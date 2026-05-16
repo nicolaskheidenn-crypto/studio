@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "Clean modern workspace representing creativity and building.",
+      "imageUrl": "https://picsum.photos/seed/webcraft-hero/1200/600",
+      "imageHint": "modern workspace"
+    },
+    {
+      "id": "content-image-1",
+      "description": "Abstract design representing collaboration.",
+      "imageUrl": "https://picsum.photos/seed/webcraft-collab/800/400",
+      "imageHint": "abstract collaboration"
+    }
+  ]
+}
