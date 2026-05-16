@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -73,7 +74,7 @@ export default function DashboardPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-5 bg-secondary/20 rounded-2xl border border-border/50 group hover:border-primary/50 transition-all">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/20 rounded-xl group-hover:bg-primary/30 transition-colors">
+                    <div className="p-3 bg-primary/20 rounded-xl group-hover:bg-primary transition-colors">
                       <BookOpen className="h-6 w-6 text-accent" />
                     </div>
                     <div>

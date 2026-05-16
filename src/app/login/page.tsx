@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export default function LoginPage() {
         title: "Welcome Back",
         description: "You have successfully signed in to your strategist hub.",
       });
-      router.push("/dashboard");
+      router.push("/");
     } catch (error: any) {
       toast({
         title: "Login Failed",

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ export default function SignUpPage() {
         description: "Your account has been created successfully. You are now logged in.",
       });
       
-      router.push("/dashboard");
+      router.push("/");
     } catch (error: any) {
       toast({
         title: "Sign Up Failed",
