@@ -1,73 +1,81 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+type Theme = 'fire' | 'water' | 'nature' | 'raining' | 'default';
+
+interface AppState {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  isAdmin: boolean;
+  setIsAdmin: (isAdmin: boolean) => void;
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      theme: 'default',
+      setTheme: (theme) => {
+        if (typeof document !== 'undefined') {
+          const body = document.body;
+          body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
+          if (theme !== 'default') {
+            body.classList.add(`theme-${theme}`);
+          }
+        }
+        set({ theme });
+      },
+      isAdmin: false,
+      setIsAdmin: (isAdmin) => set({ isAdmin }),
+    }),
+    {
+      name: 'fireproof-storage',
+    }
+  )
+);
 
 export interface Page {
   id: string;
-  slug: string;
   title: string;
+  slug: string;
   content: string;
   createdAt: string;
 }
 
-const DEFAULT_PAGES: Page[] = [
-  {
-    id: "1",
-    slug: "home",
-    title: "Welcome to WebCraft Hub",
-    content: "WebCraft Hub is your ultimate platform for building modern, responsive websites with ease. Use our AI tools to draft content and manage your pages effortlessly.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    slug: "about",
-    title: "About Our Mission",
-    content: "We believe in empowering creators through simple yet powerful digital tools. Our mission is to bridge the gap between complex development and intuitive design.",
-    createdAt: new Date().toISOString(),
-  }
-];
-
-export function usePages() {
-  const [pages, setPages] = useState<Page[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("webcraft_pages");
-    if (stored) {
-      setPages(JSON.parse(stored));
-    } else {
-      setPages(DEFAULT_PAGES);
-      localStorage.setItem("webcraft_pages", JSON.stringify(DEFAULT_PAGES));
-    }
-    setIsLoaded(true);
-  }, []);
-
-  const savePages = (newPages: Page[]) => {
-    setPages(newPages);
-    localStorage.setItem("webcraft_pages", JSON.stringify(newPages));
-  };
-
-  const addPage = (page: Omit<Page, "id" | "createdAt">) => {
-    const newPage: Page = {
-      ...page,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [...pages, newPage];
-    savePages(updated);
-    return newPage;
-  };
-
-  const updatePage = (id: string, updates: Partial<Page>) => {
-    const updated = pages.map((p) => (p.id === id ? { ...p, ...updates } : p));
-    savePages(updated);
-  };
-
-  const deletePage = (id: string) => {
-    const updated = pages.filter((p) => p.id !== id);
-    savePages(updated);
-  };
-
-  return { pages, isLoaded, addPage, updatePage, deletePage };
+interface PageState {
+  pages: Page[];
+  isLoaded: boolean;
+  addPage: (page: Omit<Page, 'id' | 'createdAt'>) => void;
+  updatePage: (id: string, page: Partial<Page>) => void;
+  deletePage: (id: string) => void;
 }
+
+export const usePages = create<PageState>()(
+  persist(
+    (set) => ({
+      pages: [],
+      isLoaded: true,
+      addPage: (pageData) => set((state) => ({
+        pages: [
+          ...state.pages,
+          {
+            ...pageData,
+            id: Math.random().toString(36).substring(2, 9),
+            createdAt: new Date().toISOString(),
+          }
+        ]
+      })),
+      updatePage: (id, pageData) => set((state) => ({
+        pages: state.pages.map((p) => p.id === id ? { ...p, ...pageData } : p)
+      })),
+      deletePage: (id) => set((state) => ({
+        pages: state.pages.filter((p) => p.id !== id)
+      })),
+    }),
+    {
+      name: 'fireproof-pages-storage',
+    }
+  )
+);

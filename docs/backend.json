@@ -1,0 +1,61 @@
+
+{
+  "entities": {
+    "Task": {
+      "title": "Daily Task",
+      "description": "A task assigned to users for the day.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "isAutomated": { "type": "boolean" }
+      },
+      "required": ["title", "description", "date"]
+    },
+    "UserProgress": {
+      "title": "User Progress",
+      "description": "Tracks completed tasks for a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "completedTaskIds": { "type": "array", "items": { "type": "string" } },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      }
+    },
+    "TimeCapsule": {
+      "title": "Time Capsule",
+      "description": "A message for the future.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "unlockAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["message", "createdAt", "unlockAt"]
+    },
+    "EBookBundle": {
+      "title": "E-Book Bundle",
+      "description": "E-books or bundles offered to users.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "downloadUrl": { "type": "string" },
+        "availableAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/tasks/{taskId}": { "schema": "Task", "description": "Global daily tasks managed by host." },
+    "/users/{userId}/progress/{progressId}": { "schema": "UserProgress", "description": "User completion tracking." },
+    "/users/{userId}/capsules/{capsuleId}": { "schema": "TimeCapsule", "description": "User future messages." },
+    "/ebooks/{ebookId}": { "schema": "EBookBundle", "description": "Available content and bundles." }
+  }
+}
