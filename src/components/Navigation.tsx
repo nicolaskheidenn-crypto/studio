@@ -3,10 +3,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User } from "lucide-react";
+import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/lib/store";
+import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
@@ -16,12 +16,15 @@ const NAV_ITEMS = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
+const HOST_EMAIL = "nicolaskheidenn@gmail.com";
+
 export function Navigation() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const { isAdmin } = useAppStore();
+  const { user } = useUser();
 
   const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isHost = user?.email === HOST_EMAIL;
 
   if (isAuthPage) return null;
 
@@ -34,7 +37,7 @@ export function Navigation() {
               <Coffee className="h-6 w-6 text-accent" />
             </div>
             <span className="text-2xl font-headline font-bold tracking-tight text-accent">
-              FireProof<span className="text-primary">.Hub</span>
+              FireProof<span className="text-primary">.ndigtl</span>
             </span>
           </Link>
 
@@ -54,15 +57,38 @@ export function Navigation() {
                   {item.label}
                 </Link>
               ))}
+              {isHost && (
+                <Link
+                  href="/admin"
+                  className={cn(
+                    "flex items-center gap-2 text-sm font-bold text-amber-600 transition-colors hover:text-amber-500",
+                    pathname === "/admin" ? "text-amber-500 underline" : ""
+                  )}
+                >
+                  <Crown className="h-4 w-4" />
+                  Host Admin
+                </Link>
+              )}
             </div>
             
             <div className="flex items-center gap-3">
-              <Button variant="ghost" className="rounded-full font-bold text-accent" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button className="rounded-full bg-accent text-white px-6 hover:bg-accent/90" asChild>
-                <Link href="/signup">Join Now</Link>
-              </Button>
+              {user ? (
+                <Button variant="ghost" className="rounded-full font-bold text-accent gap-2" asChild>
+                  <Link href="/settings">
+                    <User className="h-4 w-4" />
+                    {user.displayName || "Profile"}
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" className="rounded-full font-bold text-accent" asChild>
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button className="rounded-full bg-accent text-white px-6 hover:bg-accent/90" asChild>
+                    <Link href="/signup">Join Now</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -89,13 +115,31 @@ export function Navigation() {
               {item.label}
             </Link>
           ))}
+          {isHost && (
+            <Link
+              href="/admin"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-4 text-lg font-bold p-3 rounded-2xl text-amber-600"
+            >
+              <Crown className="h-5 w-5" />
+              Host Admin
+            </Link>
+          )}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-accent/10">
-            <Button variant="outline" className="rounded-xl font-bold h-12" asChild>
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button className="rounded-xl bg-accent text-white font-bold h-12" asChild>
-              <Link href="/signup">Join Now</Link>
-            </Button>
+            {user ? (
+              <Button className="col-span-2 rounded-xl bg-accent text-white font-bold h-12" asChild>
+                <Link href="/settings">Settings</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" className="rounded-xl font-bold h-12" asChild>
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button className="rounded-xl bg-accent text-white font-bold h-12" asChild>
+                  <Link href="/signup">Join Now</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

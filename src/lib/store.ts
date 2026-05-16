@@ -20,6 +20,7 @@ export const useAppStore = create<AppState>()(
       setTheme: (theme) => {
         if (typeof document !== 'undefined') {
           const body = document.body;
+          // Clear previous themes
           body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
           if (theme !== 'default') {
             body.classList.add(`theme-${theme}`);

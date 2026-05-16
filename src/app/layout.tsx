@@ -1,11 +1,12 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'FireProof | Fail-Proof Strategy Hub',
-  description: 'Join the next generation of earners with mocha-powered focus.',
+  title: 'FireProof | fireproof.ndigtl.app',
+  description: 'Join the next generation of earners with mocha-powered focus strategy hub.',
 };
 
 export default function RootLayout({

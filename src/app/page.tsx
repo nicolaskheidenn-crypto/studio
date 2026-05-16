@@ -21,7 +21,7 @@ export default function Home() {
               <div className="space-y-8">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-accent font-bold text-sm">
                   <Coffee className="h-4 w-4" />
-                  Brewing Success Since 2024
+                  Brewing Success at fireproof.ndigtl.app
                 </div>
                 <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight">
                   Fail-Proof Your <span className="text-accent">Strategy</span> With a Touch of <span className="text-primary">Gold</span>
@@ -53,18 +53,18 @@ export default function Home() {
               
               <div className="relative">
                 <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
-                <div className="relative bg-card border-4 border-accent/10 rounded-[2rem] p-4 shadow-2xl overflow-hidden">
+                <div className="relative bg-card border-4 border-accent/10 rounded-[2.5rem] p-4 shadow-2xl overflow-hidden">
                   <Image 
                     src="https://picsum.photos/seed/mocha-strategy/800/600" 
                     width={800} 
                     height={600} 
                     alt="Digital Strategy" 
-                    className="rounded-[1.5rem] object-cover"
+                    className="rounded-[2rem] object-cover"
                     data-ai-hint="mocha coffee workspace"
                   />
                   <div className="absolute bottom-8 left-8 right-8 bg-background/90 backdrop-blur-md p-6 rounded-2xl border shadow-lg animate-in slide-in-from-bottom-10">
                     <div className="flex items-center gap-4">
-                      <div className="bg-primary p-3 rounded-xl">
+                      <div className="bg-primary p-3 rounded-xl shadow-inner">
                         <Zap className="h-6 w-6 text-primary-foreground" />
                       </div>
                       <div>
@@ -88,16 +88,16 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { title: "Goal Focused", desc: "Automated daily tasks designed for earners.", icon: Target },
-                { title: "Future Proof", desc: "GoalCaps lock your strategy for 5 years.", icon: Hourglass },
-                { title: "Host Powered", desc: "Direct access to expert eBooks and bundles.", icon: Star },
+                { title: "Goal Focused", desc: "Automated daily tasks designed for high earners.", icon: Target },
+                { title: "Future Proof", desc: "GoalCaps lock your vision for 5 years.", icon: Hourglass },
+                { title: "Host Powered", desc: "Direct access to expert eBooks and strategy bundles.", icon: Star },
               ].map((feature, i) => (
-                <div key={i} className="bg-card p-8 rounded-3xl border border-accent/10 hover:border-primary/50 transition-all group shadow-sm">
-                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary transition-colors">
-                    <feature.icon className="h-7 w-7 text-accent group-hover:text-primary-foreground" />
+                <div key={i} className="bg-card p-10 rounded-[2.5rem] border border-accent/10 hover:border-primary/50 transition-all group shadow-sm hover:shadow-xl">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary transition-colors">
+                    <feature.icon className="h-8 w-8 text-accent group-hover:text-primary-foreground" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+                  <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-lg">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -109,9 +109,9 @@ export default function Home() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <Coffee className="h-6 w-6 text-primary" />
-            <span className="text-xl font-headline font-bold">FireProof<span className="text-primary">.Hub</span></span>
+            <span className="text-xl font-headline font-bold">FireProof<span className="text-primary">.ndigtl</span></span>
           </div>
-          <p className="text-accent-foreground/70 font-medium">© {new Date().getFullYear()} FireProof.ndigtal.app. Stay Gold.</p>
+          <p className="text-accent-foreground/70 font-medium">© {new Date().getFullYear()} fireproof.ndigtl.app. Stay Gold.</p>
           <div className="flex gap-6">
             <Link href="/login" className="hover:text-primary transition-colors">Login</Link>
             <Link href="/signup" className="hover:text-primary transition-colors">Sign Up</Link>
