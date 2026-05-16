@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'FireProof | fireproof.ndigtl.app',
+  title: 'FireProof',
   description: 'Join the next generation of earners with mocha-powered focus strategy hub.',
 };
 

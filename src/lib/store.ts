@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -19,8 +20,9 @@ export const useAppStore = create<AppState>()(
       setTheme: (theme) => {
         if (typeof document !== 'undefined') {
           const body = document.body;
-          // Clear previous themes
+          // Clear all potential theme classes
           body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
+          // Add the new one if it's not default
           if (theme !== 'default') {
             body.classList.add(`theme-${theme}`);
           }
@@ -33,7 +35,7 @@ export const useAppStore = create<AppState>()(
     {
       name: 'fireproof-storage',
       onRehydrateStorage: () => (state) => {
-        // Re-apply theme class on hydration
+        // Ensure the class is applied as soon as the store is rehydrated from local storage
         if (state && typeof document !== 'undefined') {
           const body = document.body;
           body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');

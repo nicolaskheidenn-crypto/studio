@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +11,7 @@
     --card-foreground: 20 30% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 30% 15%;
-    --primary: 45 100% 50%; /* Coffee Yellow */
+    --primary: 45 100% 50%; /* Gold Yellow */
     --primary-foreground: 20 30% 10%;
     --secondary: 20 15% 90%;
     --secondary-foreground: 20 30% 20%;
@@ -23,7 +24,7 @@
     --border: 20 15% 85%;
     --input: 20 15% 85%;
     --ring: 45 100% 50%;
-    --radius: 1rem;
+    --radius: 1.5rem;
   }
 
   .dark {
@@ -50,36 +51,44 @@
 
   /* Fire Theme */
   body.theme-fire {
-    --background: 15 40% 98%;
+    --background: 15 60% 96%;
+    --foreground: 15 60% 10%;
     --primary: 35 100% 50%;
-    --accent: 10 60% 30%;
-    --ring: 35 100% 50%;
+    --accent: 10 70% 25%;
+    --card: 0 0% 100%;
+    --border: 15 30% 85%;
   }
 
   /* Water Theme */
   body.theme-water {
-    --background: 210 40% 98%;
-    --primary: 200 90% 50%;
-    --accent: 220 50% 30%;
-    --ring: 200 90% 50%;
+    --background: 210 50% 98%;
+    --foreground: 220 50% 15%;
+    --primary: 200 90% 45%;
+    --accent: 220 60% 25%;
+    --card: 210 50% 99%;
+    --border: 210 30% 85%;
   }
 
   /* Nature Theme */
   body.theme-nature {
-    --background: 120 20% 98%;
-    --primary: 140 60% 45%;
-    --accent: 150 40% 20%;
-    --ring: 140 60% 45%;
+    --background: 120 30% 98%;
+    --foreground: 140 50% 10%;
+    --primary: 140 60% 40%;
+    --accent: 150 60% 20%;
+    --card: 120 30% 99%;
+    --border: 120 20% 85%;
   }
 
   /* Raining Theme */
   body.theme-raining {
-    --background: 220 15% 15%;
-    --foreground: 220 10% 90%;
-    --card: 220 15% 18%;
-    --primary: 210 40% 60%;
-    --accent: 220 20% 40%;
-    --ring: 210 40% 60%;
+    --background: 220 20% 12%;
+    --foreground: 220 10% 95%;
+    --card: 220 20% 16%;
+    --primary: 210 60% 65%;
+    --accent: 220 30% 45%;
+    --border: 220 15% 25%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 60%;
   }
 }
 
@@ -88,7 +97,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-500 font-body;
+    @apply bg-background text-foreground transition-all duration-500 font-body;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tight;
