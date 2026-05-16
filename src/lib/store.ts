@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -33,6 +32,16 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'fireproof-storage',
+      onRehydrateStorage: () => (state) => {
+        // Re-apply theme class on hydration
+        if (state && typeof document !== 'undefined') {
+          const body = document.body;
+          body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
+          if (state.theme !== 'default') {
+            body.classList.add(`theme-${state.theme}`);
+          }
+        }
+      }
     }
   )
 );

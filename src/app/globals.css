@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,7 +27,7 @@
   }
 
   .dark {
-    --background: 20 30% 8%; /* Dark Mocha Background */
+    --background: 20 30% 8%;
     --foreground: 30 20% 95%;
     --card: 20 30% 12%;
     --card-foreground: 30 20% 95%;
@@ -47,6 +46,40 @@
     --border: 25 25% 20%;
     --input: 25 25% 20%;
     --ring: 45 100% 50%;
+  }
+
+  /* Fire Theme */
+  body.theme-fire {
+    --background: 15 40% 98%;
+    --primary: 35 100% 50%;
+    --accent: 10 60% 30%;
+    --ring: 35 100% 50%;
+  }
+
+  /* Water Theme */
+  body.theme-water {
+    --background: 210 40% 98%;
+    --primary: 200 90% 50%;
+    --accent: 220 50% 30%;
+    --ring: 200 90% 50%;
+  }
+
+  /* Nature Theme */
+  body.theme-nature {
+    --background: 120 20% 98%;
+    --primary: 140 60% 45%;
+    --accent: 150 40% 20%;
+    --ring: 140 60% 45%;
+  }
+
+  /* Raining Theme */
+  body.theme-raining {
+    --background: 220 15% 15%;
+    --foreground: 220 10% 90%;
+    --card: 220 15% 18%;
+    --primary: 210 40% 60%;
+    --accent: 220 20% 40%;
+    --ring: 210 40% 60%;
   }
 }
 

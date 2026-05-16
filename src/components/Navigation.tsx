@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -37,7 +36,7 @@ export function Navigation() {
               <Coffee className="h-6 w-6 text-accent" />
             </div>
             <span className="text-2xl font-headline font-bold tracking-tight text-accent">
-              FireProof<span className="text-primary">.ndigtl</span>
+              FireProof
             </span>
           </Link>
 
