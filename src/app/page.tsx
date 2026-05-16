@@ -1,9 +1,8 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Flame, Sparkles, Target, Zap, ArrowRight } from "lucide-react";
+import { Flame, Sparkles, Target, Zap, ArrowRight, Hourglass } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
