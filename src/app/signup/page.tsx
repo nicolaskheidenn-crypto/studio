@@ -68,15 +68,6 @@ export default function SignUpPage() {
         <Coffee className="w-96 h-96 rotate-12" />
       </div>
 
-      <div className="absolute top-8 left-8 z-20">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary transition-colors">
-            <Coffee className="h-5 w-5 text-accent" />
-          </div>
-          <span className="font-headline font-bold text-xl text-accent">FireProof</span>
-        </Link>
-      </div>
-
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[3rem] shadow-2xl overflow-hidden border border-accent/10 relative z-10">
         {/* Left Side: Mocha Branding */}
         <div className="p-12 space-y-8 bg-accent text-white relative overflow-hidden flex flex-col justify-center">
