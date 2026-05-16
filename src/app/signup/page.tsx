@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Coffee, Chrome, Facebook, Instagram, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
@@ -24,6 +24,13 @@ export default function SignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const hasAccess = sessionStorage.getItem("fireproof_access_granted");
+    if (hasAccess !== "true") {
+      router.push("/");
+    }
+  }, [router]);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,7 +46,7 @@ export default function SignUpPage() {
         description: "Your account has been created successfully. You are now logged in.",
       });
       
-      router.push("/");
+      router.push("/home");
     } catch (error: any) {
       toast({
         title: "Sign Up Failed",
@@ -54,7 +61,7 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-accent/5">
       <div className="absolute top-8 left-8">
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/home" className="flex items-center gap-2 group">
           <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary transition-colors">
             <Coffee className="h-5 w-5 text-accent" />
           </div>
@@ -62,7 +69,7 @@ export default function SignUpPage() {
         </Link>
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-accent/10">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[3rem] shadow-2xl overflow-hidden border border-accent/10">
         <div className="p-12 space-y-8 bg-accent text-white hidden lg:block relative overflow-hidden">
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
           <div className="relative z-10 space-y-6">
@@ -85,10 +92,31 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="p-12 space-y-8">
+        <div className="p-10 md:p-12 space-y-8">
           <div className="space-y-2">
-            <h1 className="text-3xl font-headline font-bold">Create Account</h1>
+            <h1 className="text-3xl font-headline font-bold">New Account</h1>
             <p className="text-muted-foreground">Join FireProof and start earning more.</p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <Button variant="outline" className="rounded-xl border-accent/10 h-14 p-0 bg-white/50 hover:bg-white transition-all">
+              <Chrome className="h-6 w-6 text-red-500" />
+            </Button>
+            <Button variant="outline" className="rounded-xl border-accent/10 h-14 p-0 bg-white/50 hover:bg-white transition-all">
+              <Facebook className="h-6 w-6 text-blue-600" />
+            </Button>
+            <Button variant="outline" className="rounded-xl border-accent/10 h-14 p-0 bg-white/50 hover:bg-white transition-all">
+              <Instagram className="h-6 w-6 text-pink-600" />
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-accent/10" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or with email</span>
+            </div>
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-4">
@@ -139,36 +167,15 @@ export default function SignUpPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <Button type="submit" className="w-full rounded-xl py-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg" disabled={isLoading}>
+            <Button type="submit" className="w-full rounded-2xl py-7 bg-primary hover:bg-primary/90 text-accent font-bold text-lg shadow-lg" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Creating account...
                 </>
               ) : "Get Started Now"}
             </Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-accent/10" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or sign up with</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <Button variant="outline" className="rounded-xl border-accent/20 h-12 p-0">
-              <Chrome className="h-5 w-5" />
-            </Button>
-            <Button variant="outline" className="rounded-xl border-accent/20 h-12 p-0">
-              <Facebook className="h-5 w-5 text-blue-600" />
-            </Button>
-            <Button variant="outline" className="rounded-xl border-accent/20 h-12 p-0">
-              <Instagram className="h-5 w-5 text-pink-600" />
-            </Button>
-          </div>
 
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}

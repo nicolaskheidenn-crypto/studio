@@ -23,7 +23,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
 
-  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isAuthPage = pathname === "/login" || pathname === "/signup" || pathname === "/";
   const isHost = user?.email === HOST_EMAIL;
 
   if (isAuthPage) return null;
@@ -32,7 +32,7 @@ export function Navigation() {
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/home" className="flex items-center gap-2 group">
             <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary transition-colors">
               <Coffee className="h-6 w-6 text-accent" />
             </div>
