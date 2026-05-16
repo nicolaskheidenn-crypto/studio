@@ -1,28 +1,47 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, Github, Chrome, Facebook, Instagram, Mail } from "lucide-react";
+import { Coffee, Chrome, Facebook, Instagram, Mail, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useFirebaseApp } from "@/firebase";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const app = useFirebaseApp();
+  const auth = getAuth(app);
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       toast({
-        title: "Coming Soon",
-        description: "Authentication is being integrated. Please check back later!",
+        title: "Welcome Back",
+        description: "You have successfully signed in to your strategist hub.",
       });
-    }, 1500);
+      router.push("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid email or password.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,17 +64,37 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="name@example.com" required className="rounded-xl border-accent/20" />
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="name@example.com" 
+                required 
+                className="rounded-xl border-accent/20"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link href="#" className="text-xs text-accent hover:text-primary underline">Forgot password?</Link>
               </div>
-              <Input id="password" type="password" required className="rounded-xl border-accent/20" />
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                className="rounded-xl border-accent/20"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full rounded-xl py-6 bg-accent hover:bg-accent/90 text-white font-bold" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : "Sign In"}
             </Button>
           </form>
 

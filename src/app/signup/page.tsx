@@ -1,28 +1,53 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, Chrome, Facebook, Instagram, Mail, CheckCircle2 } from "lucide-react";
+import { Coffee, Chrome, Facebook, Instagram, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { useFirebaseApp } from "@/firebase";
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  
+  const app = useFirebaseApp();
+  const auth = getAuth(app);
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Registration Success",
-        description: "Welcome to the elite club! Please verify your email.",
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, {
+        displayName: `${firstName} ${lastName}`.trim(),
       });
-    }, 1500);
+      
+      toast({
+        title: "Welcome to FireProof",
+        description: "Your account has been created successfully. You are now logged in.",
+      });
+      
+      router.push("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Sign Up Failed",
+        description: error.message || "An error occurred during registration.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,23 +94,57 @@ export default function SignUpPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="first-name">First Name</Label>
-                <Input id="first-name" placeholder="John" required className="rounded-xl border-accent/20" />
+                <Input 
+                  id="first-name" 
+                  placeholder="John" 
+                  required 
+                  className="rounded-xl border-accent/20"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="last-name">Last Name</Label>
-                <Input id="last-name" placeholder="Doe" required className="rounded-xl border-accent/20" />
+                <Input 
+                  id="last-name" 
+                  placeholder="Doe" 
+                  required 
+                  className="rounded-xl border-accent/20"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="name@example.com" required className="rounded-xl border-accent/20" />
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="name@example.com" 
+                required 
+                className="rounded-xl border-accent/20"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required className="rounded-xl border-accent/20" />
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                className="rounded-xl border-accent/20"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full rounded-xl py-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Get Started Now"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : "Get Started Now"}
             </Button>
           </form>
 
