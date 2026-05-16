@@ -1,10 +1,9 @@
-
 "use client";
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type Theme = 'fire' | 'water' | 'nature' | 'raining' | 'default';
+export type Theme = 'fire' | 'water' | 'nature' | 'raining' | 'default';
 
 interface AppState {
   theme: Theme;
@@ -39,7 +38,7 @@ export const useAppStore = create<AppState>()(
           if (state && typeof document !== 'undefined') {
             const body = document.body;
             body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
-            if (state.theme !== 'default') {
+            if (state.theme && state.theme !== 'default') {
               body.classList.add(`theme-${state.theme}`);
             }
           }

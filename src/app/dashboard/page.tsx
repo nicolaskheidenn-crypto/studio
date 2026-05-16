@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -24,7 +23,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground font-headline font-bold">Loading Strategist Hub...</div>
+        <div className="animate-pulse text-muted-foreground font-headline font-bold text-2xl">Loading Strategist Hub...</div>
       </div>
     );
   }
@@ -49,29 +48,29 @@ export default function DashboardPage() {
 
         {!user ? (
           <div className="max-w-md mx-auto py-20 text-center space-y-6">
-            <div className="p-6 bg-accent/5 rounded-[2.5rem] border border-dashed border-accent/20">
-              <Lock className="h-12 w-12 mx-auto text-accent/20 mb-4" />
-              <h2 className="text-2xl font-headline font-bold">Member Access Required</h2>
-              <p className="text-muted-foreground mt-2">Sign in to access your exclusive eBooks, bundles, and progress tracking.</p>
-              <Button className="mt-6 rounded-full px-8" asChild>
+            <div className="p-12 bg-accent/5 rounded-[3rem] border border-dashed border-accent/20">
+              <Lock className="h-16 w-16 mx-auto text-accent/20 mb-4" />
+              <h2 className="text-3xl font-headline font-bold">Member Access Required</h2>
+              <p className="text-muted-foreground mt-2 text-lg">Sign in to access your exclusive eBooks, bundles, and progress tracking.</p>
+              <Button className="mt-8 rounded-full px-12 py-6 text-lg font-bold shadow-lg" asChild>
                 <a href="/login">Sign In to FireProof</a>
               </Button>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* E-Books Section */}
-            <Card className="md:col-span-2 border-accent/10 shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="md:col-span-2 border-accent/10 shadow-sm overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between bg-accent/5">
                 <div>
                   <CardTitle>Upcoming eBooks</CardTitle>
                   <CardDescription>New free releases every 2 weeks.</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleNotifyMe} className="rounded-full">
+                <Button variant="outline" size="sm" onClick={handleNotifyMe} className="rounded-full border-accent text-accent">
                   <Mail className="h-4 w-4 mr-2" /> Notify Me
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-6">
                 <div className="flex items-center justify-between p-5 bg-secondary/20 rounded-2xl border border-border/50 group hover:border-primary/50 transition-all">
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-primary/20 rounded-xl group-hover:bg-primary transition-colors">
@@ -82,7 +81,7 @@ export default function DashboardPage() {
                       <p className="text-sm text-muted-foreground">Released recently • FREE</p>
                     </div>
                   </div>
-                  <Button variant="ghost" className="rounded-full"><Download className="h-4 w-4 mr-2" /> Download</Button>
+                  <Button variant="ghost" className="rounded-full text-accent hover:text-accent font-bold"><Download className="h-4 w-4 mr-2" /> Download</Button>
                 </div>
                 
                 <div className="flex items-center justify-between p-5 bg-secondary/20 rounded-2xl border border-border/50 opacity-60">
@@ -109,7 +108,7 @@ export default function DashboardPage() {
                 </CardTitle>
                 <CardDescription>Accelerate your growth path.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-6">
                 <div className="p-5 bg-background rounded-2xl border border-primary/20 shadow-sm">
                   <h4 className="font-bold">Growth Accelerator</h4>
                   <p className="text-xs text-muted-foreground mb-4 leading-relaxed">Master the funnel strategy in 7 days with live coaching sessions.</p>

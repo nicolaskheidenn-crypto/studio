@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Camera } from "lucide-react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, type Theme } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
 import { useState, useEffect } from "react";
@@ -15,13 +14,13 @@ import { toast } from "@/hooks/use-toast";
 import { getAuth, updateProfile, updatePassword } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const THEMES = [
+const THEMES: { id: Theme; label: string; icon: any; color: string }[] = [
   { id: 'default', label: 'Classic', icon: Monitor, color: 'bg-zinc-500' },
   { id: 'fire', label: 'Fire', icon: Flame, color: 'bg-orange-500' },
   { id: 'water', label: 'Water', icon: Droplets, color: 'bg-blue-500' },
   { id: 'nature', label: 'Nature', icon: Leaf, color: 'bg-emerald-500' },
   { id: 'raining', label: 'Raining', icon: CloudRain, color: 'bg-slate-600' },
-] as const;
+];
 
 export default function SettingsPage() {
   const { theme, setTheme } = useAppStore();
@@ -71,49 +70,50 @@ export default function SettingsPage() {
           <h1 className="text-4xl font-headline font-bold">Settings</h1>
           
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="bg-muted p-1 rounded-full">
+            <TabsList className="bg-muted p-1 rounded-full w-full justify-start overflow-x-auto">
               <TabsTrigger value="profile" className="rounded-full px-6">Profile</TabsTrigger>
               <TabsTrigger value="appearance" className="rounded-full px-6">Appearance</TabsTrigger>
               <TabsTrigger value="privacy" className="rounded-full px-6">Privacy & Policy</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="profile" className="space-y-6">
-              <Card>
+            <TabsContent value="profile" className="space-y-6 animate-in fade-in">
+              <Card className="border-accent/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" /> Personal Profile</CardTitle>
                   <CardDescription>Manage your public identity and credentials.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-center gap-6 pb-6 border-b">
+                  <div className="flex items-center gap-6 pb-6 border-b border-accent/10">
                     <div className="relative">
-                      <div className="w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center border-2 border-primary/20">
+                      <div className="w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center border-2 border-primary/20 overflow-hidden">
                         <User className="h-12 w-12 text-accent/50" />
                       </div>
-                      <Button size="icon" variant="outline" className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-background">
+                      <Button size="icon" variant="outline" className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-background border-accent/20">
                         <Camera className="h-4 w-4" />
                       </Button>
                     </div>
                     <div>
-                      <h4 className="font-bold text-lg">{user?.displayName || "Strategist"}</h4>
+                      <h4 className="font-bold text-xl">{user?.displayName || "Strategist"}</h4>
                       <p className="text-sm text-muted-foreground">{user?.email}</p>
-                      <p className="text-xs font-mono mt-1 text-muted-foreground">ID: {user?.uid}</p>
+                      <p className="text-xs font-mono mt-1 text-muted-foreground/60">UID: {user?.uid}</p>
                     </div>
                   </div>
 
-                  <div className="grid gap-4">
+                  <div className="grid gap-4 max-w-md">
                     <div className="space-y-2">
-                      <Label htmlFor="nickname">Nickname / Full Name</Label>
+                      <Label htmlFor="nickname" className="font-bold">Nickname / Full Name</Label>
                       <Input 
                         id="nickname" 
                         value={displayName} 
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Your display name"
+                        className="rounded-xl border-accent/10 h-12 bg-secondary/10"
                       />
                     </div>
-                    <Button onClick={handleUpdateProfile} disabled={isLoading} className="w-fit">Save Changes</Button>
+                    <Button onClick={handleUpdateProfile} disabled={isLoading} className="w-fit rounded-full bg-accent hover:bg-accent/90">Save Profile</Button>
                   </div>
 
-                  <div className="pt-6 border-t space-y-4">
+                  <div className="pt-6 border-t border-accent/10 space-y-4 max-w-md">
                     <h3 className="font-bold flex items-center gap-2"><Lock className="h-4 w-4" /> Security</h3>
                     <div className="space-y-2">
                       <Label htmlFor="password">Change Password</Label>
@@ -123,16 +123,17 @@ export default function SettingsPage() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="••••••••"
+                        className="rounded-xl border-accent/10 h-12 bg-secondary/10"
                       />
                     </div>
-                    <Button variant="outline" onClick={handleChangePassword} disabled={isLoading} className="w-fit">Update Password</Button>
+                    <Button variant="outline" onClick={handleChangePassword} disabled={isLoading} className="w-fit rounded-full border-accent text-accent">Update Password</Button>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="appearance" className="space-y-6">
-              <Card>
+            <TabsContent value="appearance" className="space-y-6 animate-in fade-in">
+              <Card className="border-accent/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Monitor className="h-5 w-5" /> Personalization</CardTitle>
                   <CardDescription>Choose your environment to stay focused.</CardDescription>
@@ -144,16 +145,16 @@ export default function SettingsPage() {
                         key={t.id}
                         onClick={() => setTheme(t.id)}
                         className={cn(
-                          "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left bg-card",
-                          theme === t.id ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
+                          "flex items-center gap-4 p-5 rounded-3xl border-2 transition-all text-left",
+                          theme === t.id ? "border-primary bg-primary/5 ring-4 ring-primary/10" : "border-accent/10 hover:border-primary/50 bg-card"
                         )}
                       >
-                        <div className={cn("p-3 rounded-xl text-white", t.color)}>
+                        <div className={cn("p-4 rounded-2xl text-white shadow-lg", t.color)}>
                           <t.icon className="h-6 w-6" />
                         </div>
                         <div>
-                          <p className="font-bold">{t.label}</p>
-                          <p className="text-xs text-muted-foreground">Select {t.label.toLowerCase()} mode</p>
+                          <p className="font-bold text-lg">{t.label}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Mode</p>
                         </div>
                       </button>
                     ))}
@@ -162,21 +163,29 @@ export default function SettingsPage() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="privacy" className="space-y-6">
-              <Card>
+            <TabsContent value="privacy" className="space-y-6 animate-in fade-in">
+              <Card className="border-accent/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" /> Privacy & Policy</CardTitle>
                   <CardDescription>How we handle your fail-proof strategy data.</CardDescription>
                 </CardHeader>
-                <CardContent className="prose prose-sm max-w-none text-muted-foreground">
-                  <h4 className="text-foreground">1. Data Isolation</h4>
-                  <p>All your tasks, goal capsules, and progress data are encrypted and accessible only by you. We use industry-standard Firebase security protocols to ensure your strategy remains private.</p>
-                  
-                  <h4 className="text-foreground">2. Communication</h4>
-                  <p>By using fireproof.ndigtl.app, you agree to receive strategic updates and eBook notifications via your registered email. You can opt-out at any time.</p>
+                <CardContent className="prose prose-sm max-w-none text-muted-foreground p-8">
+                  <div className="space-y-8">
+                    <section>
+                      <h4 className="text-foreground text-xl font-bold mb-2">1. Data Isolation</h4>
+                      <p className="text-lg leading-relaxed">All your tasks, goal capsules, and progress data are encrypted and accessible only by you. We use industry-standard Firebase security protocols to ensure your strategy remains private and is never shared with third parties.</p>
+                    </section>
+                    
+                    <section>
+                      <h4 className="text-foreground text-xl font-bold mb-2">2. Communication</h4>
+                      <p className="text-lg leading-relaxed">By using fireproof.ndigtl.app, you agree to receive strategic updates and eBook notifications via your registered email. These are designed to keep your growth on track. You can opt-out at any time via your account settings.</p>
+                    </section>
 
-                  <h4 className="text-foreground">3. Cookie Policy</h4>
-                  <p>We use local storage only to remember your theme preferences and login session. No third-party tracking cookies are utilized.</p>
+                    <section>
+                      <h4 className="text-foreground text-xl font-bold mb-2">3. Cookie Policy</h4>
+                      <p className="text-lg leading-relaxed">We use browser storage only to remember your theme preferences and login session. No third-party tracking cookies are used to monitor your activity outside of our hub.</p>
+                    </section>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
