@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -19,9 +20,11 @@ export const useAppStore = create<AppState>()(
       setTheme: (theme) => {
         if (typeof document !== 'undefined') {
           const body = document.body;
-          // Clear all potential theme classes
-          body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
-          // Add the new one if it's not default
+          // Clear all theme classes
+          const themeClasses = ['theme-fire', 'theme-water', 'theme-nature', 'theme-raining'];
+          body.classList.remove(...themeClasses);
+          
+          // Add the new theme class
           if (theme !== 'default') {
             body.classList.add(`theme-${theme}`);
           }
@@ -37,7 +40,8 @@ export const useAppStore = create<AppState>()(
         return () => {
           if (state && typeof document !== 'undefined') {
             const body = document.body;
-            body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
+            const themeClasses = ['theme-fire', 'theme-water', 'theme-nature', 'theme-raining'];
+            body.classList.remove(...themeClasses);
             if (state.theme && state.theme !== 'default') {
               body.classList.add(`theme-${state.theme}`);
             }

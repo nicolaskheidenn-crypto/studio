@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -23,7 +24,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground font-headline font-bold text-2xl">Loading Strategist Hub...</div>
+        <div className="animate-pulse text-muted-foreground font-headline font-bold text-2xl">Brewing...</div>
       </div>
     );
   }
