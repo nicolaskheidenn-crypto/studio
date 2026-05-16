@@ -35,14 +35,15 @@ export const useAppStore = create<AppState>()(
     {
       name: 'fireproof-storage',
       onRehydrateStorage: () => (state) => {
-        // Ensure the class is applied as soon as the store is rehydrated from local storage
-        if (state && typeof document !== 'undefined') {
-          const body = document.body;
-          body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
-          if (state.theme !== 'default') {
-            body.classList.add(`theme-${state.theme}`);
+        return () => {
+          if (state && typeof document !== 'undefined') {
+            const body = document.body;
+            body.classList.remove('theme-fire', 'theme-water', 'theme-nature', 'theme-raining');
+            if (state.theme !== 'default') {
+              body.classList.add(`theme-${state.theme}`);
+            }
           }
-        }
+        };
       }
     }
   )
