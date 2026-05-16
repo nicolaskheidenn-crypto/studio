@@ -50,7 +50,7 @@
     }
   },
   "auth": {
-    "providers": ["google.com", "password"]
+    "providers": ["google.com", "facebook.com", "password"]
   },
   "firestore": {
     "/tasks/{taskId}": { "schema": "Task", "description": "Global daily tasks managed by host." },

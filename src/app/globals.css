@@ -5,62 +5,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 20 20% 98%;
+    --foreground: 20 30% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 20 30% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 24 95% 53%; /* Default Fire Orange */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47.4% 11.2%;
+    --popover-foreground: 20 30% 15%;
+    --primary: 45 100% 50%; /* Coffee Yellow */
+    --primary-foreground: 20 30% 10%;
+    --secondary: 20 15% 90%;
+    --secondary-foreground: 20 30% 20%;
+    --muted: 20 15% 90%;
+    --muted-foreground: 20 15% 40%;
+    --accent: 25 40% 20%; /* Mocha Brown */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 24 95% 53%;
-    --radius: 0.75rem;
+    --border: 20 15% 85%;
+    --input: 20 15% 85%;
+    --ring: 45 100% 50%;
+    --radius: 1rem;
   }
 
-  .theme-fire {
-    --background: 12 40% 10%;
-    --foreground: 20 100% 95%;
-    --primary: 15 90% 55%;
-    --primary-foreground: 0 0% 100%;
-    --card: 12 40% 15%;
-    --border: 15 90% 25%;
-  }
-
-  .theme-water {
-    --background: 210 50% 10%;
-    --foreground: 190 100% 95%;
-    --primary: 200 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --card: 210 50% 15%;
-    --border: 200 100% 25%;
-  }
-
-  .theme-nature {
-    --background: 140 30% 10%;
-    --foreground: 120 100% 95%;
-    --primary: 142 70% 45%;
-    --primary-foreground: 0 0% 100%;
-    --card: 140 30% 15%;
-    --border: 142 70% 20%;
-  }
-
-  .theme-raining {
-    --background: 220 20% 15%;
-    --foreground: 210 40% 90%;
-    --primary: 215 30% 45%;
-    --primary-foreground: 0 0% 100%;
-    --card: 220 20% 20%;
-    --border: 215 30% 30%;
+  .dark {
+    --background: 20 30% 8%; /* Dark Mocha Background */
+    --foreground: 30 20% 95%;
+    --card: 20 30% 12%;
+    --card-foreground: 30 20% 95%;
+    --popover: 20 30% 12%;
+    --popover-foreground: 30 20% 95%;
+    --primary: 45 100% 50%;
+    --primary-foreground: 20 30% 10%;
+    --secondary: 25 25% 18%;
+    --secondary-foreground: 30 20% 95%;
+    --muted: 25 25% 18%;
+    --muted-foreground: 25 15% 65%;
+    --accent: 30 50% 50%;
+    --accent-foreground: 20 30% 10%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 30 20% 95%;
+    --border: 25 25% 20%;
+    --input: 25 25% 20%;
+    --ring: 45 100% 50%;
   }
 }
 

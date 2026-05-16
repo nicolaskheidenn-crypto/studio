@@ -3,10 +3,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X } from "lucide-react";
+import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
+import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -20,59 +21,82 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { isAdmin } = useAppStore();
 
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+
+  if (isAuthPage) return null;
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-              <Flame className="h-6 w-6 text-primary animate-pulse" />
+            <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary transition-colors">
+              <Coffee className="h-6 w-6 text-accent" />
             </div>
-            <span className="text-xl font-headline font-bold tracking-tight">
+            <span className="text-2xl font-headline font-bold tracking-tight text-accent">
               FireProof<span className="text-primary">.Hub</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
-                  pathname === item.href ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center gap-8">
+            <div className="flex items-center gap-6 mr-4 border-r pr-6 border-accent/10">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-2 text-sm font-bold transition-colors hover:text-primary",
+                    pathname === item.href ? "text-primary" : "text-accent/70"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" className="rounded-full font-bold text-accent" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button className="rounded-full bg-accent text-white px-6 hover:bg-accent/90" asChild>
+                <Link href="/signup">Join Now</Link>
+              </Button>
+            </div>
           </div>
 
-          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X /> : <Menu />}
+          <button className="md:hidden p-2 text-accent" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden border-t bg-background p-4 flex flex-col gap-4 animate-in slide-in-from-top">
+        <div className="md:hidden border-t bg-background p-6 flex flex-col gap-6 animate-in slide-in-from-top">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "flex items-center gap-3 text-lg font-medium p-2 rounded-lg",
-                pathname === item.href ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                "flex items-center gap-4 text-lg font-bold p-3 rounded-2xl",
+                pathname === item.href ? "bg-primary/10 text-primary" : "text-accent/70 hover:bg-secondary"
               )}
             >
               <item.icon className="h-5 w-5" />
               {item.label}
             </Link>
           ))}
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-accent/10">
+            <Button variant="outline" className="rounded-xl font-bold h-12" asChild>
+              <Link href="/login">Login</Link>
+            </Button>
+            <Button className="rounded-xl bg-accent text-white font-bold h-12" asChild>
+              <Link href="/signup">Join Now</Link>
+            </Button>
+          </div>
         </div>
       )}
     </nav>
