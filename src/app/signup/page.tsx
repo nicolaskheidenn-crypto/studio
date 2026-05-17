@@ -45,11 +45,11 @@ export default function SignUpPage() {
         description: "Your account has been created successfully. You are now logged in.",
       });
       
-      router.push("/home");
+      router.push("/dashboard");
     } catch (error: any) {
       toast({
         title: "Sign Up Failed",
-        description: error.message || "An error occurred during registration.",
+        description: error.message || "An error occurred during registration. Make sure Email/Password is enabled in Firebase Console.",
         variant: "destructive",
       });
     } finally {
@@ -59,11 +59,15 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-accent/5 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-5%] opacity-5 pointer-events-none">
-        <Coffee className="w-96 h-96" />
+      {/* Decorative Coffee Elements */}
+      <div className="absolute top-[-10%] left-[-5%] opacity-10 pointer-events-none scale-150">
+        <Coffee className="w-96 h-96 text-accent" />
       </div>
-      <div className="absolute bottom-[-10%] right-[-5%] opacity-5 pointer-events-none">
-        <Coffee className="w-96 h-96 rotate-12" />
+      <div className="absolute bottom-[-10%] right-[-5%] opacity-10 pointer-events-none scale-150">
+        <Coffee className="w-96 h-96 rotate-12 text-accent" />
+      </div>
+      <div className="absolute top-1/2 right-1/4 opacity-5 pointer-events-none">
+        <Coffee className="w-40 h-40 rotate-45 text-accent" />
       </div>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[3rem] shadow-2xl overflow-hidden border border-accent/10 relative z-10">

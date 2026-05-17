@@ -38,11 +38,18 @@ export default function LoginPage() {
         title: "Welcome Back",
         description: "You have successfully signed in to your strategist hub.",
       });
-      router.push("/home");
+      router.push("/dashboard");
     } catch (error: any) {
+      let errorMessage = "Invalid email or password.";
+      if (error.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid credentials. If you haven't created an account yet, please Sign Up first.";
+      } else if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account found with this email. Please Sign Up.";
+      }
+      
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid email or password.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -52,14 +59,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-accent/5 relative overflow-hidden">
-      <div className="absolute top-[-5%] right-[-5%] opacity-5 pointer-events-none">
-        <Coffee className="w-80 h-80 rotate-45" />
+      {/* Decorative Coffee Elements */}
+      <div className="absolute top-[-5%] right-[-5%] opacity-10 pointer-events-none scale-150">
+        <Coffee className="w-80 h-80 rotate-45 text-accent" />
       </div>
-      <div className="absolute bottom-[-5%] left-[-5%] opacity-5 pointer-events-none">
-        <Coffee className="w-80 h-80 -rotate-12" />
+      <div className="absolute bottom-[-5%] left-[-5%] opacity-10 pointer-events-none scale-150">
+        <Coffee className="w-80 h-80 -rotate-12 text-accent" />
+      </div>
+      <div className="absolute top-1/2 left-1/4 opacity-5 pointer-events-none">
+        <Coffee className="w-40 h-40 -rotate-45 text-accent" />
       </div>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[3rem] shadow-2xl overflow-hidden border border-accent/10 relative z-10">
+        {/* Brand Side */}
         <div className="p-12 space-y-8 bg-accent text-white relative overflow-hidden flex flex-col justify-center">
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
           <div className="relative z-10 space-y-8 text-center lg:text-left">
@@ -75,6 +87,7 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Form Side */}
         <div className="p-10 md:p-14 space-y-10 bg-white">
           <div className="space-y-2">
             <h1 className="text-4xl font-headline font-bold text-accent">Sign In</h1>
