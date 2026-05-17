@@ -13,6 +13,7 @@ import { useUser } from "@/firebase";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Trash2, BookCheck, ShieldAlert, Key, Bell, ListOrdered, ChevronRight, ChevronLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminPage() {
   const { user } = useUser();
@@ -116,16 +117,17 @@ export default function AdminPage() {
       options: qType === 'multiple' ? qOptions.filter(o => o !== "") : undefined
     };
 
-    setTempQuestions([...tempQuestions, newQ]);
+    const updatedQuestions = [...tempQuestions, newQ];
     
     if (currentStep < questionCount) {
+      setTempQuestions(updatedQuestions);
       setCurrentStep(currentStep + 1);
       resetQForm();
     } else {
       addQuiz({
         title: quizTitle,
         questionCount,
-        questions: [...tempQuestions, newQ]
+        questions: updatedQuestions
       });
       setIsCreatingQuiz(false);
       setQuizTitle("");
@@ -255,7 +257,6 @@ export default function AdminPage() {
                          <div className="space-y-3">
                             <Label className="text-lg font-bold">Total Questions</Label>
                             <select className="w-full h-16 bg-secondary/10 border-accent/10 rounded-2xl px-6 text-xl font-bold" value={questionCount} onChange={e => setQuestionCount(parseInt(e.target.value))}>
-                               <option value={5}>5 Questions</option>
                                <option value={10}>10 Questions</option>
                                <option value={15}>15 Questions</option>
                                <option value={20}>20 Questions</option>

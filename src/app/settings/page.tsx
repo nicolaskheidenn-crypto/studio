@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { getAuth, updateProfile, updatePassword } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const THEMES: { id: Theme; label: string; icon: any; color: string }[] = [
   { id: 'default', label: 'Classic Mocha', icon: Monitor, color: 'bg-zinc-500' },

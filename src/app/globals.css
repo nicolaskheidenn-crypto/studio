@@ -27,67 +27,45 @@
     --radius: 1.5rem;
   }
 
-  .dark {
-    --background: 20 30% 8%;
-    --foreground: 30 20% 95%;
-    --card: 20 30% 12%;
-    --card-foreground: 30 20% 95%;
-    --popover: 20 30% 12%;
-    --popover-foreground: 30 20% 95%;
-    --primary: 45 100% 50%;
-    --primary-foreground: 20 30% 10%;
-    --secondary: 25 25% 18%;
-    --secondary-foreground: 30 20% 95%;
-    --muted: 25 25% 18%;
-    --muted-foreground: 25 15% 65%;
-    --accent: 30 50% 50%;
-    --accent-foreground: 20 30% 10%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 30 20% 95%;
-    --border: 25 25% 20%;
-    --input: 25 25% 20%;
-    --ring: 45 100% 50%;
-  }
-
   /* Fire Theme */
   body.theme-fire {
-    --background: 15 60% 96%;
+    --background: 15 60% 92%;
     --foreground: 15 60% 10%;
     --primary: 35 100% 50%;
     --accent: 10 70% 25%;
-    --card: 0 0% 100%;
-    --border: 15 30% 85%;
+    --card: 15 60% 98%;
+    --border: 15 30% 80%;
   }
 
   /* Water Theme */
   body.theme-water {
-    --background: 210 50% 98%;
+    --background: 210 50% 92%;
     --foreground: 220 50% 15%;
     --primary: 200 90% 45%;
     --accent: 220 60% 25%;
-    --card: 210 50% 99%;
-    --border: 210 30% 85%;
+    --card: 210 50% 98%;
+    --border: 210 30% 80%;
   }
 
   /* Nature Theme */
   body.theme-nature {
-    --background: 120 30% 98%;
+    --background: 120 30% 92%;
     --foreground: 140 50% 10%;
     --primary: 140 60% 40%;
     --accent: 150 60% 20%;
-    --card: 120 30% 99%;
-    --border: 120 20% 85%;
+    --card: 120 30% 98%;
+    --border: 120 20% 80%;
   }
 
   /* Raining Theme */
   body.theme-raining {
-    --background: 220 20% 12%;
+    --background: 220 20% 10%;
     --foreground: 220 10% 95%;
-    --card: 220 20% 16%;
+    --card: 220 20% 14%;
     --primary: 210 60% 65%;
-    --accent: 220 30% 45%;
-    --border: 220 15% 25%;
-    --muted: 220 15% 20%;
+    --accent: 220 30% 40%;
+    --border: 220 15% 20%;
+    --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
   }
 }
@@ -97,7 +75,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-all duration-500 font-body;
+    @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tight;

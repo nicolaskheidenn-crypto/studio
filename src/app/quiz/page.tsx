@@ -6,10 +6,10 @@ import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft } from "lucide-react";
+import { XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft, BookOpen } from "lucide-react";
 import { useAdminStore, QuizQuestion } from "@/lib/store";
 import { toast } from "@/hooks/use-toast";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function QuizPage() {
   const { quizzes } = useAdminStore();
