@@ -54,7 +54,6 @@ export default function EntryGate() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-accent text-white p-4 text-center overflow-hidden relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)] pointer-events-none" />
         
-        {/* Background Icons */}
         <div className="absolute top-10 left-10 opacity-10 pointer-events-none animate-pulse">
           <Coffee className="w-32 h-32" />
         </div>
@@ -98,7 +97,6 @@ export default function EntryGate() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-accent text-white p-4 relative overflow-hidden">
-       {/* Background Decoration */}
        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,215,0,0.1),transparent)] pointer-events-none" />
        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
           <Coffee className="w-[800px] h-[800px]" />

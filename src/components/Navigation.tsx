@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "relative next/link";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown } from "lucide-react";
 import { useState } from "react";

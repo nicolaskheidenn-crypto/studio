@@ -59,7 +59,6 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-accent/5 relative overflow-hidden">
-      {/* Background Coffee Decoration */}
       <div className="absolute top-[-10%] left-[-5%] opacity-5 pointer-events-none">
         <Coffee className="w-96 h-96" />
       </div>
@@ -68,7 +67,6 @@ export default function SignUpPage() {
       </div>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[3rem] shadow-2xl overflow-hidden border border-accent/10 relative z-10">
-        {/* Left Side: Mocha Branding */}
         <div className="p-12 space-y-8 bg-accent text-white relative overflow-hidden flex flex-col justify-center">
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
           <div className="relative z-10 space-y-8">
@@ -97,7 +95,6 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Right Side: Sign Up Form */}
         <div className="p-10 md:p-14 space-y-10 bg-white">
           <div className="space-y-2">
             <h1 className="text-4xl font-headline font-bold text-accent">New Account</h1>

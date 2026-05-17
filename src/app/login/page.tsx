@@ -52,7 +52,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-accent/5 relative overflow-hidden">
-      {/* Background Coffee Decoration */}
       <div className="absolute top-[-5%] right-[-5%] opacity-5 pointer-events-none">
         <Coffee className="w-80 h-80 rotate-45" />
       </div>
@@ -61,7 +60,6 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-card rounded-[3rem] shadow-2xl overflow-hidden border border-accent/10 relative z-10">
-        {/* Left Side: Mocha Branding */}
         <div className="p-12 space-y-8 bg-accent text-white relative overflow-hidden flex flex-col justify-center">
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
           <div className="relative z-10 space-y-8 text-center lg:text-left">
@@ -77,7 +75,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Side: Login Form */}
         <div className="p-10 md:p-14 space-y-10 bg-white">
           <div className="space-y-2">
             <h1 className="text-4xl font-headline font-bold text-accent">Sign In</h1>
