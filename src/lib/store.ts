@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-v3-storage',
+      name: 'fireproof-v4-persistence',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -76,7 +76,9 @@ export const useAdminStore = create<AdminStore>()(
     (set) => ({
       quizzes: [],
       dailyTasks: [
-        { id: '1', day: 1, title: 'Strategic Morning Brew', description: 'Align your vision with your primary goal for the day.' }
+        { id: 't1', day: 1, title: 'Strategic Morning Brew', description: 'Align your vision with your primary goal.' },
+        { id: 't2', day: 1, title: 'Execution Audit', description: 'Check previous performance metrics.' },
+        { id: 't3', day: 1, title: 'Network Expansion', description: 'Connect with one high-tier strategist.' }
       ],
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
@@ -90,6 +92,6 @@ export const useAdminStore = create<AdminStore>()(
       deleteQuiz: (id) => set((state) => ({ quizzes: state.quizzes.filter(q => q.id !== id) })),
       deleteTask: (id) => set((state) => ({ dailyTasks: state.dailyTasks.filter(t => t.id !== id) })),
     }),
-    { name: 'fireproof-admin-data-v3' }
+    { name: 'fireproof-admin-v4' }
   )
 );

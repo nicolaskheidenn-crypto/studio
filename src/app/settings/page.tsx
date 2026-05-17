@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Camera, Save, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Camera, Save, Eye, EyeOff, CheckCircle2, Copy } from "lucide-react";
 import { useAppStore, type Theme } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
@@ -39,7 +39,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (user?.displayName) setDisplayName(user.displayName);
-  }, [user]);
+    applyTheme();
+  }, [user, applyTheme]);
 
   const validateBio = (text: string) => {
     const lettersOnly = text.replace(/[^a-zA-Z\s]/g, "");
@@ -68,85 +69,93 @@ export default function SettingsPage() {
     toast({ 
       title: "Environment Locked", 
       description: "Atmosphere has been applied globally.",
-      variant: "default"
     });
+  };
+
+  const copyUid = () => {
+    if (user?.uid) {
+      navigator.clipboard.writeText(user.uid);
+      toast({ title: "UID Copied", description: "Strategic ID saved to clipboard." });
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-secondary/5">
       <Navigation />
-      <main className="flex-1 container mx-auto px-4 py-16 max-w-6xl">
-        <h1 className="text-7xl font-headline font-bold mb-16 text-accent tracking-tighter">Configuration</h1>
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-5xl">
+        <h1 className="text-5xl md:text-7xl font-headline font-bold mb-12 text-accent tracking-tighter">Configuration</h1>
         
-        <Tabs defaultValue="profile" className="space-y-12">
-          <TabsList className="bg-white p-2 rounded-full w-fit shadow-xl border border-accent/5">
-            <TabsTrigger value="profile" className="rounded-full px-12 h-14 text-xl font-bold data-[state=active]:bg-accent data-[state=active]:text-white">Profile Hub</TabsTrigger>
-            <TabsTrigger value="appearance" className="rounded-full px-12 h-14 text-xl font-bold data-[state=active]:bg-accent data-[state=active]:text-white">Atmosphere</TabsTrigger>
-            <TabsTrigger value="privacy" className="rounded-full px-12 h-14 text-xl font-bold data-[state=active]:bg-accent data-[state=active]:text-white">Legal Proof</TabsTrigger>
+        <Tabs defaultValue="profile" className="space-y-8">
+          <TabsList className="bg-white p-1 rounded-full w-fit shadow-lg border border-accent/5">
+            <TabsTrigger value="profile" className="rounded-full px-8 h-12 text-sm md:text-lg font-bold">Profile Hub</TabsTrigger>
+            <TabsTrigger value="appearance" className="rounded-full px-8 h-12 text-sm md:text-lg font-bold">Atmosphere</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-8 h-12 text-sm md:text-lg font-bold">Legal Proof</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-5">
-            <Card className="rounded-[4rem] border-white border-8 shadow-[0_40px_80px_rgba(0,0,0,0.1)] overflow-hidden bg-white">
-               <div className="h-64 bg-gradient-to-br from-accent via-accent/90 to-primary relative group">
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <Button variant="outline" size="sm" className="absolute bottom-6 right-10 rounded-full bg-white/30 border-white/50 text-white backdrop-blur-xl h-12 px-6 font-bold hover:bg-white hover:text-accent">
-                    <Camera className="h-5 w-5 mr-3" /> Update Cover
+          <TabsContent value="profile" className="space-y-8 animate-in fade-in slide-in-from-bottom-3">
+            <Card className="rounded-[2.5rem] border-white border-4 shadow-xl overflow-hidden bg-white">
+               <div className="h-48 bg-gradient-to-br from-accent via-accent/90 to-primary relative group">
+                  <Button variant="outline" size="sm" className="absolute bottom-4 right-6 rounded-full bg-white/30 border-white/50 text-white backdrop-blur-xl h-10 px-4 font-bold hover:bg-white hover:text-accent">
+                    <Camera className="h-4 w-4 mr-2" /> Cover
                   </Button>
                </div>
-               <CardContent className="p-16 -mt-20 relative z-10">
-                  <div className="flex flex-col md:flex-row gap-10 items-end mb-16">
-                     <div className="w-44 h-44 rounded-[3rem] border-8 border-white bg-accent shadow-2xl flex items-center justify-center text-white text-6xl font-black uppercase relative overflow-hidden group">
+               <CardContent className="p-8 md:p-12 -mt-16 relative z-10">
+                  <div className="flex flex-col md:flex-row gap-6 items-end mb-12">
+                     <div className="w-32 h-32 rounded-[2rem] border-4 border-white bg-accent shadow-xl flex items-center justify-center text-white text-4xl font-black uppercase relative overflow-hidden group">
                         {user?.displayName?.[0] || "S"}
                         <Button size="icon" className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-none h-full w-full">
-                          <Camera className="h-10 w-10 text-white" />
+                          <Camera className="h-6 w-6 text-white" />
                         </Button>
                      </div>
-                     <div className="flex-1 pb-4">
-                        <h2 className="text-5xl font-black text-accent tracking-tight leading-none">{user?.displayName || "Succemazing"}</h2>
-                        <p className="text-xl text-muted-foreground font-mono mt-2">{user?.email}</p>
+                     <div className="flex-1 pb-2">
+                        <h2 className="text-3xl font-black text-accent tracking-tight">{user?.displayName || "Succemazing"}</h2>
+                        <div className="flex items-center gap-2 mt-1">
+                          <code className="text-xs text-muted-foreground bg-secondary/20 px-2 py-1 rounded">UID: {user?.uid}</code>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={copyUid}><Copy className="h-3 w-3" /></Button>
+                        </div>
                      </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    <div className="space-y-8">
-                      <div className="space-y-3">
-                        <Label className="text-xl font-black text-accent ml-2">Username</Label>
-                        <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="@username" className="h-16 rounded-3xl bg-secondary/10 border-none px-8 text-xl font-bold" />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label className="font-bold ml-2">Username</Label>
+                        <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="@username" className="h-12 rounded-xl bg-secondary/10 border-none px-4 font-bold" />
                       </div>
-                      <div className="space-y-3">
-                        <Label className="text-xl font-black text-accent ml-2">Full Nickname</Label>
-                        <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Full Name" className="h-16 rounded-3xl bg-secondary/10 border-none px-8 text-xl font-bold" />
+                      <div className="space-y-2">
+                        <Label className="font-bold ml-2">Full Nickname</Label>
+                        <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Full Name" className="h-12 rounded-xl bg-secondary/10 border-none px-4 font-bold" />
                       </div>
-                      <div className="space-y-3">
-                        <Label className="text-xl font-black text-accent ml-2 flex justify-between">Bio <Badge className="bg-primary text-accent font-black">{bio.length}/60</Badge></Label>
+                      <div className="space-y-2">
+                        <Label className="font-bold ml-2 flex justify-between">Bio <Badge className="bg-primary text-accent h-5">{bio.length}/60</Badge></Label>
                         <Textarea 
                           value={bio} 
                           onChange={e => validateBio(e.target.value)} 
-                          placeholder="Your strategic bio (15-60 letters only)..." 
-                          className="rounded-[2.5rem] bg-secondary/10 border-none min-h-[160px] p-8 text-xl font-medium leading-relaxed"
+                          placeholder="Your bio (15-60 letters only)..." 
+                          className="rounded-2xl bg-secondary/10 border-none min-h-[120px] p-4 font-medium"
                         />
                       </div>
-                      <Button onClick={handleUpdateProfile} disabled={isLoading} className="w-full h-20 rounded-full bg-accent text-white font-black text-2xl shadow-2xl hover:scale-[1.02] transition-transform">
-                        Save Core Identity
+                      <Button onClick={handleUpdateProfile} disabled={isLoading} className="w-full h-14 rounded-full bg-accent text-white font-black text-xl shadow-lg hover:scale-[1.01] transition-transform">
+                        Save Identity
                       </Button>
                     </div>
 
-                    <div className="space-y-10">
-                       <div className="p-10 bg-secondary/5 rounded-[3.5rem] border-4 border-dashed border-accent/5">
-                          <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-accent"><Shield className="h-8 w-8 text-primary" /> Security Shield</h3>
-                          <div className="space-y-8">
-                             <div className="space-y-3">
-                                <Label className="font-bold ml-2">Update Access Password</Label>
+                    <div className="space-y-8">
+                       <div className="p-8 bg-secondary/5 rounded-[2rem] border-2 border-dashed border-accent/5">
+                          <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-accent"><Shield className="h-6 w-6 text-primary" /> Security Hub</h3>
+                          <div className="space-y-6">
+                             <div className="space-y-2">
+                                <Label className="font-bold ml-1">New Password</Label>
                                 <div className="relative">
                                    <Input 
                                       type={showPass ? "text" : "password"} 
                                       value={newPass} 
                                       onChange={e => setNewPass(e.target.value)}
-                                      className="h-16 rounded-3xl bg-white border-2 border-accent/5 px-8 pr-16 text-xl"
-                                      placeholder="New Strong Password"
+                                      className="h-12 rounded-xl bg-white border-2 border-accent/5 px-4 pr-12"
+                                      placeholder="Strong Password"
                                    />
-                                   <button onClick={() => setShowPass(!showPass)} className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors">
-                                      {showPass ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                                   <button onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-accent transition-colors">
+                                      {showPass ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                    </button>
                                 </div>
                              </div>
@@ -156,15 +165,15 @@ export default function SettingsPage() {
                                   .then(() => toast({ title: "Security Updated" }))
                                   .catch(e => toast({ title: "Failed", description: e.message, variant: "destructive" }));
                                }
-                             }} className="w-full h-16 rounded-full border-4 border-accent text-accent font-black text-xl hover:bg-accent hover:text-white transition-all shadow-lg">
-                                Synchronize Security
+                             }} className="w-full h-12 rounded-full border-2 border-accent text-accent font-black hover:bg-accent hover:text-white transition-all">
+                                Update Security
                              </Button>
                           </div>
                        </div>
                        
-                       <div className="bg-accent text-white p-10 rounded-[3.5rem] shadow-2xl">
-                          <h3 className="text-2xl font-black mb-6 flex items-center gap-3"><CheckCircle2 className="h-8 w-8 text-primary" /> Account Tier</h3>
-                          <p className="text-xl font-medium text-white/70 leading-relaxed">You are currently operating as a <span className="text-primary font-black uppercase">Elite Strategist</span>. All content paths are open.</p>
+                       <div className="bg-accent text-white p-8 rounded-[2rem] shadow-lg">
+                          <h3 className="text-xl font-black mb-4 flex items-center gap-2"><CheckCircle2 className="h-6 w-6 text-primary" /> Account Tier</h3>
+                          <p className="text-base font-medium text-white/70">Operating as an <span className="text-primary font-black uppercase">Elite Strategist</span> under Nico Digital.</p>
                        </div>
                     </div>
                   </div>
@@ -172,69 +181,75 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="appearance" className="space-y-10 animate-in fade-in slide-in-from-bottom-5">
-            <Card className="rounded-[4rem] border-white border-8 shadow-2xl p-16 bg-white">
-              <CardHeader className="text-center mb-12">
-                <CardTitle className="text-5xl font-headline font-bold text-accent tracking-tighter">Atmosphere Engine</CardTitle>
-                <CardDescription className="text-2xl font-medium text-muted-foreground mt-4">Fuel your high-focus execution environment.</CardDescription>
+          <TabsContent value="appearance" className="animate-in fade-in slide-in-from-bottom-3">
+            <Card className="rounded-[2.5rem] border-white border-4 shadow-xl p-8 md:p-12 bg-white">
+              <CardHeader className="text-center mb-8">
+                <CardTitle className="text-4xl font-headline font-bold text-accent tracking-tighter">Atmosphere Engine</CardTitle>
+                <CardDescription className="text-lg font-medium text-muted-foreground">Select a background environment for your strategy sessions.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-16">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <CardContent className="space-y-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {THEMES.map((t) => (
                     <button
                       key={t.id}
                       onClick={() => setTheme(t.id)}
                       className={cn(
-                        "group relative overflow-hidden flex flex-col p-10 rounded-[3rem] border-8 transition-all duration-500",
+                        "group relative overflow-hidden flex flex-col p-6 rounded-3xl border-2 transition-all duration-300",
                         theme === t.id 
-                          ? "border-primary bg-primary/5 shadow-2xl scale-[1.05]" 
-                          : "border-secondary/20 hover:border-accent/30 bg-card hover:bg-secondary/5"
+                          ? "border-primary bg-primary/5 shadow-md scale-[1.02]" 
+                          : "border-secondary/20 hover:border-accent/30 bg-card"
                       )}
                     >
-                      <div className={cn("w-20 h-20 rounded-3xl text-white flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 transition-transform", t.color)}>
-                        <t.icon className="h-10 w-10" />
+                      <div className={cn("w-12 h-12 rounded-xl text-white flex items-center justify-center mb-4 shadow-md", t.color)}>
+                        <t.icon className="h-6 w-6" />
                       </div>
-                      <p className="font-black text-3xl mb-2 text-accent leading-none">{t.label}</p>
-                      <p className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground">Focus Environment</p>
+                      <p className="font-black text-xl text-accent leading-none">{t.label}</p>
                       {theme === t.id && (
-                        <div className="absolute top-6 right-6 h-4 w-4 rounded-full bg-primary shadow-[0_0_15px_rgba(255,215,0,1)]" />
+                        <div className="absolute top-4 right-4 h-3 w-3 rounded-full bg-primary shadow-sm" />
                       )}
                     </button>
                   ))}
                 </div>
                 <div className="flex justify-center">
-                  <Button onClick={handleSaveTheme} className="h-24 rounded-full px-24 bg-accent text-white font-black text-4xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] hover:scale-110 transition-transform active:scale-95 group">
-                    <Save className="h-10 w-10 mr-5 group-hover:rotate-12 transition-transform" /> LOCK ENVIRONMENT
+                  <Button onClick={handleSaveTheme} className="h-16 rounded-full px-16 bg-accent text-white font-black text-2xl shadow-xl hover:scale-105 transition-transform group">
+                    <Save className="h-6 w-6 mr-3 group-hover:rotate-12 transition-transform" /> SAVE CHANGES
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-5">
-             <Card className="rounded-[4rem] p-20 shadow-2xl border-white border-8 bg-white">
-                <h2 className="text-6xl font-headline font-bold mb-16 text-center text-accent tracking-tighter">Global Security & Policy</h2>
-                <div className="space-y-20 max-w-4xl mx-auto text-xl leading-relaxed text-muted-foreground">
-                   <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-xl">I</span>
-                        Data Sovereignty Path
+          <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-3">
+             <Card className="rounded-[2.5rem] p-8 md:p-16 shadow-xl border-white border-4 bg-white">
+                <h2 className="text-4xl md:text-5xl font-headline font-bold mb-10 text-center text-accent tracking-tighter">Legal Sovereignty & Proof</h2>
+                <div className="space-y-12 max-w-3xl mx-auto text-lg leading-relaxed text-muted-foreground">
+                   <section className="space-y-4">
+                      <h4 className="text-accent text-2xl font-black flex items-center gap-3">
+                        <span className="w-10 h-10 bg-primary text-accent rounded-xl flex items-center justify-center text-base">I</span>
+                        Nico Digital Infrastructure
                       </h4>
-                      <p>At FireProof, your strategic assets and intellectual property are treated with ultimate tier isolation. Every goal capsule, daily task execution log, and MeText communication is encrypted using high-grade protocols. Your data is your empire; we only provide the vault.</p>
+                      <p>FireProof is a specialized strategic asset management tool under the <strong>Nico Digital</strong> main root business brand. All intellectual property, user interaction logs, and strategic task data are hosted on sovereign infrastructure. We do not operate like ordinary, centralized businesses; our focus is on high-tier individual growth and data privacy.</p>
                    </section>
-                   <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-xl">II</span>
-                        Anti-Intrusion Governance
+                   <section className="space-y-4">
+                      <h4 className="text-accent text-2xl font-black flex items-center gap-3">
+                        <span className="w-10 h-10 bg-primary text-accent rounded-xl flex items-center justify-center text-base">II</span>
+                        Data Privacy Protocols
                       </h4>
-                      <p>We do not harvest, monetize, or share user behavioral data with third-party networks. Our model is powered by your ambition, not your exposure. Internal audits are conducted bi-weekly to ensure zero-leak integrity across all Firestore paths. Your privacy is non-negotiable.</p>
+                      <p>We do not harvest, monetize, or sell your data. Your vision (GoalCaps), your routine (TaskDo), and your conversations (MeText) are strictly private. Firestore rules are configured with high-tier security logic to prevent cross-UID data leakage. Your account is your sovereign territory within our digital empire.</p>
                    </section>
-                   <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-xl">III</span>
-                        MeText Interaction Standards
+                   <section className="space-y-4">
+                      <h4 className="text-accent text-2xl font-black flex items-center gap-3">
+                        <span className="w-10 h-10 bg-primary text-accent rounded-xl flex items-center justify-center text-base">III</span>
+                        MeText Behavior Policy
                       </h4>
-                      <p>The messaging and social hub must be used exclusively for professional growth and strategic networking. Any data scraping or malicious automation will result in immediate UID termination. We reserve the right to prune connections to maintain system velocity.</p>
+                      <p>Communication within the MeText hub is strictly for strategic growth. Harassment, data scraping, or malicious bot activity will result in permanent UID blacklisting without prior warning. By using this hub, you agree to respect the sovereignty of other Succemazings.</p>
+                   </section>
+                   <section className="space-y-4">
+                      <h4 className="text-accent text-2xl font-black flex items-center gap-3">
+                        <span className="w-10 h-10 bg-primary text-accent rounded-xl flex items-center justify-center text-base">IV</span>
+                        Business Authenticity
+                      </h4>
+                      <p>Nico Digital provides this proof as verification of our legitimate high-focus execution model. We are not just an app; we are a strategic partner in your journey toward consistency and excellence.</p>
                    </section>
                 </div>
              </Card>
