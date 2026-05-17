@@ -1,11 +1,11 @@
 /**
- * Firebase Configuration
+ * Firebase Configuration for loggedin-9490f
  */
 export const firebaseConfig = {
-  apiKey: "AIzaSyAo9OI0JaTk5m3NjS7YYqroKLJyP5DrBFs",
-  authDomain: "fireproof-ndigtal-app.firebaseapp.com",
-  projectId: "fireproof-ndigtal-app",
-  storageBucket: "fireproof-ndigtal-app.firebasestorage.app",
-  messagingSenderId: "998922251959",
-  appId: "1:998922251959:web:ba20519c34bfe88316e732"
+  apiKey: "AIzaSyALHVW4HDZJNWr_s-efkCEJRTx3e7anRdk",
+  authDomain: "loggedin-9490f.firebaseapp.com",
+  projectId: "loggedin-9490f",
+  storageBucket: "loggedin-9490f.firebasestorage.app",
+  messagingSenderId: "1099447507231",
+  appId: "1:1099447507231:web:8843890e50f6d46779b82a"
 };

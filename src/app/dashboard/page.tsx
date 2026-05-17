@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -60,7 +59,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* E-Books Section */}
+            {/* Upcoming eBooks Section */}
             <Card className="md:col-span-2 border-accent/10 shadow-sm overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between bg-accent/5">
                 <div>
