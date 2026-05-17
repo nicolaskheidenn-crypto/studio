@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-v2-storage',
+      name: 'fireproof-v3-storage',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -49,6 +49,7 @@ export interface QuizQuestion {
 export interface Quiz {
   id: string;
   title: string;
+  questionCount: number;
   questions: QuizQuestion[];
   createdAt: string;
 }
@@ -64,6 +65,7 @@ interface AdminStore {
   quizzes: Quiz[];
   dailyTasks: ManagedTask[];
   addQuiz: (quiz: Omit<Quiz, 'id' | 'createdAt'>) => void;
+  updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
   addTask: (task: Omit<ManagedTask, 'id'>) => void;
   deleteQuiz: (id: string) => void;
   deleteTask: (id: string) => void;
@@ -79,12 +81,15 @@ export const useAdminStore = create<AdminStore>()(
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
       })),
+      updateQuiz: (id, data) => set((state) => ({
+        quizzes: state.quizzes.map(q => q.id === id ? { ...q, ...data } : q)
+      })),
       addTask: (data) => set((state) => ({
         dailyTasks: [...state.dailyTasks, { ...data, id: Math.random().toString(36).substr(2, 9) }].sort((a, b) => a.day - b.day)
       })),
       deleteQuiz: (id) => set((state) => ({ quizzes: state.quizzes.filter(q => q.id !== id) })),
       deleteTask: (id) => set((state) => ({ dailyTasks: state.dailyTasks.filter(t => t.id !== id) })),
     }),
-    { name: 'fireproof-admin-data-v2' }
+    { name: 'fireproof-admin-data-v3' }
   )
 );
