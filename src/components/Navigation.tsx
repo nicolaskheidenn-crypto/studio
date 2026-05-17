@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown } from "lucide-react";
+import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "TaskDo", href: "/task-do", icon: CheckSquare },
+  { label: "FireQuizzo", href: "/quiz", icon: BookOpen },
   { label: "GoalCaps", href: "/goal-caps", icon: Hourglass },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
@@ -25,7 +27,7 @@ export function Navigation() {
   const isAuthPage = pathname === "/login" || pathname === "/signup" || pathname === "/";
   const isHost = user?.email === HOST_EMAIL;
 
-  if (isAuthPage) return null;
+  if (isAuthPage && !user) return null;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -65,7 +67,7 @@ export function Navigation() {
                   )}
                 >
                   <Crown className="h-4 w-4" />
-                  Host Admin
+                  Admin
                 </Link>
               )}
             </div>
@@ -75,7 +77,7 @@ export function Navigation() {
                 <Button variant="ghost" className="rounded-full font-bold text-accent gap-2" asChild>
                   <Link href="/settings">
                     <User className="h-4 w-4" />
-                    {user.displayName || "Profile"}
+                    {user.displayName?.split(' ')[0] || "Strategist"}
                   </Link>
                 </Button>
               ) : (
@@ -107,7 +109,7 @@ export function Navigation() {
               onClick={() => setIsOpen(false)}
               className={cn(
                 "flex items-center gap-4 text-lg font-bold p-3 rounded-2xl",
-                pathname === item.href ? "bg-primary/10 text-primary" : "text-accent/70 hover:bg-secondary"
+                pathname === item.href ? "bg-primary/10 text-primary" : "text-accent/70"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -115,31 +117,10 @@ export function Navigation() {
             </Link>
           ))}
           {isHost && (
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-4 text-lg font-bold p-3 rounded-2xl text-amber-600"
-            >
-              <Crown className="h-5 w-5" />
-              Host Admin
+            <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-4 text-lg font-bold p-3 rounded-2xl text-amber-600">
+              <Crown className="h-5 w-5" /> Admin
             </Link>
           )}
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-accent/10">
-            {user ? (
-              <Button className="col-span-2 rounded-xl bg-accent text-white font-bold h-12" asChild>
-                <Link href="/settings">Settings</Link>
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" className="rounded-xl font-bold h-12" asChild>
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button className="rounded-xl bg-accent text-white font-bold h-12" asChild>
-                  <Link href="/signup">Join Now</Link>
-                </Button>
-              </>
-            )}
-          </div>
         </div>
       )}
     </nav>

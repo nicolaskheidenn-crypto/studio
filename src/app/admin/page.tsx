@@ -1,113 +1,141 @@
 
 "use client";
 
-import { AdminLayout } from "@/components/AdminLayout";
-import { usePages } from "@/lib/store";
+import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Edit, Trash2, Plus, ExternalLink, MoreVertical } from "lucide-react";
-import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdminStore } from "@/lib/store";
+import { useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
+import { Plus, Trash2, BookCheck, ClipboardList } from "lucide-react";
 
-export default function AdminDashboard() {
-  const { pages, deletePage, isLoaded } = usePages();
-  const { toast } = useToast();
+export default function AdminPage() {
+  const { user } = useUser();
+  const router = useRouter();
+  const { quizzes, addQuiz, deleteQuiz, dailyTasks, addTask, deleteTask } = useAdminStore();
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this page?")) {
-      deletePage(id);
-      toast({
-        title: "Page Deleted",
-        description: "The page has been removed successfully.",
-      });
-    }
+  const [quizTitle, setQuizTitle] = useState("");
+  const [qText, setQText] = useState("");
+  const [qType, setQType] = useState<'multiple' | 'boolean' | 'id'>('multiple');
+  const [qAnswer, setQAnswer] = useState("");
+  const [qOptions, setQOptions] = useState("");
+
+  const [taskDay, setTaskDay] = useState(1);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDesc, setTaskDesc] = useState("");
+
+  if (user?.email !== "nicolaskheidenn@gmail.com") {
+    return <div className="p-20 text-center">Unauthorized Access</div>;
+  }
+
+  const handleCreateQuiz = () => {
+    if (!quizTitle || !qText || !qAnswer) return;
+    addQuiz({
+      title: quizTitle,
+      questions: [{
+        id: Math.random().toString(),
+        type: qType,
+        question: qText,
+        answer: qAnswer,
+        options: qType === 'multiple' ? qOptions.split(',').map(o => o.trim()) : undefined
+      }]
+    });
+    setQuizTitle(""); setQText(""); setQAnswer(""); setQOptions("");
+    toast({ title: "Quiz Created" });
+  };
+
+  const handleCreateTask = () => {
+    if (!taskTitle || !taskDay) return;
+    addTask({ day: taskDay, title: taskTitle, description: taskDesc });
+    setTaskTitle(""); setTaskDesc("");
+    toast({ title: "Task Added for Day " + taskDay });
   };
 
   return (
-    <AdminLayout>
-      <div className="flex flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-headline font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your website's pages and content.</p>
-          </div>
-          <Button asChild className="rounded-full shadow-lg bg-primary hover:bg-primary/90">
-            <Link href="/admin/new">
-              <Plus className="mr-2 h-4 w-4" /> New Page
-            </Link>
-          </Button>
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-headline font-bold mb-8">Admin Dashboard</h1>
 
-        <div className="bg-card rounded-2xl border shadow-sm overflow-hidden">
-          {!isLoaded ? (
-            <div className="p-12 text-center text-muted-foreground animate-pulse">
-              Loading pages...
+        <Tabs defaultValue="tasks" className="space-y-6">
+          <TabsList className="rounded-full">
+            <TabsTrigger value="tasks" className="rounded-full">Manage Daily Tasks</TabsTrigger>
+            <TabsTrigger value="quizzes" className="rounded-full">Manage FireQuizzo</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="tasks" className="space-y-6">
+            <Card>
+              <CardHeader><CardTitle>Add Daily Task</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Day Number</Label>
+                    <Input type="number" value={taskDay} onChange={e => setTaskDay(parseInt(e.target.value))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Task Title</Label>
+                    <Input value={taskTitle} onChange={e => setTaskTitle(e.target.value)} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea value={taskDesc} onChange={e => setTaskDesc(e.target.value)} />
+                </div>
+                <Button onClick={handleCreateTask} className="w-full rounded-full"><Plus className="mr-2" /> Add Task</Button>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              <h3 className="font-bold">Current Routine</h3>
+              {dailyTasks.map(t => (
+                <div key={t.id} className="p-4 border rounded-2xl flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold uppercase text-primary">Day {t.day}</span>
+                    <p className="font-bold">{t.title}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => deleteTask(t.id)}><Trash2 className="text-destructive h-4 w-4" /></Button>
+                </div>
+              ))}
             </div>
-          ) : pages.length === 0 ? (
-            <div className="p-20 text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-                <Plus className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-headline font-bold">No pages yet</h3>
-                <p className="text-muted-foreground">Start by creating your first page.</p>
-              </div>
-              <Button asChild variant="outline" className="rounded-full">
-                <Link href="/admin/new">Create First Page</Link>
-              </Button>
+          </TabsContent>
+
+          <TabsContent value="quizzes" className="space-y-6">
+            <Card>
+              <CardHeader><CardTitle>Create New Quiz</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <Input placeholder="Quiz Title" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} />
+                <div className="grid grid-cols-2 gap-4">
+                  <select className="p-2 border rounded-md" value={qType} onChange={e => setQType(e.target.value as any)}>
+                    <option value="multiple">Multiple Choice</option>
+                    <option value="boolean">True/False</option>
+                    <option value="id">Identification</option>
+                  </select>
+                </div>
+                <Textarea placeholder="Question Text" value={qText} onChange={e => setQText(e.target.value)} />
+                {qType === 'multiple' && <Input placeholder="Options (comma separated)" value={qOptions} onChange={e => setQOptions(e.target.value)} />}
+                <Input placeholder="Correct Answer" value={qAnswer} onChange={e => setQAnswer(e.target.value)} />
+                <Button onClick={handleCreateQuiz} className="w-full rounded-full"><BookCheck className="mr-2" /> Publish Quiz</Button>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              <h3 className="font-bold">Published Quizzes</h3>
+              {quizzes.map(q => (
+                <div key={q.id} className="p-4 border rounded-2xl flex items-center justify-between">
+                  <p className="font-bold">{q.title}</p>
+                  <Button variant="ghost" size="icon" onClick={() => deleteQuiz(q.id)}><Trash2 className="text-destructive h-4 w-4" /></Button>
+                </div>
+              ))}
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead className="font-bold">Page Title</TableHead>
-                  <TableHead className="font-bold">Slug</TableHead>
-                  <TableHead className="font-bold">Date Created</TableHead>
-                  <TableHead className="font-bold text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pages.map((page) => (
-                  <TableRow key={page.id} className="hover:bg-muted/10 transition-colors">
-                    <TableCell className="font-medium">{page.title}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-mono text-xs">
-                        /{page.slug}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {new Date(page.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" asChild title="View Publicly">
-                          <Link href={`/pages/${page.slug}`}>
-                            <ExternalLink className="h-4 w-4 text-primary" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="icon" asChild title="Edit Page">
-                          <Link href={`/admin/edit/${page.id}`}>
-                            <Edit className="h-4 w-4 text-accent" />
-                          </Link>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleDelete(page.id)}
-                          title="Delete Page"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
-      </div>
-    </AdminLayout>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -6,25 +7,36 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Hourglass, Lock, Unlock, Send } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Hourglass, Lock, Unlock, Send, Calendar } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 
 export default function GoalCapsPage() {
   const [message, setMessage] = useState("");
-  const [capsules, setCapsules] = useState([
-    { id: '1', date: '2025-05-20', unlockDate: '2030-05-20', locked: true },
-  ]);
+  const [unlockDate, setUnlockDate] = useState("");
+  const [capsules, setCapsules] = useState<any[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message) return;
+    if (!message || !unlockDate) return;
+    
+    const newCap = {
+      id: Math.random().toString(),
+      message,
+      unlockDate,
+      createdAt: new Date().toLocaleDateString(),
+      isLocked: new Date(unlockDate) > new Date()
+    };
+
+    setCapsules([newCap, ...capsules]);
+    setMessage("");
+    setUnlockDate("");
     
     toast({
       title: "Capsule Sealed",
-      description: "Your message has been locked for 5 years.",
+      description: "Your message is locked until " + new Date(unlockDate).toLocaleDateString(),
     });
-    setMessage("");
   };
 
   return (
@@ -34,28 +46,42 @@ export default function GoalCapsPage() {
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-headline font-bold">Goal<span className="text-primary">Caps</span></h1>
-            <p className="text-muted-foreground text-lg">Communicate with your future self. What will you achieve in 5 years?</p>
+            <p className="text-muted-foreground text-lg">Send a message to your future self. Unlock it only when the time is right.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card>
+            <Card className="shadow-xl">
               <CardHeader>
                 <CardTitle>Create Time Capsule</CardTitle>
-                <CardDescription>Seal your message until {new Date().getFullYear() + 5}.</CardDescription>
+                <CardDescription>What will Succemazing achieve by this date?</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
+                    <Label>Unlock Date (Month/Day/Year)</Label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type="date" 
+                        className="pl-10 h-12 rounded-xl" 
+                        value={unlockDate}
+                        onChange={(e) => setUnlockDate(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <Label>Message to the Future</Label>
                     <Textarea 
-                      placeholder="Today I start my journey to digital mastery..." 
-                      className="min-h-[200px]"
+                      placeholder="Today I start my journey... In the future I am..." 
+                      className="min-h-[200px] rounded-2xl"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
+                      required
                     />
                   </div>
-                  <Button type="submit" className="w-full rounded-full bg-primary hover:bg-primary/90">
-                    <Send className="h-4 w-4 mr-2" /> Seal Message
+                  <Button type="submit" className="w-full rounded-full h-14 bg-primary hover:bg-primary/90 text-accent font-bold">
+                    <Send className="h-4 w-4 mr-2" /> Seal for Future Succemazing
                   </Button>
                 </form>
               </CardContent>
@@ -64,24 +90,39 @@ export default function GoalCapsPage() {
             <div className="space-y-6">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <Hourglass className="h-5 w-5 text-primary" />
-                Your Active Capsules
+                Active Capsules
               </h3>
-              {capsules.map((cap) => (
-                <Card key={cap.id} className="bg-secondary/20 border-dashed">
-                  <CardContent className="p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-background rounded-full border">
-                        <Lock className="h-5 w-5 text-muted-foreground" />
+              {capsules.length === 0 ? (
+                <p className="text-muted-foreground italic">No capsules sealed yet. Start your journey above.</p>
+              ) : (
+                capsules.map((cap) => (
+                  <Card key={cap.id} className={cn("border-dashed border-2", cap.isLocked ? "bg-secondary/20" : "bg-primary/5")}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className={cn("p-3 rounded-full border", cap.isLocked ? "bg-background" : "bg-primary")}>
+                            {cap.isLocked ? <Lock className="h-5 w-5 text-muted-foreground" /> : <Unlock className="h-5 w-5 text-white" />}
+                          </div>
+                          <div>
+                            <p className="font-bold">Unlocks: {new Date(cap.unlockDate).toLocaleDateString()}</p>
+                            <p className="text-xs text-muted-foreground">Sealed on {cap.createdAt}</p>
+                          </div>
+                        </div>
+                        <Badge variant={cap.isLocked ? "secondary" : "default"}>
+                          {cap.isLocked ? "Locked" : "Ready"}
+                        </Badge>
                       </div>
-                      <div>
-                        <p className="font-bold">Sealed on {cap.date}</p>
-                        <p className="text-sm text-muted-foreground">Unlocks on {cap.unlockDate}</p>
+                      <div className="p-4 bg-background/50 rounded-xl">
+                        {cap.isLocked ? (
+                          <p className="text-sm italic text-muted-foreground blur-[2px] select-none">This content is locked for privacy.</p>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{cap.message}</p>
+                        )}
                       </div>
-                    </div>
-                    <Badge variant="secondary">Locked</Badge>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </div>
