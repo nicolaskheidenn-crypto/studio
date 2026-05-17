@@ -9,53 +9,66 @@
         "id": { "type": "string" },
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "date": { "type": "string", "format": "date" },
-        "isAutomated": { "type": "boolean" }
+        "day": { "type": "number" }
       },
-      "required": ["title", "description", "date"]
+      "required": ["title", "description", "day"]
     },
-    "UserProgress": {
-      "title": "User Progress",
-      "description": "Tracks completed tasks for a user.",
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Extended user information.",
       "type": "object",
       "properties": {
-        "userId": { "type": "string" },
-        "completedTaskIds": { "type": "array", "items": { "type": "string" } },
-        "lastUpdated": { "type": "string", "format": "date-time" }
+        "username": { "type": "string" },
+        "nickname": { "type": "string" },
+        "bio": { "type": "string", "minLength": 15, "maxLength": 60 },
+        "coverPhotoUrl": { "type": "string" },
+        "avatarUrl": { "type": "string" }
       }
     },
-    "TimeCapsule": {
-      "title": "Time Capsule",
-      "description": "A message for the future.",
+    "FriendRequest": {
+      "title": "Friend Request",
+      "description": "Request to connect between users.",
+      "type": "object",
+      "properties": {
+        "fromId": { "type": "string" },
+        "toId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A message in a conversation.",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["image", "video"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AppNotification": {
+      "title": "Notification",
+      "description": "System or social alert.",
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
-        "message": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "unlockAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["message", "createdAt", "unlockAt"]
-    },
-    "EBookBundle": {
-      "title": "E-Book Bundle",
-      "description": "E-books or bundles offered to users.",
-      "type": "object",
-      "properties": {
         "title": { "type": "string" },
-        "description": { "type": "string" },
-        "price": { "type": "number" },
-        "downloadUrl": { "type": "string" },
-        "availableAt": { "type": "string", "format": "date-time" }
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["system", "friend_request", "admin"] },
+        "isRead": { "type": "boolean" }
       }
     }
   },
   "auth": {
-    "providers": ["google.com", "facebook.com", "password"]
+    "providers": ["google.com", "password"]
   },
   "firestore": {
-    "/tasks/{taskId}": { "schema": "Task", "description": "Global daily tasks managed by host." },
-    "/users/{userId}/progress/{progressId}": { "schema": "UserProgress", "description": "User completion tracking." },
-    "/users/{userId}/capsules/{capsuleId}": { "schema": "TimeCapsule", "description": "User future messages." },
-    "/ebooks/{ebookId}": { "schema": "EBookBundle", "description": "Available content and bundles." }
+    "/tasks/{taskId}": { "schema": "Task", "description": "Global daily tasks." },
+    "/users/{userId}": { "schema": "UserProfile", "description": "User profile data." },
+    "/friendRequests/{requestId}": { "schema": "FriendRequest", "description": "Social connections." },
+    "/chats/{chatId}/messages/{msgId}": { "schema": "ChatMessage", "description": "Conversation data." },
+    "/notifications/{notifId}": { "schema": "AppNotification", "description": "User alerts." }
   }
 }

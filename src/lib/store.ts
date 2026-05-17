@@ -9,41 +9,30 @@ export type Theme = 'fire' | 'water' | 'nature' | 'raining' | 'default';
 interface AppState {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  isAdmin: boolean;
-  setIsAdmin: (isAdmin: boolean) => void;
+  applyTheme: () => void;
 }
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       theme: 'default',
-      setTheme: (theme) => {
+      setTheme: (theme) => set({ theme }),
+      applyTheme: () => {
         if (typeof document !== 'undefined') {
           const body = document.body;
           const themeClasses = ['theme-fire', 'theme-water', 'theme-nature', 'theme-raining'];
           body.classList.remove(...themeClasses);
-          if (theme !== 'default') {
-            body.classList.add(`theme-${theme}`);
+          const currentTheme = get().theme;
+          if (currentTheme !== 'default') {
+            body.classList.add(`theme-${currentTheme}`);
           }
         }
-        set({ theme });
-      },
-      isAdmin: false,
-      setIsAdmin: (isAdmin) => set({ isAdmin }),
+      }
     }),
     {
-      name: 'fireproof-storage',
+      name: 'fireproof-v2-storage',
       onRehydrateStorage: () => (state) => {
-        return () => {
-          if (state && typeof document !== 'undefined') {
-            const body = document.body;
-            const themeClasses = ['theme-fire', 'theme-water', 'theme-nature', 'theme-raining'];
-            body.classList.remove(...themeClasses);
-            if (state.theme && state.theme !== 'default') {
-              body.classList.add(`theme-${state.theme}`);
-            }
-          }
-        };
+        if (state) state.applyTheme();
       }
     }
   )
@@ -85,8 +74,7 @@ export const useAdminStore = create<AdminStore>()(
     (set) => ({
       quizzes: [],
       dailyTasks: [
-        { id: '1', day: 1, title: 'Strategic Morning Brew', description: 'Align your vision with your primary goal for the day.' },
-        { id: '2', day: 2, title: 'Market Pulse Check', description: 'Analyze top 3 competitors in your niche.' }
+        { id: '1', day: 1, title: 'Strategic Morning Brew', description: 'Align your vision with your primary goal for the day.' }
       ],
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
@@ -97,6 +85,6 @@ export const useAdminStore = create<AdminStore>()(
       deleteQuiz: (id) => set((state) => ({ quizzes: state.quizzes.filter(q => q.id !== id) })),
       deleteTask: (id) => set((state) => ({ dailyTasks: state.dailyTasks.filter(t => t.id !== id) })),
     }),
-    { name: 'fireproof-admin-data' }
+    { name: 'fireproof-admin-data-v2' }
   )
 );
