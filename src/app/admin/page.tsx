@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -9,9 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminStore } from "@/lib/store";
 import { useUser } from "@/firebase";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, ShieldAlert, Key, ShoppingBag, Image as ImageIcon, ShieldCheck, Save, Newspaper, Upload } from "lucide-react";
+import { Plus, Trash2, ShieldAlert, Key, ShoppingBag, Image as ImageIcon, ShieldCheck, Save, Newspaper, Upload, FileUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminPage() {
@@ -26,6 +27,7 @@ export default function AdminPage() {
   } = useAdminStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const productFileRef = useRef<HTMLInputElement>(null);
   const [uploadTarget, setUploadTarget] = useState<'news' | 'product' | null>(null);
 
   // TaskDo state
@@ -40,6 +42,7 @@ export default function AdminPage() {
   const [pTitle, setPTitle] = useState("");
   const [pDesc, setPDesc] = useState("");
   const [pImg, setPImg] = useState("");
+  const [pFile, setPFile] = useState("");
   const [pLink, setPLink] = useState("");
   const [pType, setPType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
   const [pPrice, setPPrice] = useState("");
@@ -52,6 +55,11 @@ export default function AdminPage() {
   // Sovereignty state
   const [sovTitle, setSovTitle] = useState(sovereigntyTitle);
   const [sovSections, setSovSections] = useState(sovereigntySections);
+
+  useEffect(() => {
+    setSovTitle(sovereigntyTitle);
+    setSovSections(sovereigntySections);
+  }, [sovereigntyTitle, sovereigntySections]);
 
   const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
   const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
@@ -77,14 +85,18 @@ export default function AdminPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'file') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
-        if (uploadTarget === 'news') setPostImg(base64);
-        if (uploadTarget === 'product') setPImg(base64);
+        if (type === 'image') {
+          if (uploadTarget === 'news') setPostImg(base64);
+          if (uploadTarget === 'product') setPImg(base64);
+        } else if (type === 'file') {
+          setPFile(base64);
+        }
         toast({ title: "Digital Asset Injected" });
       };
       reader.readAsDataURL(file);
@@ -101,10 +113,18 @@ export default function AdminPage() {
   };
 
   const handleAddProduct = () => {
-    if (!pTitle || !pLink) return;
-    addProduct({ title: pTitle, description: pDesc, imageUrl: pImg, shopLink: pLink, type: pType, price: pPrice });
-    toast({ title: "Shooppy Asset Added" });
-    setPTitle(""); setPDesc(""); setPImg(""); setPLink(""); setPPrice("");
+    if (!pTitle) return;
+    addProduct({ 
+      title: pTitle, 
+      description: pDesc, 
+      imageUrl: pImg, 
+      fileUrl: pFile,
+      shopLink: pLink, 
+      type: pType, 
+      price: pPrice 
+    });
+    toast({ title: "Root Asset Added" });
+    setPTitle(""); setPDesc(""); setPImg(""); setPLink(""); setPPrice(""); setPFile("");
   };
 
   const handleAddPost = () => {
@@ -136,7 +156,7 @@ export default function AdminPage() {
                 <Input 
                   type="password" 
                   placeholder="0000-0000-0000-0000" 
-                  className="h-20 text-center text-3xl font-mono tracking-widest rounded-3xl border-2 border-primary/20"
+                  className="h-20 text-center text-3xl font-mono tracking-widest rounded-3xl border-2 border-primary/20 text-white"
                   value={adminKey}
                   onChange={(e) => setAdminKey(e.target.value)}
                 />
@@ -154,7 +174,8 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
-      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'image')} />
+      <input type="file" ref={productFileRef} className="hidden" onChange={(e) => handleFileChange(e, 'file')} />
       
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl">
         <div className="flex items-center justify-between mb-12">
@@ -166,7 +187,7 @@ export default function AdminPage() {
           <TabsList className="bg-secondary/40 p-2 rounded-full w-fit shadow-xl border border-primary/10 overflow-x-auto">
             <TabsTrigger value="tasks" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Inject TaskDo</TabsTrigger>
             <TabsTrigger value="newsfeed" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Broadcast News</TabsTrigger>
-            <TabsTrigger value="shooppy" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Shooppy Manager</TabsTrigger>
+            <TabsTrigger value="shooppy" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Root Asset Manager</TabsTrigger>
             <TabsTrigger value="sovereignty" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Legal Editor</TabsTrigger>
           </TabsList>
 
@@ -179,7 +200,7 @@ export default function AdminPage() {
               <CardContent className="p-10 space-y-10">
                 <div className="space-y-4 max-w-xs">
                   <Label className="font-black text-primary uppercase text-xs tracking-widest">Execution Day</Label>
-                  <Input type="number" value={taskDay} onChange={e => setTaskDay(parseInt(e.target.value))} className="h-16 rounded-2xl text-2xl font-black" />
+                  <Input type="number" value={taskDay} onChange={e => setTaskDay(parseInt(e.target.value))} className="h-16 rounded-2xl text-2xl font-black text-white" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -194,13 +215,13 @@ export default function AdminPage() {
                           <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest">Objective</Label>
                           <Input value={tasks[idx].title} onChange={e => {
                             const n = [...tasks]; n[idx].title = e.target.value; setTasks(n);
-                          }} className="h-12" />
+                          }} className="h-12 text-white" />
                         </div>
                         <div className="space-y-2">
                           <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest">Description</Label>
                           <Textarea value={tasks[idx].description} onChange={e => {
                             const n = [...tasks]; n[idx].description = e.target.value; setTasks(n);
-                          }} className="min-h-[100px]" />
+                          }} className="min-h-[100px] text-white" />
                         </div>
                       </div>
                     </div>
@@ -240,7 +261,7 @@ export default function AdminPage() {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Title</Label>
-                      <Input value={postTitle} onChange={e => setPostTitle(e.target.value)} placeholder="System Update" className="h-14 font-black" />
+                      <Input value={postTitle} onChange={e => setPostTitle(e.target.value)} placeholder="System Update" className="h-14 font-black text-white" />
                     </div>
                     <div className="space-y-2">
                       <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Asset Cover</Label>
@@ -257,7 +278,7 @@ export default function AdminPage() {
                   </div>
                   <div className="space-y-2">
                     <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Message Body</Label>
-                    <Textarea value={postContent} onChange={e => setPostContent(e.target.value)} placeholder="Write the announcement..." className="min-h-[160px] font-medium" />
+                    <Textarea value={postContent} onChange={e => setPostContent(e.target.value)} placeholder="Write the announcement..." className="min-h-[160px] font-medium text-white" />
                   </div>
                 </div>
                 <Button onClick={handleAddPost} className="w-full h-20 rounded-full bg-primary text-background font-black text-2xl shadow-xl">
@@ -285,15 +306,15 @@ export default function AdminPage() {
           <TabsContent value="shooppy" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
             <Card className="rounded-[3rem] border-primary/10 shadow-2xl overflow-hidden bg-secondary/20">
               <CardHeader className="bg-primary p-10 text-background">
-                <CardTitle className="text-3xl font-black uppercase flex items-center gap-4"><ShoppingBag className="h-8 w-8" /> Shooppy Manager</CardTitle>
-                <CardDescription className="text-background/70 font-bold uppercase tracking-widest text-[10px]">Manage Bundles, Templates, and eBooks.</CardDescription>
+                <CardTitle className="text-3xl font-black uppercase flex items-center gap-4"><ShoppingBag className="h-8 w-8" /> Root Asset Manager</CardTitle>
+                <CardDescription className="text-background/70 font-bold uppercase tracking-widest text-[10px]">Manage Bundles, Templates, and eBooks for the community.</CardDescription>
               </CardHeader>
               <CardContent className="p-10 space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Asset Title</Label>
-                      <Input value={pTitle} onChange={e => setPTitle(e.target.value)} placeholder="Master Bundle v2" className="h-14 font-black" />
+                      <Input value={pTitle} onChange={e => setPTitle(e.target.value)} placeholder="Sovereign Ebook" className="h-14 font-black text-white" />
                     </div>
                     <div className="space-y-2">
                       <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Category</Label>
@@ -304,30 +325,38 @@ export default function AdminPage() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Price/Label</Label>
-                      <Input value={pPrice} onChange={e => setPPrice(e.target.value)} placeholder="$99 or FREE" className="h-14 font-black" />
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Asset Image</Label>
+                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Asset Cover (Image)</Label>
                       <div className="flex gap-4">
                         <Button 
                           onClick={() => { setUploadTarget('product'); fileInputRef.current?.click(); }}
                           className="h-14 bg-secondary/40 border-2 border-primary/20 text-primary font-black px-6"
                         >
-                          <Upload className="h-4 w-4 mr-2" /> Select File
+                          <Upload className="h-4 w-4 mr-2" /> Select Image
                         </Button>
                         {pImg && <div className="h-14 w-14 rounded-xl border-2 border-primary overflow-hidden"><img src={pImg} className="w-full h-full object-cover" /></div>}
                       </div>
                     </div>
+                  </div>
+                  <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Checkout Link</Label>
-                      <Input value={pLink} onChange={e => setPLink(e.target.value)} placeholder="https://..." className="h-14 font-black" />
+                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Asset File (PDF/ZIP)</Label>
+                      <div className="flex gap-4">
+                        <Button 
+                          onClick={() => productFileRef.current?.click()}
+                          className="h-14 bg-secondary/40 border-2 border-primary/20 text-primary font-black px-6"
+                        >
+                          <FileUp className="h-4 w-4 mr-2" /> Upload Ebook
+                        </Button>
+                        {pFile && <Badge className="bg-primary text-background">File Ready</Badge>}
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Short Bio</Label>
-                      <Input value={pDesc} onChange={e => setPDesc(e.target.value)} placeholder="Unlocking the core..." className="h-14 font-black" />
+                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Short Description</Label>
+                      <Textarea value={pDesc} onChange={e => setPDesc(e.target.value)} placeholder="Describe the strategy..." className="h-14 font-medium text-white" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Price/Label</Label>
+                      <Input value={pPrice} onChange={e => setPPrice(e.target.value)} placeholder="FREE or $99" className="h-14 font-black text-white" />
                     </div>
                   </div>
                 </div>
@@ -342,9 +371,11 @@ export default function AdminPage() {
                 <Card key={p.id} className="rounded-[2.5rem] overflow-hidden bg-secondary/10 border-2 border-primary/10 group">
                   <div className="h-48 bg-background relative overflow-hidden">
                     {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover" />}
-                    <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-full" onClick={() => deleteProduct(p.id)}>
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
+                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <Button variant="ghost" size="icon" className="text-red-500 bg-background/80 rounded-full" onClick={() => deleteProduct(p.id)}>
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="p-6 space-y-4">
                     <Badge className="bg-primary text-background font-black text-[9px] uppercase">{p.type}</Badge>
@@ -364,33 +395,37 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent className="p-10 space-y-10">
                 <div className="space-y-4">
-                  <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Main Heading</Label>
-                  <Input value={sovTitle} onChange={e => setSovTitle(e.target.value)} className="h-16 font-black text-2xl" />
+                  <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1 text-white">Main Heading</Label>
+                  <Input value={sovTitle} onChange={e => setSovTitle(e.target.value)} className="h-16 font-black text-2xl text-white border-primary/40" />
                 </div>
                 
                 <div className="space-y-8">
                   {sovSections.map((s, idx) => (
-                    <div key={idx} className="p-10 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 space-y-6">
+                    <div key={idx} className="p-10 bg-background/40 rounded-[2.5rem] border-2 border-primary/20 space-y-6">
                       <div className="flex items-center justify-between">
                         <Badge className="bg-primary text-background font-black text-[9px] uppercase px-4">Clause {idx + 1}</Badge>
+                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => {
+                          const n = sovSections.filter((_, i) => i !== idx);
+                          setSovSections(n);
+                        }}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Subject</Label>
+                          <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1 text-white">Subject</Label>
                           <Input value={s.title} onChange={e => {
                             const n = [...sovSections]; n[idx].title = e.target.value; setSovSections(n);
-                          }} className="h-12 font-black" />
+                          }} className="h-12 font-black text-white border-primary/20" />
                         </div>
                         <div className="space-y-2">
-                          <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1">Content</Label>
+                          <Label className="font-black text-primary/60 uppercase text-[9px] tracking-widest ml-1 text-white">Content</Label>
                           <Textarea value={s.content} onChange={e => {
                             const n = [...sovSections]; n[idx].content = e.target.value; setSovSections(n);
-                          }} className="min-h-[120px]" />
+                          }} className="min-h-[120px] text-white border-primary/20" />
                         </div>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 border-primary/20 text-primary font-black uppercase tracking-widest text-xs" onClick={() => setSovSections([...sovSections, { id: Math.random().toString(), title: "", content: "" }])}>
+                  <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 border-primary/40 text-primary font-black uppercase tracking-widest text-xs" onClick={() => setSovSections([...sovSections, { id: Math.random().toString(), title: "", content: "" }])}>
                     <Plus className="mr-2 h-4 w-4" /> Add Sovereignty Clause
                   </Button>
                 </div>

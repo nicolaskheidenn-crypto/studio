@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Navigation } from '@/components/Navigation';
@@ -24,6 +25,8 @@ import {
   CheckCircle2,
   Newspaper,
   Calendar,
+  FileText,
+  Download,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useState, useEffect, useMemo } from 'react';
@@ -49,7 +52,12 @@ export default function DashboardPage() {
   const tabParam = searchParams.get('tab');
 
   const isHost = user?.uid === HOST_UID;
-  const { shooppyProducts, notifications, newsPosts, markNotifRead, addNotification } = useAdminStore();
+  const { 
+    shooppyProducts, notifications, newsPosts, 
+    markNotifRead, addNotification,
+    sovereigntyTitle, sovereigntySections 
+  } = useAdminStore();
+  
   const { friends, addFriend, chatMessages, addChatMessage, nickname, bio, avatarUrl, coverPhotoUrl } = useUserStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,7 +155,7 @@ export default function DashboardPage() {
                       {unreadCount}
                     </Badge>
                   )}
-                  <span className="font-bold text-xs">Alerts</span>
+                  <span className="font-bold text-xs text-white">Alerts</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-0 rounded-2xl overflow-hidden shadow-2xl border-2 border-primary/10 bg-secondary/40 backdrop-blur-xl">
@@ -246,25 +254,29 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
+              {/* Legal Proof Dynamically Rendered */}
               <Card className="rounded-[2.5rem] border-white/5 shadow-2xl overflow-hidden bg-secondary/20 backdrop-blur-sm">
                 <CardHeader className="bg-secondary/40 p-8 border-b border-white/5">
                   <div className="space-y-2">
-                    <CardTitle className="text-3xl font-headline font-black text-primary tracking-tighter uppercase">Root Assets</CardTitle>
+                    <CardTitle className="text-3xl font-headline font-black text-primary tracking-tighter uppercase">{sovereigntyTitle}</CardTitle>
                     <CardDescription className="text-foreground/50 text-[10px] font-bold uppercase tracking-widest">
-                      Infrastructure status and execution logs.
+                      Infrastructure status and sovereign clauses.
                     </CardDescription>
                   </div>
                 </CardHeader>
-                <CardContent className="p-12">
-                  <div className="flex flex-col items-center justify-center py-16 text-center space-y-6 border-2 border-dashed border-primary/10 rounded-3xl bg-background/20">
-                    <Lock className="h-14 w-14 text-primary opacity-20" />
-                    <div className="space-y-2">
-                      <h4 className="text-2xl font-black text-white">Execution Logs Pending</h4>
-                      <p className="text-[10px] text-foreground/50 max-w-sm mx-auto font-black uppercase tracking-widest">
-                        Host synchronizing root deployment.
-                      </p>
+                <CardContent className="p-10 space-y-6">
+                  {sovereigntySections.map((s) => (
+                    <div key={s.id} className="p-8 bg-background/40 rounded-[2rem] border border-white/5 shadow-inner space-y-3">
+                      <h4 className="text-xl font-black text-white uppercase tracking-tight">{s.title}</h4>
+                      <p className="text-sm font-medium text-foreground/70 leading-relaxed">{s.content}</p>
                     </div>
-                  </div>
+                  ))}
+                  {sovereigntySections.length === 0 && (
+                     <div className="flex flex-col items-center justify-center py-16 text-center space-y-6 border-2 border-dashed border-primary/10 rounded-3xl bg-background/20">
+                      <Lock className="h-14 w-14 text-primary opacity-20" />
+                      <p className="text-[10px] text-foreground/50 font-black uppercase tracking-widest">Host synchronizing root deployment.</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -311,7 +323,7 @@ export default function DashboardPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/50" />
                 <Input
                   placeholder="Find Succemazing..."
-                  className="pl-11 h-12 rounded-2xl bg-secondary/40 border-primary/10 shadow-xl text-[10px] font-black text-white uppercase tracking-widest focus:border-primary"
+                  className="pl-11 h-12 rounded-2xl bg-secondary/40 border-primary/20 shadow-xl text-[10px] font-black text-white uppercase tracking-widest focus:border-primary"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -408,7 +420,7 @@ export default function DashboardPage() {
                     <div className="flex-1">
                       <Input
                         placeholder="Type a MeText..."
-                        className="h-14 rounded-2xl bg-background/40 border-primary/10 px-6 text-sm font-bold text-white focus:border-primary"
+                        className="h-14 rounded-2xl bg-background/40 border-primary/20 px-6 text-sm font-bold text-white focus:border-primary"
                         value={msg}
                         onChange={(e) => setMsg(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -439,9 +451,9 @@ export default function DashboardPage() {
             <Card className="rounded-[3rem] border-white/5 shadow-2xl bg-secondary/10 overflow-hidden backdrop-blur-sm">
               <div className="bg-primary p-12 text-background flex flex-col md:flex-row justify-between items-center gap-10">
                 <div className="space-y-3 text-center md:text-left">
-                  <h2 className="text-5xl font-headline font-black tracking-tighter uppercase">Shooppy</h2>
+                  <h2 className="text-5xl font-headline font-black tracking-tighter uppercase">Shooppy Hub</h2>
                   <p className="text-base font-black opacity-80 max-w-md leading-relaxed">
-                    Access elite strategic assets to amplify your business execution. Bundles, Templates, and eBooks.
+                    Elite strategic assets deployed directly from the Nico Digital root. eBooks, Templates, and Bundles.
                   </p>
                 </div>
                 <Button size="lg" className="h-16 px-10 rounded-full bg-background text-primary font-black text-xl shadow-2xl hover:bg-secondary transition-all" asChild>
@@ -450,7 +462,14 @@ export default function DashboardPage() {
                   </a>
                 </Button>
               </div>
-              <CardContent className="p-10">
+
+              {/* Shooppy Catalog at the top of the content area */}
+              <CardContent className="p-10 space-y-12">
+                <div className="flex items-center justify-between">
+                   <h3 className="text-4xl font-black text-white uppercase tracking-tighter italic">Strategic Assets</h3>
+                   <Badge className="bg-primary text-background font-black px-6 py-2 rounded-full uppercase text-[10px]">SOVEREIGN CATALOG</Badge>
+                </div>
+
                 {shooppyProducts.length === 0 ? (
                   <div className="text-center py-20 border-2 border-dashed border-primary/10 rounded-[2.5rem] bg-background/20">
                     <ShoppingBag className="h-16 w-16 mx-auto text-primary opacity-10 mb-4" />
@@ -480,11 +499,20 @@ export default function DashboardPage() {
                           <p className="text-xs text-foreground/60 font-medium leading-relaxed line-clamp-3 flex-1">
                             {p.description}
                           </p>
-                          <Button className="w-full h-14 rounded-2xl bg-primary text-background font-black text-sm shadow-xl hover:bg-white transition-all active:scale-95" asChild>
-                            <a href={p.shopLink} target="_blank" rel="noopener noreferrer">
-                              Acquire Asset
-                            </a>
-                          </Button>
+                          <div className="flex gap-2">
+                             <Button className="flex-1 h-14 rounded-2xl bg-primary text-background font-black text-sm shadow-xl hover:bg-white transition-all active:scale-95" asChild>
+                              <a href={p.shopLink || '#'} target="_blank" rel="noopener noreferrer">
+                                {p.price === 'FREE' ? 'Acquire Free' : 'Acquire Asset'}
+                              </a>
+                            </Button>
+                            {p.fileUrl && (
+                               <Button variant="outline" className="h-14 w-14 rounded-2xl border-2 border-primary text-primary hover:bg-primary hover:text-background" asChild>
+                                  <a href={p.fileUrl} download={`${p.title}.pdf`}>
+                                     <Download className="h-5 w-5" />
+                                  </a>
+                               </Button>
+                            )}
+                          </div>
                         </div>
                       </Card>
                     ))}

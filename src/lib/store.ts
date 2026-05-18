@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -29,7 +30,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-app-v11',
+      name: 'fireproof-app-v12',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -65,7 +66,8 @@ export interface ShooppyProduct {
   title: string;
   description: string;
   imageUrl: string;
-  shopLink: string;
+  fileUrl?: string; // For uploaded ebooks/templates
+  shopLink?: string;
   type: 'Bundle' | 'Template' | 'eBook';
   price?: string;
 }
@@ -126,7 +128,9 @@ export const useAdminStore = create<AdminStore>()(
         { id: 't2', day: 1, title: 'Execution Planning', description: 'Outline your top 3 objectives for high-focus success.' },
         { id: 't3', day: 1, title: 'Consistency Audit', description: 'Log your progress from the previous strategy session.' }
       ],
-      shooppyProducts: [],
+      shooppyProducts: [
+        { id: 'sp1', title: 'Nico Digital Master Key', description: 'The fundamental guide to sovereign digital execution.', imageUrl: 'https://picsum.photos/seed/key/800/600', type: 'eBook', price: 'FREE' }
+      ],
       newsPosts: [
         { id: 'p1', title: 'Nico Digital Hub Online', content: 'Welcome to the elite sovereign execution infrastructure. Start your journey with TaskDo.', imageUrl: 'https://picsum.photos/seed/nd/800/400', createdAt: new Date().toISOString() }
       ],
@@ -171,7 +175,7 @@ export const useAdminStore = create<AdminStore>()(
       deleteNewsPost: (id) => set((state) => ({ newsPosts: state.newsPosts.filter(p => p.id !== id) })),
       updateSovereignty: (title, sections) => set({ sovereigntyTitle: title, sovereigntySections: sections }),
     }),
-    { name: 'fireproof-admin-v11' }
+    { name: 'fireproof-admin-v12' }
   )
 );
 
@@ -227,6 +231,6 @@ export const useUserStore = create<UserProgressStore>()(
         chatMessages: [...state.chatMessages, { ...data, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }]
       })),
     }),
-    { name: 'fireproof-user-v11' }
+    { name: 'fireproof-user-v12' }
   )
 );
