@@ -3,16 +3,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown, BookOpen, MessageCircle, Bell } from "lucide-react";
+import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown, BookOpen, MessageCircle, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "MeText", href: "/dashboard?tab=social", icon: MessageCircle },
+  { label: "Shooppy", href: "/dashboard?tab=shooppy", icon: ShoppingBag },
   { label: "TaskDo", href: "/task-do", icon: CheckSquare },
   { label: "FireQuizzo", href: "/quiz", icon: BookOpen },
   { label: "GoalCaps", href: "/goal-caps", icon: Hourglass },
@@ -26,10 +26,8 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
 
-  const isAuthPage = pathname === "/login" || pathname === "/signup" || pathname === "/";
   const isHost = user?.email === HOST_EMAIL;
 
-  // Don't show nav if user is on entry gate and not logged in
   if (pathname === "/" && !user) return null;
 
   return (
@@ -46,15 +44,15 @@ export function Navigation() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6">
             <div className="flex items-center gap-5 mr-2 border-r pr-6 border-accent/10">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-bold transition-colors hover:text-primary",
-                    (pathname === item.href || (item.label === "MeText" && pathname === "/dashboard")) ? "text-primary" : "text-accent/70"
+                    "flex items-center gap-2 text-sm font-bold transition-colors hover:text-primary whitespace-nowrap",
+                    (pathname === item.href) ? "text-primary" : "text-accent/70"
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -76,10 +74,6 @@ export function Navigation() {
             </div>
             
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="relative rounded-full text-accent">
-                <Bell className="h-6 w-6" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-accent border-2 border-background">2</Badge>
-              </Button>
               {user ? (
                 <Button variant="ghost" className="rounded-full font-bold text-accent gap-2" asChild>
                   <Link href="/settings">
@@ -100,7 +94,7 @@ export function Navigation() {
             </div>
           </div>
 
-          <button className="md:hidden p-2 text-accent" onClick={() => setIsOpen(!isOpen)}>
+          <button className="lg:hidden p-2 text-accent" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
@@ -108,7 +102,7 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden border-t bg-background p-6 flex flex-col gap-4 animate-in slide-in-from-top">
+        <div className="lg:hidden border-t bg-background p-6 flex flex-col gap-4 animate-in slide-in-from-top">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}

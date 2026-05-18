@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-app-v5',
+      name: 'fireproof-app-v6',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -61,14 +61,40 @@ export interface ManagedTask {
   description: string;
 }
 
+export interface ShooppyProduct {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  shopLink: string;
+  type: 'Bundle' | 'Template' | 'eBook';
+  price?: string;
+}
+
+export interface SystemNotification {
+  id: string;
+  title: string;
+  message: string;
+  createdAt: string;
+  isRead: boolean;
+}
+
 interface AdminStore {
   quizzes: Quiz[];
   dailyTasks: ManagedTask[];
+  shooppyProducts: ShooppyProduct[];
+  notifications: SystemNotification[];
   addQuiz: (quiz: Omit<Quiz, 'id' | 'createdAt'>) => void;
   updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
   addTask: (task: Omit<ManagedTask, 'id'>) => void;
+  addTasks: (day: number, tasks: { title: string; description: string }[]) => void;
   deleteQuiz: (id: string) => void;
   deleteTask: (id: string) => void;
+  addProduct: (product: Omit<ShooppyProduct, 'id'>) => void;
+  deleteProduct: (id: string) => void;
+  updateProduct: (id: string, product: Partial<ShooppyProduct>) => void;
+  broadcastNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead'>) => void;
+  markNotifRead: (id: string) => void;
 }
 
 export const useAdminStore = create<AdminStore>()(
@@ -80,6 +106,11 @@ export const useAdminStore = create<AdminStore>()(
         { id: 't2', day: 1, title: 'Strategic Planning', description: 'Outline your top 3 objectives for the day.' },
         { id: 't3', day: 1, title: 'Consistency Audit', description: 'Log your progress from the previous session.' }
       ],
+      shooppyProducts: [],
+      notifications: [
+        { id: 'n1', title: 'System Online', message: 'Nico Digital Root Infrastructure initialized.', createdAt: new Date().toISOString(), isRead: false },
+        { id: 'n2', title: 'Welcome Succemazing', message: 'Your strategist hub is ready for drops.', createdAt: new Date().toISOString(), isRead: false }
+      ],
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
       })),
@@ -89,10 +120,29 @@ export const useAdminStore = create<AdminStore>()(
       addTask: (data) => set((state) => ({
         dailyTasks: [...state.dailyTasks, { ...data, id: Math.random().toString(36).substr(2, 9) }].sort((a, b) => a.day - b.day)
       })),
+      addTasks: (day, tasks) => set((state) => {
+        const newTasks = tasks.map(t => ({ ...t, day, id: Math.random().toString(36).substr(2, 9) }));
+        return {
+          dailyTasks: [...state.dailyTasks.filter(t => t.day !== day), ...newTasks].sort((a, b) => a.day - b.day)
+        };
+      }),
       deleteQuiz: (id) => set((state) => ({ quizzes: state.quizzes.filter(q => q.id !== id) })),
       deleteTask: (id) => set((state) => ({ dailyTasks: state.dailyTasks.filter(t => t.id !== id) })),
+      addProduct: (data) => set((state) => ({
+        shooppyProducts: [...state.shooppyProducts, { ...data, id: Math.random().toString(36).substr(2, 9) }]
+      })),
+      deleteProduct: (id) => set((state) => ({ shooppyProducts: state.shooppyProducts.filter(p => p.id !== id) })),
+      updateProduct: (id, data) => set((state) => ({
+        shooppyProducts: state.shooppyProducts.map(p => p.id === id ? { ...p, ...data } : p)
+      })),
+      broadcastNotification: (data) => set((state) => ({
+        notifications: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString(), isRead: false }, ...state.notifications]
+      })),
+      markNotifRead: (id) => set((state) => ({
+        notifications: state.notifications.map(n => n.id === id ? { ...n, isRead: true } : n)
+      })),
     }),
-    { name: 'fireproof-admin-v5' }
+    { name: 'fireproof-admin-v6' }
   )
 );
 
@@ -117,6 +167,6 @@ export const useUserStore = create<UserProgressStore>()(
         capsules: [cap, ...state.capsules]
       })),
     }),
-    { name: 'fireproof-user-v5' }
+    { name: 'fireproof-user-v6' }
   )
 );

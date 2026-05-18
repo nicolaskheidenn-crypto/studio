@@ -5,13 +5,16 @@ import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Crown, Download, Mail, Lock, UserPlus, Search, Send, Smile, Image as ImageIcon, Video, Bell, MessageCircle, ShieldCheck } from "lucide-react";
+import { Crown, Mail, Lock, Search, Send, Smile, Image as ImageIcon, Video, Bell, MessageCircle, ShieldCheck, ShoppingBag, ExternalLink } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useAdminStore } from "@/lib/store";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { formatDistanceToNow } from "date-fns";
 
 const HOST_EMAIL = "nicolaskheidenn@gmail.com";
 const HOST_UID = "R9TfGgUleVN6kDnXySqVUhzoHmn2";
@@ -23,6 +26,7 @@ export default function DashboardPage() {
   const tabParam = searchParams.get("tab");
   
   const isHost = user?.email === HOST_EMAIL;
+  const { shooppyProducts, notifications, markNotifRead } = useAdminStore();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [chatUser, setChatUser] = useState<string | null>(null);
@@ -43,6 +47,8 @@ export default function DashboardPage() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-headline font-bold text-2xl animate-pulse text-accent">STABILIZING CORE...</div>;
 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   return (
     <div className="min-h-screen flex flex-col bg-secondary/5">
       <Navigation />
@@ -55,9 +61,41 @@ export default function DashboardPage() {
             <p className="text-lg text-muted-foreground font-black uppercase tracking-widest">Nico Digital Sovereign Hub</p>
           </div>
           <div className="flex gap-4">
-             <Button variant="outline" className="rounded-full h-14 px-8 border-accent/10 bg-white shadow-xl hover:border-primary transition-all">
-                <Bell className="h-6 w-6 mr-3 text-accent" /> <Badge className="bg-primary text-accent text-xs font-black rounded-full h-6 w-6 p-0 flex items-center justify-center">2</Badge>
-             </Button>
+             <Popover>
+               <PopoverTrigger asChild>
+                 <Button variant="outline" className="rounded-full h-14 px-8 border-accent/10 bg-white shadow-xl hover:border-primary transition-all relative">
+                    <Bell className="h-6 w-6 mr-3 text-accent" /> 
+                    {unreadCount > 0 && (
+                      <Badge className="bg-primary text-accent text-xs font-black rounded-full h-6 w-6 p-0 flex items-center justify-center absolute -top-1 -right-1 border-2 border-white">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                 </Button>
+               </PopoverTrigger>
+               <PopoverContent className="w-80 p-0 rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
+                 <div className="bg-accent p-6 text-white font-bold flex justify-between items-center">
+                    <span>System Alerts</span>
+                    <Badge className="bg-primary text-accent">{unreadCount} New</Badge>
+                 </div>
+                 <div className="max-h-96 overflow-y-auto bg-white">
+                    {notifications.length === 0 ? (
+                      <div className="p-10 text-center text-muted-foreground italic">No alerts found.</div>
+                    ) : (
+                      notifications.map(n => (
+                        <div 
+                          key={n.id} 
+                          className={`p-6 border-b hover:bg-secondary/5 cursor-pointer transition-colors ${!n.isRead ? 'bg-primary/5' : ''}`}
+                          onClick={() => markNotifRead(n.id)}
+                        >
+                          <h4 className="font-black text-accent mb-1">{n.title}</h4>
+                          <p className="text-sm text-muted-foreground leading-snug mb-2">{n.message}</p>
+                          <span className="text-[10px] uppercase font-black text-primary">{formatDistanceToNow(new Date(n.createdAt))} ago</span>
+                        </div>
+                      ))
+                    )}
+                 </div>
+               </PopoverContent>
+             </Popover>
              {isHost && (
               <Button className="bg-amber-600 hover:bg-amber-500 rounded-full h-14 px-10 font-black text-lg shadow-2xl" asChild>
                 <a href="/admin"><Crown className="h-6 w-6 mr-3" /> Host Portal</a>
@@ -67,9 +105,10 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue={tabParam || "overview"} className="space-y-10">
-           <TabsList className="bg-white p-2 rounded-full w-fit shadow-xl border border-accent/5">
-              <TabsTrigger value="overview" className="rounded-full px-10 h-12 text-base font-black data-[state=active]:bg-accent data-[state=active]:text-white">Strategic Center</TabsTrigger>
-              <TabsTrigger value="social" className="rounded-full px-10 h-12 text-base font-black data-[state=active]:bg-accent data-[state=active]:text-white">MeText Hub</TabsTrigger>
+           <TabsList className="bg-white p-2 rounded-full w-fit shadow-xl border border-accent/5 overflow-x-auto">
+              <TabsTrigger value="overview" className="rounded-full px-8 h-12 text-base font-black data-[state=active]:bg-accent data-[state=active]:text-white">Strategic Center</TabsTrigger>
+              <TabsTrigger value="social" className="rounded-full px-8 h-12 text-base font-black data-[state=active]:bg-accent data-[state=active]:text-white">MeText Hub</TabsTrigger>
+              <TabsTrigger value="shooppy" className="rounded-full px-8 h-12 text-base font-black data-[state=active]:bg-accent data-[state=active]:text-white">Shooppy</TabsTrigger>
            </TabsList>
 
            <TabsContent value="overview" className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-in fade-in slide-in-from-bottom-5">
@@ -86,43 +125,11 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-10 space-y-8">
-                   {!user ? (
-                     <div className="flex flex-col items-center justify-center py-24 text-center space-y-8 border-4 border-dashed rounded-[2.5rem] bg-secondary/10">
-                        <Lock className="h-20 w-20 text-muted-foreground opacity-20" />
-                        <h4 className="text-3xl font-black">Members Only</h4>
-                        <p className="text-xl text-muted-foreground max-w-md">Authenticate with Nico Digital to unlock these sovereign assets.</p>
-                        <Button className="rounded-full px-12 h-16 bg-accent text-white font-black text-2xl" asChild><a href="/login">Authenticate</a></Button>
-                     </div>
-                   ) : (
-                     <div className="space-y-6">
-                        <div className="flex items-center justify-between p-8 bg-secondary/5 rounded-[2rem] border-2 border-transparent hover:border-primary/50 transition-all group shadow-sm">
-                           <div className="flex items-center gap-8">
-                              <div className="w-20 h-20 bg-primary text-accent rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform">
-                                 <BookOpen className="h-10 w-10" />
-                              </div>
-                              <div>
-                                 <h4 className="text-2xl font-black text-accent">Master Strategy Bundle</h4>
-                                 <p className="text-base text-muted-foreground font-bold">Unlocking in 48 hours • Member Verified</p>
-                              </div>
-                           </div>
-                           <Button className="rounded-full h-14 px-10 font-black bg-accent text-white shadow-xl">
-                              <Download className="h-5 w-5 mr-3" /> Reserve
-                           </Button>
-                        </div>
-                        <div className="p-8 bg-secondary/10 rounded-[2rem] opacity-40 grayscale flex items-center justify-between border-2 border-dashed border-accent/10">
-                           <div className="flex items-center gap-8">
-                              <div className="w-20 h-20 bg-muted text-muted-foreground rounded-2xl flex items-center justify-center">
-                                 <Lock className="h-10 w-10" />
-                              </div>
-                              <div>
-                                 <h4 className="text-2xl font-black">Strategic Velocity v2</h4>
-                                 <p className="text-base text-muted-foreground font-bold">Requires Sovereign Tier</p>
-                              </div>
-                           </div>
-                           <Badge variant="outline" className="h-10 px-6 rounded-full font-black">LOCKED</Badge>
-                        </div>
-                     </div>
-                   )}
+                   <div className="flex flex-col items-center justify-center py-12 text-center space-y-8 border-4 border-dashed rounded-[2.5rem] bg-secondary/10">
+                      <Lock className="h-20 w-20 text-muted-foreground opacity-20" />
+                      <h4 className="text-3xl font-black">Strategic Assets Pending</h4>
+                      <p className="text-xl text-muted-foreground max-w-md">The Host is preparing the next major drop. Authenticate your notifications above to be the first to know.</p>
+                   </div>
                 </CardContent>
               </Card>
 
@@ -159,7 +166,7 @@ export default function DashboardPage() {
                  </div>
                  <Card className="flex-1 rounded-[2.5rem] overflow-hidden shadow-2xl border-white border-4 bg-white flex flex-col">
                     <CardHeader className="bg-accent text-white p-6 border-b">
-                      <h4 className="text-lg font-black flex items-center gap-3"><MessageCircle className="h-6 w-6 text-primary" /> Active Hub</h4>
+                      <h4 className="text-lg font-black flex items-center gap-3"><MessageCircle className="h-6 w-6 text-primary" /> MeText Hub</h4>
                     </CardHeader>
                     <CardContent className="p-0 overflow-y-auto flex-1">
                        <button 
@@ -172,19 +179,6 @@ export default function DashboardPage() {
                              <p className="text-xs font-black text-primary flex items-center gap-2 uppercase tracking-widest mt-1"><span className="w-2 h-2 rounded-full bg-primary animate-pulse" /> Official</p>
                           </div>
                        </button>
-                       {['Alpha Strategist', 'Delta Focus', 'Zen Earner'].map((name, i) => (
-                         <button 
-                            key={i} 
-                            onClick={() => setChatUser(name)}
-                            className={`w-full p-8 flex items-center gap-5 hover:bg-primary/5 transition-all text-left border-b border-accent/5 ${chatUser === name ? "bg-primary/10 border-r-8 border-r-primary" : ""}`}
-                         >
-                            <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center text-accent text-2xl font-black shadow-md">{name[0]}</div>
-                            <div>
-                               <p className="font-black text-xl text-accent leading-tight">{name}</p>
-                               <p className="text-xs font-bold text-muted-foreground flex items-center gap-2 mt-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Active</p>
-                            </div>
-                         </button>
-                       ))}
                     </CardContent>
                  </Card>
               </div>
@@ -200,14 +194,11 @@ export default function DashboardPage() {
                                 <p className="text-white/40 font-black text-xs uppercase tracking-[0.2em] mt-1">Sovereign MeText Active</p>
                              </div>
                           </div>
-                          <div className="flex gap-4">
-                             <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full text-white hover:bg-white/10"><UserPlus className="h-6 w-6" /></Button>
-                          </div>
                        </div>
                        <div className="flex-1 p-10 overflow-y-auto space-y-8 bg-secondary/5">
                           <div className="flex justify-start">
                             <div className="bg-white border-2 border-accent/5 p-6 rounded-[1.5rem] rounded-tl-none max-w-[75%] text-lg font-bold shadow-xl text-accent leading-relaxed">
-                              Hello Succemazing. Ready to initialize your next high-focus strategy session? Nico Digital encryption is active on this channel.
+                              Hello Succemazing. Ready to initialize your next high-focus strategy session? All MeText interactions are secured by Nico Digital protocols.
                             </div>
                           </div>
                        </div>
@@ -216,15 +207,15 @@ export default function DashboardPage() {
                           <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full text-muted-foreground"><Video className="h-7 w-7" /></Button>
                           <div className="flex-1 relative">
                              <Input 
-                                placeholder="Broadcast a MeText..." 
+                                placeholder="Type a MeText..." 
                                 className="h-16 rounded-full bg-secondary/10 border-none px-10 text-lg font-bold pr-16"
                                 value={msg}
                                 onChange={(e) => setMsg(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && (setMsg(""), toast({ title: "MeText Dispatched" }))}
+                                onKeyDown={(e) => e.key === 'Enter' && (setMsg(""), toast({ title: "MeText Sent" }))}
                              />
                              <button className="absolute right-6 top-1/2 -translate-y-1/2 text-accent"><Smile className="h-7 w-7" /></button>
                           </div>
-                          <Button className="h-16 w-16 rounded-full bg-accent text-white shadow-2xl hover:scale-105 transition-transform" onClick={() => { setMsg(""); toast({ title: "MeText Dispatched" }); }}>
+                          <Button className="h-16 w-16 rounded-full bg-accent text-white shadow-2xl hover:scale-105 transition-transform" onClick={() => { setMsg(""); toast({ title: "MeText Sent" }); }}>
                              <Send className="h-7 w-7" />
                           </Button>
                        </div>
@@ -234,10 +225,57 @@ export default function DashboardPage() {
                        <div className="w-32 h-32 bg-accent/5 rounded-full flex items-center justify-center mb-10 border-4 border-dashed border-accent/10">
                           <MessageCircle className="h-16 w-16 text-accent/10" />
                        </div>
-                       <h3 className="text-4xl font-headline font-black text-accent/20 tracking-tighter uppercase">MeText Sovereign</h3>
-                       <p className="text-xl text-muted-foreground mt-6 max-w-md font-bold leading-relaxed">Select a strategist to begin a fail-proof conversation. All MeText interactions are secured by Nico Digital protocols.</p>
+                       <h3 className="text-4xl font-headline font-black text-accent/20 tracking-tighter uppercase">MeText Hub</h3>
+                       <p className="text-xl text-muted-foreground mt-6 max-w-md font-bold leading-relaxed">Select a Succemazing to begin a fail-proof conversation. All MeText interactions are secured by Nico Digital protocols.</p>
                     </div>
                  )}
+              </div>
+           </TabsContent>
+
+           <TabsContent value="shooppy" className="animate-in fade-in slide-in-from-bottom-5">
+              <div className="space-y-12">
+                 <Card className="rounded-[3rem] border-white border-4 shadow-2xl bg-white overflow-hidden">
+                    <div className="bg-amber-600 p-12 text-white flex flex-col md:flex-row justify-between items-center gap-8">
+                       <div className="space-y-4 text-center md:text-left">
+                          <h2 className="text-5xl font-headline font-black tracking-tighter">Shooppy Hub</h2>
+                          <p className="text-xl font-bold opacity-80 max-w-lg">Access elite strategic assets, bundles, and templates to amplify your execution.</p>
+                       </div>
+                       <Button size="lg" className="h-20 px-12 rounded-full bg-white text-amber-600 font-black text-2xl shadow-2xl hover:bg-white/90" asChild>
+                          <a href="https://your-main-shop-link.com" target="_blank" rel="noopener noreferrer">
+                             MAIN SHOP <ExternalLink className="ml-3 h-8 w-8" />
+                          </a>
+                       </Button>
+                    </div>
+                    <CardContent className="p-12">
+                       {shooppyProducts.length === 0 ? (
+                         <div className="text-center py-20 border-4 border-dashed rounded-[3rem] bg-secondary/5">
+                            <ShoppingBag className="h-20 w-20 mx-auto text-muted-foreground opacity-20 mb-6" />
+                            <p className="text-2xl text-muted-foreground font-black italic">No strategic products deployed yet.</p>
+                         </div>
+                       ) : (
+                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                            {shooppyProducts.map(p => (
+                              <Card key={p.id} className="rounded-[2.5rem] border-accent/5 shadow-xl hover:shadow-2xl transition-all group overflow-hidden bg-white">
+                                 <div className="h-60 bg-secondary/10 relative">
+                                    {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />}
+                                    <Badge className="absolute top-4 left-4 bg-primary text-accent h-8 px-4 font-black rounded-full">{p.type}</Badge>
+                                 </div>
+                                 <div className="p-8 space-y-4">
+                                    <div className="flex justify-between items-start">
+                                       <h4 className="text-2xl font-black text-accent">{p.title}</h4>
+                                       <span className="font-black text-primary text-xl">{p.price}</span>
+                                    </div>
+                                    <p className="text-muted-foreground font-medium leading-relaxed line-clamp-3">{p.description}</p>
+                                    <Button className="w-full h-14 rounded-full bg-accent text-white font-black text-lg shadow-lg hover:bg-accent/90" asChild>
+                                       <a href={p.shopLink} target="_blank" rel="noopener noreferrer">Acquire Asset</a>
+                                    </Button>
+                                 </div>
+                              </Card>
+                            ))}
+                         </div>
+                       )}
+                    </CardContent>
+                 </Card>
               </div>
            </TabsContent>
         </Tabs>
