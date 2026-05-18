@@ -29,7 +29,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-app-v10',
+      name: 'fireproof-app-v11',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -87,13 +87,10 @@ export interface NewsPost {
   createdAt: string;
 }
 
-export interface ChatMessage {
+export interface SovereigntySection {
   id: string;
-  senderId: string;
-  receiverId: string;
-  text: string;
-  timestamp: string;
-  mediaUrl?: string;
+  title: string;
+  content: string;
 }
 
 interface AdminStore {
@@ -102,6 +99,9 @@ interface AdminStore {
   shooppyProducts: ShooppyProduct[];
   notifications: SystemNotification[];
   newsPosts: NewsPost[];
+  sovereigntyTitle: string;
+  sovereigntySections: SovereigntySection[];
+  
   addQuiz: (quiz: Omit<Quiz, 'id' | 'createdAt'>) => void;
   updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
   addTasks: (day: number, tasks: { title: string; description: string }[]) => void;
@@ -110,11 +110,11 @@ interface AdminStore {
   addProduct: (product: Omit<ShooppyProduct, 'id'>) => void;
   deleteProduct: (id: string) => void;
   updateProduct: (id: string, product: Partial<ShooppyProduct>) => void;
-  broadcastNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead' | 'type'>) => void;
   addNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead'>) => void;
   markNotifRead: (id: string) => void;
   addNewsPost: (post: Omit<NewsPost, 'id' | 'createdAt'>) => void;
   deleteNewsPost: (id: string) => void;
+  updateSovereignty: (title: string, sections: SovereigntySection[]) => void;
 }
 
 export const useAdminStore = create<AdminStore>()(
@@ -122,16 +122,21 @@ export const useAdminStore = create<AdminStore>()(
     (set) => ({
       quizzes: [],
       dailyTasks: [
-        { id: 't1', day: 1, title: 'Morning Alignment', description: 'Review your core vision for 10 minutes.' },
-        { id: 't2', day: 1, title: 'Strategic Planning', description: 'Outline your top 3 objectives for the day.' },
-        { id: 't3', day: 1, title: 'Consistency Audit', description: 'Log your progress from the previous session.' }
+        { id: 't1', day: 1, title: 'Strategic Rooting', description: 'Review your Nico Digital core mission for 10 minutes.' },
+        { id: 't2', day: 1, title: 'Execution Planning', description: 'Outline your top 3 objectives for high-focus success.' },
+        { id: 't3', day: 1, title: 'Consistency Audit', description: 'Log your progress from the previous strategy session.' }
       ],
       shooppyProducts: [],
       newsPosts: [
-        { id: 'p1', title: 'Nico Digital Hub Launched', content: 'Welcome to the elite sovereign execution infrastructure. Start your journey with TaskDo.', imageUrl: 'https://picsum.photos/seed/nd/800/400', createdAt: new Date().toISOString() }
+        { id: 'p1', title: 'Nico Digital Hub Online', content: 'Welcome to the elite sovereign execution infrastructure. Start your journey with TaskDo.', imageUrl: 'https://picsum.photos/seed/nd/800/400', createdAt: new Date().toISOString() }
       ],
       notifications: [
         { id: 'n1', title: 'System Online', message: 'Nico Digital Root Infrastructure initialized.', createdAt: new Date().toISOString(), isRead: false, type: 'system' },
+      ],
+      sovereigntyTitle: "Legal Proof & Sovereignty",
+      sovereigntySections: [
+        { id: '1', title: 'Nico Digital Infrastructure', content: 'FireProof is a specialized high-focus utility operating exclusively under the Nico Digital parent brand.' },
+        { id: '2', title: 'Data Isolation Protocols', content: 'Your strategic vision (GoalCaps) and internal communication (MeText) are strictly isolated within your UID.' }
       ],
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
@@ -154,9 +159,6 @@ export const useAdminStore = create<AdminStore>()(
       updateProduct: (id, data) => set((state) => ({
         shooppyProducts: state.shooppyProducts.map(p => p.id === id ? { ...p, ...data } : p)
       })),
-      broadcastNotification: (data) => set((state) => ({
-        notifications: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString(), isRead: false, type: 'broadcast' }, ...state.notifications]
-      })),
       addNotification: (data) => set((state) => ({
         notifications: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString(), isRead: false }, ...state.notifications]
       })),
@@ -167,10 +169,20 @@ export const useAdminStore = create<AdminStore>()(
         newsPosts: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }, ...state.newsPosts]
       })),
       deleteNewsPost: (id) => set((state) => ({ newsPosts: state.newsPosts.filter(p => p.id !== id) })),
+      updateSovereignty: (title, sections) => set({ sovereigntyTitle: title, sovereigntySections: sections }),
     }),
-    { name: 'fireproof-admin-v10' }
+    { name: 'fireproof-admin-v11' }
   )
 );
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  text: string;
+  timestamp: string;
+  mediaUrl?: string;
+}
 
 interface UserProgressStore {
   nickname: string;
@@ -215,6 +227,6 @@ export const useUserStore = create<UserProgressStore>()(
         chatMessages: [...state.chatMessages, { ...data, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }]
       })),
     }),
-    { name: 'fireproof-user-v10' }
+    { name: 'fireproof-user-v11' }
   )
 );

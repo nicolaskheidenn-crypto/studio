@@ -21,7 +21,7 @@
     --secondary-foreground: 45 100% 90%;
     
     --muted: 25 20% 12%;
-    --muted-foreground: 45 20% 70%; /* Higher contrast for readability */
+    --muted-foreground: 25 10% 85%; /* High Contrast for readability */
     
     --accent: 45 100% 50%;
     --accent-foreground: 25 25% 5%;
@@ -29,8 +29,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 25 20% 18%;
-    --input: 25 20% 18%;
+    --border: 45 100% 50% / 0.2;
+    --input: 45 100% 50% / 0.3;
     --ring: 45 100% 50%;
     
     --radius: 1.5rem;
@@ -92,7 +92,10 @@
   scrollbar-width: none;
 }
 
-/* Specific readability fix for light text on light surfaces */
 .text-muted-foreground {
-  color: #a39485 !important;
+  color: hsl(45 10% 80%) !important;
+}
+
+input, textarea, select {
+  @apply border-2 border-primary/30 bg-background/50 focus:border-primary !important;
 }
