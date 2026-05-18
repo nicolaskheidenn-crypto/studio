@@ -87,9 +87,9 @@ export default function SettingsPage() {
         
         <Tabs defaultValue="profile" className="space-y-8">
           <TabsList className="bg-white/50 p-1 rounded-full w-fit shadow-md border border-accent/5 backdrop-blur-sm">
-            <TabsTrigger value="profile" className="rounded-full px-10 h-12 text-base font-bold">Identity</TabsTrigger>
-            <TabsTrigger value="appearance" className="rounded-full px-10 h-12 text-base font-bold">Atmosphere</TabsTrigger>
-            <TabsTrigger value="privacy" className="rounded-full px-10 h-12 text-base font-bold">Legal Proof</TabsTrigger>
+            <TabsTrigger value="profile" className="rounded-full px-10 h-12 text-xs font-black uppercase tracking-widest">Identity</TabsTrigger>
+            <TabsTrigger value="appearance" className="rounded-full px-10 h-12 text-xs font-black uppercase tracking-widest">Atmosphere</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-10 h-12 text-xs font-black uppercase tracking-widest">Legal Proof</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
@@ -105,10 +105,10 @@ export default function SettingsPage() {
                         {user?.displayName?.[0] || "S"}
                      </div>
                      <div className="pb-2">
-                        <h2 className="text-3xl font-black text-accent">{user?.displayName || "Strategist"}</h2>
+                        <h2 className="text-3xl font-black text-accent uppercase tracking-tight">{user?.displayName || "Strategist"}</h2>
                         <div className="flex items-center gap-2 mt-1">
-                          <code className="text-xs text-muted-foreground bg-secondary/20 px-3 py-1 rounded-full font-bold">UID: {user?.uid}</code>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={copyUid}><Copy className="h-3 w-3" /></Button>
+                          <code className="text-xs text-accent font-black bg-secondary/20 px-3 py-1 rounded-full uppercase tracking-tighter">UID: {user?.uid}</code>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-accent" onClick={copyUid}><Copy className="h-3 w-3" /></Button>
                         </div>
                      </div>
                   </div>
@@ -116,16 +116,16 @@ export default function SettingsPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <Label className="font-bold ml-1">Nickname</Label>
-                        <Input value={displayName} onChange={e => setDisplayName(e.target.value)} className="h-14 rounded-2xl border-2 border-accent/5 bg-secondary/5 font-bold px-6" />
+                        <Label className="font-black ml-1 text-accent/60 uppercase text-[10px]">Nickname</Label>
+                        <Input value={displayName} onChange={e => setDisplayName(e.target.value)} className="h-14 rounded-2xl border-2 border-accent/5 bg-secondary/5 font-black text-accent px-6" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="font-bold ml-1 flex justify-between">Biography <Badge variant="outline" className="h-5">{bio.length}/60</Badge></Label>
+                        <Label className="font-black ml-1 flex justify-between text-accent/60 uppercase text-[10px]">Biography <Badge variant="outline" className="h-5">{bio.length}/60</Badge></Label>
                         <Textarea 
                           value={bio} 
                           onChange={e => validateBio(e.target.value)} 
-                          placeholder="Tell your story (15-60 letters only)..." 
-                          className="rounded-[1.5rem] border-2 border-accent/5 bg-secondary/5 min-h-[120px] p-6 font-medium"
+                          placeholder="Tell your story..." 
+                          className="rounded-[1.5rem] border-2 border-accent/5 bg-secondary/5 min-h-[120px] p-6 font-black text-accent uppercase tracking-tight"
                         />
                       </div>
                       <Button onClick={handleUpdateProfile} disabled={isLoading} className="w-full h-16 rounded-full bg-accent text-white font-black text-xl shadow-lg">
@@ -135,19 +135,19 @@ export default function SettingsPage() {
 
                     <div className="space-y-8">
                        <div className="p-8 bg-secondary/5 rounded-[2.5rem] border-2 border-dashed border-accent/5">
-                          <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-accent"><Shield className="h-6 w-6 text-primary" /> Security</h3>
+                          <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-accent uppercase tracking-tighter"><Shield className="h-6 w-6 text-primary" /> Security</h3>
                           <div className="space-y-6">
                              <div className="space-y-2">
-                                <Label className="font-bold">New Hub Password</Label>
+                                <Label className="font-black text-accent/60 uppercase text-[10px]">New Hub Password</Label>
                                 <div className="relative">
                                    <Input 
                                       type={showPass ? "text" : "password"} 
                                       value={newPass} 
                                       onChange={e => setNewPass(e.target.value)}
-                                      className="h-14 rounded-2xl border-2 border-accent/5 px-6"
+                                      className="h-14 rounded-2xl border-2 border-accent/5 px-6 font-black text-accent"
                                       placeholder="••••••••"
                                    />
-                                   <button onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                   <button onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-accent/40">
                                       {showPass ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                    </button>
                                 </div>
@@ -172,8 +172,8 @@ export default function SettingsPage() {
           <TabsContent value="appearance" className="animate-in fade-in slide-in-from-bottom-5">
             <Card className="rounded-[3rem] border-white border-4 shadow-xl p-12 bg-white/90 backdrop-blur-xl">
               <CardHeader className="text-center mb-10">
-                <CardTitle className="text-4xl font-headline font-bold text-accent">Atmosphere Engine</CardTitle>
-                <CardDescription className="text-lg">Select and lock your preferred animated environment.</CardDescription>
+                <CardTitle className="text-4xl font-headline font-black text-accent">Atmosphere Engine</CardTitle>
+                <CardDescription className="text-lg text-accent/60 font-bold">Select and lock your preferred animated environment.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-12">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -192,10 +192,10 @@ export default function SettingsPage() {
                         <t.icon className="h-7 w-7" />
                       </div>
                       <div className="text-left space-y-1">
-                        <p className="font-black text-2xl text-accent flex items-center gap-2">
+                        <p className="font-black text-2xl text-accent flex items-center gap-2 uppercase tracking-tighter">
                           {t.label} {t.id !== 'default' && <Sparkles className="h-4 w-4 text-primary" />}
                         </p>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t.description}</p>
+                        <p className="text-[10px] font-black text-accent/40 uppercase tracking-widest">{t.description}</p>
                       </div>
                       {theme === t.id && (
                         <div className="absolute top-6 right-6 h-4 w-4 rounded-full bg-primary animate-pulse" />
@@ -214,35 +214,21 @@ export default function SettingsPage() {
 
           <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-5">
              <Card className="rounded-[3rem] p-16 shadow-xl border-white border-4 bg-white/95 backdrop-blur-lg">
-                <h2 className="text-5xl font-headline font-bold mb-12 text-center text-accent tracking-tighter">Legal Proof & Sovereignty</h2>
-                <div className="space-y-16 max-w-4xl mx-auto text-xl leading-relaxed text-muted-foreground">
+                <h2 className="text-5xl font-headline font-black mb-12 text-center text-accent tracking-tighter uppercase">Legal Proof & Sovereignty</h2>
+                <div className="space-y-16 max-w-4xl mx-auto text-xl leading-relaxed text-accent/80">
                    <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-lg">01</span>
+                      <h4 className="text-accent text-3xl font-black flex items-center gap-4 uppercase tracking-tighter">
+                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-lg font-black">01</span>
                         Nico Digital Infrastructure
                       </h4>
-                      <p>FireProof is a specialized high-focus utility operating exclusively under the <strong>Nico Digital</strong> parent brand. This is a sovereign business environment designed for elite strategist growth. All intellectual property, interaction logs, and strategic task structures are hosted on Nico Digital's proprietary configuration. We operate with a strict non-centralized data model, prioritizing individual success over mass data harvesting.</p>
+                      <p className="font-bold">FireProof is a specialized high-focus utility operating exclusively under the <strong className="text-accent">Nico Digital</strong> parent brand. This is a sovereign business environment designed for elite strategist growth. All intellectual property, interaction logs, and strategic task structures are hosted on Nico Digital's proprietary configuration.</p>
                    </section>
                    <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-lg">02</span>
+                      <h4 className="text-accent text-3xl font-black flex items-center gap-4 uppercase tracking-tighter">
+                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-lg font-black">02</span>
                         Data Isolation Protocols
                       </h4>
-                      <p>Your strategic vision (GoalCaps), your routine (TaskDo), and your internal communication (MeText) are strictly isolated within your UID. Nico Digital implements top-tier Firestore Security Rules to prevent any cross-leakage of data. We do not sell, share, or monetize user interaction data—your growth is your business, secured by our infrastructure.</p>
-                   </section>
-                   <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-lg">03</span>
-                        User Sovereignty
-                      </h4>
-                      <p>By entering this hub, you agree to the Nico Digital behavior policy. This includes the ethical use of MeText and absolute focus during FireQuizzo sessions. Failure to adhere to these high-standard strategic behaviors may result in UID blacklisting to preserve the hub's elite atmosphere.</p>
-                   </section>
-                   <section className="space-y-6">
-                      <h4 className="text-accent text-3xl font-black flex items-center gap-4">
-                        <span className="w-12 h-12 bg-primary text-accent rounded-2xl flex items-center justify-center text-lg">04</span>
-                        Business Verification
-                      </h4>
-                      <p>Nico Digital provides this transparency as proof of a legitimate, high-execution business model. We are a results-driven agency providing the tools for individual earners to achieve peak consistency without the noise of modern centralized platforms.</p>
+                      <p className="font-bold">Your strategic vision (GoalCaps), your routine (TaskDo), and your internal communication (MeText) are strictly isolated within your UID. Nico Digital implements top-tier Firestore Security Rules to prevent any cross-leakage of data.</p>
                    </section>
                 </div>
              </Card>

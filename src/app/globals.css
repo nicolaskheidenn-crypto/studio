@@ -20,8 +20,9 @@
     --secondary: 25 15% 20%;
     --secondary-foreground: 45 100% 95%;
     
+    /* Stronger contrast for labels/text on light surfaces */
     --muted: 25 15% 20%;
-    --muted-foreground: 25 10% 60%;
+    --muted-foreground: 25 10% 40%; 
     
     --accent: 45 100% 50%; /* Accents are Gold */
     --accent-foreground: 25 20% 5%;
@@ -36,14 +37,12 @@
     --radius: 1.5rem;
   }
 
-  /* Animated Atmosphere Keyframes */
   @keyframes atmosphere-float {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
 
-  /* Theme Overrides for Personalization */
   body.theme-fire {
     --background: 10 70% 15%;
     --primary: 30 100% 50%;

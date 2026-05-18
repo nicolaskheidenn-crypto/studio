@@ -132,7 +132,7 @@ export default function DashboardPage() {
               Welcome, <span className="text-primary italic">Succemazing</span>
             </h1>
             <p className="text-[10px] text-primary font-black uppercase tracking-[0.3em] opacity-60">
-              Nico Digital Root Hub
+              Nico Digital root infrastructure
             </p>
           </div>
           <div className="flex gap-3">
@@ -189,13 +189,13 @@ export default function DashboardPage() {
 
         <Tabs defaultValue={tabParam || 'overview'} className="space-y-8">
           <TabsList className="bg-secondary/40 p-1.5 rounded-full w-fit shadow-xl border border-white/5 backdrop-blur-md">
-            <TabsTrigger value="overview" className="rounded-full px-8 h-10 text-xs font-black data-[state=active]:bg-primary data-[state=active]:text-background uppercase tracking-widest transition-all">
+            <TabsTrigger value="overview" className="rounded-full px-8 h-10 text-[10px] font-black data-[state=active]:bg-primary data-[state=active]:text-background uppercase tracking-widest transition-all">
               Hub
             </TabsTrigger>
-            <TabsTrigger value="social" className="rounded-full px-8 h-10 text-xs font-black data-[state=active]:bg-primary data-[state=active]:text-background uppercase tracking-widest transition-all">
+            <TabsTrigger value="social" className="rounded-full px-8 h-10 text-[10px] font-black data-[state=active]:bg-primary data-[state=active]:text-background uppercase tracking-widest transition-all">
               MeText
             </TabsTrigger>
-            <TabsTrigger value="shooppy" className="rounded-full px-8 h-10 text-xs font-black data-[state=active]:bg-primary data-[state=active]:text-background uppercase tracking-widest transition-all">
+            <TabsTrigger value="shooppy" className="rounded-full px-8 h-10 text-[10px] font-black data-[state=active]:bg-primary data-[state=active]:text-background uppercase tracking-widest transition-all">
               Shooppy
             </TabsTrigger>
           </TabsList>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
               <CardHeader className="bg-secondary/40 p-8 border-b border-white/5">
                 <div className="space-y-2">
                   <CardTitle className="text-3xl font-headline font-black text-primary tracking-tighter uppercase">Root Assets</CardTitle>
-                  <CardDescription className="text-foreground/50 text-xs font-bold uppercase tracking-widest">
+                  <CardDescription className="text-foreground/50 text-[10px] font-bold uppercase tracking-widest">
                     Infrastructure status and execution logs.
                   </CardDescription>
                 </div>
@@ -215,8 +215,8 @@ export default function DashboardPage() {
                   <Lock className="h-14 w-14 text-primary opacity-20" />
                   <div className="space-y-2">
                     <h4 className="text-2xl font-black text-white">Execution Logs Pending</h4>
-                    <p className="text-xs text-foreground/50 max-w-sm mx-auto font-medium">
-                      The Host is synchronizing the next major routine deployment. Stay authenticated for live updates.
+                    <p className="text-[10px] text-foreground/50 max-w-sm mx-auto font-black uppercase tracking-widest">
+                      Host synchronizing root deployment.
                     </p>
                   </div>
                 </div>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/50" />
                 <Input
                   placeholder="Find Succemazing..."
-                  className="pl-11 h-12 rounded-2xl bg-secondary/40 border-primary/10 shadow-xl text-xs font-bold text-white focus:border-primary"
+                  className="pl-11 h-12 rounded-2xl bg-secondary/40 border-primary/10 shadow-xl text-[10px] font-black text-white uppercase tracking-widest focus:border-primary"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                         {s.nickname[0]}
                       </div>
                       <div>
-                        <p className="font-black text-xs text-white">{s.nickname}</p>
+                        <p className="font-black text-xs text-white uppercase">{s.nickname}</p>
                         <p className="text-[9px] text-primary/60 uppercase font-bold tracking-widest">{s.uid}</p>
                       </div>
                     </button>
@@ -290,7 +290,7 @@ export default function DashboardPage() {
                         {friend.nickname[0]}
                       </div>
                       <div>
-                        <p className="font-black text-sm text-white">{friend.nickname}</p>
+                        <p className="font-black text-sm text-white uppercase">{friend.nickname}</p>
                         <p className="text-[9px] font-black text-primary flex items-center gap-1.5 uppercase tracking-tighter">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> Online
                         </p>

@@ -1,18 +1,15 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coffee, CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown, BookOpen, MessageCircle, ShoppingBag } from "lucide-react";
+import { CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
-  { label: "Hub", href: "/dashboard", icon: LayoutDashboard },
-  { label: "MeText", href: "/dashboard?tab=social", icon: MessageCircle },
-  { label: "Shooppy", href: "/dashboard?tab=shooppy", icon: ShoppingBag },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "TaskDo", href: "/task-do", icon: CheckSquare },
   { label: "Quizzo", href: "/quiz", icon: BookOpen },
   { label: "GoalCaps", href: "/goal-caps", icon: Hourglass },
@@ -31,7 +28,7 @@ export function Navigation() {
   if (pathname === "/" && !user) return null;
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white/90 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-16 items-center justify-between">
           <Link href="/home" className="flex items-center gap-3 group">
@@ -48,14 +45,14 @@ export function Navigation() {
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-4">
-            <div className="flex items-center gap-4 mr-2 border-r pr-6 border-accent/5">
+            <div className="flex items-center gap-4 mr-2 border-r pr-6 border-accent/10">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-black transition-colors hover:text-primary uppercase tracking-wider whitespace-nowrap",
-                    (pathname === item.href) ? "text-primary" : "text-black/60"
+                    "flex items-center gap-1.5 text-[10px] font-black transition-colors hover:text-primary uppercase tracking-widest whitespace-nowrap",
+                    (pathname === item.href) ? "text-primary" : "text-black/40"
                   )}
                 >
                   <item.icon className="h-3.5 w-3.5" />
@@ -66,7 +63,7 @@ export function Navigation() {
                 <Link
                   href="/admin"
                   className={cn(
-                    "flex items-center gap-1.5 text-xs font-black text-amber-600 transition-colors hover:text-amber-500 uppercase tracking-wider",
+                    "flex items-center gap-1.5 text-[10px] font-black text-amber-600 transition-colors hover:text-amber-500 uppercase tracking-widest",
                     pathname === "/admin" ? "text-amber-500 underline" : ""
                   )}
                 >
@@ -78,7 +75,7 @@ export function Navigation() {
             
             <div className="flex items-center gap-2">
               {user ? (
-                <Button variant="ghost" className="rounded-full font-black text-xs text-black gap-2 h-9 px-4 uppercase" asChild>
+                <Button variant="ghost" className="rounded-full font-black text-[10px] text-black gap-2 h-9 px-4 uppercase tracking-widest border border-accent/5" asChild>
                   <Link href="/settings">
                     <User className="h-4 w-4 text-primary" />
                     {user.displayName?.split(' ')[0] || "Strategist"}
@@ -86,10 +83,10 @@ export function Navigation() {
                 </Button>
               ) : (
                 <div className="flex gap-2">
-                  <Button variant="ghost" className="rounded-full font-black text-xs uppercase h-9 px-4" asChild>
+                  <Button variant="ghost" className="rounded-full font-black text-[10px] uppercase h-9 px-4 tracking-widest" asChild>
                     <Link href="/login">Login</Link>
                   </Button>
-                  <Button className="rounded-full bg-black text-white px-6 h-9 font-black text-xs uppercase" asChild>
+                  <Button className="rounded-full bg-black text-white px-6 h-9 font-black text-[10px] uppercase tracking-widest" asChild>
                     <Link href="/signup">Join</Link>
                   </Button>
                 </div>
@@ -105,14 +102,14 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="lg:hidden border-t bg-white p-6 flex flex-col gap-3 animate-in slide-in-from-top">
+        <div className="lg:hidden border-t bg-white p-6 flex flex-col gap-3 animate-in slide-in-from-top shadow-2xl">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "flex items-center gap-4 text-sm font-black p-3 rounded-xl uppercase tracking-widest",
+                "flex items-center gap-4 text-xs font-black p-4 rounded-2xl uppercase tracking-[0.2em]",
                 pathname === item.href ? "bg-primary text-black" : "text-black/60"
               )}
             >
@@ -121,7 +118,7 @@ export function Navigation() {
             </Link>
           ))}
           {isHost && (
-            <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-4 text-sm font-black p-3 rounded-xl text-amber-600 uppercase tracking-widest">
+            <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-4 text-xs font-black p-4 rounded-2xl text-amber-600 uppercase tracking-[0.2em] border-t">
               <Crown className="h-4 w-4" /> Host Terminal
             </Link>
           )}
