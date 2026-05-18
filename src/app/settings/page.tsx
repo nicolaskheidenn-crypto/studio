@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Camera, Save, Eye, EyeOff, CheckCircle2, Copy } from "lucide-react";
+import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Camera, Save, Eye, EyeOff, CheckCircle2, Copy, Sparkles } from "lucide-react";
 import { useAppStore, type Theme } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
@@ -17,12 +16,12 @@ import { getAuth, updateProfile, updatePassword } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-const THEMES: { id: Theme; label: string; icon: any; color: string }[] = [
-  { id: 'default', label: 'Classic Mocha', icon: Monitor, color: 'bg-zinc-500' },
-  { id: 'fire', label: 'Volcanic Fire', icon: Flame, color: 'bg-orange-500' },
-  { id: 'water', label: 'Oceanic Blue', icon: Droplets, color: 'bg-blue-500' },
-  { id: 'nature', label: 'Calm Nature', icon: Leaf, color: 'bg-emerald-500' },
-  { id: 'raining', label: 'Stormy Night', icon: CloudRain, color: 'bg-slate-600' },
+const THEMES: { id: Theme; label: string; icon: any; color: string; description: string }[] = [
+  { id: 'default', label: 'Classic Mocha', icon: Monitor, color: 'bg-zinc-500', description: 'Clean, professional static design.' },
+  { id: 'fire', label: 'Volcanic Animated', icon: Flame, color: 'bg-orange-500', description: 'Slow-motion heat gradient flow.' },
+  { id: 'water', label: 'Oceanic Animated', icon: Droplets, color: 'bg-blue-500', description: 'Gentle deep-sea wave pulses.' },
+  { id: 'nature', label: 'Forest Animated', icon: Leaf, color: 'bg-emerald-500', description: 'Calm breeze-inspired shifts.' },
+  { id: 'raining', label: 'Storm Animated', icon: CloudRain, color: 'bg-slate-600', description: 'Dynamic night-sky shimmer.' },
 ];
 
 export default function SettingsPage() {
@@ -31,7 +30,6 @@ export default function SettingsPage() {
   const auth = getAuth();
   
   const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [newPass, setNewPass] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -69,8 +67,8 @@ export default function SettingsPage() {
   const handleSaveTheme = () => {
     applyTheme();
     toast({ 
-      title: "Environment Locked", 
-      description: "Atmosphere has been applied globally to your session.",
+      title: "Atmosphere Locked", 
+      description: "The animated environment has been applied globally.",
     });
   };
 
@@ -82,13 +80,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-secondary/5">
+    <div className="min-h-screen flex flex-col">
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
         <h1 className="text-5xl font-headline font-bold mb-10 text-accent tracking-tighter">Personalization</h1>
         
         <Tabs defaultValue="profile" className="space-y-8">
-          <TabsList className="bg-white p-1 rounded-full w-fit shadow-md border border-accent/5">
+          <TabsList className="bg-white/50 p-1 rounded-full w-fit shadow-md border border-accent/5 backdrop-blur-sm">
             <TabsTrigger value="profile" className="rounded-full px-10 h-12 text-base font-bold">Identity</TabsTrigger>
             <TabsTrigger value="appearance" className="rounded-full px-10 h-12 text-base font-bold">Atmosphere</TabsTrigger>
             <TabsTrigger value="privacy" className="rounded-full px-10 h-12 text-base font-bold">Legal Proof</TabsTrigger>
@@ -172,10 +170,10 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="appearance" className="animate-in fade-in slide-in-from-bottom-5">
-            <Card className="rounded-[3rem] border-white border-4 shadow-xl p-12 bg-white">
+            <Card className="rounded-[3rem] border-white border-4 shadow-xl p-12 bg-white/90 backdrop-blur-xl">
               <CardHeader className="text-center mb-10">
                 <CardTitle className="text-4xl font-headline font-bold text-accent">Atmosphere Engine</CardTitle>
-                <CardDescription className="text-lg">Select and lock your preferred strategic environment.</CardDescription>
+                <CardDescription className="text-lg">Select and lock your preferred animated environment.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-12">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -186,23 +184,28 @@ export default function SettingsPage() {
                       className={cn(
                         "group relative overflow-hidden flex flex-col p-8 rounded-[2rem] border-4 transition-all duration-300",
                         theme === t.id 
-                          ? "border-primary bg-primary/5 shadow-inner scale-[1.02]" 
-                          : "border-secondary hover:border-accent/20 bg-card"
+                          ? "border-primary bg-primary/10 shadow-inner scale-[1.02]" 
+                          : "border-secondary hover:border-accent/20 bg-card/50"
                       )}
                     >
-                      <div className={cn("w-14 h-14 rounded-2xl text-white flex items-center justify-center mb-6 shadow-lg", t.color)}>
+                      <div className={cn("w-14 h-14 rounded-2xl text-white flex items-center justify-center mb-6 shadow-lg transition-transform group-hover:rotate-12", t.color)}>
                         <t.icon className="h-7 w-7" />
                       </div>
-                      <p className="font-black text-2xl text-accent">{t.label}</p>
+                      <div className="text-left space-y-1">
+                        <p className="font-black text-2xl text-accent flex items-center gap-2">
+                          {t.label} {t.id !== 'default' && <Sparkles className="h-4 w-4 text-primary" />}
+                        </p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t.description}</p>
+                      </div>
                       {theme === t.id && (
-                        <div className="absolute top-6 right-6 h-4 w-4 rounded-full bg-primary" />
+                        <div className="absolute top-6 right-6 h-4 w-4 rounded-full bg-primary animate-pulse" />
                       )}
                     </button>
                   ))}
                 </div>
                 <div className="flex justify-center">
                   <Button onClick={handleSaveTheme} className="h-20 rounded-full px-20 bg-accent text-white font-black text-2xl shadow-2xl hover:scale-105 transition-transform">
-                    <Save className="h-6 w-6 mr-3" /> LOCK ENVIRONMENT
+                    <Save className="h-6 w-6 mr-3" /> LOCK ANIMATED WALLPAPER
                   </Button>
                 </div>
               </CardContent>
@@ -210,7 +213,7 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-5">
-             <Card className="rounded-[3rem] p-16 shadow-xl border-white border-4 bg-white">
+             <Card className="rounded-[3rem] p-16 shadow-xl border-white border-4 bg-white/95 backdrop-blur-lg">
                 <h2 className="text-5xl font-headline font-bold mb-12 text-center text-accent tracking-tighter">Legal Proof & Sovereignty</h2>
                 <div className="space-y-16 max-w-4xl mx-auto text-xl leading-relaxed text-muted-foreground">
                    <section className="space-y-6">

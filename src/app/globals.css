@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,7 +27,14 @@
     --radius: 1.25rem;
   }
 
-  /* Fire Theme */
+  /* Animated Atmosphere Keyframes */
+  @keyframes atmosphere-float {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Fire Theme - Animated Volcanic Flow */
   body.theme-fire {
     --background: 15 60% 95%;
     --foreground: 15 60% 10%;
@@ -36,9 +42,12 @@
     --accent: 10 70% 25%;
     --card: 15 60% 98%;
     --border: 15 30% 85%;
+    background: linear-gradient(-45deg, #fff5f2, #ffebe6, #fff0e0, #fff5f2);
+    background-size: 400% 400%;
+    animation: atmosphere-float 20s ease infinite;
   }
 
-  /* Water Theme */
+  /* Water Theme - Animated Oceanic Pulse */
   body.theme-water {
     --background: 210 50% 95%;
     --foreground: 220 50% 15%;
@@ -46,9 +55,12 @@
     --accent: 220 60% 25%;
     --card: 210 50% 98%;
     --border: 210 30% 85%;
+    background: linear-gradient(-45deg, #f0f7ff, #e6f2ff, #deedff, #f0f7ff);
+    background-size: 400% 400%;
+    animation: atmosphere-float 25s ease infinite;
   }
 
-  /* Nature Theme */
+  /* Nature Theme - Animated Forest Breeze */
   body.theme-nature {
     --background: 120 30% 95%;
     --foreground: 140 50% 10%;
@@ -56,9 +68,12 @@
     --accent: 150 60% 20%;
     --card: 120 30% 98%;
     --border: 120 20% 85%;
+    background: linear-gradient(-45deg, #f2fff2, #e6ffe6, #d9ffd9, #f2fff2);
+    background-size: 400% 400%;
+    animation: atmosphere-float 30s ease infinite;
   }
 
-  /* Raining Theme */
+  /* Raining Theme - Animated Storm Shimmer */
   body.theme-raining {
     --background: 220 20% 10%;
     --foreground: 220 10% 95%;
@@ -68,6 +83,14 @@
     --border: 220 15% 20%;
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
+    background: linear-gradient(-45deg, #0d1117, #161b22, #0d1117);
+    background-size: 400% 400%;
+    animation: atmosphere-float 15s ease infinite;
+  }
+
+  /* Default Theme - Static Mocha */
+  body {
+    background-color: hsl(var(--background));
   }
 }
 
@@ -76,7 +99,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-all duration-500 font-body antialiased;
+    @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tighter;
