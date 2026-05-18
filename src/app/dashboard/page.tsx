@@ -22,6 +22,8 @@ import {
   ExternalLink,
   UserPlus,
   CheckCircle2,
+  Newspaper,
+  Calendar,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useState, useEffect, useMemo } from 'react';
@@ -47,8 +49,8 @@ export default function DashboardPage() {
   const tabParam = searchParams.get('tab');
 
   const isHost = user?.uid === HOST_UID;
-  const { shooppyProducts, notifications, markNotifRead, addNotification } = useAdminStore();
-  const { friends, addFriend, chatMessages, addChatMessage } = useUserStore();
+  const { shooppyProducts, notifications, newsPosts, markNotifRead, addNotification } = useAdminStore();
+  const { friends, addFriend, chatMessages, addChatMessage, nickname, bio, avatarUrl, coverPhotoUrl } = useUserStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -129,7 +131,7 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-6">
           <div className="space-y-1">
             <h1 className="text-4xl md:text-5xl font-headline font-black text-white tracking-tight uppercase">
-              Welcome, <span className="text-primary italic">Succemazing</span>
+              Welcome, <span className="text-primary italic">{nickname.split(' ')[0]}</span>
             </h1>
             <p className="text-[10px] text-primary font-black uppercase tracking-[0.3em] opacity-60">
               Nico Digital root infrastructure
@@ -201,43 +203,106 @@ export default function DashboardPage() {
           </TabsList>
 
           <TabsContent value="overview" className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-5">
-            <Card className="lg:col-span-2 rounded-[2.5rem] border-white/5 shadow-2xl overflow-hidden bg-secondary/20 backdrop-blur-sm">
-              <CardHeader className="bg-secondary/40 p-8 border-b border-white/5">
-                <div className="space-y-2">
-                  <CardTitle className="text-3xl font-headline font-black text-primary tracking-tighter uppercase">Root Assets</CardTitle>
-                  <CardDescription className="text-foreground/50 text-[10px] font-bold uppercase tracking-widest">
-                    Infrastructure status and execution logs.
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="p-12">
-                <div className="flex flex-col items-center justify-center py-16 text-center space-y-6 border-2 border-dashed border-primary/10 rounded-3xl bg-background/20">
-                  <Lock className="h-14 w-14 text-primary opacity-20" />
+            <div className="lg:col-span-2 space-y-8">
+              {/* Sovereign Newsfeed */}
+              <Card className="rounded-[2.5rem] border-white/5 shadow-2xl overflow-hidden bg-secondary/20 backdrop-blur-sm">
+                <CardHeader className="bg-secondary/40 p-8 border-b border-white/5">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <CardTitle className="text-3xl font-headline font-black text-primary tracking-tighter uppercase flex items-center gap-3">
+                        <Newspaper className="h-8 w-8" /> Sovereign Feed
+                      </CardTitle>
+                      <CardDescription className="text-foreground/50 text-[10px] font-bold uppercase tracking-widest">
+                        Official broadcasts from the Nico Digital root.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-8 space-y-8">
+                  {newsPosts.length === 0 ? (
+                    <div className="py-20 text-center text-muted-foreground italic text-sm">No feed activity detected.</div>
+                  ) : (
+                    newsPosts.map((post) => (
+                      <div key={post.id} className="p-8 rounded-[2rem] bg-background/40 border border-white/5 shadow-inner space-y-6">
+                        {post.imageUrl && (
+                          <div className="h-64 rounded-2xl overflow-hidden border-2 border-primary/10">
+                            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-2xl font-black text-white uppercase tracking-tight">{post.title}</h3>
+                            <Badge variant="outline" className="text-[10px] border-primary text-primary font-black uppercase">
+                              <Calendar className="h-3 w-3 mr-1" /> {formatDistanceToNow(new Date(post.createdAt))} ago
+                            </Badge>
+                          </div>
+                          <p className="text-sm font-medium text-foreground/70 leading-relaxed whitespace-pre-wrap">
+                            {post.content}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[2.5rem] border-white/5 shadow-2xl overflow-hidden bg-secondary/20 backdrop-blur-sm">
+                <CardHeader className="bg-secondary/40 p-8 border-b border-white/5">
                   <div className="space-y-2">
-                    <h4 className="text-2xl font-black text-white">Execution Logs Pending</h4>
-                    <p className="text-[10px] text-foreground/50 max-w-sm mx-auto font-black uppercase tracking-widest">
-                      Host synchronizing root deployment.
+                    <CardTitle className="text-3xl font-headline font-black text-primary tracking-tighter uppercase">Root Assets</CardTitle>
+                    <CardDescription className="text-foreground/50 text-[10px] font-bold uppercase tracking-widest">
+                      Infrastructure status and execution logs.
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-12">
+                  <div className="flex flex-col items-center justify-center py-16 text-center space-y-6 border-2 border-dashed border-primary/10 rounded-3xl bg-background/20">
+                    <Lock className="h-14 w-14 text-primary opacity-20" />
+                    <div className="space-y-2">
+                      <h4 className="text-2xl font-black text-white">Execution Logs Pending</h4>
+                      <p className="text-[10px] text-foreground/50 max-w-sm mx-auto font-black uppercase tracking-widest">
+                        Host synchronizing root deployment.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-8">
+              <Card className="rounded-[2.5rem] border-2 border-primary/20 bg-primary/5 shadow-2xl p-8 flex flex-col justify-center text-center space-y-6">
+                <div className="w-16 h-16 bg-primary text-background rounded-2xl flex items-center justify-center mx-auto shadow-2xl border-2 border-white rotate-6 transition-transform hover:rotate-0">
+                  <ShieldCheck className="h-8 w-8" />
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-2xl font-headline font-black uppercase tracking-tighter">Legal Proof</h4>
+                  <div className="bg-background/40 p-6 rounded-2xl shadow-inner border border-white/5">
+                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-3">Identity Sovereign</p>
+                    <Badge className="bg-primary text-background font-black mb-3 uppercase text-[9px] px-3">Verified Status</Badge>
+                    <p className="text-[11px] text-foreground/70 font-bold leading-relaxed">
+                      Secured by Nico Digital protocols. Your execution data is isolated, encrypted, and strictly personal.
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </Card>
 
-            <Card className="rounded-[2.5rem] border-2 border-primary/20 bg-primary/5 shadow-2xl p-8 flex flex-col justify-center text-center space-y-6">
-              <div className="w-16 h-16 bg-primary text-background rounded-2xl flex items-center justify-center mx-auto shadow-2xl border-2 border-white rotate-6 transition-transform hover:rotate-0">
-                <ShieldCheck className="h-8 w-8" />
-              </div>
-              <div className="space-y-4">
-                <h4 className="text-2xl font-headline font-black uppercase tracking-tighter">Legal Proof</h4>
-                <div className="bg-background/40 p-6 rounded-2xl shadow-inner border border-white/5">
-                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-3">Identity Sovereign</p>
-                  <Badge className="bg-primary text-background font-black mb-3 uppercase text-[9px] px-3">Verified Status</Badge>
-                  <p className="text-[11px] text-foreground/70 font-bold leading-relaxed">
-                    Secured by Nico Digital protocols. Your execution data is isolated, encrypted, and strictly personal.
-                  </p>
+              {/* Strategy Profile Preview */}
+              <Card className="rounded-[2.5rem] border-white/5 bg-secondary/20 shadow-2xl p-8 space-y-6 overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full h-24 bg-primary/10">
+                  {coverPhotoUrl && <img src={coverPhotoUrl} className="w-full h-full object-cover opacity-30" />}
                 </div>
-              </div>
-            </Card>
+                <div className="relative pt-12 flex flex-col items-center text-center space-y-4">
+                  <div className="w-20 h-20 rounded-2xl bg-primary border-4 border-background overflow-hidden shadow-2xl">
+                    {avatarUrl ? <img src={avatarUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-black text-3xl text-background">{nickname[0]}</div>}
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black uppercase text-white">{nickname}</h4>
+                    <p className="text-[9px] font-black text-primary uppercase tracking-widest">Root Strategist</p>
+                  </div>
+                  <p className="text-[11px] text-foreground/60 font-medium italic">{bio}</p>
+                </div>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="social" className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[650px] animate-in fade-in slide-in-from-right-10">

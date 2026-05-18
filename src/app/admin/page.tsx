@@ -7,32 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminStore, QuizQuestion, ShooppyProduct } from "@/lib/store";
+import { useAdminStore } from "@/lib/store";
 import { useUser } from "@/firebase";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, ShieldAlert, Key, Bell, ListOrdered, ChevronRight, ShoppingBag, Link as LinkIcon, Image as ImageIcon, ShieldCheck, FileText, Save } from "lucide-react";
+import { Plus, Trash2, ShieldAlert, Key, Bell, ListOrdered, ChevronRight, ShoppingBag, Link as LinkIcon, Image as ImageIcon, ShieldCheck, FileText, Save, Newspaper } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminPage() {
   const { user } = useUser();
   const [adminKey, setAdminKey] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const { quizzes, addQuiz, deleteQuiz, dailyTasks, addTasks, deleteTask, shooppyProducts, addProduct, deleteProduct, broadcastNotification } = useAdminStore();
+  const { quizzes, addQuiz, deleteQuiz, dailyTasks, addTasks, deleteTask, shooppyProducts, addProduct, deleteProduct, newsPosts, addNewsPost, deleteNewsPost } = useAdminStore();
 
-  const [quizTitle, setQuizTitle] = useState("");
-  const [questionCount, setQuestionCount] = useState(10);
-  const [isCreatingQuiz, setIsCreatingQuiz] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [tempQuestions, setTempQuestions] = useState<QuizQuestion[]>([]);
-
-  // Current question edit state
-  const [qText, setQText] = useState("");
-  const [qType, setQType] = useState<'multiple' | 'boolean' | 'id'>('multiple');
-  const [qAnswer, setQAnswer] = useState("");
-  const [qOptions, setQOptions] = useState(["", "", "", ""]);
-
-  // Inject TaskDo state
+  // TaskDo state
   const [taskDay, setTaskDay] = useState(1);
   const [tasks, setTasks] = useState([
     { title: "", description: "" },
@@ -48,8 +36,10 @@ export default function AdminPage() {
   const [pType, setPType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
   const [pPrice, setPPrice] = useState("");
 
-  const [broadcastTitle, setBroadcastTitle] = useState("");
-  const [broadcastMsg, setBroadcastMsg] = useState("");
+  // Newsfeed state
+  const [postTitle, setPostTitle] = useState("");
+  const [postContent, setPostContent] = useState("");
+  const [postImg, setPostImg] = useState("");
 
   // Sovereignty Editor state
   const [sovereigntyTitle, setSovereigntyTitle] = useState("Legal Proof & Sovereignty");
@@ -130,6 +120,13 @@ export default function AdminPage() {
     setPTitle(""); setPDesc(""); setPImg(""); setPLink(""); setPPrice("");
   };
 
+  const handleAddPost = () => {
+    if (!postTitle || !postContent) return;
+    addNewsPost({ title: postTitle, content: postContent, imageUrl: postImg });
+    toast({ title: "Broadcast Dispatched" });
+    setPostTitle(""); setPostContent(""); setPostImg("");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-secondary/10">
       <Navigation />
@@ -142,9 +139,9 @@ export default function AdminPage() {
         <Tabs defaultValue="tasks" className="space-y-10">
           <TabsList className="bg-white/50 p-2 rounded-full w-fit shadow-sm border border-accent/5 overflow-x-auto">
             <TabsTrigger value="tasks" className="rounded-full px-8 h-12 text-xs font-black uppercase tracking-widest">Inject TaskDo</TabsTrigger>
+            <TabsTrigger value="newsfeed" className="rounded-full px-8 h-12 text-xs font-black uppercase tracking-widest">Broadcast News</TabsTrigger>
             <TabsTrigger value="shooppy" className="rounded-full px-8 h-12 text-xs font-black uppercase tracking-widest">Shooppy Manager</TabsTrigger>
             <TabsTrigger value="sovereignty" className="rounded-full px-8 h-12 text-xs font-black uppercase tracking-widest">Legal Editor</TabsTrigger>
-            <TabsTrigger value="quizzes" className="rounded-full px-8 h-12 text-xs font-black uppercase tracking-widest">FireQuizzo Lab</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tasks" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
@@ -218,45 +215,49 @@ export default function AdminPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="sovereignty" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
+          <TabsContent value="newsfeed" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
             <Card className="rounded-[3rem] border-accent/10 shadow-2xl overflow-hidden bg-white">
               <CardHeader className="bg-primary text-accent p-10">
-                <CardTitle className="text-3xl flex items-center gap-4"><ShieldCheck className="h-8 w-8" /> Legal Proof Editor</CardTitle>
-                <CardDescription className="text-accent/60">Update your business sovereignty clauses and proof of root.</CardDescription>
+                <CardTitle className="text-3xl flex items-center gap-4"><Newspaper className="h-8 w-8" /> Broadcast News</CardTitle>
+                <CardDescription className="text-accent/60">Update the Sovereign Newsfeed for all strategists.</CardDescription>
               </CardHeader>
-              <CardContent className="p-10 space-y-10">
-                <div className="space-y-4">
-                  <Label className="font-black text-accent">Main Title</Label>
-                  <Input value={sovereigntyTitle} onChange={e => setSovereigntyTitle(e.target.value)} className="h-14 rounded-xl text-accent font-black" />
-                </div>
-                
-                <div className="space-y-8">
-                  {sovereigntySections.map((s, idx) => (
-                    <div key={s.id} className="p-8 bg-secondary/5 rounded-3xl border-2 border-accent/5 space-y-6">
-                      <div className="flex items-center justify-between">
-                        <Badge className="bg-accent text-white">Clause {idx + 1}</Badge>
-                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="font-black text-accent/60 uppercase text-[10px]">Clause Subject</Label>
-                        <Input value={s.title} className="h-12 rounded-xl font-bold text-accent" />
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="font-black text-accent/60 uppercase text-[10px]">Legal Description</Label>
-                        <Textarea value={s.content} className="min-h-[100px] rounded-xl font-medium text-accent" />
-                      </div>
+              <CardContent className="p-10 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="font-black text-accent">Broadcast Title</Label>
+                      <Input value={postTitle} onChange={e => setPostTitle(e.target.value)} placeholder="System Evolution Update" className="h-14 rounded-xl font-bold" />
                     </div>
-                  ))}
-                  <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 border-accent/20 text-accent font-black">
-                    <Plus className="mr-2" /> Add Sovereignty Clause
-                  </Button>
+                    <div className="space-y-2">
+                      <Label className="font-black text-accent">Content Image URL</Label>
+                      <Input value={postImg} onChange={e => setPostImg(e.target.value)} placeholder="https://..." className="h-14 rounded-xl font-bold" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-black text-accent">Broadcast Message</Label>
+                    <Textarea value={postContent} onChange={e => setPostContent(e.target.value)} placeholder="Write the announcement..." className="min-h-[160px] rounded-xl font-medium" />
+                  </div>
                 </div>
-
-                <Button className="w-full h-20 rounded-full bg-accent text-white font-black text-2xl shadow-xl">
-                  <Save className="mr-3" /> Update Sovereignty Hub
+                <Button onClick={handleAddPost} className="w-full h-20 rounded-full bg-accent text-white font-black text-2xl shadow-xl">
+                  Dispatch to Sovereign Feed
                 </Button>
               </CardContent>
             </Card>
+
+            <div className="space-y-4">
+              {newsPosts.map(p => (
+                <div key={p.id} className="p-6 bg-white rounded-3xl border-2 border-accent/5 flex items-center justify-between shadow-sm">
+                  <div className="flex items-center gap-4">
+                    {p.imageUrl && <img src={p.imageUrl} className="w-16 h-16 rounded-xl object-cover" />}
+                    <div>
+                      <h4 className="font-black text-accent">{p.title}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{p.content}</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteNewsPost(p.id)}><Trash2 className="h-5 w-5" /></Button>
+                </div>
+              ))}
+            </div>
           </TabsContent>
 
           <TabsContent value="shooppy" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
@@ -324,6 +325,47 @@ export default function AdminPage() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="sovereignty" className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
+            <Card className="rounded-[3rem] border-accent/10 shadow-2xl overflow-hidden bg-white">
+              <CardHeader className="bg-primary text-accent p-10">
+                <CardTitle className="text-3xl flex items-center gap-4"><ShieldCheck className="h-8 w-8" /> Legal Proof Editor</CardTitle>
+                <CardDescription className="text-accent/60">Update your business sovereignty clauses and proof of root.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-10 space-y-10">
+                <div className="space-y-4">
+                  <Label className="font-black text-accent">Main Title</Label>
+                  <Input value={sovereigntyTitle} onChange={e => setSovereigntyTitle(e.target.value)} className="h-14 rounded-xl text-accent font-black" />
+                </div>
+                
+                <div className="space-y-8">
+                  {sovereigntySections.map((s, idx) => (
+                    <div key={s.id} className="p-8 bg-secondary/5 rounded-3xl border-2 border-accent/5 space-y-6">
+                      <div className="flex items-center justify-between">
+                        <Badge className="bg-accent text-white">Clause {idx + 1}</Badge>
+                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="font-black text-accent/60 uppercase text-[10px]">Clause Subject</Label>
+                        <Input value={s.title} className="h-12 rounded-xl font-bold text-accent" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="font-black text-accent/60 uppercase text-[10px]">Legal Description</Label>
+                        <Textarea value={s.content} className="min-h-[100px] rounded-xl font-medium text-accent" />
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 border-accent/20 text-accent font-black">
+                    <Plus className="mr-2" /> Add Sovereignty Clause
+                  </Button>
+                </div>
+
+                <Button className="w-full h-20 rounded-full bg-accent text-white font-black text-2xl shadow-xl">
+                  <Save className="mr-3" /> Update Sovereignty Hub
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

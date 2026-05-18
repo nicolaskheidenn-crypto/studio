@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -30,7 +29,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-app-v7',
+      name: 'fireproof-app-v10',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -80,6 +79,14 @@ export interface SystemNotification {
   type: 'system' | 'friend_request' | 'broadcast';
 }
 
+export interface NewsPost {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -94,6 +101,7 @@ interface AdminStore {
   dailyTasks: ManagedTask[];
   shooppyProducts: ShooppyProduct[];
   notifications: SystemNotification[];
+  newsPosts: NewsPost[];
   addQuiz: (quiz: Omit<Quiz, 'id' | 'createdAt'>) => void;
   updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
   addTasks: (day: number, tasks: { title: string; description: string }[]) => void;
@@ -105,6 +113,8 @@ interface AdminStore {
   broadcastNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead' | 'type'>) => void;
   addNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead'>) => void;
   markNotifRead: (id: string) => void;
+  addNewsPost: (post: Omit<NewsPost, 'id' | 'createdAt'>) => void;
+  deleteNewsPost: (id: string) => void;
 }
 
 export const useAdminStore = create<AdminStore>()(
@@ -117,6 +127,9 @@ export const useAdminStore = create<AdminStore>()(
         { id: 't3', day: 1, title: 'Consistency Audit', description: 'Log your progress from the previous session.' }
       ],
       shooppyProducts: [],
+      newsPosts: [
+        { id: 'p1', title: 'Nico Digital Hub Launched', content: 'Welcome to the elite sovereign execution infrastructure. Start your journey with TaskDo.', imageUrl: 'https://picsum.photos/seed/nd/800/400', createdAt: new Date().toISOString() }
+      ],
       notifications: [
         { id: 'n1', title: 'System Online', message: 'Nico Digital Root Infrastructure initialized.', createdAt: new Date().toISOString(), isRead: false, type: 'system' },
       ],
@@ -150,16 +163,25 @@ export const useAdminStore = create<AdminStore>()(
       markNotifRead: (id) => set((state) => ({
         notifications: state.notifications.map(n => n.id === id ? { ...n, isRead: true } : n)
       })),
+      addNewsPost: (data) => set((state) => ({
+        newsPosts: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }, ...state.newsPosts]
+      })),
+      deleteNewsPost: (id) => set((state) => ({ newsPosts: state.newsPosts.filter(p => p.id !== id) })),
     }),
-    { name: 'fireproof-admin-v7' }
+    { name: 'fireproof-admin-v10' }
   )
 );
 
 interface UserProgressStore {
+  nickname: string;
+  bio: string;
+  avatarUrl: string;
+  coverPhotoUrl: string;
   completedTaskIds: string[];
   capsules: any[];
   friends: string[];
   chatMessages: ChatMessage[];
+  updateProfile: (data: { nickname?: string; bio?: string; avatarUrl?: string; coverPhotoUrl?: string }) => void;
   toggleTask: (id: string) => void;
   addCapsule: (capsule: any) => void;
   addFriend: (uid: string) => void;
@@ -169,10 +191,15 @@ interface UserProgressStore {
 export const useUserStore = create<UserProgressStore>()(
   persist(
     (set) => ({
+      nickname: 'Succemazing Strategist',
+      bio: 'Consistency is my only master key.',
+      avatarUrl: '',
+      coverPhotoUrl: '',
       completedTaskIds: [],
       capsules: [],
-      friends: ['R9TfGgUleVN6kDnXySqVUhzoHmn2'], // Host is a default friend
+      friends: ['R9TfGgUleVN6kDnXySqVUhzoHmn2'],
       chatMessages: [],
+      updateProfile: (data) => set((state) => ({ ...state, ...data })),
       toggleTask: (id) => set((state) => ({
         completedTaskIds: state.completedTaskIds.includes(id) 
           ? state.completedTaskIds.filter(tid => tid !== id) 
@@ -188,6 +215,6 @@ export const useUserStore = create<UserProgressStore>()(
         chatMessages: [...state.chatMessages, { ...data, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }]
       })),
     }),
-    { name: 'fireproof-user-v7' }
+    { name: 'fireproof-user-v10' }
   )
 );
