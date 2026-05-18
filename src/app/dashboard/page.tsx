@@ -5,6 +5,7 @@ import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 import { Crown, Mail, Lock, Search, Send, Smile, Image as ImageIcon, Video, Bell, MessageCircle, ShieldCheck, ShoppingBag, ExternalLink, UserPlus, CheckCircle2, User } from "lucide-react";
 import { useUser } from "@/firebase";
 import { useState, useEffect, useMemo } from "react";
