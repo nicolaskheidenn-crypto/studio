@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-v4-persistence',
+      name: 'fireproof-app-v5',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -76,9 +76,9 @@ export const useAdminStore = create<AdminStore>()(
     (set) => ({
       quizzes: [],
       dailyTasks: [
-        { id: 't1', day: 1, title: 'Strategic Morning Brew', description: 'Align your vision with your primary goal.' },
-        { id: 't2', day: 1, title: 'Execution Audit', description: 'Check previous performance metrics.' },
-        { id: 't3', day: 1, title: 'Network Expansion', description: 'Connect with one high-tier strategist.' }
+        { id: 't1', day: 1, title: 'Morning Alignment', description: 'Review your core vision for 10 minutes.' },
+        { id: 't2', day: 1, title: 'Strategic Planning', description: 'Outline your top 3 objectives for the day.' },
+        { id: 't3', day: 1, title: 'Consistency Audit', description: 'Log your progress from the previous session.' }
       ],
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
@@ -92,6 +92,31 @@ export const useAdminStore = create<AdminStore>()(
       deleteQuiz: (id) => set((state) => ({ quizzes: state.quizzes.filter(q => q.id !== id) })),
       deleteTask: (id) => set((state) => ({ dailyTasks: state.dailyTasks.filter(t => t.id !== id) })),
     }),
-    { name: 'fireproof-admin-v4' }
+    { name: 'fireproof-admin-v5' }
+  )
+);
+
+interface UserProgressStore {
+  completedTaskIds: string[];
+  capsules: any[];
+  toggleTask: (id: string) => void;
+  addCapsule: (capsule: any) => void;
+}
+
+export const useUserStore = create<UserProgressStore>()(
+  persist(
+    (set) => ({
+      completedTaskIds: [],
+      capsules: [],
+      toggleTask: (id) => set((state) => ({
+        completedTaskIds: state.completedTaskIds.includes(id) 
+          ? state.completedTaskIds.filter(tid => tid !== id) 
+          : [...state.completedTaskIds, id]
+      })),
+      addCapsule: (cap) => set((state) => ({
+        capsules: [cap, ...state.capsules]
+      })),
+    }),
+    { name: 'fireproof-user-v5' }
   )
 );

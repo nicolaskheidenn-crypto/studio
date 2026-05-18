@@ -9,13 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Hourglass, Lock, Unlock, Send, Calendar } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { useUserStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 export default function GoalCapsPage() {
+  const { capsules, addCapsule } = useUserStore();
   const [message, setMessage] = useState("");
   const [unlockDate, setUnlockDate] = useState("");
-  const [capsules, setCapsules] = useState<any[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,44 +33,45 @@ export default function GoalCapsPage() {
       message,
       unlockDate,
       createdAt: new Date().toLocaleDateString(),
-      isLocked: new Date(unlockDate) > new Date()
     };
 
-    setCapsules([newCap, ...capsules]);
+    addCapsule(newCap);
     setMessage("");
     setUnlockDate("");
     
     toast({
       title: "Capsule Sealed",
-      description: "Your message is locked until " + new Date(unlockDate).toLocaleDateString(),
+      description: "Your vision is now locked until " + new Date(unlockDate).toLocaleDateString(),
     });
   };
 
+  if (!isMounted) return null;
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-secondary/5">
       <Navigation />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-12">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+        <div className="space-y-12">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-headline font-bold">Goal<span className="text-primary">Caps</span></h1>
-            <p className="text-muted-foreground text-lg">Send a message to your future self. Unlock it only when the time is right.</p>
+            <h1 className="text-4xl md:text-5xl font-headline font-bold text-accent">Goal<span className="text-primary">Caps</span></h1>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">Send a message to your future self. Unlock it only when the time is right. Nico Digital encryption active.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="shadow-xl">
-              <CardHeader>
-                <CardTitle>Create Time Capsule</CardTitle>
-                <CardDescription>What will Succemazing achieve by this date?</CardDescription>
+            <Card className="shadow-xl rounded-[2.5rem] border-white border-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl font-bold">Seal a Vision</CardTitle>
+                <CardDescription>Define your success parameters for the future.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Unlock Date (Month/Day/Year)</Label>
+                    <Label className="font-bold ml-1">Target Unlock Date</Label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input 
                         type="date" 
-                        className="pl-10 h-12 rounded-xl" 
+                        className="pl-12 h-14 rounded-2xl bg-secondary/10 border-none text-lg" 
                         value={unlockDate}
                         onChange={(e) => setUnlockDate(e.target.value)}
                         required
@@ -71,58 +79,67 @@ export default function GoalCapsPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Message to the Future</Label>
+                    <Label className="font-bold ml-1">Strategic Message</Label>
                     <Textarea 
                       placeholder="Today I start my journey... In the future I am..." 
-                      className="min-h-[200px] rounded-2xl"
+                      className="min-h-[220px] rounded-3xl bg-secondary/10 border-none p-6 text-lg"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full rounded-full h-14 bg-primary hover:bg-primary/90 text-accent font-bold">
-                    <Send className="h-4 w-4 mr-2" /> Seal for Future Succemazing
+                  <Button type="submit" className="w-full rounded-full h-16 bg-accent hover:bg-accent/90 text-white font-black text-xl shadow-lg transition-transform active:scale-95">
+                    <Send className="h-6 w-6 mr-3" /> Seal for Future Succemazing
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
             <div className="space-y-6">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <Hourglass className="h-5 w-5 text-primary" />
-                Active Capsules
+              <h3 className="text-2xl font-black text-accent flex items-center gap-3">
+                <Hourglass className="h-6 w-6 text-primary" />
+                Active Vision Vault
               </h3>
-              {capsules.length === 0 ? (
-                <p className="text-muted-foreground italic">No capsules sealed yet. Start your journey above.</p>
-              ) : (
-                capsules.map((cap) => (
-                  <Card key={cap.id} className={cn("border-dashed border-2", cap.isLocked ? "bg-secondary/20" : "bg-primary/5")}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className={cn("p-3 rounded-full border", cap.isLocked ? "bg-background" : "bg-primary")}>
-                            {cap.isLocked ? <Lock className="h-5 w-5 text-muted-foreground" /> : <Unlock className="h-5 w-5 text-white" />}
+              <div className="space-y-4">
+                {capsules.length === 0 ? (
+                  <div className="p-12 border-4 border-dashed rounded-[2.5rem] text-center bg-white/50">
+                    <p className="text-muted-foreground italic font-medium">No capsules sealed yet. Initialize your first vision above.</p>
+                  </div>
+                ) : (
+                  capsules.map((cap) => {
+                    const isLocked = new Date(cap.unlockDate) > new Date();
+                    return (
+                      <Card key={cap.id} className={cn("border-2 rounded-[2rem] transition-all", isLocked ? "bg-white/40 border-accent/5" : "bg-primary/5 border-primary/20 shadow-md")}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                              <div className={cn("p-3 rounded-2xl border", isLocked ? "bg-white" : "bg-primary")}>
+                                {isLocked ? <Lock className="h-6 w-6 text-muted-foreground" /> : <Unlock className="h-6 w-6 text-accent" />}
+                              </div>
+                              <div>
+                                <p className="font-black text-accent">Unlocks: {new Date(cap.unlockDate).toLocaleDateString()}</p>
+                                <p className="text-xs text-muted-foreground font-bold">Sealed {cap.createdAt}</p>
+                              </div>
+                            </div>
+                            <Badge variant={isLocked ? "secondary" : "default"} className="h-6 rounded-full px-3">
+                              {isLocked ? "ENCRYPTED" : "REVEALED"}
+                            </Badge>
                           </div>
-                          <div>
-                            <p className="font-bold">Unlocks: {new Date(cap.unlockDate).toLocaleDateString()}</p>
-                            <p className="text-xs text-muted-foreground">Sealed on {cap.createdAt}</p>
+                          <div className="p-5 bg-white/80 rounded-2xl border border-accent/5">
+                            {isLocked ? (
+                              <p className="text-sm italic text-muted-foreground/30 blur-[4px] select-none font-medium leading-relaxed">
+                                This vision is strictly encrypted until the specified target date has been reached for privacy and consistency.
+                              </p>
+                            ) : (
+                              <p className="whitespace-pre-wrap font-medium text-accent leading-relaxed">{cap.message}</p>
+                            )}
                           </div>
-                        </div>
-                        <Badge variant={cap.isLocked ? "secondary" : "default"}>
-                          {cap.isLocked ? "Locked" : "Ready"}
-                        </Badge>
-                      </div>
-                      <div className="p-4 bg-background/50 rounded-xl">
-                        {cap.isLocked ? (
-                          <p className="text-sm italic text-muted-foreground blur-[2px] select-none">This content is locked for privacy.</p>
-                        ) : (
-                          <p className="whitespace-pre-wrap">{cap.message}</p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                )}
+              </div>
             </div>
           </div>
         </div>
