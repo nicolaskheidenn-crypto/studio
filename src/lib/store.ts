@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'fireproof-app-v6',
+      name: 'fireproof-app-v7',
       onRehydrateStorage: () => (state) => {
         if (state) state.applyTheme();
       }
@@ -77,6 +77,16 @@ export interface SystemNotification {
   message: string;
   createdAt: string;
   isRead: boolean;
+  type: 'system' | 'friend_request' | 'broadcast';
+}
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  text: string;
+  timestamp: string;
+  mediaUrl?: string;
 }
 
 interface AdminStore {
@@ -86,14 +96,14 @@ interface AdminStore {
   notifications: SystemNotification[];
   addQuiz: (quiz: Omit<Quiz, 'id' | 'createdAt'>) => void;
   updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
-  addTask: (task: Omit<ManagedTask, 'id'>) => void;
   addTasks: (day: number, tasks: { title: string; description: string }[]) => void;
   deleteQuiz: (id: string) => void;
   deleteTask: (id: string) => void;
   addProduct: (product: Omit<ShooppyProduct, 'id'>) => void;
   deleteProduct: (id: string) => void;
   updateProduct: (id: string, product: Partial<ShooppyProduct>) => void;
-  broadcastNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead'>) => void;
+  broadcastNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead' | 'type'>) => void;
+  addNotification: (notif: Omit<SystemNotification, 'id' | 'createdAt' | 'isRead'>) => void;
   markNotifRead: (id: string) => void;
 }
 
@@ -108,17 +118,13 @@ export const useAdminStore = create<AdminStore>()(
       ],
       shooppyProducts: [],
       notifications: [
-        { id: 'n1', title: 'System Online', message: 'Nico Digital Root Infrastructure initialized.', createdAt: new Date().toISOString(), isRead: false },
-        { id: 'n2', title: 'Welcome Succemazing', message: 'Your strategist hub is ready for drops.', createdAt: new Date().toISOString(), isRead: false }
+        { id: 'n1', title: 'System Online', message: 'Nico Digital Root Infrastructure initialized.', createdAt: new Date().toISOString(), isRead: false, type: 'system' },
       ],
       addQuiz: (data) => set((state) => ({
         quizzes: [...state.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }]
       })),
       updateQuiz: (id, data) => set((state) => ({
         quizzes: state.quizzes.map(q => q.id === id ? { ...q, ...data } : q)
-      })),
-      addTask: (data) => set((state) => ({
-        dailyTasks: [...state.dailyTasks, { ...data, id: Math.random().toString(36).substr(2, 9) }].sort((a, b) => a.day - b.day)
       })),
       addTasks: (day, tasks) => set((state) => {
         const newTasks = tasks.map(t => ({ ...t, day, id: Math.random().toString(36).substr(2, 9) }));
@@ -136,21 +142,28 @@ export const useAdminStore = create<AdminStore>()(
         shooppyProducts: state.shooppyProducts.map(p => p.id === id ? { ...p, ...data } : p)
       })),
       broadcastNotification: (data) => set((state) => ({
+        notifications: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString(), isRead: false, type: 'broadcast' }, ...state.notifications]
+      })),
+      addNotification: (data) => set((state) => ({
         notifications: [{ ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString(), isRead: false }, ...state.notifications]
       })),
       markNotifRead: (id) => set((state) => ({
         notifications: state.notifications.map(n => n.id === id ? { ...n, isRead: true } : n)
       })),
     }),
-    { name: 'fireproof-admin-v6' }
+    { name: 'fireproof-admin-v7' }
   )
 );
 
 interface UserProgressStore {
   completedTaskIds: string[];
   capsules: any[];
+  friends: string[];
+  chatMessages: ChatMessage[];
   toggleTask: (id: string) => void;
   addCapsule: (capsule: any) => void;
+  addFriend: (uid: string) => void;
+  addChatMessage: (msg: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
 }
 
 export const useUserStore = create<UserProgressStore>()(
@@ -158,6 +171,8 @@ export const useUserStore = create<UserProgressStore>()(
     (set) => ({
       completedTaskIds: [],
       capsules: [],
+      friends: ['R9TfGgUleVN6kDnXySqVUhzoHmn2'], // Host is a default friend
+      chatMessages: [],
       toggleTask: (id) => set((state) => ({
         completedTaskIds: state.completedTaskIds.includes(id) 
           ? state.completedTaskIds.filter(tid => tid !== id) 
@@ -166,7 +181,13 @@ export const useUserStore = create<UserProgressStore>()(
       addCapsule: (cap) => set((state) => ({
         capsules: [cap, ...state.capsules]
       })),
+      addFriend: (uid) => set((state) => ({
+        friends: state.friends.includes(uid) ? state.friends : [...state.friends, uid]
+      })),
+      addChatMessage: (data) => set((state) => ({
+        chatMessages: [...state.chatMessages, { ...data, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }]
+      })),
     }),
-    { name: 'fireproof-user-v6' }
+    { name: 'fireproof-user-v7' }
   )
 );
