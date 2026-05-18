@@ -10,11 +10,11 @@ import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Hub", href: "/dashboard", icon: LayoutDashboard },
   { label: "MeText", href: "/dashboard?tab=social", icon: MessageCircle },
   { label: "Shooppy", href: "/dashboard?tab=shooppy", icon: ShoppingBag },
   { label: "TaskDo", href: "/task-do", icon: CheckSquare },
-  { label: "FireQuizzo", href: "/quiz", icon: BookOpen },
+  { label: "Quizzo", href: "/quiz", icon: BookOpen },
   { label: "GoalCaps", href: "/goal-caps", icon: Hourglass },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
@@ -31,31 +31,34 @@ export function Navigation() {
   if (pathname === "/" && !user) return null;
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex h-20 items-center justify-between">
-          <Link href="/home" className="flex items-center gap-2 group">
-            <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary transition-colors">
-              <Coffee className="h-6 w-6 text-accent" />
+        <div className="flex h-16 items-center justify-between">
+          <Link href="/home" className="flex items-center gap-3 group">
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-headline font-black tracking-tighter text-black leading-none group-hover:text-primary transition-colors">
+                ND
+              </span>
+              <div className="h-1 w-full bg-primary rounded-full" />
             </div>
-            <span className="text-2xl font-headline font-bold tracking-tight text-accent">
-              FireProof
+            <span className="text-xl font-headline font-black tracking-tight text-black hidden sm:block uppercase">
+              NICO <span className="text-primary">DIGITAL</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-6">
-            <div className="flex items-center gap-5 mr-2 border-r pr-6 border-accent/10">
+          <div className="hidden lg:flex items-center gap-4">
+            <div className="flex items-center gap-4 mr-2 border-r pr-6 border-accent/5">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-bold transition-colors hover:text-primary whitespace-nowrap",
-                    (pathname === item.href) ? "text-primary" : "text-accent/70"
+                    "flex items-center gap-1.5 text-xs font-black transition-colors hover:text-primary uppercase tracking-wider whitespace-nowrap",
+                    (pathname === item.href) ? "text-primary" : "text-black/60"
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-3.5 w-3.5" />
                   {item.label}
                 </Link>
               ))}
@@ -63,38 +66,38 @@ export function Navigation() {
                 <Link
                   href="/admin"
                   className={cn(
-                    "flex items-center gap-2 text-sm font-bold text-amber-600 transition-colors hover:text-amber-500",
+                    "flex items-center gap-1.5 text-xs font-black text-amber-600 transition-colors hover:text-amber-500 uppercase tracking-wider",
                     pathname === "/admin" ? "text-amber-500 underline" : ""
                   )}
                 >
-                  <Crown className="h-4 w-4" />
-                  Admin
+                  <Crown className="h-3.5 w-3.5" />
+                  Host
                 </Link>
               )}
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {user ? (
-                <Button variant="ghost" className="rounded-full font-bold text-accent gap-2" asChild>
+                <Button variant="ghost" className="rounded-full font-black text-xs text-black gap-2 h-9 px-4 uppercase" asChild>
                   <Link href="/settings">
-                    <User className="h-4 w-4" />
+                    <User className="h-4 w-4 text-primary" />
                     {user.displayName?.split(' ')[0] || "Strategist"}
                   </Link>
                 </Button>
               ) : (
                 <div className="flex gap-2">
-                  <Button variant="ghost" className="rounded-full font-bold text-accent" asChild>
+                  <Button variant="ghost" className="rounded-full font-black text-xs uppercase h-9 px-4" asChild>
                     <Link href="/login">Login</Link>
                   </Button>
-                  <Button className="rounded-full bg-accent text-white px-6 hover:bg-accent/90" asChild>
-                    <Link href="/signup">Join Now</Link>
+                  <Button className="rounded-full bg-black text-white px-6 h-9 font-black text-xs uppercase" asChild>
+                    <Link href="/signup">Join</Link>
                   </Button>
                 </div>
               )}
             </div>
           </div>
 
-          <button className="lg:hidden p-2 text-accent" onClick={() => setIsOpen(!isOpen)}>
+          <button className="lg:hidden p-2 text-black" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
@@ -102,24 +105,24 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="lg:hidden border-t bg-background p-6 flex flex-col gap-4 animate-in slide-in-from-top">
+        <div className="lg:hidden border-t bg-white p-6 flex flex-col gap-3 animate-in slide-in-from-top">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "flex items-center gap-4 text-lg font-bold p-3 rounded-2xl",
-                pathname === item.href ? "bg-primary/10 text-primary" : "text-accent/70"
+                "flex items-center gap-4 text-sm font-black p-3 rounded-xl uppercase tracking-widest",
+                pathname === item.href ? "bg-primary text-black" : "text-black/60"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-4 w-4" />
               {item.label}
             </Link>
           ))}
           {isHost && (
-            <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-4 text-lg font-bold p-3 rounded-2xl text-amber-600">
-              <Crown className="h-5 w-5" /> Admin
+            <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-4 text-sm font-black p-3 rounded-xl text-amber-600 uppercase tracking-widest">
+              <Crown className="h-4 w-4" /> Host Terminal
             </Link>
           )}
         </div>

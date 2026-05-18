@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Coffee, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Lock, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useUser } from "@/firebase";
 
@@ -14,11 +14,12 @@ export default function EntryGate() {
   const [key, setKey] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const router = useRouter();
-  const { user } = useUser();
+  const { user, loading } = useUser();
 
   const ACCESS_KEY = "0924-6719-4345-6581";
 
   useEffect(() => {
+    if (loading) return;
     const hasAccess = sessionStorage.getItem("fireproof_access_granted");
     if (hasAccess === "true") {
       if (user) {
@@ -27,7 +28,7 @@ export default function EntryGate() {
         router.push("/login");
       }
     }
-  }, [router, user]);
+  }, [router, user, loading]);
 
   const handleProceed = () => {
     setStep('key');
@@ -42,49 +43,54 @@ export default function EntryGate() {
         sessionStorage.setItem("fireproof_access_granted", "true");
         toast({
           title: "Access Granted",
-          description: "Welcome to the FireProof inner circle.",
+          description: "Welcome to NICO DIGITAL Infrastructure.",
         });
         router.push("/login");
       } else {
         toast({
           title: "Invalid Key",
-          description: "The access key you entered is incorrect.",
+          description: "Verification failed. Access denied.",
           variant: "destructive",
         });
       }
       setIsVerifying(false);
-    }, 1500);
+    }, 1200);
   };
 
   if (step === 'ready') {
     return (
-      <div className="min-h-svh flex flex-col items-center justify-center bg-accent text-white p-6 text-center overflow-hidden relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.05),transparent)] pointer-events-none" />
+      <div className="min-h-svh flex flex-col items-center justify-center bg-white text-accent p-8 text-center overflow-hidden relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)] pointer-events-none" />
         
-        <div className="relative z-10 space-y-8 animate-in fade-in zoom-in duration-700 w-full max-w-lg">
-          <div className="p-4 bg-primary/20 rounded-[2rem] w-fit mx-auto border-2 border-primary/30 shadow-lg">
-            <Coffee className="h-10 w-10 md:h-12 md:w-12 text-primary" />
+        <div className="relative z-10 space-y-10 animate-in fade-in zoom-in duration-700 w-full max-w-lg">
+          <div className="space-y-2">
+            <h1 className="text-8xl md:text-9xl font-headline font-black tracking-tighter text-black leading-none">
+              ND
+            </h1>
+            <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
           </div>
           
-          <div className="space-y-3">
-            <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-tight uppercase">
-              Are you <span className="text-primary italic">READY?</span>
-            </h1>
-            <p className="text-base md:text-lg text-white/70 font-bold max-w-xs mx-auto leading-relaxed">
-              Entry is restricted to the strategic elite. Authenticate to proceed.
+          <div className="space-y-4">
+            <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tight uppercase">
+              NICO <span className="text-primary">DIGITAL</span>
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground font-black uppercase tracking-[0.3em]">
+              CREATE · CONNECT · GROW
             </p>
           </div>
 
-          <Button 
-            size="lg" 
-            className="rounded-full px-10 py-6 text-lg md:text-xl font-black bg-primary hover:bg-primary/90 text-accent transition-all transform hover:scale-105 shadow-xl active:scale-95 mx-auto"
-            onClick={handleProceed}
-          >
-            PROCEED <ArrowRight className="ml-3 h-6 w-6" />
-          </Button>
+          <div className="pt-8">
+            <Button 
+              size="lg" 
+              className="rounded-full px-12 py-7 text-lg font-black bg-black text-white hover:bg-black/90 transition-all transform hover:scale-105 shadow-2xl active:scale-95 mx-auto"
+              onClick={handleProceed}
+            >
+              ARE YOU READY? <ArrowRight className="ml-3 h-6 w-6 text-primary" />
+            </Button>
+          </div>
           
-          <p className="text-[10px] text-white/30 uppercase tracking-[0.4em] font-black">
-            NICO DIGITAL SOVEREIGN HUB
+          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.5em] font-black pt-12">
+            SOVEREIGN EXECUTION HUB
           </p>
         </div>
       </div>
@@ -92,36 +98,37 @@ export default function EntryGate() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center bg-accent text-white p-6 relative overflow-hidden">
-      <div className="w-full max-w-sm space-y-8 animate-in slide-in-from-bottom-10 duration-700 relative z-10">
-        <div className="text-center space-y-5">
-          <div className="p-4 bg-primary/10 rounded-[1.5rem] w-fit mx-auto border-2 border-primary/20 shadow-md">
-            <Lock className="h-8 w-8 text-primary" />
+    <div className="min-h-svh flex flex-col items-center justify-center bg-white text-accent p-8 relative overflow-hidden">
+      <div className="w-full max-w-sm space-y-10 animate-in slide-in-from-bottom-10 duration-700 relative z-10">
+        <div className="text-center space-y-6">
+          <div className="p-5 bg-primary/10 rounded-3xl w-fit mx-auto border-2 border-primary/20 shadow-md">
+            <Lock className="h-10 w-10 text-black" />
           </div>
-          <h2 className="text-3xl font-headline font-bold tracking-tight">Access Control</h2>
-          <p className="text-white/60 text-sm font-medium px-4">Input your unique 16-digit verification code provided by the Host.</p>
+          <h2 className="text-3xl font-headline font-black tracking-tight text-black">Master Access</h2>
+          <p className="text-muted-foreground text-sm font-bold px-4">Identify yourself with the Host's 16-digit verification code.</p>
         </div>
 
-        <form onSubmit={verifyKey} className="space-y-5 px-4">
+        <form onSubmit={verifyKey} className="space-y-6 px-4">
           <Input 
             type="text" 
             placeholder="0000-0000-0000-0000"
-            className="bg-white/5 border-2 border-white/20 h-16 text-center text-xl md:text-2xl font-mono tracking-[0.1em] rounded-2xl focus:border-primary text-primary placeholder:text-white/5"
+            className="bg-secondary/30 border-2 border-accent/5 h-16 text-center text-2xl font-mono tracking-[0.1em] rounded-2xl focus:border-primary text-black placeholder:text-muted-foreground/30"
             value={key}
             onChange={(e) => setKey(e.target.value)}
             required
+            autoFocus
           />
           <Button 
             type="submit" 
-            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-accent font-black text-lg shadow-xl transition-all active:scale-95"
+            className="w-full h-16 rounded-2xl bg-black hover:bg-black/90 text-white font-black text-lg shadow-xl transition-all active:scale-95"
             disabled={isVerifying}
           >
-            {isVerifying ? <Loader2 className="animate-spin h-6 w-6" /> : "VERIFY ACCESS"}
+            {isVerifying ? <Loader2 className="animate-spin h-6 w-6" /> : "AUTHENTICATE"}
           </Button>
         </form>
 
-        <p className="text-center text-[10px] text-white/20 font-black uppercase tracking-[0.3em]">
-          SECURITY PROTOCOL ACTIVE
+        <p className="text-center text-[10px] text-muted-foreground font-black uppercase tracking-[0.4em]">
+          NICO DIGITAL ROOT SECURITY
         </p>
       </div>
     </div>
