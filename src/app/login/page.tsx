@@ -31,22 +31,18 @@ export default function LoginPage() {
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!email || !password) return;
+    if (!email || !password) {
+      toast({ title: 'Input Required', description: 'Please enter both credentials.', variant: 'destructive' });
+      return;
+    }
     setIsLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: 'Access Granted',
-        description: 'Welcome back to the strategist hub.',
-      });
+      toast({ title: 'Access Granted', description: 'Welcome back to NICO DIGITAL.' });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({
-        title: 'Login Failed',
-        description: 'Invalid credentials. Ensure your strategy is correct.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Login Failed', description: error.message || 'Invalid credentials.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -54,124 +50,91 @@ export default function LoginPage() {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      toast({
-        title: 'Email Required',
-        description: 'Enter your email to reset password.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Email Required', description: 'Enter your email to reset password.', variant: 'destructive' });
       return;
     }
     try {
       await sendPasswordResetEmail(auth, email);
-      toast({
-        title: 'Email Sent',
-        description: 'Check your inbox for reset instructions.',
-      });
+      toast({ title: 'Email Sent', description: 'Check your inbox for reset instructions.' });
     } catch (e: any) {
       toast({ title: 'Reset Failed', description: e.message, variant: 'destructive' });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
-      {/* Decorative Branding */}
-      <div className="absolute top-[-5%] right-[-5%] opacity-10 pointer-events-none">
-        <Coffee className="w-64 h-64 text-primary rotate-45" />
-      </div>
-      <div className="absolute bottom-[-5%] left-[-5%] opacity-10 pointer-events-none">
-        <Coffee className="w-64 h-64 text-primary -rotate-12" />
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#fdfaf6] relative overflow-hidden">
+      <div className="absolute top-[-10%] right-[-10%] opacity-10 pointer-events-none rotate-45 scale-150">
+        <Coffee className="w-96 h-96 text-foreground" />
       </div>
 
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 bg-secondary/20 rounded-[3rem] shadow-2xl overflow-hidden border border-white/5 relative z-10 backdrop-blur-sm">
-        <div className="p-12 md:p-16 space-y-8 bg-secondary/40 text-foreground flex flex-col justify-center border-r border-white/5">
+      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[3.5rem] shadow-2xl overflow-hidden border-4 border-foreground/5 relative z-10">
+        <div className="p-12 md:p-16 space-y-8 bg-foreground text-white flex flex-col justify-center">
           <div className="space-y-6">
-            <div className="p-5 bg-primary/10 rounded-2xl w-fit border border-primary/20">
-              <Lock className="h-10 w-10 text-primary" />
+            <div className="p-5 bg-primary rounded-3xl w-fit shadow-xl">
+              <Lock className="h-10 w-10 text-foreground" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
-              Return to <span className="text-primary italic">Consistency</span>.
+            <h2 className="text-4xl md:text-5xl font-headline font-black leading-tight tracking-tighter uppercase">
+              STRATEGIST <span className="text-primary italic">HUB</span>.
             </h2>
-            <p className="text-foreground/70 text-lg leading-relaxed font-medium">
-              Nico Digital Infrastructure ensures your high-focus sessions are uninterrupted and productive.
+            <p className="text-white/60 text-lg leading-relaxed font-bold uppercase tracking-widest">
+              Nico Digital Infrastructure ensures high-focus session stability.
             </p>
           </div>
         </div>
 
-        <div className="p-10 md:p-14 space-y-8 bg-background/60">
+        <div className="p-10 md:p-14 space-y-10">
           <div className="space-y-2">
-            <h1 className="text-3xl font-headline font-bold text-white tracking-tight uppercase">Sign In</h1>
-            <p className="text-sm text-primary font-black uppercase tracking-widest opacity-60">Strategist Identity</p>
+            <h1 className="text-3xl font-headline font-black text-foreground tracking-tight uppercase italic">Sign In</h1>
+            <p className="text-[10px] text-primary font-black uppercase tracking-[0.5em]">Protocol Authorization</p>
           </div>
 
-          <div className="flex justify-start gap-4">
-            <Button variant="outline" className="rounded-xl border-primary/20 h-12 w-12 p-0 bg-secondary/50 hover:bg-primary/20 transition-colors">
-              <Chrome className="h-6 w-6 text-red-500" />
-            </Button>
-            <Button variant="outline" className="rounded-xl border-primary/20 h-12 w-12 p-0 bg-secondary/50 hover:bg-primary/20 transition-colors">
-              <Facebook className="h-6 w-6 text-blue-600" />
-            </Button>
-            <Button variant="outline" className="rounded-xl border-primary/20 h-12 w-12 p-0 bg-secondary/50 hover:bg-primary/20 transition-colors">
-              <Instagram className="h-6 w-6 text-pink-600" />
-            </Button>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest opacity-60 ml-1">Strategic Email</Label>
+              <Label>Strategic Email</Label>
               <Input
                 type="email"
                 placeholder="name@example.com"
                 required
-                className="rounded-xl h-14 bg-secondary/40 border-primary/10 px-5 text-base focus:border-primary transition-all"
+                className="rounded-2xl h-16 bg-secondary/20 border-foreground/10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between ml-1">
-                <Label className="text-xs font-bold uppercase tracking-widest opacity-60">Security Key</Label>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-[10px] text-primary hover:text-white font-black uppercase tracking-tighter underline"
-                >
-                  Forgot Key?
-                </button>
+              <div className="flex items-center justify-between">
+                <Label>Security Key</Label>
+                <button type="button" onClick={handleForgotPassword} className="text-[10px] text-primary font-black uppercase underline">Forgot Key?</button>
               </div>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="rounded-xl h-14 bg-secondary/40 border-primary/10 px-5 pr-12 text-base focus:border-primary transition-all"
+                  className="rounded-2xl h-16 bg-secondary/20 border-foreground/10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                 />
                 <button
                   type="button"
-                  onMouseDown={() => setShowPassword(true)}
-                  onMouseUp={() => setShowPassword(false)}
-                  onMouseLeave={() => setShowPassword(false)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 hover:text-primary transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary"
                 >
-                  {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                  {showPassword ? <Eye className="h-6 w-6" /> : <EyeOff className="h-6 w-6" />}
                 </button>
               </div>
             </div>
             <Button
               type="submit"
-              className="w-full rounded-2xl h-16 bg-primary text-background hover:bg-white font-black text-lg shadow-xl transition-all active:scale-95"
+              className="w-full rounded-2xl h-20 bg-foreground text-white hover:bg-primary hover:text-foreground font-black text-xl shadow-xl transition-all"
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : 'ACCESS HUB'}
+              {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'ACCESS HUB'}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-foreground/60 font-medium">
+          <p className="text-center text-sm text-foreground/40 font-black uppercase tracking-widest">
             New strategist?{' '}
-            <Link href="/signup" className="text-primary font-black hover:text-white transition-colors underline">
-              Create Empire
-            </Link>
+            <Link href="/signup" className="text-primary font-black hover:underline">Create Empire</Link>
           </p>
         </div>
       </div>

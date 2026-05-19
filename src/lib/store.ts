@@ -66,9 +66,7 @@ export interface ShooppyProduct {
   description: string;
   imageUrl: string;
   fileUrl?: string;
-  shopLink?: string;
   type: 'Bundle' | 'Template' | 'eBook';
-  price?: string;
   requiredLevel?: number;
 }
 
@@ -83,7 +81,6 @@ export interface Badge {
   title: string;
   description: string;
   difficulty: 'Bronze' | 'Silver' | 'Gold' | 'Sovereign';
-  icon?: string;
 }
 
 export interface ActivityPost {
@@ -136,8 +133,6 @@ interface AdminStore {
   deletePost: (id: string) => void;
   addNewsPost: (post: Omit<BroadCastMessage, 'id' | 'timestamp'>) => void;
   deleteNewsPost: (id: string) => void;
-  
-  // User Actions (Not Host)
   addActivityWall: (post: Omit<ActivityPost, 'id' | 'timestamp'>) => void;
   addResource: (res: Omit<Resource, 'id'>) => void;
   deleteResource: (id: string) => void;

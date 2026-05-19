@@ -20,7 +20,7 @@
     --secondary: 25 20% 92%;
     --secondary-foreground: 25 25% 6%;
     
-    --muted: 25 25% 15%; /* Darker for better readability */
+    --muted: 25 25% 15%; 
     --muted-foreground: 25 25% 30%; 
     
     --accent: 45 100% 50%;
@@ -33,7 +33,7 @@
     --input: 25 25% 10% / 0.25;
     --ring: 45 100% 50%;
     
-    --radius: 1.5rem;
+    --radius: 2rem;
   }
 
   @keyframes atmosphere-float {
@@ -69,26 +69,33 @@
   body {
     @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
     background-color: #fdfaf6;
+    color: #1f1610;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tighter text-foreground font-black;
+    color: #1f1610;
   }
 
   input, textarea, select {
     @apply border-2 border-foreground/30 bg-white focus:border-primary focus:ring-1 focus:ring-primary !important;
     color: #1f1610 !important;
-    font-weight: 500;
+    font-weight: 600 !important;
   }
 
   label {
     @apply font-black uppercase tracking-widest text-foreground !important;
+    color: #1f1610 !important;
     opacity: 1 !important;
     font-size: 0.75rem;
   }
 
   .text-muted-foreground {
-    color: #4a3728 !important; /* Richer brown for visibility */
+    color: #4a3728 !important; 
+  }
+
+  button {
+    @apply transition-transform active:scale-95;
   }
 }
 
