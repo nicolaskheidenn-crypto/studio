@@ -23,6 +23,7 @@ const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
 
 export default function AdminPage() {
   const { user } = useUser();
+  const uid = user?.uid;
   const [adminKey, setAdminKey] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
   
@@ -533,8 +534,8 @@ export default function AdminPage() {
                          <p className="text-[11px] font-bold text-[#1f1610]/40 uppercase tracking-[0.3em]">Global Identity Synchronization Active</p>
                       </div>
                       <div className="flex gap-6">
-                         <Button onClick={() => { updateSpecificUser({ streak: 0 }); toast({ title: "Streak Zeroed" }); }} variant="destructive" className="rounded-full h-16 px-12 font-black uppercase text-sm shadow-xl">Reset Streak</Button>
-                         <Button onClick={resetUserStats} variant="outline" className="rounded-full h-16 px-12 font-black uppercase text-sm border-4 border-[#1f1610] bg-white text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] transition-all shadow-xl">Purge User Stats</Button>
+                         <Button onClick={() => { uid && updateSpecificUser(uid, { streak: 0 }); toast({ title: "Streak Zeroed" }); }} variant="destructive" className="rounded-full h-16 px-12 font-black uppercase text-sm shadow-xl">Reset Streak</Button>
+                         <Button onClick={() => uid && resetUserStats(uid)} variant="outline" className="rounded-full h-16 px-12 font-black uppercase text-sm border-4 border-[#1f1610] bg-white text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] transition-all shadow-xl">Purge User Stats</Button>
                       </div>
                    </div>
                 </Card>
@@ -569,7 +570,7 @@ export default function AdminPage() {
                       <div className="space-y-6">
                          <Input placeholder="Webinar Title" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610]" />
                          <Input placeholder="Protocol Watch Link (URL)" value={webinLink} onChange={e => setWebinLink(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610]" />
-                         <Button onClick={() => { addResource({ type: 'WeBin', title: webinTitle, description: "", content: webinLink, userId: user.uid, nickname: 'The Host' }); setWebinTitle(""); setWebinLink(""); toast({ title: "WeBin Added" }); }} className="w-full h-20 rounded-full bg-[#FFD700] text-[#1f1610] font-black uppercase text-lg">Add to WeBin</Button>
+                         <Button onClick={() => { uid && addResource({ type: 'WeBin', title: webinTitle, description: "", content: webinLink, userId: uid, nickname: 'The Host' }); setWebinTitle(""); setWebinLink(""); toast({ title: "WeBin Added" }); }} className="w-full h-20 rounded-full bg-[#FFD700] text-[#1f1610] font-black uppercase text-lg">Add to WeBin</Button>
                       </div>
                       <div className="space-y-4">
                         {resources.filter(r => r.type === 'WeBin').map(r => (

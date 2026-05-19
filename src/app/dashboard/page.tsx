@@ -16,16 +16,39 @@ import {
   MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X, Download
 } from 'lucide-react';
 import { useUser } from '@/firebase';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { useAdminStore, useUserStore } from '@/lib/store';
+import { useAdminStore, useUserStore, UserProfile } from '@/lib/store';
 import { cn } from '@/lib/utils';
+
+const DEFAULT_PROFILE: UserProfile = {
+  nickname: 'Succemazing',
+  bio: '',
+  avatarUrl: '',
+  coverPhotoUrl: '',
+  points: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  currentTaskDay: 1,
+  lastLogin: null,
+  completedTaskIds: [],
+  capsules: [],
+};
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const uid = user?.uid;
+
+  const profiles = useUserStore(s => s.profiles);
+  const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
+  
   const { 
-    points, xp, level, streak, nickname,
-    claimDaily, lastLogin, addPoints
+    points, xp, level, streak, nickname, lastLogin
+  } = profile;
+
+  const {
+    claimDaily, addPoints
   } = useUserStore();
   
   const { 
@@ -49,13 +72,12 @@ export default function DashboardPage() {
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'| 'WeBin'>('AI_Prompt');
   const [resContent, setResContent] = useState("");
 
-  // Handle Hydration and Daily Logic
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !uid) return;
 
     const checkDaily = () => {
       if (!lastLogin) return true;
@@ -69,10 +91,11 @@ export default function DashboardPage() {
     } else {
       setShowDaily(false);
     }
-  }, [lastLogin, isHydrated]);
+  }, [lastLogin, isHydrated, uid]);
 
   const handleClaimDaily = () => {
-    claimDaily();
+    if (!uid) return;
+    claimDaily(uid);
     setShowDaily(false);
     toast({ title: "Daily Sync Complete", description: "+100 Points, +50 XP Added." });
   };
@@ -91,15 +114,15 @@ export default function DashboardPage() {
   };
 
   const handleDispatchWin = () => {
-    if (!postText) return;
+    if (!postText || !uid) return;
     addActivityWall({
-      userId: user?.uid || 'anon',
+      userId: uid,
       nickname: nickname,
       description: postText,
       images: postImages,
       isPrivate: false
     });
-    addPoints(20);
+    addPoints(uid, 20);
     setPostText("");
     setPostImages([]);
     toast({ title: "Sovereign Win Dispatched", description: "+20 Points earned." });
@@ -108,9 +131,9 @@ export default function DashboardPage() {
 
   const handleAddComment = (postId: string) => {
     const text = commentInputs[postId];
-    if (!text?.trim()) return;
+    if (!text?.trim() || !uid) return;
     addComment(postId, {
-      userId: user?.uid || 'anon',
+      userId: uid,
       nickname: nickname,
       text: text
     });
@@ -119,16 +142,16 @@ export default function DashboardPage() {
   };
 
   const handleAddResource = () => {
-    if (!resTitle || !resContent) return;
+    if (!resTitle || !resContent || !uid) return;
     addResource({
       title: resTitle,
       description: "",
       type: resType,
       content: resContent,
-      userId: user?.uid || 'anon',
+      userId: uid,
       nickname: nickname
     });
-    addPoints(10);
+    addPoints(uid, 10);
     setResTitle(""); setResContent("");
     toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
   };
@@ -300,7 +323,7 @@ export default function DashboardPage() {
                                      </div>
                                      <p className="text-base font-bold text-foreground/80">{comment.text}</p>
                                   </div>
-                                  {(user?.uid === post.userId || user?.email === 'nicolaskheidenn@gmail.com') && (
+                                  {(uid === post.userId || user?.email === 'nicolaskheidenn@gmail.com') && (
                                     <Button 
                                       variant="ghost" 
                                       size="icon" 

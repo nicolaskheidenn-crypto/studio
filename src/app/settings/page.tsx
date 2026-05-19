@@ -8,38 +8,62 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Shield, Lock, Award, Trophy, Coffee, FileText } from "lucide-react";
-import { useUserStore, useAdminStore } from "@/lib/store";
+import { useUserStore, useAdminStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { getAuth, updateProfile } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+const DEFAULT_PROFILE: UserProfile = {
+  nickname: 'Succemazing',
+  bio: '',
+  avatarUrl: '',
+  coverPhotoUrl: '',
+  points: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  currentTaskDay: 1,
+  lastLogin: null,
+  completedTaskIds: [],
+  capsules: [],
+};
+
 export default function SettingsPage() {
   const { user } = useUser();
+  const uid = user?.uid;
   const auth = getAuth();
   
-  const { 
-    nickname: storeNickname, bio: storeBio, 
-    avatarUrl: storeAvatar, coverPhotoUrl: storeCover, 
-    updateProfile: updateStoreProfile,
-  } = useUserStore();
+  const profiles = useUserStore(s => s.profiles);
+  const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
+  const { updateProfile: updateStoreProfile } = useUserStore();
 
   const { badges } = useAdminStore();
 
-  const [displayName, setDisplayName] = useState(storeNickname);
-  const [bio, setBio] = useState(storeBio);
-  const [avatar, setAvatar] = useState(storeAvatar);
-  const [cover, setCover] = useState(storeCover);
+  const [displayName, setDisplayName] = useState(profile.nickname);
+  const [bio, setBio] = useState(profile.bio);
+  const [avatar, setAvatar] = useState(profile.avatarUrl);
+  const [cover, setCover] = useState(profile.coverPhotoUrl);
   const [newPass, setNewPass] = useState("");
 
+  useEffect(() => {
+    if (uid && profiles[uid]) {
+      setDisplayName(profiles[uid].nickname);
+      setBio(profiles[uid].bio);
+      setAvatar(profiles[uid].avatarUrl);
+      setCover(profiles[uid].coverPhotoUrl);
+    }
+  }, [uid, profiles]);
+
   const handleUpdateProfile = async () => {
+    if (!uid) return;
     try {
       if (auth.currentUser) await updateProfile(auth.currentUser, { displayName });
-      updateStoreProfile({ nickname: displayName, bio, avatarUrl: avatar, coverPhotoUrl: cover });
+      updateStoreProfile(uid, { nickname: displayName, bio, avatarUrl: avatar, coverPhotoUrl: cover });
       toast({ title: "Sovereign Profile Updated" });
     } catch (e) {
       toast({ title: "Update Failed", variant: "destructive" });
@@ -59,7 +83,6 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* Decorative Atmosphere Icons */}
       <div className="absolute top-[10%] right-[5%] opacity-10 -rotate-12 pointer-events-none">
         <Coffee className="w-64 h-64 text-primary" />
       </div>
@@ -147,7 +170,6 @@ export default function SettingsPage() {
                 <ScrollArea className="h-[600px] pr-6">
                   <div className="prose prose-sm prose-stone max-w-none text-[#1f1610] space-y-8">
                     <p className="text-lg leading-relaxed">At <strong>Nico Digital</strong>, we are committed to protecting your privacy and building trust through transparency. This Privacy Policy explains how we collect, use, disclose, store, and protect your personal information when you interact with our website, membership platform, and services.</p>
-                    
                     <p className="text-lg leading-relaxed"><strong>Nico Digital</strong> (referred to as “we,” “us,” or “our”) is a digital business established in 2026, specializing in eBooks, templates, bundles, and membership programs. Our flagship offering includes the “Fail-Proof” 30-Day Implementation Sprint — a guided membership experience with daily tasks, progress tracking, Time Capsule, gamification elements, and community features.</p>
 
                     <div className="space-y-4">

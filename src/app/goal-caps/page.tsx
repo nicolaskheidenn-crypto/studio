@@ -9,30 +9,47 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Hourglass, Lock, Unlock, Send, Calendar as CalendarIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store";
+import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/firebase";
 
-/**
- * @fileOverview GoalCapsPage - A sovereign vision archiving system.
- * This component implements the "Time Capsule" feature for long-term goal tracking.
- * It handles hydration to prevent chunk loading errors in Next.js 15.
- */
+const DEFAULT_PROFILE: UserProfile = {
+  nickname: 'Succemazing',
+  bio: '',
+  avatarUrl: '',
+  coverPhotoUrl: '',
+  points: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  currentTaskDay: 1,
+  lastLogin: null,
+  completedTaskIds: [],
+  capsules: [],
+};
 
 export default function GoalCapsPage() {
-  const { capsules, addCapsule } = useUserStore();
+  const { user } = useUser();
+  const uid = user?.uid;
+  const profiles = useUserStore(s => s.profiles);
+  const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
+  
+  const { capsules } = profile;
+  const { addCapsule } = useUserStore();
+
   const [message, setMessage] = useState("");
   const [unlockDate, setUnlockDate] = useState("");
   const [isMounted, setIsMounted] = useState(false);
 
-  // Robust hydration check to prevent chunk/mismatch errors
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!uid) return;
     if (!message || !unlockDate) {
       toast({
         title: "Protocol Error",
@@ -49,7 +66,7 @@ export default function GoalCapsPage() {
       createdAt: new Date().toLocaleDateString(),
     };
 
-    addCapsule(newCap);
+    addCapsule(uid, newCap);
     setMessage("");
     setUnlockDate("");
     
@@ -88,7 +105,6 @@ export default function GoalCapsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Input Side */}
             <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-12">
               <div className="space-y-4">
                 <h3 className="text-4xl font-black text-[#1f1610] uppercase tracking-tight italic">Seal Vision</h3>
@@ -131,7 +147,6 @@ export default function GoalCapsPage() {
               </form>
             </Card>
 
-            {/* List Side */}
             <div className="space-y-10">
               <div className="flex items-center gap-6 px-6">
                 <div className="p-4 bg-primary/10 rounded-2xl">

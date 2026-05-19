@@ -7,14 +7,38 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Trophy, ArrowRight, Lock, Award, ShieldCheck } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
-import { useAdminStore, useUserStore } from "@/lib/store";
+import { useAdminStore, useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/firebase";
+
+const DEFAULT_PROFILE: UserProfile = {
+  nickname: 'Succemazing',
+  bio: '',
+  avatarUrl: '',
+  coverPhotoUrl: '',
+  points: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  currentTaskDay: 1,
+  lastLogin: null,
+  completedTaskIds: [],
+  capsules: [],
+};
 
 export default function TaskDoPage() {
+  const { user } = useUser();
+  const uid = user?.uid;
   const { dailyTasks } = useAdminStore();
-  const { completedTaskIds, toggleTask, currentTaskDay, unlockNextDay } = useUserStore();
+  
+  const profiles = useUserStore(s => s.profiles);
+  const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
+  
+  const { completedTaskIds, currentTaskDay } = profile;
+  const { toggleTask, unlockNextDay } = useUserStore();
+
   const [showAward, setShowAward] = useState(false);
   const [showFinalAward, setShowFinalAward] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -27,7 +51,7 @@ export default function TaskDoPage() {
   const isDayComplete = dayTasks.length >= 3 && dayTasks.every(t => completedTaskIds.includes(t.id));
 
   useEffect(() => {
-    if (isDayComplete && isMounted) {
+    if (isDayComplete && isMounted && uid) {
       if (currentTaskDay === 7) {
         setShowFinalAward(true);
       } else {
@@ -36,10 +60,11 @@ export default function TaskDoPage() {
     } else {
       setShowAward(false);
     }
-  }, [isDayComplete, currentTaskDay, isMounted]);
+  }, [isDayComplete, currentTaskDay, isMounted, uid]);
 
   const handleNextDay = () => {
-    unlockNextDay();
+    if (!uid) return;
+    unlockNextDay(uid);
     setShowAward(false);
     toast({
       title: `Day ${currentTaskDay + 1} Protocol Initiated`,
@@ -99,7 +124,7 @@ export default function TaskDoPage() {
                         ? "border-primary/40 bg-primary/10" 
                         : "border-primary/5 bg-background/40 hover:border-primary/20"
                     )}
-                    onClick={() => toggleTask(task.id)}
+                    onClick={() => uid && toggleTask(uid, task.id)}
                   >
                     <Checkbox 
                       checked={completedTaskIds.includes(task.id)} 

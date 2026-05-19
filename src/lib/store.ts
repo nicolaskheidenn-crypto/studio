@@ -218,7 +218,7 @@ export const useAdminStore = create<AdminStore>()(
   )
 );
 
-interface UserProgressStore {
+export interface UserProfile {
   nickname: string;
   bio: string;
   avatarUrl: string;
@@ -231,89 +231,131 @@ interface UserProgressStore {
   currentTaskDay: number;
   completedTaskIds: string[];
   capsules: GoalCapsule[];
-  updateProfile: (data: Partial<{ nickname: string; bio: string; avatarUrl: string; coverPhotoUrl: string }>) => void;
-  addXP: (amount: number) => void;
-  addPoints: (amount: number) => void;
-  toggleTask: (id: string) => void;
-  claimDaily: () => void;
-  addCapsule: (cap: GoalCapsule) => void;
-  resetUserStats: () => void;
-  unlockNextDay: () => void;
-  updateSpecificUser: (data: Partial<{ points: number; xp: number; level: number; streak: number; currentTaskDay: number }>) => void;
+}
+
+const DEFAULT_PROFILE: UserProfile = {
+  nickname: 'Succemazing',
+  bio: '',
+  avatarUrl: '',
+  coverPhotoUrl: '',
+  points: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  currentTaskDay: 1,
+  lastLogin: null,
+  completedTaskIds: [],
+  capsules: [],
+};
+
+interface UserProgressStore {
+  profiles: Record<string, UserProfile>;
+  
+  updateProfile: (uid: string, data: Partial<UserProfile>) => void;
+  addXP: (uid: string, amount: number) => void;
+  addPoints: (uid: string, amount: number) => void;
+  toggleTask: (uid: string, id: string) => void;
+  claimDaily: (uid: string) => void;
+  addCapsule: (uid: string, cap: GoalCapsule) => void;
+  resetUserStats: (uid: string) => void;
+  unlockNextDay: (uid: string) => void;
+  updateSpecificUser: (uid: string, data: Partial<{ points: number; xp: number; level: number; streak: number; currentTaskDay: number }>) => void;
 }
 
 export const useUserStore = create<UserProgressStore>()(
   persist(
     (set, get) => ({
-      nickname: 'Succemazing',
-      bio: '',
-      avatarUrl: '',
-      coverPhotoUrl: '',
-      points: 0,
-      xp: 0,
-      level: 1,
-      streak: 0,
-      currentTaskDay: 1,
-      lastLogin: null,
-      completedTaskIds: [],
-      capsules: [],
-      updateProfile: (data) => set((s) => ({ ...s, ...data })),
-      addXP: (amount) => {
-        const { xp, level } = get();
-        let newXP = xp + amount;
-        let newLevel = level;
+      profiles: {},
+
+      updateProfile: (uid, data) => set((s) => ({
+        profiles: {
+          ...s.profiles,
+          [uid]: { ...(s.profiles[uid] || DEFAULT_PROFILE), ...data }
+        }
+      })),
+
+      addXP: (uid, amount) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        let newXP = current.xp + amount;
+        let newLevel = current.level;
         while (newXP >= 100) {
           newXP -= 100;
           newLevel += 1;
         }
-        set({ xp: newXP, level: newLevel });
+        get().updateProfile(uid, { xp: newXP, level: newLevel });
       },
-      addPoints: (amount) => set((s) => ({ points: s.points + amount })),
-      toggleTask: (id) => set((s) => {
-        const isCompleting = !s.completedTaskIds.includes(id);
+
+      addPoints: (uid, amount) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        get().updateProfile(uid, { points: current.points + amount });
+      },
+
+      toggleTask: (uid, id) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const isCompleting = !current.completedTaskIds.includes(id);
         if (isCompleting) {
-          get().addXP(20);
-          get().addPoints(50);
+          get().addXP(uid, 20);
+          get().addPoints(uid, 50);
         }
-        return { completedTaskIds: isCompleting ? [...s.completedTaskIds, id] : s.completedTaskIds.filter(tid => tid !== id) };
-      }),
-      claimDaily: () => set((s) => {
-        const now = new Date();
-        const last = s.lastLogin ? new Date(s.lastLogin) : null;
+        const newIds = isCompleting 
+          ? [...current.completedTaskIds, id] 
+          : current.completedTaskIds.filter(tid => tid !== id);
         
-        let newStreak = s.streak;
+        get().updateProfile(uid, { completedTaskIds: newIds });
+      },
+
+      claimDaily: (uid) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const now = new Date();
+        const last = current.lastLogin ? new Date(current.lastLogin) : null;
+        
+        let newStreak = current.streak;
         if (!last) {
           newStreak = 1;
         } else {
-          // Calculate difference in full calendar days
           const lastDate = new Date(last.getFullYear(), last.getMonth(), last.getDate());
           const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           const diffDays = Math.floor((currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
           
           if (diffDays === 1) {
-            newStreak += 1; // Consecutive day
+            newStreak += 1;
           } else if (diffDays > 1) {
-            newStreak = 1; // Missed a day
+            newStreak = 1;
           } else if (diffDays === 0) {
-            return {}; // Already claimed today - prevent redundant state updates
+            return;
           }
         }
 
-        return { 
+        get().updateProfile(uid, { 
           lastLogin: now.toISOString(), 
           streak: newStreak, 
-          points: s.points + 100, 
-          xp: s.xp + 50 
-        };
-      }),
-      unlockNextDay: () => set((s) => ({ currentTaskDay: Math.min(s.currentTaskDay + 1, 7) })),
-      addCapsule: (cap) => {
-        set((s) => ({ capsules: [...s.capsules, cap] }));
-        get().addPoints(50);
-        get().addXP(30);
+          points: current.points + 100, 
+          xp: current.xp + 50 
+        });
       },
-      resetUserStats: () => set({ points: 0, xp: 0, level: 1, streak: 0, currentTaskDay: 1, completedTaskIds: [] }),
-      updateSpecificUser: (data) => set((s) => ({ ...s, ...data })),
+
+      unlockNextDay: (uid) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        get().updateProfile(uid, { currentTaskDay: Math.min(current.currentTaskDay + 1, 7) });
+      },
+
+      addCapsule: (uid, cap) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        get().updateProfile(uid, { capsules: [...current.capsules, cap] });
+        get().addPoints(uid, 50);
+        get().addXP(uid, 30);
+      },
+
+      resetUserStats: (uid) => set((s) => ({
+        profiles: {
+          ...s.profiles,
+          [uid]: { ...DEFAULT_PROFILE }
+        }
+      })),
+
+      updateSpecificUser: (uid, data) => {
+        get().updateProfile(uid, data);
+      },
     }),
     { name: 'fireproof-user-v15' }
   )
