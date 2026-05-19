@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -13,8 +14,7 @@ import { cn } from "@/lib/utils";
 
 export default function TaskDoPage() {
   const { dailyTasks } = useAdminStore();
-  const { completedTaskIds, toggleTask } = useUserStore();
-  const [currentDay, setCurrentDay] = useState(1);
+  const { completedTaskIds, toggleTask, currentTaskDay, unlockNextDay } = useUserStore();
   const [showAward, setShowAward] = useState(false);
   const [showFinalAward, setShowFinalAward] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -23,28 +23,28 @@ export default function TaskDoPage() {
     setIsMounted(true);
   }, []);
 
-  const dayTasks = dailyTasks.filter(t => t.day === currentDay);
+  const dayTasks = dailyTasks.filter(t => t.day === currentTaskDay);
   const isDayComplete = dayTasks.length >= 3 && dayTasks.every(t => completedTaskIds.includes(t.id));
 
   useEffect(() => {
     if (isDayComplete && isMounted) {
-      if (currentDay === 7) {
+      if (currentTaskDay === 7) {
         setShowFinalAward(true);
       } else {
         setShowAward(true);
       }
-      toast({
-        title: `Day ${currentDay} Mastered!`,
-        description: "Excellent consistency. Nico Digital acknowledges your discipline.",
-      });
     } else {
       setShowAward(false);
     }
-  }, [isDayComplete, currentDay, isMounted]);
+  }, [isDayComplete, currentTaskDay, isMounted]);
 
   const handleNextDay = () => {
-    setCurrentDay(d => d + 1);
+    unlockNextDay();
     setShowAward(false);
+    toast({
+      title: `Day ${currentTaskDay + 1} Protocol Initiated`,
+      description: "Previous routines have been archived for sovereignty.",
+    });
   };
 
   if (!isMounted) return null;
@@ -62,15 +62,14 @@ export default function TaskDoPage() {
           {[1, 2, 3, 4, 5, 6, 7].map(d => (
             <Button 
               key={d}
-              variant={currentDay === d ? "default" : "outline"}
-              className={cn("rounded-3xl min-w-[85px] h-14 font-black text-xl shadow-xl transition-all border-2", 
-                currentDay === d ? "bg-primary text-background border-primary" : "border-primary/20 text-primary/40",
-                currentDay > d && "border-primary text-primary opacity-100"
+              variant={currentTaskDay === d ? "default" : "outline"}
+              className={cn("rounded-3xl min-w-[85px] h-14 font-black text-xl shadow-xl transition-all border-2 cursor-default", 
+                currentTaskDay === d ? "bg-primary text-background border-primary" : "border-primary/20 text-primary/40",
+                currentTaskDay > d && "border-primary text-primary opacity-50 grayscale"
               )}
-              onClick={() => d <= currentDay && setCurrentDay(d)}
-              disabled={d > currentDay}
+              disabled={d !== currentTaskDay}
             >
-              D{d} {currentDay > d && <ShieldCheck className="ml-1 h-4 w-4" />}
+              D{d} {currentTaskDay > d && <ShieldCheck className="ml-1 h-4 w-4" />}
             </Button>
           ))}
         </div>
@@ -78,12 +77,12 @@ export default function TaskDoPage() {
         {dayTasks.length === 0 ? (
           <div className="text-center p-20 bg-secondary/20 rounded-[3rem] border-4 border-dashed border-primary/10 shadow-2xl">
             <Lock className="h-16 w-16 mx-auto text-primary/20 mb-8" />
-            <p className="text-2xl text-white/50 font-black uppercase tracking-tight">The Host is finalizing Day {currentDay} tasks.</p>
+            <p className="text-2xl text-white/50 font-black uppercase tracking-tight">The Host is finalizing Day {currentTaskDay} tasks.</p>
           </div>
         ) : (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
             <div className="flex items-center justify-between px-4">
-               <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">Day {currentDay} Routine</h2>
+               <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">Day {currentTaskDay} Routine</h2>
                <Badge className="bg-primary text-background h-8 px-5 text-[10px] font-black rounded-full uppercase tracking-widest shadow-xl">
                 {completedTaskIds.filter(id => dayTasks.some(t => t.id === id)).length} / 3 COMPLETED
                </Badge>
@@ -124,13 +123,13 @@ export default function TaskDoPage() {
             <Trophy className="h-20 w-20 mx-auto mb-6 animate-bounce" />
             <h2 className="text-5xl font-headline font-black mb-4 uppercase tracking-tighter">Day Mastered!</h2>
             <p className="text-xl font-black uppercase tracking-widest opacity-80 mb-10 leading-relaxed">
-              Strategic consistency complete.<br/>You are one step closer to Sovereignty.
+              Strategic consistency complete.<br/>The routine is archived. No turning back.
             </p>
             <Button 
               className="rounded-full font-black text-2xl px-16 h-20 bg-background text-primary hover:bg-secondary transition-all active:scale-95 shadow-2xl uppercase tracking-tighter" 
               onClick={handleNextDay}
             >
-              Unlock Day {currentDay + 1} <ArrowRight className="ml-4 h-8 w-8" />
+              Advance to Day {currentTaskDay + 1} <ArrowRight className="ml-4 h-8 w-8" />
             </Button>
           </div>
         )}
