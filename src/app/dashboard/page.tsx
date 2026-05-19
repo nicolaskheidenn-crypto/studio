@@ -36,6 +36,7 @@ export default function DashboardPage() {
   const [showDaily, setShowDaily] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [activeTab, setActiveTab] = useState('hub');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Activity State
   const [postText, setPostText] = useState("");
@@ -48,15 +49,27 @@ export default function DashboardPage() {
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'| 'WeBin'>('AI_Prompt');
   const [resContent, setResContent] = useState("");
 
+  // Handle Hydration and Daily Logic
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
     const checkDaily = () => {
       if (!lastLogin) return true;
       const lastDate = new Date(lastLogin).toDateString();
       const nowDate = new Date().toDateString();
       return lastDate !== nowDate;
     };
-    if (checkDaily()) setShowDaily(true);
-  }, [lastLogin]);
+
+    if (checkDaily()) {
+      setShowDaily(true);
+    } else {
+      setShowDaily(false);
+    }
+  }, [lastLogin, isHydrated]);
 
   const handleClaimDaily = () => {
     claimDaily();
@@ -122,6 +135,8 @@ export default function DashboardPage() {
 
   const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub');
   const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
+
+  if (!isHydrated) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
