@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    /* NICO DIGITAL Brand Palette: Mocha Brown and Gold Yellow */
-    --background: 45 30% 98%; /* #fdfaf6 - Calm Mocha Cream */
-    --foreground: 25 25% 6%; /* #1f1610 - Deep Mocha Brown */
+    /* NICO DIGITAL Brand Palette: Mocha Brown Background and Gold Yellow Primary */
+    --background: 25 25% 6%; /* #1f1610 - Deep Mocha Brown */
+    --foreground: 45 30% 98%; /* #fdfaf6 - Mocha Cream/White for text */
     
-    --card: 0 0% 100%;
-    --card-foreground: 25 25% 6%;
+    --card: 25 25% 10%;
+    --card-foreground: 45 30% 98%;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 25 25% 6%;
+    --popover: 25 25% 10%;
+    --popover-foreground: 45 30% 98%;
     
-    --primary: 45 100% 50%; /* NICO Gold Yellow */
+    --primary: 45 100% 50%; /* #FFD700 - Gold Yellow */
     --primary-foreground: 25 25% 6%;
     
-    --secondary: 25 20% 92%;
-    --secondary-foreground: 25 25% 6%;
+    --secondary: 25 25% 15%;
+    --secondary-foreground: 45 30% 98%;
     
-    --muted: 25 25% 15%; 
-    --muted-foreground: 25 25% 30%; 
+    --muted: 25 25% 25%; 
+    --muted-foreground: 45 20% 70%; 
     
     --accent: 45 100% 50%;
     --accent-foreground: 25 25% 6%;
@@ -29,8 +29,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 25 25% 10% / 0.2;
-    --input: 25 25% 10% / 0.25;
+    --border: 45 100% 50% / 0.2;
+    --input: 45 100% 50% / 0.3;
     --ring: 45 100% 50%;
     
     --radius: 2rem;
@@ -68,30 +68,25 @@
 
   body {
     @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
-    background-color: #fdfaf6;
-    color: #1f1610;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tighter text-foreground font-black;
-    color: #1f1610;
   }
 
   input, textarea, select {
-    @apply border-2 border-foreground/30 bg-white focus:border-primary focus:ring-1 focus:ring-primary !important;
-    color: #1f1610 !important;
+    @apply border-2 border-primary/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary !important;
     font-weight: 600 !important;
   }
 
   label {
-    @apply font-black uppercase tracking-widest text-foreground !important;
-    color: #1f1610 !important;
+    @apply font-black uppercase tracking-widest text-primary !important;
     opacity: 1 !important;
     font-size: 0.75rem;
   }
 
   .text-muted-foreground {
-    color: #4a3728 !important; 
+    @apply text-foreground/60 !important; 
   }
 
   button {
