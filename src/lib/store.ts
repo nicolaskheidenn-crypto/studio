@@ -69,6 +69,14 @@ export interface Badge {
   difficulty: 'Bronze' | 'Silver' | 'Gold' | 'Sovereign';
 }
 
+export interface PostComment {
+  id: string;
+  userId: string;
+  nickname: string;
+  text: string;
+  timestamp: string;
+}
+
 export interface ActivityPost {
   id: string;
   userId: string;
@@ -77,6 +85,8 @@ export interface ActivityPost {
   images: string[];
   isPrivate: boolean;
   timestamp: string;
+  hearts: number;
+  comments: PostComment[];
 }
 
 export interface Resource {
@@ -128,7 +138,10 @@ interface AdminStore {
   deletePost: (id: string) => void;
   addNewsPost: (post: Omit<BroadCastMessage, 'id' | 'timestamp'>) => void;
   deleteNewsPost: (id: string) => void;
-  addActivityWall: (post: Omit<ActivityPost, 'id' | 'timestamp'>) => void;
+  addActivityWall: (post: Omit<ActivityPost, 'id' | 'timestamp' | 'hearts' | 'comments'>) => void;
+  heartPost: (postId: string) => void;
+  addComment: (postId: string, comment: Omit<PostComment, 'id' | 'timestamp'>) => void;
+  deleteComment: (postId: string, commentId: string) => void;
   addResource: (res: Omit<Resource, 'id'>) => void;
   deleteResource: (id: string) => void;
 }
@@ -167,7 +180,30 @@ export const useAdminStore = create<AdminStore>()(
       deletePost: (id) => set((s) => ({ activityWall: s.activityWall.filter(p => p.id !== id) })),
       addNewsPost: (data) => set((s) => ({ newsPosts: [{ ...data, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }, ...s.newsPosts] })),
       deleteNewsPost: (id) => set((s) => ({ newsPosts: s.newsPosts.filter(p => p.id !== id) })),
-      addActivityWall: (data) => set((s) => ({ activityWall: [{ ...data, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }, ...s.activityWall] })),
+      addActivityWall: (data) => set((s) => ({ 
+        activityWall: [{ 
+          ...data, 
+          id: Math.random().toString(36).substr(2, 9), 
+          timestamp: new Date().toISOString(),
+          hearts: 0,
+          comments: []
+        }, ...s.activityWall] 
+      })),
+      heartPost: (postId) => set((s) => ({
+        activityWall: s.activityWall.map(p => p.id === postId ? { ...p, hearts: p.hearts + 1 } : p)
+      })),
+      addComment: (postId, comment) => set((s) => ({
+        activityWall: s.activityWall.map(p => p.id === postId ? { 
+          ...p, 
+          comments: [...p.comments, { ...comment, id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toISOString() }] 
+        } : p)
+      })),
+      deleteComment: (postId, commentId) => set((s) => ({
+        activityWall: s.activityWall.map(p => p.id === postId ? {
+          ...p,
+          comments: p.comments.filter(c => c.id !== commentId)
+        } : p)
+      })),
       addResource: (data) => set((s) => ({ resources: [...s.resources, { ...data, id: Math.random().toString(36).substr(2, 9) }] })),
       deleteResource: (id) => set((s) => ({ resources: s.resources.filter(r => r.id !== id) })),
     }),

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Navigation } from '@/components/Navigation';
@@ -12,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
-  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, UserPlus, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock
+  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, UserPlus, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useState, useEffect, useRef } from 'react';
@@ -30,7 +31,7 @@ export default function DashboardPage() {
   
   const { 
     shooppyProducts, newsPosts, faqs, resources, activityWall, 
-    addActivityWall, addResource 
+    addActivityWall, addResource, heartPost, addComment, deleteComment 
   } = useAdminStore();
   
   const [showDaily, setShowDaily] = useState(false);
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   // Activity State
   const [postText, setPostText] = useState("");
   const [postImages, setPostImages] = useState<string[]>([]);
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Resource State
@@ -96,6 +98,18 @@ export default function DashboardPage() {
     setPostImages([]);
     toast({ title: "Sovereign Win Dispatched", description: "+20 Points earned." });
     setActiveTab('hub'); 
+  };
+
+  const handleAddComment = (postId: string) => {
+    const text = commentInputs[postId];
+    if (!text?.trim()) return;
+    addComment(postId, {
+      userId: user?.uid || 'anon',
+      nickname: nickname,
+      text: text
+    });
+    setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+    toast({ title: "Insight Recorded" });
   };
 
   const handleAddResource = () => {
@@ -218,7 +232,7 @@ export default function DashboardPage() {
                    <Button variant="ghost" className="text-primary hover:text-primary/70 rounded-full font-black text-[11px] uppercase tracking-widest" onClick={() => fileInputRef.current?.click()}>
                     <Plus className="h-6 w-6 mr-3" /> Gallery (1-6)
                    </Button>
-                   <input type="file" ref={fileInputRef} hidden multiple accept="image/*" onChange={handleFileChange} />
+                   <input type="file" min={1} max={6} ref={fileInputRef} hidden multiple accept="image/*" onChange={handleFileChange} />
                    <Button onClick={handleDispatchWin} className="bg-primary text-background rounded-full px-14 h-16 font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Dispatch Win</Button>
                 </div>
               </Card>
@@ -246,22 +260,71 @@ export default function DashboardPage() {
                     <CardHeader className="p-10 pb-6">
                        <div className="flex items-center gap-5">
                          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm border-2 border-primary/20">{post.nickname.slice(0,2).toUpperCase()}</div>
-                         <div>
-                            <p className="font-black text-lg uppercase text-foreground">{post.nickname}</p>
-                            <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest">{new Date(post.timestamp).toLocaleString()}</p>
+                         <div className="flex-1">
+                            <p className="font-black text-xl uppercase text-foreground">{post.nickname}</p>
+                            <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">{new Date(post.timestamp).toLocaleString()}</p>
                          </div>
                        </div>
                     </CardHeader>
                     <CardContent className="p-10 pt-0 space-y-8">
-                       <p className="text-lg font-bold text-foreground leading-relaxed">{post.description}</p>
+                       <p className="text-2xl font-black text-foreground leading-tight tracking-tight uppercase italic">{post.description}</p>
                        {post.images.length > 0 && (
                          <div className={cn("grid gap-4", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
                            {post.images.map((img, i) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" alt="Activity" />)}
                          </div>
                        )}
+                       
                        <div className="flex gap-8 pt-8 border-t-2 border-primary/10">
-                          <Button variant="ghost" className="text-[11px] font-black uppercase tracking-widest text-primary/40 hover:text-primary"><Heart className="h-5 w-5 mr-3" /> Respect</Button>
-                          <Button variant="ghost" className="text-[11px] font-black uppercase tracking-widest text-primary/40 hover:text-primary"><MessageCircle className="h-5 w-5 mr-3" /> Insight</Button>
+                          <Button 
+                            variant="ghost" 
+                            className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary transition-all"
+                            onClick={() => heartPost(post.id)}
+                          >
+                            <Heart className="h-6 w-6 mr-3 fill-primary" /> 
+                            {post.hearts || 0} Heart
+                          </Button>
+                          <Button variant="ghost" className="text-[11px] font-black uppercase tracking-widest text-primary/40 hover:text-primary">
+                            <MessageCircle className="h-6 w-6 mr-3" /> 
+                            {post.comments?.length || 0} Insight
+                          </Button>
+                       </div>
+
+                       {/* Comment Section */}
+                       <div className="space-y-6 pt-6 bg-background/20 rounded-[2.5rem] p-6">
+                          <div className="flex gap-4">
+                             <Input 
+                               placeholder="Add a strategic insight..." 
+                               className="h-14 rounded-2xl bg-background/50 border-primary/10 text-sm font-black"
+                               value={commentInputs[post.id] || ""}
+                               onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                               onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
+                             />
+                             <Button onClick={() => handleAddComment(post.id)} className="h-14 w-14 rounded-2xl bg-primary text-background"><Send className="h-6 w-6" /></Button>
+                          </div>
+                          
+                          <div className="space-y-4">
+                             {post.comments?.map((comment) => (
+                               <div key={comment.id} className="p-6 bg-background/40 rounded-3xl border-2 border-primary/5 flex justify-between items-start group">
+                                  <div className="flex-1">
+                                     <div className="flex items-center gap-3 mb-1">
+                                        <p className="font-black text-xs uppercase text-primary">@{comment.nickname}</p>
+                                        <span className="text-[10px] text-white/20 font-black">{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                                     </div>
+                                     <p className="text-base font-bold text-foreground/80">{comment.text}</p>
+                                  </div>
+                                  {(user?.uid === post.userId || user?.email === 'nicolaskheidenn@gmail.com') && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="text-red-500/40 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => deleteComment(post.id, comment.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                               </div>
+                             ))}
+                          </div>
                        </div>
                     </CardContent>
                   </Card>
