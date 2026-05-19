@@ -277,7 +277,35 @@ export const useUserStore = create<UserProgressStore>()(
         }
         return { completedTaskIds: isCompleting ? [...s.completedTaskIds, id] : s.completedTaskIds.filter(tid => tid !== id) };
       }),
-      claimDaily: () => set((s) => ({ lastLogin: new Date().toISOString(), streak: s.streak + 1, points: s.points + 100, xp: s.xp + 50 })),
+      claimDaily: () => set((s) => {
+        const now = new Date();
+        const last = s.lastLogin ? new Date(s.lastLogin) : null;
+        
+        let newStreak = s.streak;
+        if (!last) {
+          newStreak = 1;
+        } else {
+          // Calculate difference in full calendar days
+          const lastDate = new Date(last.getFullYear(), last.getMonth(), last.getDate());
+          const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const diffDays = Math.floor((currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            newStreak += 1; // Consecutive day
+          } else if (diffDays > 1) {
+            newStreak = 1; // Missed a day
+          } else if (diffDays === 0) {
+            return {}; // Already claimed today - prevent redundant state updates
+          }
+        }
+
+        return { 
+          lastLogin: now.toISOString(), 
+          streak: newStreak, 
+          points: s.points + 100, 
+          xp: s.xp + 50 
+        };
+      }),
       unlockNextDay: () => set((s) => ({ currentTaskDay: Math.min(s.currentTaskDay + 1, 7) })),
       addCapsule: (cap) => {
         set((s) => ({ capsules: [...s.capsules, cap] }));

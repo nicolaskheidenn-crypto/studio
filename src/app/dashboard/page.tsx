@@ -45,15 +45,15 @@ export default function DashboardPage() {
 
   // Resource State
   const [resTitle, setResTitle] = useState("");
-  const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
+  const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'| 'WeBin'>('AI_Prompt');
   const [resContent, setResContent] = useState("");
 
   useEffect(() => {
     const checkDaily = () => {
       if (!lastLogin) return true;
-      const last = new Date(lastLogin).getTime();
-      const now = new Date().getTime();
-      return (now - last) > 86400000;
+      const lastDate = new Date(lastLogin).toDateString();
+      const nowDate = new Date().toDateString();
+      return lastDate !== nowDate;
     };
     if (checkDaily()) setShowDaily(true);
   }, [lastLogin]);
