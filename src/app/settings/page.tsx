@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -68,20 +69,20 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fdfaf6]">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-5xl">
-        <h1 className="text-6xl font-headline font-black mb-12 text-foreground uppercase tracking-tighter">Settings</h1>
+        <h1 className="text-6xl font-headline font-black mb-12 text-foreground uppercase tracking-tighter italic">Settings</h1>
         
         <Tabs defaultValue="profile" className="space-y-10">
-          <TabsList className="bg-white/50 p-1.5 rounded-full w-fit shadow-md border border-foreground/5">
-            <TabsTrigger value="profile" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest">Identity</TabsTrigger>
-            <TabsTrigger value="appearance" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest">Atmosphere</TabsTrigger>
-            <TabsTrigger value="achievements" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest">Vault</TabsTrigger>
+          <TabsList className="bg-card/40 p-1.5 rounded-full w-fit shadow-md border-2 border-primary/10">
+            <TabsTrigger value="profile" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Identity</TabsTrigger>
+            <TabsTrigger value="appearance" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Atmosphere</TabsTrigger>
+            <TabsTrigger value="achievements" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Vault</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-foreground/5 bg-white p-12 shadow-xl">
+            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-12 shadow-xl">
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                   <div className="space-y-8">
                     <div className="space-y-2">
@@ -93,25 +94,25 @@ export default function SettingsPage() {
                       <Textarea value={bio} onChange={e => setBio(e.target.value)} className="min-h-[140px] font-medium" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                       <div><Label>Avatar</Label><Input type="file" onChange={e => handleFile(e, setAvatar)} className="mt-2" /></div>
-                       <div><Label>Cover</Label><Input type="file" onChange={e => handleFile(e, setCover)} className="mt-2" /></div>
+                       <div><Label>Avatar</Label><Input type="file" onChange={e => handleFile(e, setAvatar)} className="mt-2 h-12" /></div>
+                       <div><Label>Cover</Label><Input type="file" onChange={e => handleFile(e, setCover)} className="mt-2 h-12" /></div>
                     </div>
-                    <Button onClick={handleUpdateProfile} className="w-full h-20 rounded-full bg-foreground text-white font-black text-2xl uppercase shadow-xl active:scale-95 transition-all">Update Protocol</Button>
+                    <Button onClick={handleUpdateProfile} className="w-full h-20 rounded-full bg-primary text-background font-black text-2xl uppercase shadow-xl active:scale-95 transition-all">Update Protocol</Button>
                   </div>
-                  <div className="p-10 bg-secondary/20 rounded-[3rem] border border-foreground/5 space-y-8">
+                  <div className="p-10 bg-primary/5 rounded-[3rem] border-2 border-primary/10 space-y-8">
                     <h3 className="text-2xl font-black uppercase tracking-tighter text-foreground flex items-center gap-3"><Lock className="h-6 w-6 text-primary" /> Root Security</h3>
                     <div className="space-y-2">
                       <Label>New Security Key</Label>
                       <Input type="password" placeholder="••••••••" value={newPass} onChange={e => setNewPass(e.target.value)} className="h-16" />
                     </div>
-                    <Button className="w-full h-16 rounded-2xl bg-white border-2 border-foreground text-foreground font-black uppercase text-xs hover:bg-foreground hover:text-white transition-all">Update Access Key</Button>
+                    <Button className="w-full h-16 rounded-2xl bg-background border-2 border-primary text-primary font-black uppercase text-xs hover:bg-primary hover:text-background transition-all">Update Access Key</Button>
                   </div>
                </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-foreground/5 bg-white p-16 shadow-xl">
+            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-16 shadow-xl">
                <div className="text-center mb-16 space-y-4">
                   <Trophy className="h-16 w-16 mx-auto text-primary" />
                   <h2 className="text-5xl font-black text-foreground uppercase tracking-tighter italic">Achievement Vault</h2>
@@ -119,9 +120,9 @@ export default function SettingsPage() {
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   {badges.length === 0 ? (
-                    <p className="col-span-full text-center text-foreground/30 font-black uppercase italic">No badges deployed by the Host.</p>
+                    <p className="col-span-full text-center text-foreground/30 font-black uppercase italic py-20">No badges deployed by the Host.</p>
                   ) : badges.map((b) => (
-                    <div key={b.id} className="p-10 bg-secondary/10 rounded-[3rem] border-4 border-transparent flex items-center gap-8 group hover:border-primary transition-all shadow-sm">
+                    <div key={b.id} className="p-10 bg-background/40 rounded-[3rem] border-4 border-transparent flex items-center gap-8 group hover:border-primary transition-all shadow-sm">
                        <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform", 
                          b.difficulty === 'Bronze' ? 'bg-[#cd7f32]' : 
                          b.difficulty === 'Silver' ? 'bg-[#c0c0c0]' : 
@@ -129,8 +130,8 @@ export default function SettingsPage() {
                           <Award className="h-10 w-10 text-white" />
                        </div>
                        <div>
-                         <Badge className="mb-2 bg-white text-foreground text-[8px] uppercase border border-foreground/10">{b.difficulty}</Badge>
-                         <h4 className="text-2xl font-black text-foreground uppercase tracking-tight">{b.title}</h4>
+                         <Badge className="mb-2 bg-primary text-background text-[8px] uppercase border-none">{b.difficulty}</Badge>
+                         <h4 className="text-2xl font-black text-foreground uppercase tracking-tight italic">{b.title}</h4>
                          <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{b.description}</p>
                        </div>
                     </div>
@@ -140,18 +141,18 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="appearance" className="animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-foreground/5 bg-white p-16 space-y-16 shadow-xl">
+            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-16 space-y-16 shadow-xl">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {THEMES.map((t) => (
-                    <button key={t.id} onClick={() => setTheme(t.id)} className={cn("flex flex-col p-10 rounded-[3rem] border-4 transition-all shadow-md", theme === t.id ? "border-primary bg-primary/5" : "border-foreground/5 bg-secondary/20")}>
+                    <button key={t.id} onClick={() => setTheme(t.id)} className={cn("flex flex-col p-10 rounded-[3rem] border-4 transition-all shadow-md", theme === t.id ? "border-primary bg-primary/10" : "border-primary/5 bg-background/60")}>
                       <div className={cn("w-16 h-16 rounded-2xl text-white flex items-center justify-center mb-8 shadow-xl", t.color)}>
                         <t.icon className="h-8 w-8" />
                       </div>
-                      <p className="font-black text-2xl text-foreground uppercase tracking-tighter">{t.label}</p>
+                      <p className="font-black text-2xl text-foreground uppercase tracking-tighter italic">{t.label}</p>
                     </button>
                   ))}
                 </div>
-                <Button onClick={() => { applyTheme(); toast({ title: "Atmosphere Engine Locked" }); }} className="w-full h-24 rounded-full bg-foreground text-white font-black text-3xl shadow-2xl active:scale-95 transition-all">LOCK ENVIRONMENT</Button>
+                <Button onClick={() => { applyTheme(); toast({ title: "Atmosphere Engine Locked" }); }} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl active:scale-95 transition-all uppercase tracking-tighter">LOCK ENVIRONMENT</Button>
             </Card>
           </TabsContent>
         </Tabs>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -111,6 +112,13 @@ export interface BroadCastMessage {
   timestamp: string;
 }
 
+export interface GoalCapsule {
+  id: string;
+  message: string;
+  unlockDate: string;
+  createdAt: string;
+}
+
 interface AdminStore {
   quizzes: Quiz[];
   dailyTasks: ManagedTask[];
@@ -181,11 +189,13 @@ interface UserProgressStore {
   streak: number;
   lastLogin: string | null;
   completedTaskIds: string[];
+  capsules: GoalCapsule[];
   updateProfile: (data: Partial<{ nickname: string; bio: string; avatarUrl: string; coverPhotoUrl: string }>) => void;
   addXP: (amount: number) => void;
   addPoints: (amount: number) => void;
   toggleTask: (id: string) => void;
   claimDaily: () => void;
+  addCapsule: (cap: GoalCapsule) => void;
   resetUserStats: () => void;
   updateSpecificUser: (data: Partial<{ points: number; xp: number; level: number; streak: number }>) => void;
 }
@@ -203,6 +213,7 @@ export const useUserStore = create<UserProgressStore>()(
       streak: 0,
       lastLogin: null,
       completedTaskIds: [],
+      capsules: [],
       updateProfile: (data) => set((s) => ({ ...s, ...data })),
       addXP: (amount) => {
         const { xp, level } = get();
@@ -224,6 +235,11 @@ export const useUserStore = create<UserProgressStore>()(
         return { completedTaskIds: isCompleting ? [...s.completedTaskIds, id] : s.completedTaskIds.filter(tid => tid !== id) };
       }),
       claimDaily: () => set((s) => ({ lastLogin: new Date().toISOString(), streak: s.streak + 1, points: s.points + 100, xp: s.xp + 50 })),
+      addCapsule: (cap) => {
+        set((s) => ({ capsules: [...s.capsules, cap] }));
+        get().addPoints(50);
+        get().addXP(30);
+      },
       resetUserStats: () => set({ points: 0, xp: 0, level: 1, streak: 0 }),
       updateSpecificUser: (data) => set((s) => ({ ...s, ...data })),
     }),
