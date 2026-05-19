@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -7,14 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminStore, useUserStore, QuizQuestion } from "@/lib/store";
+import { useAdminStore, useUserStore, QuizQuestion, Quiz } from "@/lib/store";
 import { useUser } from "@/firebase";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, CheckSquare, 
   Newspaper, ShoppingBag, Users, MessageSquare, Lightbulb, 
-  Video, HelpCircle, Upload, Plus, MoveUp, MoveDown, CheckCircle2 
+  Video, HelpCircle, Upload, Plus, MoveUp, MoveDown, CheckCircle2, Edit3 
 } from "lucide-react";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
@@ -27,7 +28,7 @@ export default function AdminPage() {
   
   const { 
     dailyTasks, addTasks,
-    quizzes, addQuiz, deleteQuiz,
+    quizzes, addQuiz, updateQuiz, deleteQuiz, moveQuiz,
     shooppyProducts, addProduct, deleteProduct, 
     newsPosts, addNewsPost, deleteNewsPost,
     faqs, addFAQ, deleteFAQ,
@@ -74,6 +75,7 @@ export default function AdminPage() {
   const [webinLink, setWebinLink] = useState("");
 
   // --- Quizzo Editor State ---
+  const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
   const [quizTitle, setQuizTitle] = useState("");
   const [tempQuestions, setTempQuestions] = useState<Omit<QuizQuestion, 'id'>[]>([]);
   const [qText, setQText] = useState("");
@@ -145,14 +147,31 @@ export default function AdminPage() {
       toast({ title: "Quiz requires title and questions", variant: "destructive" });
       return;
     }
-    addQuiz({
+    const quizData = {
       title: quizTitle,
       questionCount: tempQuestions.length,
       questions: tempQuestions.map((q, i) => ({ ...q, id: i.toString() })) as QuizQuestion[]
-    });
+    };
+
+    if (editingQuizId) {
+      updateQuiz(editingQuizId, quizData);
+      setEditingQuizId(null);
+      toast({ title: "Protocol Updated" });
+    } else {
+      addQuiz(quizData);
+      toast({ title: "Full Quiz Deployed" });
+    }
+    
     setQuizTitle("");
     setTempQuestions([]);
-    toast({ title: "Full Quiz Deployed" });
+  };
+
+  const startEditQuiz = (quiz: Quiz) => {
+    setEditingQuizId(quiz.id);
+    setQuizTitle(quiz.title);
+    setTempQuestions(quiz.questions.map(({ id, ...q }) => q));
+    toast({ title: "Protocol Loaded into Editor" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (user?.email !== ADMIN_EMAIL) {
@@ -313,7 +332,7 @@ export default function AdminPage() {
                    </CardHeader>
                    <CardContent className="space-y-10">
                       <div className="space-y-4">
-                        <Label>Quiz Title</Label>
+                        <Label>{editingQuizId ? 'Editing Protocol Title' : 'Quiz Title'}</Label>
                         <Input placeholder="Advanced Strategy Test" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 rounded-2xl font-black bg-white text-[#1f1610]" />
                       </div>
 
@@ -334,7 +353,7 @@ export default function AdminPage() {
 
                          {qType === 'multiple' && (
                            <div className="space-y-4">
-                              <Label>Options (Provide 4)</Label>
+                              <Label>Options (Provide 4 distractors)</Label>
                               {qOptions.map((opt, i) => (
                                 <Input key={i} placeholder={`Option ${i+1}`} value={opt} onChange={e => { const newOpts = [...qOptions]; newOpts[i] = e.target.value; setQOptions(newOpts); }} className="h-12 bg-white" />
                               ))}
@@ -346,12 +365,12 @@ export default function AdminPage() {
                             <Input placeholder="The exact key" value={qAnswer} onChange={e => setQAnswer(e.target.value)} className="h-14 bg-white font-black text-primary" />
                          </div>
 
-                         <Button onClick={addQuestionToTemp} className="w-full h-16 rounded-full bg-[#1f1610] text-[#FFD700] font-black uppercase text-sm"><Plus className="h-5 w-5 mr-3" /> Add Question to List</Button>
+                         <Button onClick={addQuestionToTemp} className="w-full h-16 rounded-full bg-[#1f1610] text-[#FFD700] font-black uppercase text-sm"><Plus className="h-5 w-5 mr-3" /> Add Question to Protocol</Button>
                       </div>
 
                       {tempQuestions.length > 0 && (
                         <div className="space-y-4">
-                           <h4 className="font-black text-[#1f1610]/40 uppercase text-[10px] tracking-[0.4em] text-center">Queue ({tempQuestions.length})</h4>
+                           <h4 className="font-black text-[#1f1610]/40 uppercase text-[10px] tracking-[0.4em] text-center">Protocol Queue ({tempQuestions.length})</h4>
                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
                               {tempQuestions.map((q, i) => (
                                 <div key={i} className="p-5 bg-white rounded-2xl flex justify-between items-center border-2 border-[#1f1610]/5">
@@ -363,14 +382,19 @@ export default function AdminPage() {
                                 </div>
                               ))}
                            </div>
-                           <Button onClick={saveFullQuiz} className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] font-black text-2xl uppercase shadow-2xl">Deploy Full Quiz</Button>
+                           <Button onClick={saveFullQuiz} className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] font-black text-2xl uppercase shadow-2xl">
+                             {editingQuizId ? 'Update Strategic Protocol' : 'Deploy Full Quiz'}
+                           </Button>
+                           {editingQuizId && (
+                             <Button onClick={() => { setEditingQuizId(null); setQuizTitle(""); setTempQuestions([]); }} variant="ghost" className="w-full text-xs font-black uppercase text-[#1f1610]/40">Cancel Edit</Button>
+                           )}
                         </div>
                       )}
                    </CardContent>
                 </Card>
              </div>
 
-             {/* Manage Existing Quizzes (Move/Delete) */}
+             {/* Manage Existing Quizzes (Move/Delete/Edit) */}
              <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl mt-12">
                 <CardTitle className="text-3xl font-black uppercase mb-10 flex items-center gap-5 text-[#1f1610]"><CheckCircle2 className="h-10 w-10 text-[#FFD700]" /> Active Protocols (Quizzes)</CardTitle>
                 <div className="space-y-6">
@@ -387,8 +411,9 @@ export default function AdminPage() {
                              </div>
                           </div>
                           <div className="flex items-center gap-4">
-                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary"><MoveUp className="h-6 w-6" /></Button>
-                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary"><MoveDown className="h-6 w-6" /></Button>
+                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary" onClick={() => moveQuiz(q.id, 'up')}><MoveUp className="h-6 w-6" /></Button>
+                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary" onClick={() => moveQuiz(q.id, 'down')}><MoveDown className="h-6 w-6" /></Button>
+                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-blue-50 text-blue-500" onClick={() => startEditQuiz(q)}><Edit3 className="h-6 w-6" /></Button>
                              <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 text-red-500" onClick={() => deleteQuiz(q.id)}><Trash2 className="h-6 w-6" /></Button>
                           </div>
                        </div>

@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Award, Trophy } from "lucide-react";
+import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Award, Trophy, Coffee } from "lucide-react";
 import { useAppStore, type Theme, useUserStore, useAdminStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { getAuth, updateProfile } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +26,7 @@ const THEMES: { id: Theme; label: string; icon: any; color: string }[] = [
 ];
 
 export default function SettingsPage() {
-  const { theme, setTheme, applyTheme } = useAppStore();
+  const { theme, setTheme } = useAppStore();
   const { user } = useUser();
   const auth = getAuth();
   
@@ -34,7 +34,6 @@ export default function SettingsPage() {
     nickname: storeNickname, bio: storeBio, 
     avatarUrl: storeAvatar, coverPhotoUrl: storeCover, 
     updateProfile: updateStoreProfile,
-    points, level
   } = useUserStore();
 
   const { badges } = useAdminStore();
@@ -44,10 +43,6 @@ export default function SettingsPage() {
   const [avatar, setAvatar] = useState(storeAvatar);
   const [cover, setCover] = useState(storeCover);
   const [newPass, setNewPass] = useState("");
-
-  useEffect(() => {
-    applyTheme();
-  }, [theme, applyTheme]);
 
   const handleUpdateProfile = async () => {
     try {
@@ -69,9 +64,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-5xl">
+      
+      {/* Decorative Atmosphere Icons */}
+      <div className="absolute top-[10%] right-[5%] opacity-10 -rotate-12 pointer-events-none">
+        <Coffee className="w-64 h-64 text-primary" />
+      </div>
+      <div className="absolute bottom-[10%] left-[5%] opacity-5 rotate-12 pointer-events-none">
+        <Coffee className="w-80 h-80 text-primary" />
+      </div>
+
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-5xl relative z-10">
         <h1 className="text-6xl font-headline font-black mb-12 text-foreground uppercase tracking-tighter italic">Settings</h1>
         
         <Tabs defaultValue="profile" className="space-y-10">
@@ -82,47 +86,47 @@ export default function SettingsPage() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-12 shadow-xl">
+            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-mocha-cream p-12 shadow-xl">
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                   <div className="space-y-8">
                     <div className="space-y-2">
-                      <Label>Nickname</Label>
-                      <Input value={displayName} onChange={e => setDisplayName(e.target.value)} className="h-16 font-black text-xl" />
+                      <Label className="text-[#1f1610]">Nickname</Label>
+                      <Input value={displayName} onChange={e => setDisplayName(e.target.value)} className="h-16 font-black text-xl bg-white text-[#1f1610]" />
                     </div>
                     <div className="space-y-2">
-                      <Label>Strategic Bio</Label>
-                      <Textarea value={bio} onChange={e => setBio(e.target.value)} className="min-h-[140px] font-medium" />
+                      <Label className="text-[#1f1610]">Strategic Bio</Label>
+                      <Textarea value={bio} onChange={e => setBio(e.target.value)} className="min-h-[140px] font-medium bg-white text-[#1f1610]" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                       <div><Label>Avatar</Label><Input type="file" onChange={e => handleFile(e, setAvatar)} className="mt-2 h-12" /></div>
-                       <div><Label>Cover</Label><Input type="file" onChange={e => handleFile(e, setCover)} className="mt-2 h-12" /></div>
+                       <div><Label className="text-[#1f1610]">Avatar</Label><Input type="file" onChange={e => handleFile(e, setAvatar)} className="mt-2 h-12 bg-white text-[#1f1610]" /></div>
+                       <div><Label className="text-[#1f1610]">Cover</Label><Input type="file" onChange={e => handleFile(e, setCover)} className="mt-2 h-12 bg-white text-[#1f1610]" /></div>
                     </div>
-                    <Button onClick={handleUpdateProfile} className="w-full h-20 rounded-full bg-primary text-background font-black text-2xl uppercase shadow-xl active:scale-95 transition-all">Update Protocol</Button>
+                    <Button onClick={handleUpdateProfile} className="w-full h-20 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-xl active:scale-95 transition-all">Update Protocol</Button>
                   </div>
-                  <div className="p-10 bg-primary/5 rounded-[3rem] border-2 border-primary/10 space-y-8">
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-foreground flex items-center gap-3"><Lock className="h-6 w-6 text-primary" /> Root Security</h3>
+                  <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-2 border-[#1f1610]/10 space-y-8">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#1f1610] flex items-center gap-3"><Lock className="h-6 w-6 text-primary" /> Root Security</h3>
                     <div className="space-y-2">
-                      <Label>New Security Key</Label>
-                      <Input type="password" placeholder="••••••••" value={newPass} onChange={e => setNewPass(e.target.value)} className="h-16" />
+                      <Label className="text-[#1f1610]/60">New Security Key</Label>
+                      <Input type="password" placeholder="••••••••" value={newPass} onChange={e => setNewPass(e.target.value)} className="h-16 bg-white text-[#1f1610]" />
                     </div>
-                    <Button className="w-full h-16 rounded-2xl bg-background border-2 border-primary text-primary font-black uppercase text-xs hover:bg-primary hover:text-background transition-all">Update Access Key</Button>
+                    <Button className="w-full h-16 rounded-2xl bg-[#1f1610] border-2 border-[#FFD700] text-[#FFD700] font-black uppercase text-xs hover:bg-[#FFD700] hover:text-[#1f1610] transition-all">Update Access Key</Button>
                   </div>
                </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-16 shadow-xl">
+            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-mocha-cream p-16 shadow-xl">
                <div className="text-center mb-16 space-y-4">
                   <Trophy className="h-16 w-16 mx-auto text-primary" />
-                  <h2 className="text-5xl font-black text-foreground uppercase tracking-tighter italic">Achievement Vault</h2>
+                  <h2 className="text-5xl font-black text-[#1f1610] uppercase tracking-tighter italic">Achievement Vault</h2>
                   <p className="text-[10px] text-primary font-black uppercase tracking-widest">Strategy milestones unlocked</p>
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   {badges.length === 0 ? (
-                    <p className="col-span-full text-center text-foreground/30 font-black uppercase italic py-20">No badges deployed by the Host.</p>
+                    <p className="col-span-full text-center text-[#1f1610]/30 font-black uppercase italic py-20">No badges deployed by the Host.</p>
                   ) : badges.map((b) => (
-                    <div key={b.id} className="p-10 bg-background/40 rounded-[3rem] border-4 border-transparent flex items-center gap-8 group hover:border-primary transition-all shadow-sm">
+                    <div key={b.id} className="p-10 bg-white rounded-[3rem] border-4 border-transparent flex items-center gap-8 group hover:border-primary transition-all shadow-sm">
                        <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform", 
                          b.difficulty === 'Bronze' ? 'bg-[#cd7f32]' : 
                          b.difficulty === 'Silver' ? 'bg-[#c0c0c0]' : 
@@ -131,8 +135,8 @@ export default function SettingsPage() {
                        </div>
                        <div>
                          <Badge className="mb-2 bg-primary text-background text-[8px] uppercase border-none">{b.difficulty}</Badge>
-                         <h4 className="text-2xl font-black text-foreground uppercase tracking-tight italic">{b.title}</h4>
-                         <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{b.description}</p>
+                         <h4 className="text-2xl font-black text-[#1f1610] uppercase tracking-tight italic">{b.title}</h4>
+                         <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-widest">{b.description}</p>
                        </div>
                     </div>
                   ))}
@@ -152,7 +156,7 @@ export default function SettingsPage() {
                     </button>
                   ))}
                 </div>
-                <Button onClick={() => { applyTheme(); toast({ title: "Atmosphere Engine Locked" }); }} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl active:scale-95 transition-all uppercase tracking-tighter">LOCK ENVIRONMENT</Button>
+                <Button onClick={() => { toast({ title: "Atmosphere Engine Locked" }); }} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl active:scale-95 transition-all uppercase tracking-tighter">LOCK ENVIRONMENT</Button>
             </Card>
           </TabsContent>
         </Tabs>

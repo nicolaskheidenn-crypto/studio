@@ -115,7 +115,9 @@ interface AdminStore {
   resources: Resource[];
 
   addQuiz: (quiz: Omit<Quiz, 'id' | 'createdAt'>) => void;
+  updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
   deleteQuiz: (id: string) => void;
+  moveQuiz: (id: string, direction: 'up' | 'down') => void;
   addTasks: (day: number, tasks: Omit<ManagedTask, 'id' | 'day'>[]) => void;
   addProduct: (product: Omit<ShooppyProduct, 'id'>) => void;
   deleteProduct: (id: string) => void;
@@ -144,7 +146,17 @@ export const useAdminStore = create<AdminStore>()(
       resources: [],
 
       addQuiz: (data) => set((s) => ({ quizzes: [...s.quizzes, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }] })),
+      updateQuiz: (id, data) => set((s) => ({ quizzes: s.quizzes.map(q => q.id === id ? { ...q, ...data } : q) })),
       deleteQuiz: (id) => set((s) => ({ quizzes: s.quizzes.filter(q => q.id !== id) })),
+      moveQuiz: (id, direction) => set((s) => {
+        const index = s.quizzes.findIndex(q => q.id === id);
+        if (index === -1) return s;
+        const newQuizzes = [...s.quizzes];
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= newQuizzes.length) return s;
+        [newQuizzes[index], newQuizzes[newIndex]] = [newQuizzes[newIndex], newQuizzes[index]];
+        return { quizzes: newQuizzes };
+      }),
       addTasks: (day, tasks) => set((s) => ({ dailyTasks: [...s.dailyTasks.filter(t => t.day !== day), ...tasks.map(t => ({ ...t, day, id: Math.random().toString(36).substr(2, 9) }))] })),
       addProduct: (data) => set((s) => ({ shooppyProducts: [...s.shooppyProducts, { ...data, id: Math.random().toString(36).substr(2, 9) }] })),
       deleteProduct: (id) => set((s) => ({ shooppyProducts: s.shooppyProducts.filter(p => p.id !== id) })),
