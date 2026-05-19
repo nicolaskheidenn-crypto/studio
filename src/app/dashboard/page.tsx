@@ -13,20 +13,30 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
-  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, UserPlus, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2
+  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, UserPlus, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, UserMinus, Check, X
 } from 'lucide-react';
 import { useUser } from '@/firebase';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useAdminStore, useUserStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
+const STRATEGIST_REGISTRY = [
+  { nickname: 'The Host', bio: 'Global Admin / Sovereign Strategist', type: 'Host' },
+  { nickname: 'Kheidenn', bio: 'Execution Specialist', type: 'Strategist' },
+  { nickname: 'ViperX', bio: 'AI Prompt Engineer', type: 'Strategist' },
+  { nickname: 'Phoenix', bio: 'Growth Architect', type: 'Strategist' },
+  { nickname: 'MochaMaster', bio: 'Consistency Lead', type: 'Strategist' },
+];
+
 export default function DashboardPage() {
   const { user } = useUser();
   const { 
     points, xp, level, streak, nickname,
-    claimDaily, lastLogin, addPoints 
+    claimDaily, lastLogin, addPoints,
+    friends, sentRequests, notifications,
+    sendFriendRequest, acceptFriendRequest, declineFriendRequest, unfriend, clearNotification
   } = useUserStore();
   
   const { 
@@ -51,9 +61,13 @@ export default function DashboardPage() {
 
   // MeText State
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState([
-    { id: '1', sender: 'The Host', text: 'Welcome to MeText, Strategist. Empire alignment begins with synchronized communication.', timestamp: new Date().toISOString() }
-  ]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeChatTarget, setActiveChatTarget] = useState<string>('The Host');
+  const [messages, setMessages] = useState<Record<string, any[]>>({
+    'The Host': [
+      { id: '1', sender: 'The Host', text: 'Welcome to MeText, Strategist. Empire alignment begins with synchronized communication.', timestamp: new Date().toISOString() }
+    ]
+  });
 
   useEffect(() => {
     const checkDaily = () => {
@@ -128,27 +142,46 @@ export default function DashboardPage() {
   };
 
   const handleSendMessage = () => {
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || !friends.includes(activeChatTarget)) return;
     const newMessage = {
       id: Math.random().toString(),
       sender: nickname,
       text: chatInput,
       timestamp: new Date().toISOString()
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => ({
+      ...prev,
+      [activeChatTarget]: [...(prev[activeChatTarget] || []), newMessage]
+    }));
     setChatInput("");
     
-    // Automatic Host Response
-    setTimeout(() => {
-      const response = {
-        id: Math.random().toString(),
-        sender: 'The Host',
-        text: 'Synchronizing... Message received. Keep executing.',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, response]);
-    }, 1500);
+    // Automatic Response Simulation
+    if (activeChatTarget === 'The Host') {
+      setTimeout(() => {
+        const response = {
+          id: Math.random().toString(),
+          sender: 'The Host',
+          text: 'Synchronizing... Message received. Keep executing.',
+          timestamp: new Date().toISOString()
+        };
+        setMessages(prev => ({
+          ...prev,
+          'The Host': [...(prev['The Host'] || []), response]
+        }));
+      }, 1500);
+    }
   };
+
+  const filteredStrategists = useMemo(() => {
+    if (!searchQuery) return STRATEGIST_REGISTRY.filter(s => s.nickname !== nickname);
+    return STRATEGIST_REGISTRY.filter(s => 
+      s.nickname.toLowerCase().includes(searchQuery.toLowerCase()) && 
+      s.nickname !== nickname
+    );
+  }, [searchQuery, nickname]);
+
+  const isFriend = (target: string) => friends.includes(target);
+  const hasSentRequest = (target: string) => sentRequests.includes(target);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -172,6 +205,12 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary">Current Streak</span>
             </div>
+            {notifications.length > 0 && (
+              <Button onClick={() => setActiveTab('hub')} variant="ghost" className="relative group p-2">
+                <Mail className="h-8 w-8 text-primary animate-pulse" />
+                <Badge className="absolute -top-1 -right-1 bg-red-600 border-2 border-background animate-bounce">{notifications.length}</Badge>
+              </Button>
+            )}
           </div>
           
           <button 
@@ -205,6 +244,34 @@ export default function DashboardPage() {
 
           <TabsContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
+              {/* Sovereign Notifications (Friend Requests) */}
+              {notifications.length > 0 && (
+                <Card className="rounded-[3rem] border-4 border-primary bg-primary/5 p-10 animate-in slide-in-from-top-4">
+                  <h3 className="text-2xl font-black uppercase italic text-primary mb-6 flex items-center gap-3">
+                    <ShieldCheck className="h-8 w-8" /> Incoming Protocol Requests
+                  </h3>
+                  <div className="space-y-4">
+                    {notifications.map(n => (
+                      <div key={n.id} className="p-6 bg-background/60 rounded-3xl border-2 border-primary/20 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center font-black text-background text-sm">
+                            {n.from.slice(0,2).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-black text-foreground">@{n.from}</p>
+                            <p className="text-[10px] text-primary/60 font-black uppercase">{n.message}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button onClick={() => acceptFriendRequest(n.id, n.from)} size="icon" className="rounded-full bg-primary text-background"><Check className="h-5 w-5" /></Button>
+                          <Button onClick={() => declineFriendRequest(n.id)} size="icon" variant="ghost" className="rounded-full text-red-500"><X className="h-5 w-5" /></Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
               {/* Win Dispatcher */}
               <Card className="rounded-[3.5rem] border-4 border-primary/10 shadow-2xl p-10 bg-card/40">
                 <div className="flex gap-6">
@@ -350,6 +417,115 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
 
+          <TabsContent value="metext" className="h-[800px]">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 h-full">
+                <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 overflow-hidden flex flex-col shadow-2xl">
+                   <div className="p-10 border-b-4 border-primary/10 space-y-6">
+                      <h3 className="text-3xl font-black uppercase tracking-tighter text-foreground italic">Strategists</h3>
+                      <div className="relative">
+                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/30" />
+                         <Input 
+                            placeholder="Search Identity..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-16 h-16 rounded-[2rem] bg-background/50 border-2 border-primary/10 font-black" 
+                         />
+                      </div>
+                   </div>
+                   <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+                      {filteredStrategists.map((strat) => (
+                        <div 
+                          key={strat.nickname} 
+                          className={cn(
+                            "p-8 rounded-[3rem] border-4 flex items-center justify-between group cursor-pointer transition-all",
+                            activeChatTarget === strat.nickname ? "bg-primary/20 border-primary" : "bg-primary/5 border-primary/5 hover:bg-primary/10"
+                          )}
+                          onClick={() => isFriend(strat.nickname) && setActiveChatTarget(strat.nickname)}
+                        >
+                           <div className="flex items-center gap-5">
+                              <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-xl shadow-lg">
+                                {strat.nickname.slice(0,2).toUpperCase()}
+                              </div>
+                              <div>
+                                 <p className="font-black text-base uppercase text-foreground">{strat.nickname}</p>
+                                 <p className="text-[10px] text-primary uppercase font-black tracking-widest">{strat.type}</p>
+                              </div>
+                           </div>
+                           <div className="flex gap-2">
+                             {isFriend(strat.nickname) ? (
+                               <>
+                                 <Button variant="ghost" size="icon" className="text-primary"><MessageSquare className="h-6 w-6" /></Button>
+                                 <Button variant="ghost" size="icon" className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); unfriend(strat.nickname); }}><UserMinus className="h-6 w-6" /></Button>
+                               </>
+                             ) : hasSentRequest(strat.nickname) ? (
+                               <Badge className="bg-primary/10 text-primary border-none text-[8px] uppercase">Pending</Badge>
+                             ) : (
+                               <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/20" onClick={(e) => { e.stopPropagation(); sendFriendRequest(strat.nickname); toast({ title: "Protocol Request Dispatched" }); }}><UserPlus className="h-6 w-6" /></Button>
+                             )}
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                </Card>
+
+                <Card className="lg:col-span-2 rounded-[4rem] border-4 border-primary/10 bg-card/40 overflow-hidden flex flex-col shadow-2xl relative">
+                   {isFriend(activeChatTarget) ? (
+                     <>
+                       <div className="p-10 border-b-4 border-primary/10 flex items-center justify-between bg-card z-10 shadow-sm">
+                          <div className="flex items-center gap-6">
+                             <div className="w-16 h-16 rounded-3xl bg-primary flex items-center justify-center font-black text-background text-2xl shadow-xl">
+                               {activeChatTarget.slice(0,2).toUpperCase()}
+                             </div>
+                             <div>
+                                <p className="font-black text-xl uppercase text-foreground">{activeChatTarget}</p>
+                                <p className="text-[11px] font-black text-primary/40 uppercase tracking-[0.3em]">Sovereign Communication Hub</p>
+                             </div>
+                          </div>
+                       </div>
+                       <div className="flex-1 overflow-y-auto p-12 space-y-10 bg-background/30 scrollbar-hide flex flex-col">
+                          {(messages[activeChatTarget] || []).map((msg) => (
+                            <div key={msg.id} className={cn("flex gap-6", msg.sender === nickname ? "flex-row-reverse" : "flex-row")}>
+                               <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-sm">
+                                  {msg.sender === nickname ? nickname.slice(0,2).toUpperCase() : activeChatTarget.slice(0,2).toUpperCase()}
+                               </div>
+                               <div className={cn("max-w-[75%] p-8 shadow-xl border-4 border-primary/10", 
+                                  msg.sender === nickname ? "bg-primary/20 rounded-l-[3rem] rounded-br-[3rem]" : "bg-card rounded-r-[3rem] rounded-bl-[3rem]")}>
+                                  <p className="text-lg font-bold text-foreground leading-relaxed">{msg.text}</p>
+                                  <p className="text-[10px] font-black text-foreground/40 mt-3 uppercase tracking-widest">{new Date(msg.timestamp).toLocaleTimeString()}</p>
+                               </div>
+                            </div>
+                          ))}
+                       </div>
+                       <div className="p-10 bg-card border-t-4 border-primary/10 flex gap-6">
+                          <Input 
+                            placeholder="Sync message..." 
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                            className="flex-1 h-20 rounded-[2.5rem] bg-background/50 border-2 border-primary/10 px-10 text-lg font-black" 
+                          />
+                          <Button onClick={handleSendMessage} className="h-20 w-20 rounded-[2.5rem] bg-primary text-background shadow-2xl hover:bg-white hover:text-primary transition-all"><Send className="h-8 w-8" /></Button>
+                       </div>
+                     </>
+                   ) : (
+                     <div className="flex-1 flex flex-col items-center justify-center p-20 text-center space-y-8 bg-background/20">
+                        <Lock className="h-32 w-32 text-primary/20 animate-pulse" />
+                        <div className="space-y-4">
+                          <h3 className="text-4xl font-black uppercase italic tracking-tighter text-foreground">Sync Required</h3>
+                          <p className="text-sm font-black uppercase text-primary/40 tracking-[0.4em] max-w-sm">
+                            You must be friends with @{activeChatTarget} to initiate a secure communication protocol.
+                          </p>
+                        </div>
+                        <Button onClick={() => sendFriendRequest(activeChatTarget)} disabled={hasSentRequest(activeChatTarget)} className="rounded-full h-18 px-12 bg-primary text-background font-black uppercase text-sm">
+                          {hasSentRequest(activeChatTarget) ? 'Protocol Requested' : 'Send Friend Request'}
+                        </Button>
+                     </div>
+                   )}
+                </Card>
+             </div>
+          </TabsContent>
+          
+          {/* Other tabs remain unchanged... */}
           <TabsContent value="shooppy" className="space-y-16">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Strategic Marketplace</h3>
@@ -479,68 +655,6 @@ export default function DashboardPage() {
                   ))}
                 </Accordion>
              </Card>
-          </TabsContent>
-
-          <TabsContent value="metext" className="h-[800px]">
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 h-full">
-                <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 overflow-hidden flex flex-col shadow-2xl">
-                   <div className="p-10 border-b-4 border-primary/10 space-y-6">
-                      <h3 className="text-3xl font-black uppercase tracking-tighter text-foreground italic">Strategists</h3>
-                      <div className="relative">
-                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/30" />
-                         <Input placeholder="Search Identity..." className="pl-16 h-16 rounded-[2rem] bg-background/50 border-2 border-primary/10 font-black" />
-                      </div>
-                   </div>
-                   <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
-                      <div className="p-8 bg-primary/10 rounded-[3rem] border-4 border-primary/20 flex items-center justify-between group cursor-pointer hover:bg-primary/20 transition-all">
-                         <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-xl shadow-lg">HD</div>
-                            <div>
-                               <p className="font-black text-base uppercase text-foreground">The Host</p>
-                               <p className="text-[10px] text-primary uppercase font-black tracking-widest">Global Admin</p>
-                            </div>
-                         </div>
-                         <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/20"><Mail className="h-6 w-6" /></Button>
-                      </div>
-                   </div>
-                </Card>
-
-                <Card className="lg:col-span-2 rounded-[4rem] border-4 border-primary/10 bg-card/40 overflow-hidden flex flex-col shadow-2xl relative">
-                   <div className="p-10 border-b-4 border-primary/10 flex items-center justify-between bg-card z-10 shadow-sm">
-                      <div className="flex items-center gap-6">
-                         <div className="w-16 h-16 rounded-3xl bg-primary flex items-center justify-center font-black text-background text-2xl shadow-xl">HD</div>
-                         <div>
-                            <p className="font-black text-xl uppercase text-foreground">The Host</p>
-                            <p className="text-[11px] font-black text-primary/40 uppercase tracking-[0.3em]">Sovereign Communication Hub</p>
-                         </div>
-                      </div>
-                   </div>
-                   <div className="flex-1 overflow-y-auto p-12 space-y-10 bg-background/30 scrollbar-hide flex flex-col">
-                      {messages.map((msg) => (
-                        <div key={msg.id} className={cn("flex gap-6", msg.sender === nickname ? "flex-row-reverse" : "flex-row")}>
-                           <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-sm">
-                              {msg.sender === nickname ? nickname.slice(0,2).toUpperCase() : "HD"}
-                           </div>
-                           <div className={cn("max-w-[75%] p-8 shadow-xl border-4 border-primary/10", 
-                              msg.sender === nickname ? "bg-primary/20 rounded-l-[3rem] rounded-br-[3rem]" : "bg-card rounded-r-[3rem] rounded-bl-[3rem]")}>
-                              <p className="text-lg font-bold text-foreground leading-relaxed">{msg.text}</p>
-                              <p className="text-[10px] font-black text-foreground/40 mt-3 uppercase tracking-widest">{new Date(msg.timestamp).toLocaleTimeString()}</p>
-                           </div>
-                        </div>
-                      ))}
-                   </div>
-                   <div className="p-10 bg-card border-t-4 border-primary/10 flex gap-6">
-                      <Input 
-                        placeholder="Sync message..." 
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="flex-1 h-20 rounded-[2.5rem] bg-background/50 border-2 border-primary/10 px-10 text-lg font-black" 
-                      />
-                      <Button onClick={handleSendMessage} className="h-20 w-20 rounded-[2.5rem] bg-primary text-background shadow-2xl hover:bg-white hover:text-primary transition-all"><Send className="h-8 w-8" /></Button>
-                   </div>
-                </Card>
-             </div>
           </TabsContent>
         </Tabs>
       </main>
