@@ -30,41 +30,31 @@ export default function HomePage() {
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-accent font-bold text-sm">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm">
                   <Coffee className="h-4 w-4" />
                   Brewing Success
                 </div>
                 <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight">
-                  Fail-Proof Your <span className="text-accent">Strategy</span> With a Touch of <span className="text-primary">Gold</span>
+                  Fail-Proof Your <span className="text-primary">Strategy</span> With a Touch of <span className="text-primary italic">Gold</span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
                   Welcome, Succemazing. Join our community of high-earning strategists. We provide the tools, you bring the ambition.
                 </p>
                 <div className="flex flex-wrap items-center gap-4">
-                  <Button size="lg" className="rounded-full px-8 py-7 text-xl shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 text-accent font-bold" asChild>
+                  <Button size="lg" className="rounded-full px-12 py-8 text-2xl shadow-2xl shadow-primary/20 bg-primary hover:bg-white text-[#1f1610] font-black uppercase tracking-tighter" asChild>
                     <Link href="/signup">
-                      Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+                      Get Started Free <ArrowRight className="ml-3 h-6 w-6" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="rounded-full px-8 py-7 text-xl border-accent text-accent hover:bg-accent hover:text-white" asChild>
+                  <Button size="lg" variant="outline" className="rounded-full px-12 py-8 text-2xl border-primary text-primary hover:bg-primary hover:text-[#1f1610] font-black uppercase tracking-tighter" asChild>
                     <Link href="/login">Sign In</Link>
                   </Button>
-                </div>
-                <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-8 h-8 rounded-full border-2 border-background bg-secondary flex items-center justify-center overflow-hidden">
-                        <Image src={`https://picsum.photos/seed/user${i}/32/32`} width={32} height={32} alt="User" />
-                      </div>
-                    ))}
-                  </div>
-                  <span>Joined by 1,000+ earners today</span>
                 </div>
               </div>
               
               <div className="relative">
                 <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
-                <div className="relative bg-card border-4 border-accent/10 rounded-[2.5rem] p-4 shadow-2xl overflow-hidden">
+                <div className="relative bg-card border-4 border-primary/10 rounded-[2.5rem] p-4 shadow-2xl overflow-hidden">
                   <Image 
                     src="https://picsum.photos/seed/mocha-strategy/800/600" 
                     width={800} 
@@ -73,13 +63,13 @@ export default function HomePage() {
                     className="rounded-[2rem] object-cover"
                     data-ai-hint="mocha coffee workspace"
                   />
-                  <div className="absolute bottom-8 left-8 right-8 bg-background/90 backdrop-blur-md p-6 rounded-2xl border shadow-lg animate-in slide-in-from-bottom-10">
+                  <div className="absolute bottom-8 left-8 right-8 bg-background/90 backdrop-blur-md p-6 rounded-2xl border shadow-lg animate-in slide-in-from-bottom-10 border-primary/20">
                     <div className="flex items-center gap-4">
                       <div className="bg-primary p-3 rounded-xl shadow-inner">
-                        <Zap className="h-6 w-6 text-accent" />
+                        <Zap className="h-6 w-6 text-[#1f1610]" />
                       </div>
                       <div>
-                        <p className="font-bold text-lg text-accent">Daily Task Ready</p>
+                        <p className="font-bold text-lg text-primary">Daily Task Ready</p>
                         <p className="text-sm text-muted-foreground">Automated checklist for your morning brew.</p>
                       </div>
                     </div>
@@ -91,11 +81,11 @@ export default function HomePage() {
         </section>
 
         {/* Features */}
-        <section className="py-24 bg-accent/5">
+        <section className="py-24 bg-primary/5">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16 space-y-4">
-              <h2 className="text-4xl font-headline font-bold">Why Choose <span className="text-accent">FireProof</span>?</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">We've combined professional digital marketing strategy with a fail-proof execution system.</p>
+              <h2 className="text-4xl font-headline font-bold uppercase tracking-tight">Why Choose <span className="text-primary italic">FireProof</span>?</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto font-medium">We've combined professional digital marketing strategy with a fail-proof execution system.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
@@ -103,12 +93,12 @@ export default function HomePage() {
                 { title: "Future Proof", desc: "GoalCaps lock your vision for 5 years.", icon: Hourglass },
                 { title: "Host Powered", desc: "Direct access to expert eBooks and strategy bundles.", icon: Star },
               ].map((feature, i) => (
-                <div key={i} className="bg-card p-10 rounded-[2.5rem] border border-accent/10 hover:border-primary/50 transition-all group shadow-sm hover:shadow-xl">
+                <div key={i} className="bg-card p-10 rounded-[2.5rem] border border-primary/10 hover:border-primary/50 transition-all group shadow-sm hover:shadow-xl">
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary transition-colors">
-                    <feature.icon className="h-8 w-8 text-accent group-hover:text-accent" />
+                    <feature.icon className="h-8 w-8 text-primary group-hover:text-[#1f1610]" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg">{feature.desc}</p>
+                  <h3 className="text-2xl font-black uppercase tracking-tight italic">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-lg font-medium">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -116,16 +106,16 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="py-12 border-t bg-accent text-white">
+      <footer className="py-12 border-t bg-[#1f1610] text-[#fdfaf6]">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <Coffee className="h-6 w-6 text-primary" />
-            <span className="text-xl font-headline font-bold">FireProof</span>
+            <span className="text-xl font-headline font-black uppercase tracking-tighter">FireProof</span>
           </div>
-          <p className="text-white/70 font-medium">© {new Date().getFullYear()} fireproof.ndigtl.app. Stay Gold.</p>
+          <p className="text-[#fdfaf6]/60 font-black uppercase text-[10px] tracking-widest">© {new Date().getFullYear()} fireproof.ndigtl.app. Stay Gold.</p>
           <div className="flex gap-6">
-            <Link href="/login" className="hover:text-primary transition-colors">Login</Link>
-            <Link href="/signup" className="hover:text-primary transition-colors">Sign Up</Link>
+            <Link href="/login" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Login</Link>
+            <Link href="/signup" className="text-[10px] font-black uppercase tracking-widest hover:text-primary transition-colors">Sign Up</Link>
           </div>
         </div>
       </footer>
