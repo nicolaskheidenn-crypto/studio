@@ -82,38 +82,38 @@ export default function QuizPage() {
 
   if (!activeQuiz) {
     return (
-      <div className="min-h-screen flex flex-col bg-secondary/10">
+      <div className="min-h-screen flex flex-col bg-background">
         <Navigation />
         <main className="flex-1 container mx-auto px-4 py-12 max-w-5xl">
           <div className="space-y-12">
             <header className="text-center space-y-4">
-              <h1 className="text-5xl font-headline font-bold text-accent tracking-tighter">
-                Fire<span className="text-primary italic">Quizzo</span>
+              <h1 className="text-5xl font-headline font-bold text-primary tracking-tighter uppercase italic">
+                Fire<span className="text-[#fdfaf6]">Quizzo</span>
               </h1>
-              <p className="text-lg text-muted-foreground font-medium max-w-xl mx-auto">
-                One mistake is fine, but you must reach the passing threshold to earn mastery. Nico Digital security active.
+              <p className="text-lg text-foreground/60 font-black uppercase tracking-widest max-w-xl mx-auto">
+                Reach the passing threshold to earn mastery. Nico Digital security active.
               </p>
             </header>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quizzes.length === 0 ? (
-                <div className="col-span-full py-16 text-center bg-white rounded-[2rem] border-4 border-dashed border-accent/10">
-                  <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-20" />
-                  <p className="text-muted-foreground font-medium italic">No strategic tests published by the Host.</p>
+                <div className="col-span-full py-16 text-center bg-mocha-cream rounded-[2rem] border-4 border-dashed border-primary/20">
+                  <ShieldAlert className="h-12 w-12 mx-auto text-[#1f1610] mb-4 opacity-20" />
+                  <p className="text-[#1f1610] font-black uppercase tracking-widest italic">No active protocols published.</p>
                 </div>
               ) : (
                 quizzes.map((q) => (
                   <Card 
                     key={q.id} 
-                    className="hover:border-primary transition-all cursor-pointer group rounded-[2.5rem] border-white border-4 bg-white shadow-lg hover:shadow-2xl active:scale-95" 
+                    className="hover:border-primary transition-all cursor-pointer group rounded-[2.5rem] border-primary/10 bg-mocha-cream shadow-lg hover:shadow-2xl active:scale-95" 
                     onClick={() => startQuiz(q)}
                   >
                     <CardHeader className="p-8">
-                      <div className="p-3 bg-primary/10 rounded-2xl w-fit mb-4 group-hover:bg-primary transition-colors">
-                        <BookOpen className="h-8 w-8 text-accent" />
+                      <div className="p-3 bg-[#1f1610] rounded-2xl w-fit mb-4 group-hover:bg-primary transition-colors">
+                        <BookOpen className="h-8 w-8 text-primary" />
                       </div>
-                      <CardTitle className="text-2xl font-black leading-tight text-accent">{q.title}</CardTitle>
-                      <CardDescription className="text-sm font-bold text-muted-foreground mt-2">
+                      <CardTitle className="text-2xl font-black leading-tight text-[#1f1610] uppercase italic">{q.title}</CardTitle>
+                      <CardDescription className="text-[10px] font-black text-[#1f1610]/40 mt-2 uppercase tracking-widest">
                         {q.questionCount} Questions • Pass: {getPassingScore(q.questionCount)}
                       </CardDescription>
                     </CardHeader>
@@ -132,21 +132,21 @@ export default function QuizPage() {
     const hasPassed = score >= passing;
 
     return (
-      <div className={cn("min-h-screen flex flex-col items-center justify-center p-8 text-center", hasPassed ? "bg-primary text-accent" : "bg-red-600 text-white")}>
+      <div className={cn("min-h-screen flex flex-col items-center justify-center p-8 text-center", hasPassed ? "bg-primary text-[#1f1610]" : "bg-red-600 text-white")}>
         {hasPassed ? <Trophy className="h-32 w-32 mb-8 animate-bounce" /> : <XCircle className="h-32 w-32 mb-8 animate-pulse" />}
-        <h1 className="text-6xl font-headline font-black mb-4 tracking-tighter">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
-        <p className="text-3xl font-bold mb-4">Score: {score} / {shuffledQuestions.length}</p>
-        <p className="text-xl opacity-80 mb-12 max-w-md font-medium">
+        <h1 className="text-8xl font-headline font-black mb-4 tracking-tighter uppercase italic">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
+        <p className="text-4xl font-black mb-4">SCORE: {score} / {shuffledQuestions.length}</p>
+        <p className="text-xl font-black uppercase tracking-widest opacity-80 mb-12 max-w-md leading-relaxed">
           {hasPassed 
             ? "Strategic filtration complete. You are certified Succemazing." 
             : `Requirement: ${passing} points. Study the routine and attempt again.`}
         </p>
         <div className="flex gap-6">
-          <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-12 h-16 text-xl font-black shadow-2xl hover:scale-105 transition-transform", hasPassed ? "bg-accent text-white" : "bg-white text-red-600")}>
+          <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-16 h-20 text-xl font-black shadow-2xl hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
             RETURN TO HUB
           </Button>
           {!hasPassed && (
-            <Button onClick={() => startQuiz(activeQuiz)} variant="outline" className="rounded-full px-12 h-16 text-xl font-black bg-transparent border-4 border-white text-white hover:bg-white hover:text-red-600">
+            <Button onClick={() => startQuiz(activeQuiz)} variant="outline" className="rounded-full px-16 h-20 text-xl font-black bg-transparent border-4 border-white text-white hover:bg-white hover:text-red-600 uppercase tracking-tighter">
               TRY AGAIN
             </Button>
           )}
@@ -158,45 +158,45 @@ export default function QuizPage() {
   const currentQ = shuffledQuestions[currentIdx];
 
   return (
-    <div className="min-h-screen flex flex-col bg-accent">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8 flex flex-col items-center relative">
         {cheatTriggered && (
-          <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center text-white p-6 text-center animate-in fade-in">
-            <AlertTriangle className="h-32 w-32 text-red-600 mb-6 animate-pulse" />
-            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-4">STOP CHEATING</h1>
-            <p className="text-xl text-red-500 font-black uppercase tracking-[0.3em]">Nico Digital Sensor Resetting...</p>
+          <div className="fixed inset-0 z-[100] bg-[#1f1610]/95 flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in">
+            <AlertTriangle className="h-32 w-32 text-primary mb-6 animate-pulse" />
+            <h1 className="text-5xl md:text-8xl font-headline font-bold mb-4 uppercase tracking-tighter">SECURITY ALERT</h1>
+            <p className="text-xl text-primary font-black uppercase tracking-[0.3em]">Protocol Sensor Resetting...</p>
           </div>
         )}
 
         <div className="max-w-3xl w-full space-y-8">
-          <div className="flex items-center justify-between text-white">
-            <Button variant="ghost" className="text-white hover:bg-white/10 rounded-full h-12 px-6 font-bold" onClick={() => setActiveQuiz(null)}>
-              <ArrowLeft className="mr-3 h-5 w-5" /> Exit Test
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" className="text-primary hover:text-primary/60 rounded-full h-12 px-6 font-black uppercase text-[10px] tracking-widest" onClick={() => setActiveQuiz(null)}>
+              <ArrowLeft className="mr-3 h-5 w-5" /> Exit Protocol
             </Button>
-            <div className="text-xl font-black bg-primary text-accent px-8 py-3 rounded-full shadow-lg">
-              {currentIdx + 1} <span className="text-accent/40 mx-2">/</span> {shuffledQuestions.length}
+            <div className="text-xl font-black bg-mocha-cream text-[#1f1610] px-8 py-3 rounded-full shadow-lg border-2 border-primary/20">
+              {currentIdx + 1} <span className="text-[#1f1610]/40 mx-2">/</span> {shuffledQuestions.length}
             </div>
           </div>
 
-          <Card className="rounded-[3rem] border-white border-4 shadow-2xl p-12 bg-white">
-            <h3 className="text-3xl font-black mb-12 leading-tight text-center text-accent">{currentQ.question}</h3>
+          <Card className="rounded-[4rem] border-primary/10 border-4 shadow-2xl p-16 bg-mocha-cream">
+            <h3 className="text-4xl font-black mb-16 leading-tight text-center text-[#1f1610] uppercase italic tracking-tight">{currentQ.question}</h3>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               {currentQ.type === 'multiple' && currentQ.options && (
-                <div className="grid gap-4">
+                <div className="grid gap-6">
                   {currentQ.options.map((opt, i) => (
                     <button 
                       key={i} 
                       onClick={() => setUserAnswer(opt)}
                       className={cn(
-                        "p-6 text-left border-2 rounded-2xl text-xl font-bold transition-all active:scale-95 flex items-center gap-4",
+                        "p-8 text-left border-4 rounded-3xl text-xl font-black transition-all active:scale-95 flex items-center gap-6 uppercase",
                         userAnswer === opt 
-                          ? "bg-accent text-white border-accent shadow-lg" 
-                          : "border-secondary bg-secondary/5 text-accent/80 hover:border-primary"
+                          ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-xl" 
+                          : "border-[#1f1610]/5 bg-white text-[#1f1610]/80 hover:border-primary"
                       )}
                     >
-                      <span className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-sm font-black">
+                      <span className="w-12 h-12 rounded-2xl bg-primary text-[#1f1610] flex items-center justify-center text-sm font-black shadow-inner">
                         {String.fromCharCode(65 + i)}
                       </span>
                       {opt}
@@ -206,16 +206,16 @@ export default function QuizPage() {
               )}
 
               {currentQ.type === 'boolean' && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-8">
                   {['True', 'False'].map((opt) => (
                     <button 
                       key={opt}
                       onClick={() => setUserAnswer(opt)}
                       className={cn(
-                        "p-12 text-center border-2 rounded-[2rem] text-3xl font-black transition-all active:scale-95",
+                        "p-16 text-center border-4 rounded-[3rem] text-4xl font-black transition-all active:scale-95 uppercase",
                         userAnswer === opt 
-                          ? "bg-accent text-white border-accent shadow-lg" 
-                          : "border-secondary bg-secondary/5 text-accent/80 hover:border-primary"
+                          ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-xl" 
+                          : "border-[#1f1610]/5 bg-white text-[#1f1610]/80 hover:border-primary"
                       )}
                     >
                       {opt}
@@ -225,21 +225,21 @@ export default function QuizPage() {
               )}
 
               {currentQ.type === 'id' && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Input 
-                    placeholder="Type your strategic answer..." 
-                    className="h-20 rounded-[1.5rem] text-2xl text-center font-black bg-secondary/5 border-2 border-accent/10 focus:border-primary" 
+                    placeholder="Inquiry Response..." 
+                    className="h-24 rounded-[2.5rem] text-3xl text-center font-black bg-white border-4 border-[#1f1610]/10 text-[#1f1610] focus:border-primary" 
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && userAnswer && handleNext()}
                   />
-                  <p className="text-center text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px]">Press Enter to Finalize</p>
+                  <p className="text-center text-[#1f1610]/40 font-black uppercase tracking-[0.4em] text-[10px]">Verify with Enter</p>
                 </div>
               )}
             </div>
 
             <Button 
-              className="w-full mt-12 h-20 rounded-full font-black text-2xl bg-primary text-accent hover:bg-primary/90 shadow-xl transition-transform active:scale-95 disabled:opacity-50" 
+              className="w-full mt-16 h-24 rounded-full font-black text-3xl bg-primary text-[#1f1610] hover:bg-white transition-all shadow-[0_30px_60px_rgba(255,215,0,0.3)] active:scale-95 disabled:opacity-20 uppercase tracking-tighter" 
               onClick={handleNext} 
               disabled={!userAnswer}
             >
@@ -251,3 +251,4 @@ export default function QuizPage() {
     </div>
   );
 }
+
