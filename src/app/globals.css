@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,38 +34,8 @@
     --radius: 2rem;
   }
 
-  @keyframes atmosphere-float {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .theme-fire {
-    background: linear-gradient(-45deg, #1a0502, #3d120a, #1a0502) !important;
-    background-size: 400% 400% !important;
-    animation: atmosphere-float 15s ease infinite !important;
-  }
-
-  .theme-water {
-    background: linear-gradient(-45deg, #020d1a, #0a2d4a, #020d1a) !important;
-    background-size: 400% 400% !important;
-    animation: atmosphere-float 15s ease infinite !important;
-  }
-
-  .theme-nature {
-    background: linear-gradient(-45deg, #021a0a, #0a4a1d, #021a0a) !important;
-    background-size: 400% 400% !important;
-    animation: atmosphere-float 15s ease infinite !important;
-  }
-
-  .theme-raining {
-    background: linear-gradient(-45deg, #050608, #141821, #050608) !important;
-    background-size: 400% 400% !important;
-    animation: atmosphere-float 10s ease infinite !important;
-  }
-
   body {
-    @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
+    @apply bg-background text-foreground font-body antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {

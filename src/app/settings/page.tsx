@@ -7,26 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Flame, Droplets, Leaf, CloudRain, Monitor, User, Shield, Lock, Award, Trophy, Coffee } from "lucide-react";
-import { useAppStore, type Theme, useUserStore, useAdminStore } from "@/lib/store";
+import { Shield, Lock, Award, Trophy, Coffee, FileText } from "lucide-react";
+import { useUserStore, useAdminStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { getAuth, updateProfile } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-
-const THEMES: { id: Theme; label: string; icon: any; color: string }[] = [
-  { id: 'default', label: 'Classic Mocha', icon: Monitor, color: 'bg-zinc-500' },
-  { id: 'fire', label: 'Volcanic', icon: Flame, color: 'bg-orange-500' },
-  { id: 'water', label: 'Oceanic', icon: Droplets, color: 'bg-blue-500' },
-  { id: 'nature', label: 'Forest', icon: Leaf, color: 'bg-emerald-500' },
-  { id: 'raining', label: 'Storm', icon: CloudRain, color: 'bg-slate-600' },
-];
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useAppStore();
   const { user } = useUser();
   const auth = getAuth();
   
@@ -81,8 +73,8 @@ export default function SettingsPage() {
         <Tabs defaultValue="profile" className="space-y-10">
           <TabsList className="bg-card/40 p-1.5 rounded-full w-fit shadow-md border-2 border-primary/10">
             <TabsTrigger value="profile" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Identity</TabsTrigger>
-            <TabsTrigger value="appearance" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Atmosphere</TabsTrigger>
             <TabsTrigger value="achievements" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Vault</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Privacy</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
@@ -144,19 +136,74 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="appearance" className="animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-16 space-y-16 shadow-xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {THEMES.map((t) => (
-                    <button key={t.id} onClick={() => setTheme(t.id)} className={cn("flex flex-col p-10 rounded-[3rem] border-4 transition-all shadow-md", theme === t.id ? "border-primary bg-primary/10" : "border-primary/5 bg-background/60")}>
-                      <div className={cn("w-16 h-16 rounded-2xl text-white flex items-center justify-center mb-8 shadow-xl", t.color)}>
-                        <t.icon className="h-8 w-8" />
-                      </div>
-                      <p className="font-black text-2xl text-foreground uppercase tracking-tighter italic">{t.label}</p>
-                    </button>
-                  ))}
-                </div>
-                <Button onClick={() => { toast({ title: "Atmosphere Engine Locked" }); }} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl active:scale-95 transition-all uppercase tracking-tighter">LOCK ENVIRONMENT</Button>
+          <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-4">
+            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-mocha-cream p-12 shadow-xl">
+              <CardHeader className="text-center pb-8">
+                <FileText className="h-12 w-12 mx-auto text-primary mb-4" />
+                <CardTitle className="text-4xl font-black text-[#1f1610] uppercase italic">Privacy Policy</CardTitle>
+                <p className="text-[10px] font-black text-primary uppercase tracking-widest">Last Updated: May 19, 2026</p>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[600px] pr-6">
+                  <div className="prose prose-sm prose-stone max-w-none text-[#1f1610] space-y-8">
+                    <p className="text-lg leading-relaxed">At <strong>Nico Digital</strong>, we are committed to protecting your privacy and building trust through transparency. This Privacy Policy explains how we collect, use, disclose, store, and protect your personal information when you interact with our website, membership platform, and services.</p>
+                    
+                    <p className="text-lg leading-relaxed"><strong>Nico Digital</strong> (referred to as “we,” “us,” or “our”) is a digital business established in 2026, specializing in eBooks, templates, bundles, and membership programs. Our flagship offering includes the “Fail-Proof” 30-Day Implementation Sprint — a guided membership experience with daily tasks, progress tracking, Time Capsule, gamification elements, and community features.</p>
+
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-black uppercase italic">1. Information We Collect</h3>
+                      <p>We collect information to provide, improve, and personalize our services while ensuring a safe and effective learning environment.</p>
+                      <h4 className="font-black">Information You Provide Directly:</h4>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Account Information</strong>: Full name, email, username, nickname, password, profile picture, and cover image.</li>
+                        <li><strong>Profile Details</strong>: UID, date of birth, and location.</li>
+                        <li><strong>Content You Create</strong>: Daily task responses, Time Capsule entries, journal reflections, and Messenger data.</li>
+                        <li><strong>Payment Information</strong>: Billing details processed securely by third-party providers (Stripe, PayPal).</li>
+                      </ul>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-black uppercase italic">2. How We Collect Your Information</h3>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li>Through registration, login, and profile setup.</li>
+                        <li>When you complete daily tasks or engage with the Time Capsule.</li>
+                        <li>Automatically via server logs and cookies.</li>
+                        <li>During purchases of our digital products.</li>
+                      </ul>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-black uppercase italic">3. How We Use Your Information</h3>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Managing Services</strong>: Delivering daily tasks and managing the 30-Day Sprint.</li>
+                        <li><strong>Gamification</strong>: Customizing themes, streaks, badges, and levels.</li>
+                        <li><strong>Communication</strong>: Milestone updates and administrative notices.</li>
+                        <li><strong>Security</strong>: Detecting unauthorized access and protecting platform integrity.</li>
+                      </ul>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-black uppercase italic">4. Sharing and Disclosure</h3>
+                      <p>We do not sell your personal data. We may share information with trusted service providers who help operate the platform under strict confidentiality agreements.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-black uppercase italic">5. Data Storage and Security</h3>
+                      <p>We implement reasonable administrative, technical, and physical safeguards. However, no system is completely secure. <strong>Retention Period</strong>: Active membership data is retained while your account is open.</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-2xl font-black uppercase italic">6. Your Rights</h3>
+                      <p>You have the right to access, correct, delete, or port your personal data. To exercise these rights, contact us at our official support email.</p>
+                    </div>
+
+                    <div className="space-y-4 pt-8 border-t-2 border-[#1f1610]/10">
+                      <h3 className="text-2xl font-black uppercase italic">Acknowledgment</h3>
+                      <p className="italic">By using Nico Digital’s services, you confirm that you have read and understood this Privacy Policy, including how your information is protected in the context of the Fail-Proof 30-Day Implementation Sprint.</p>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

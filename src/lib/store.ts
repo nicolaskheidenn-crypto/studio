@@ -4,19 +4,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Theme = 'fire' | 'water' | 'nature' | 'raining' | 'default';
-
 interface AppState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  // App-wide state can be added here in the future
 }
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
-      theme: 'default',
-      setTheme: (theme) => set({ theme }),
-    }),
+    () => ({}),
     {
       name: 'fireproof-app-v15',
     }
