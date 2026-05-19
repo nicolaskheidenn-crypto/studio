@@ -115,7 +115,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-10">
             <div className="space-y-4">
-              <Label className="text-[#1f1610]/60 font-black text-xs">STRATEGIC EMAIL</Label>
+              <Label className="text-[#1f1610] font-black text-xs">STRATEGIC EMAIL</Label>
               <Input
                 type="email"
                 placeholder="name@example.com"
@@ -128,7 +128,7 @@ export default function LoginPage() {
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-[#1f1610]/60 font-black text-xs">SECURITY KEY</Label>
+                <Label className="text-[#1f1610] font-black text-xs">SECURITY KEY</Label>
                 <button 
                   type="button" 
                   onClick={handleForgotPassword} 
@@ -149,7 +149,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-8 top-1/2 -translate-y-1/2 text-[#FFD700] hover:text-[#1f1610] transition-colors"
+                  className="absolute right-8 top-1/2 -translate-y-1/2 text-[#1f1610]/40 hover:text-[#1f1610] transition-colors"
                 >
                   {showPassword ? <Eye className="h-8 w-8" /> : <EyeOff className="h-8 w-8" />}
                 </button>
@@ -158,11 +158,11 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full rounded-full h-24 bg-[#1f1610] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#1f1610] font-black text-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] border-4 border-[#FFD700]/20 transition-all transform active:scale-95 group uppercase tracking-tighter"
+              className="w-full rounded-full h-24 bg-[#FFD700] text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] font-black text-3xl shadow-[0_30px_60px_rgba(255,215,0,0.3)] border-4 border-[#1f1610]/10 transition-all transform active:scale-95 group uppercase tracking-tighter"
               disabled={isLoading}
             >
               {isLoading ? (
-                <Loader2 className="h-12 w-12 animate-spin" />
+                <Loader2 className="h-12 w-12 animate-spin text-[#1f1610]" />
               ) : (
                 <span className="flex items-center gap-6">
                   AUTHORIZE SESSION <ArrowRight className="h-10 w-10 group-hover:translate-x-3 transition-transform" />

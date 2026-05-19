@@ -59,7 +59,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1f1610] relative overflow-hidden font-body">
       <div className="absolute top-[-5%] left-[-5%] opacity-10 pointer-events-none">
         <Coffee className="w-80 h-80 text-primary -rotate-12" />
       </div>
@@ -67,13 +67,13 @@ export default function SignUpPage() {
         <Coffee className="w-80 h-80 text-primary rotate-45" />
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-secondary/20 rounded-[3rem] shadow-2xl overflow-hidden border border-white/5 relative z-10 backdrop-blur-sm">
-        <div className="p-12 md:p-16 space-y-10 bg-secondary/40 text-foreground flex flex-col justify-center border-r border-white/5">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-mocha-cream rounded-[3rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 backdrop-blur-sm">
+        <div className="p-12 md:p-16 space-y-10 bg-[#1f1610] text-[#fdfaf6] flex flex-col justify-center border-r-4 border-primary/10">
           <div className="space-y-8">
-            <h2 className="text-5xl md:text-6xl font-headline font-bold leading-tight tracking-tighter">
+            <h2 className="text-5xl md:text-6xl font-headline font-black leading-tight tracking-tighter uppercase">
               Build your <span className="text-primary italic">Sovereign</span> Empire.
             </h2>
-            <p className="text-foreground/70 text-xl font-medium leading-relaxed">
+            <p className="text-[#fdfaf6]/70 text-xl font-black uppercase tracking-widest leading-relaxed">
               Every great strategy starts with a single daily task. Nico Digital provides the root for your growth.
             </p>
 
@@ -86,84 +86,70 @@ export default function SignUpPage() {
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-4">
                   <div className="bg-primary p-1.5 rounded-full shadow-lg">
-                    <CheckCircle2 className="h-5 w-5 text-background" />
+                    <CheckCircle2 className="h-5 w-5 text-[#1f1610]" />
                   </div>
-                  <span className="font-bold text-lg tracking-tight">{text}</span>
+                  <span className="font-black text-lg uppercase tracking-tight">{text}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        <div className="p-10 md:p-14 space-y-10 bg-background/60">
+        <div className="p-10 md:p-14 space-y-10 bg-mocha-cream">
           <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-headline font-bold text-white tracking-tight uppercase">New Empire</h1>
-            <p className="text-sm text-primary font-black uppercase tracking-widest opacity-60">Initialize Strategist Account</p>
-          </div>
-
-          <div className="flex justify-start gap-4">
-            <Button variant="outline" className="rounded-xl border-primary/20 h-12 w-12 p-0 bg-secondary/50 hover:bg-primary/20">
-              <Chrome className="h-6 w-6 text-red-500" />
-            </Button>
-            <Button variant="outline" className="rounded-xl border-primary/20 h-12 w-12 p-0 bg-secondary/50 hover:bg-primary/20">
-              <Facebook className="h-6 w-6 text-blue-600" />
-            </Button>
-            <Button variant="outline" className="rounded-xl border-primary/20 h-12 w-12 p-0 bg-secondary/50 hover:bg-primary/20">
-              <Instagram className="h-6 w-6 text-pink-600" />
-            </Button>
+            <h1 className="text-3xl md:text-4xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">New Empire</h1>
+            <p className="text-sm text-primary font-black uppercase tracking-[0.4em] opacity-80">Initialize Strategist Account</p>
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-widest opacity-60 ml-1">First Name</Label>
+                <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">First Name</Label>
                 <Input
                   placeholder="John"
                   required
-                  className="rounded-xl h-14 bg-secondary/40 border-primary/10 px-5 text-base"
+                  className="rounded-xl h-14 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-base font-black px-5"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-widest opacity-60 ml-1">Last Name</Label>
+                <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">Last Name</Label>
                 <Input
                   placeholder="Doe"
                   required
-                  className="rounded-xl h-14 bg-secondary/40 border-primary/10 px-5 text-base"
+                  className="rounded-xl h-14 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-base font-black px-5"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest opacity-60 ml-1">Strategic Email</Label>
+              <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">Strategic Email</Label>
               <Input
                 type="email"
                 placeholder="name@example.com"
                 required
-                className="rounded-xl h-14 bg-secondary/40 border-primary/10 px-5 text-base"
+                className="rounded-xl h-14 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-base font-black px-5"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest opacity-60 ml-1">Security Key</Label>
+              <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">Security Key</Label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="rounded-xl h-14 bg-secondary/40 border-primary/10 px-5 pr-12 text-base"
+                  className="rounded-xl h-14 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-base font-black px-5 pr-12"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSignUp()}
                 />
                 <button
                   type="button"
-                  onMouseDown={() => setShowPassword(true)}
-                  onMouseUp={() => setShowPassword(false)}
-                  onMouseLeave={() => setShowPassword(false)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1f1610]/40"
                 >
                   {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                 </button>
@@ -171,16 +157,16 @@ export default function SignUpPage() {
             </div>
             <Button
               type="submit"
-              className="w-full rounded-2xl h-16 bg-primary text-background hover:bg-white font-black text-lg shadow-xl transition-all active:scale-95"
+              className="w-full rounded-2xl h-16 bg-[#FFD700] text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] font-black text-lg shadow-xl transition-all active:scale-95 border-2 border-[#1f1610]/10 uppercase tracking-widest"
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-7 w-7 animate-spin" /> : 'BUILD EMPIRE'}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-foreground/60 font-medium">
+          <p className="text-center text-sm text-[#1f1610]/60 font-black uppercase">
             Already a strategist?{' '}
-            <Link href="/login" className="text-primary font-black hover:text-white transition-colors underline">
+            <Link href="/login" className="text-primary font-black hover:text-[#1f1610] transition-colors underline">
               Sign In
             </Link>
           </p>
