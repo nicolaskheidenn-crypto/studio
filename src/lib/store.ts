@@ -114,15 +114,6 @@ export interface GoalCapsule {
   createdAt: string;
 }
 
-export interface Notification {
-  id: string;
-  type: 'friend_request' | 'system';
-  from: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-}
-
 interface AdminStore {
   quizzes: Quiz[];
   dailyTasks: ManagedTask[];
@@ -232,9 +223,6 @@ interface UserProgressStore {
   lastLogin: string | null;
   completedTaskIds: string[];
   capsules: GoalCapsule[];
-  friends: string[];
-  sentRequests: string[];
-  notifications: Notification[];
   updateProfile: (data: Partial<{ nickname: string; bio: string; avatarUrl: string; coverPhotoUrl: string }>) => void;
   addXP: (amount: number) => void;
   addPoints: (amount: number) => void;
@@ -243,11 +231,6 @@ interface UserProgressStore {
   addCapsule: (cap: GoalCapsule) => void;
   resetUserStats: () => void;
   updateSpecificUser: (data: Partial<{ points: number; xp: number; level: number; streak: number }>) => void;
-  sendFriendRequest: (toNickname: string) => void;
-  acceptFriendRequest: (notifId: string, fromNickname: string) => void;
-  declineFriendRequest: (notifId: string) => void;
-  unfriend: (nickname: string) => void;
-  clearNotification: (id: string) => void;
 }
 
 export const useUserStore = create<UserProgressStore>()(
@@ -264,9 +247,6 @@ export const useUserStore = create<UserProgressStore>()(
       lastLogin: null,
       completedTaskIds: [],
       capsules: [],
-      friends: ['The Host'],
-      sentRequests: [],
-      notifications: [],
       updateProfile: (data) => set((s) => ({ ...s, ...data })),
       addXP: (amount) => {
         const { xp, level } = get();
@@ -295,20 +275,6 @@ export const useUserStore = create<UserProgressStore>()(
       },
       resetUserStats: () => set({ points: 0, xp: 0, level: 1, streak: 0 }),
       updateSpecificUser: (data) => set((s) => ({ ...s, ...data })),
-      sendFriendRequest: (to) => set((s) => ({ sentRequests: [...s.sentRequests, to] })),
-      acceptFriendRequest: (notifId, from) => set((s) => ({
-        friends: [...s.friends, from],
-        notifications: s.notifications.filter(n => n.id !== notifId)
-      })),
-      declineFriendRequest: (notifId) => set((s) => ({
-        notifications: s.notifications.filter(n => n.id !== notifId)
-      })),
-      unfriend: (nickname) => set((s) => ({
-        friends: s.friends.filter(f => f !== nickname)
-      })),
-      clearNotification: (id) => set((s) => ({
-        notifications: s.notifications.filter(n => n.id !== id)
-      })),
     }),
     { name: 'fireproof-user-v15' }
   )

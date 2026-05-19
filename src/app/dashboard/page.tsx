@@ -13,23 +13,19 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
-  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, UserPlus, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, UserMinus, Check, X
+  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X
 } from 'lucide-react';
-import { useUser, useFirestore, useCollection } from '@/firebase';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useUser } from '@/firebase';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useAdminStore, useUserStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
-import { collection, query, where, limit } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const db = useFirestore();
   const { 
     points, xp, level, streak, nickname,
-    claimDaily, lastLogin, addPoints,
-    friends, sentRequests, notifications,
-    sendFriendRequest, acceptFriendRequest, declineFriendRequest, unfriend, clearNotification
+    claimDaily, lastLogin, addPoints
   } = useUserStore();
   
   const { 
@@ -51,20 +47,6 @@ export default function DashboardPage() {
   const [resTitle, setResTitle] = useState("");
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
   const [resContent, setResContent] = useState("");
-
-  // MeText State
-  const [chatInput, setChatInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeChatTarget, setActiveChatTarget] = useState<string>('The Host');
-  const [messages, setMessages] = useState<Record<string, any[]>>({
-    'The Host': [
-      { id: '1', sender: 'The Host', text: 'Welcome to MeText, Strategist. Empire alignment begins with synchronized communication.', timestamp: new Date().toISOString() }
-    ]
-  });
-
-  // Dynamic Real User Registry - Pulling only real strategists from Firestore
-  const usersQuery = useMemo(() => query(collection(db, 'users'), limit(50)), [db]);
-  const { data: realUsers } = useCollection<{ id: string, nickname: string, bio: string }>(usersQuery);
 
   useEffect(() => {
     const checkDaily = () => {
@@ -138,49 +120,6 @@ export default function DashboardPage() {
     toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
   };
 
-  const handleSendMessage = () => {
-    if (!chatInput.trim() || !friends.includes(activeChatTarget)) return;
-    const newMessage = {
-      id: Math.random().toString(),
-      sender: nickname,
-      text: chatInput,
-      timestamp: new Date().toISOString()
-    };
-    setMessages(prev => ({
-      ...prev,
-      [activeChatTarget]: [...(prev[activeChatTarget] || []), newMessage]
-    }));
-    setChatInput("");
-    
-    // Automatic Response Simulation for The Host
-    if (activeChatTarget === 'The Host') {
-      setTimeout(() => {
-        const response = {
-          id: Math.random().toString(),
-          sender: 'The Host',
-          text: 'Synchronizing... Message received. Keep executing.',
-          timestamp: new Date().toISOString()
-        };
-        setMessages(prev => ({
-          ...prev,
-          'The Host': [...(prev['The Host'] || []), response]
-        }));
-      }, 1500);
-    }
-  };
-
-  const filteredStrategists = useMemo(() => {
-    const list = realUsers || [];
-    // We filter out the current user and filter by search query
-    return list.filter(s => 
-      s.nickname !== nickname && 
-      (searchQuery === "" || s.nickname.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [realUsers, searchQuery, nickname]);
-
-  const isFriend = (target: string) => friends.includes(target);
-  const hasSentRequest = (target: string) => sentRequests.includes(target);
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
@@ -203,12 +142,6 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary">Current Streak</span>
             </div>
-            {notifications.length > 0 && (
-              <Button onClick={() => setActiveTab('hub')} variant="ghost" className="relative group p-2">
-                <Mail className="h-8 w-8 text-primary animate-pulse" />
-                <Badge className="absolute -top-1 -right-1 bg-red-600 border-2 border-background animate-bounce">{notifications.length}</Badge>
-              </Button>
-            )}
           </div>
           
           <button 
@@ -237,40 +170,11 @@ export default function DashboardPage() {
             <TabsTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</TabsTrigger>
             <TabsTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</TabsTrigger>
             <TabsTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</TabsTrigger>
-            <TabsTrigger value="metext" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><MessageSquare className="h-4 w-4" /> MeText</TabsTrigger>
           </TabsList>
 
           {/* Hub Tab Content */}
           <TabsContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
-              {/* Sovereign Notifications (Friend Requests) */}
-              {notifications.length > 0 && (
-                <Card className="rounded-[3rem] border-4 border-primary bg-primary/5 p-10 animate-in slide-in-from-top-4">
-                  <h3 className="text-2xl font-black uppercase italic text-primary mb-6 flex items-center gap-3">
-                    <ShieldCheck className="h-8 w-8" /> Incoming Protocol Requests
-                  </h3>
-                  <div className="space-y-4">
-                    {notifications.map(n => (
-                      <div key={n.id} className="p-6 bg-background/60 rounded-3xl border-2 border-primary/20 flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center font-black text-background text-sm">
-                            {n.from.slice(0,2).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-black text-foreground">@{n.from}</p>
-                            <p className="text-[10px] text-primary/60 font-black uppercase">{n.message}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-3">
-                          <Button onClick={() => acceptFriendRequest(n.id, n.from)} size="icon" className="rounded-full bg-primary text-background"><Check className="h-5 w-5" /></Button>
-                          <Button onClick={() => declineFriendRequest(n.id)} size="icon" variant="ghost" className="rounded-full text-red-500"><X className="h-5 w-5" /></Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              )}
-
               {/* Win Dispatcher */}
               <Card className="rounded-[3.5rem] border-4 border-primary/10 shadow-2xl p-10 bg-card/40">
                 <div className="flex gap-6">
@@ -415,133 +319,7 @@ export default function DashboardPage() {
               </Card>
             </div>
           </TabsContent>
-
-          {/* MeText Tab - Real User Integration & High-Impact UI */}
-          <TabsContent value="metext" className="h-[750px]">
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-                {/* Left Strategists Sidebar */}
-                <div className="bg-[#120d0b] border-4 border-primary/20 rounded-[3rem] overflow-hidden flex flex-col shadow-2xl">
-                   <div className="p-10 space-y-8">
-                      <h3 className="text-4xl font-headline font-black text-white italic uppercase tracking-tighter">STRATEGISTS</h3>
-                      <div className="relative">
-                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
-                         <Input 
-                            placeholder="Search Identity..." 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-16 h-16 rounded-full bg-[#1f1610] border-2 border-primary/40 font-black text-white placeholder:text-white/20 focus:border-primary" 
-                         />
-                      </div>
-                   </div>
-                   <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
-                      {filteredStrategists.length === 0 ? (
-                        <div className="text-center py-10 opacity-20 font-black uppercase italic text-xs tracking-widest">No Real Identities Found</div>
-                      ) : (
-                        filteredStrategists.map((strat) => (
-                          <div 
-                            key={strat.id} 
-                            className={cn(
-                              "p-8 rounded-[2.5rem] border-2 flex items-center justify-between group cursor-pointer transition-all",
-                              activeChatTarget === strat.nickname ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(255,215,0,0.1)]" : "bg-[#1f1610] border-primary/10 hover:border-primary/40"
-                            )}
-                            onClick={() => isFriend(strat.nickname) && setActiveChatTarget(strat.nickname)}
-                          >
-                             <div className="flex items-center gap-5">
-                                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center font-black text-[#120d0b] text-xl shadow-lg">
-                                  {strat.nickname.slice(0,2).toUpperCase()}
-                                </div>
-                                <div>
-                                   <p className="font-black text-lg uppercase text-white leading-none">{strat.nickname}</p>
-                                   <p className="text-[10px] text-primary uppercase font-black tracking-widest mt-1">Strategist</p>
-                                </div>
-                             </div>
-                             <div className="flex gap-2">
-                               {isFriend(strat.nickname) ? (
-                                 <>
-                                   <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10 rounded-full"><MessageSquare className="h-6 w-6" /></Button>
-                                   <Button variant="ghost" size="icon" title="Sever Link" className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-red-500/10" onClick={(e) => { e.stopPropagation(); unfriend(strat.nickname); toast({ title: "Protocol Severed" }); }}><UserMinus className="h-6 w-6" /></Button>
-                                 </>
-                               ) : hasSentRequest(strat.nickname) ? (
-                                 <Badge className="bg-primary/10 text-primary border-primary/20 text-[9px] uppercase font-black px-4 rounded-full">Pending</Badge>
-                               ) : (
-                                 <Button variant="ghost" size="icon" title="Add Strategist" className="text-primary hover:bg-primary/20 rounded-full" onClick={(e) => { e.stopPropagation(); sendFriendRequest(strat.nickname); toast({ title: "Protocol Request Dispatched" }); }}><UserPlus className="h-6 w-6" /></Button>
-                               )}
-                             </div>
-                          </div>
-                        ))
-                      )}
-                   </div>
-                </div>
-
-                {/* Right Chat Hub */}
-                <div className="lg:col-span-2 bg-[#120d0b] border-4 border-primary/20 rounded-[3rem] overflow-hidden flex flex-col shadow-2xl">
-                   {/* Header */}
-                   <div className="p-10 border-b-2 border-primary/10 flex items-center gap-6 bg-[#1f1610]/30">
-                      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center font-black text-[#120d0b] text-3xl shadow-[0_0_30px_rgba(255,215,0,0.2)]">
-                        {activeChatTarget.slice(0,2).toUpperCase()}
-                      </div>
-                      <div>
-                         <h3 className="text-3xl font-headline font-black text-white italic uppercase tracking-tighter leading-none">{activeChatTarget}</h3>
-                         <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mt-2">SOVEREIGN COMMUNICATION HUB</p>
-                      </div>
-                   </div>
-
-                   {/* Messages Pane */}
-                   <div className="flex-1 overflow-y-auto p-12 space-y-12 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.03),transparent)] scrollbar-hide">
-                      {isFriend(activeChatTarget) ? (
-                        (messages[activeChatTarget] || []).map((msg) => (
-                          <div key={msg.id} className={cn("flex items-start gap-6", msg.sender === nickname ? "flex-row-reverse" : "flex-row")}>
-                             <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center font-black text-[#120d0b] text-sm shadow-md">
-                                {msg.sender === nickname ? nickname.slice(0,2).toUpperCase() : activeChatTarget.slice(0,2).toUpperCase()}
-                             </div>
-                             <div className={cn("max-w-[70%] p-10 border-2", 
-                                msg.sender === nickname 
-                                  ? "bg-primary/10 border-primary rounded-[3rem] rounded-tr-none" 
-                                  : "bg-[#1f1610] border-primary/20 rounded-[3rem] rounded-tl-none")}>
-                                <p className="text-xl font-bold text-white leading-relaxed">{msg.text}</p>
-                                <p className="text-[10px] font-black text-primary mt-4 uppercase tracking-widest">{new Date(msg.timestamp).toLocaleTimeString()}</p>
-                             </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-center space-y-10 opacity-40">
-                           <Lock className="h-40 w-40 text-primary animate-pulse" />
-                           <div className="space-y-4">
-                              <h3 className="text-4xl font-headline font-black text-white uppercase italic tracking-tighter">Sync Required</h3>
-                              <p className="text-sm font-black text-primary uppercase tracking-[0.5em] max-w-sm">
-                                Establishing secure friendship protocol with @{activeChatTarget} is mandatory for messaging.
-                              </p>
-                           </div>
-                           <Button onClick={() => sendFriendRequest(activeChatTarget)} disabled={hasSentRequest(activeChatTarget)} className="rounded-full h-18 px-14 bg-primary text-[#120d0b] font-black uppercase text-sm hover:scale-105 transition-transform">
-                             {hasSentRequest(activeChatTarget) ? 'Protocol Requested' : 'Dispatch Friend Request'}
-                           </Button>
-                        </div>
-                      )}
-                   </div>
-
-                   {/* Input Bar */}
-                   {isFriend(activeChatTarget) && (
-                     <div className="p-10 border-t-2 border-primary/10 bg-[#1f1610]/20 flex gap-6 items-center">
-                        <Input 
-                          placeholder="Sync message..." 
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                          className="flex-1 h-20 rounded-full bg-[#120d0b] border-2 border-primary/40 px-10 text-xl font-black text-white placeholder:text-white/20 focus:border-primary" 
-                        />
-                        <Button 
-                          onClick={handleSendMessage} 
-                          className="h-20 w-20 rounded-full bg-primary text-[#120d0b] shadow-2xl hover:bg-white transition-all active:scale-90"
-                        >
-                          <Send className="h-8 w-8" />
-                        </Button>
-                     </div>
-                   )}
-                </div>
-             </div>
-          </TabsContent>
           
-          {/* Other Tabs Content Remains Intact... */}
           <TabsContent value="shooppy" className="space-y-16">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Strategic Marketplace</h3>
