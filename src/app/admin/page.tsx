@@ -7,11 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminStore, useUserStore } from "@/lib/store";
+import { useAdminStore, useUserStore, QuizQuestion } from "@/lib/store";
 import { useUser } from "@/firebase";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { Key, ShieldAlert, Trash2, Award, BookOpen, CheckSquare, Newspaper, ShoppingBag, Users, MessageSquare, Lightbulb, Video, HelpCircle, Upload } from "lucide-react";
+import { 
+  Key, ShieldAlert, Trash2, Award, BookOpen, CheckSquare, 
+  Newspaper, ShoppingBag, Users, MessageSquare, Lightbulb, 
+  Video, HelpCircle, Upload, Plus, MoveUp, MoveDown, CheckCircle2 
+} from "lucide-react";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
 const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
@@ -69,10 +73,13 @@ export default function AdminPage() {
   const [webinTitle, setWebinTitle] = useState("");
   const [webinLink, setWebinLink] = useState("");
 
-  // Quiz State
+  // --- Quizzo Editor State ---
   const [quizTitle, setQuizTitle] = useState("");
-  const [quizQ, setQuizQ] = useState("");
-  const [quizA, setQuizA] = useState("");
+  const [tempQuestions, setTempQuestions] = useState<Omit<QuizQuestion, 'id'>[]>([]);
+  const [qText, setQText] = useState("");
+  const [qType, setQType] = useState<'multiple' | 'boolean' | 'id'>('multiple');
+  const [qAnswer, setQAnswer] = useState("");
+  const [qOptions, setQOptions] = useState<string[]>(["", "", "", ""]);
 
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +120,39 @@ export default function AdminPage() {
     });
     setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile("");
     toast({ title: "Strategic Asset Deployed" });
+  };
+
+  // --- Quizzo Logic ---
+  const addQuestionToTemp = () => {
+    if (!qText || !qAnswer) {
+      toast({ title: "Missing Question Data", variant: "destructive" });
+      return;
+    }
+    const newQ = {
+      type: qType,
+      question: qText,
+      answer: qAnswer,
+      options: qType === 'multiple' ? qOptions.filter(o => o !== "") : undefined
+    };
+    setTempQuestions([...tempQuestions, newQ]);
+    setQText("");
+    setQAnswer("");
+    setQOptions(["", "", "", ""]);
+  };
+
+  const saveFullQuiz = () => {
+    if (!quizTitle || tempQuestions.length === 0) {
+      toast({ title: "Quiz requires title and questions", variant: "destructive" });
+      return;
+    }
+    addQuiz({
+      title: quizTitle,
+      questionCount: tempQuestions.length,
+      questions: tempQuestions.map((q, i) => ({ ...q, id: i.toString() })) as QuizQuestion[]
+    });
+    setQuizTitle("");
+    setTempQuestions([]);
+    toast({ title: "Full Quiz Deployed" });
   };
 
   if (user?.email !== ADMIN_EMAIL) {
@@ -241,7 +281,8 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="routines" className="space-y-12">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {/* TaskDo Injector */}
                 <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><CheckSquare className="h-10 w-10 text-[#FFD700]" /> TaskDo Injector</CardTitle>
                    <div className="space-y-6">
@@ -265,20 +306,96 @@ export default function AdminPage() {
                    </div>
                 </Card>
 
+                {/* Comprehensive Quizzo Editor */}
                 <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                   <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-10 w-10 text-[#FFD700]" /> Quizzo Editor</CardTitle>
-                   <div className="space-y-6">
-                      <Input placeholder="Quiz Title" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 rounded-2xl font-black bg-white text-[#1f1610]" />
-                      <div className="p-8 bg-white/50 rounded-[2.5rem] space-y-6 border-2 border-[#1f1610]/10">
-                        <Label className="text-[#1f1610]">Question</Label>
-                        <Textarea placeholder="Ask a strategic question..." value={quizQ} onChange={e => setQuizQ(e.target.value)} className="min-h-[120px] rounded-3xl bg-white text-[#1f1610]" />
-                        <Label className="text-[#1f1610]">Answer</Label>
-                        <Input placeholder="Correct Key" value={quizA} onChange={e => setQuizA(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610]" />
+                   <CardHeader>
+                      <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-10 w-10 text-[#FFD700]" /> Quizzo Editor</CardTitle>
+                   </CardHeader>
+                   <CardContent className="space-y-10">
+                      <div className="space-y-4">
+                        <Label>Quiz Title</Label>
+                        <Input placeholder="Advanced Strategy Test" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 rounded-2xl font-black bg-white text-[#1f1610]" />
                       </div>
-                      <Button onClick={() => { addQuiz({ title: quizTitle, questionCount: 1, questions: [{ id: '1', type: 'id', question: quizQ, answer: quizA }] }); toast({ title: "Quiz Deployed" }); }} className="w-full h-24 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-2xl">Deploy Quiz</Button>
-                   </div>
+
+                      <div className="p-8 bg-white/50 rounded-[3rem] border-4 border-dashed border-[#1f1610]/10 space-y-8">
+                         <h4 className="font-black text-[#1f1610] uppercase text-xl italic">Inject Question</h4>
+                         <div className="space-y-4">
+                            <Label>Question Type</Label>
+                            <select className="w-full h-14 bg-white border-2 border-[#1f1610]/10 rounded-xl px-6 font-black uppercase text-xs" value={qType} onChange={e => setQType(e.target.value as any)}>
+                               <option value="multiple">Multiple Choice</option>
+                               <option value="boolean">True / False</option>
+                               <option value="id">Identification</option>
+                            </select>
+                         </div>
+                         <div className="space-y-4">
+                            <Label>Question Text</Label>
+                            <Textarea placeholder="Define the strategy..." value={qText} onChange={e => setQText(e.target.value)} className="min-h-[100px] bg-white rounded-2xl" />
+                         </div>
+
+                         {qType === 'multiple' && (
+                           <div className="space-y-4">
+                              <Label>Options (Provide 4)</Label>
+                              {qOptions.map((opt, i) => (
+                                <Input key={i} placeholder={`Option ${i+1}`} value={opt} onChange={e => { const newOpts = [...qOptions]; newOpts[i] = e.target.value; setQOptions(newOpts); }} className="h-12 bg-white" />
+                              ))}
+                           </div>
+                         )}
+
+                         <div className="space-y-4">
+                            <Label>Correct Answer</Label>
+                            <Input placeholder="The exact key" value={qAnswer} onChange={e => setQAnswer(e.target.value)} className="h-14 bg-white font-black text-primary" />
+                         </div>
+
+                         <Button onClick={addQuestionToTemp} className="w-full h-16 rounded-full bg-[#1f1610] text-[#FFD700] font-black uppercase text-sm"><Plus className="h-5 w-5 mr-3" /> Add Question to List</Button>
+                      </div>
+
+                      {tempQuestions.length > 0 && (
+                        <div className="space-y-4">
+                           <h4 className="font-black text-[#1f1610]/40 uppercase text-[10px] tracking-[0.4em] text-center">Queue ({tempQuestions.length})</h4>
+                           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
+                              {tempQuestions.map((q, i) => (
+                                <div key={i} className="p-5 bg-white rounded-2xl flex justify-between items-center border-2 border-[#1f1610]/5">
+                                   <div className="flex-1 mr-4">
+                                      <p className="font-black text-[10px] text-primary uppercase mb-1">{q.type}</p>
+                                      <p className="font-bold text-[#1f1610] text-sm line-clamp-1">{q.question}</p>
+                                   </div>
+                                   <Button variant="ghost" size="icon" onClick={() => setTempQuestions(tempQuestions.filter((_, idx) => idx !== i))} className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                                </div>
+                              ))}
+                           </div>
+                           <Button onClick={saveFullQuiz} className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] font-black text-2xl uppercase shadow-2xl">Deploy Full Quiz</Button>
+                        </div>
+                      )}
+                   </CardContent>
                 </Card>
              </div>
+
+             {/* Manage Existing Quizzes (Move/Delete) */}
+             <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl mt-12">
+                <CardTitle className="text-3xl font-black uppercase mb-10 flex items-center gap-5 text-[#1f1610]"><CheckCircle2 className="h-10 w-10 text-[#FFD700]" /> Active Protocols (Quizzes)</CardTitle>
+                <div className="space-y-6">
+                   {quizzes.length === 0 ? (
+                     <p className="text-center text-[#1f1610]/30 font-black uppercase italic py-10">No active quizzes detected.</p>
+                   ) : (
+                     quizzes.map((q, i) => (
+                       <div key={q.id} className="p-8 bg-white rounded-[3rem] border-4 border-[#1f1610]/5 flex items-center justify-between group">
+                          <div className="flex items-center gap-6 flex-1">
+                             <div className="w-16 h-16 bg-[#1f1610] text-[#FFD700] rounded-2xl flex items-center justify-center font-black text-2xl">{i + 1}</div>
+                             <div>
+                                <h4 className="font-black text-[#1f1610] uppercase text-xl italic">{q.title}</h4>
+                                <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{q.questionCount} Strategic Questions</p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary"><MoveUp className="h-6 w-6" /></Button>
+                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary"><MoveDown className="h-6 w-6" /></Button>
+                             <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 text-red-500" onClick={() => deleteQuiz(q.id)}><Trash2 className="h-6 w-6" /></Button>
+                          </div>
+                       </div>
+                     ))
+                   )}
+                </div>
+             </Card>
           </TabsContent>
 
           <TabsContent value="broadcast" className="space-y-12">
