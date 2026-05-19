@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const { user } = useUser();
   const { 
     points, xp, level, streak, nickname,
-    claimDaily, lastLogin 
+    claimDaily, lastLogin, addPoints 
   } = useUserStore();
   
   const { 
@@ -46,6 +46,12 @@ export default function DashboardPage() {
   const [resTitle, setResTitle] = useState("");
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
   const [resContent, setResContent] = useState("");
+
+  // MeText State
+  const [chatInput, setChatInput] = useState("");
+  const [messages, setMessages] = useState([
+    { id: '1', sender: 'The Host', text: 'Welcome to MeText, Strategist. Empire alignment begins with synchronized communication.', timestamp: new Date().toISOString() }
+  ]);
 
   useEffect(() => {
     const checkDaily = () => {
@@ -85,9 +91,10 @@ export default function DashboardPage() {
       images: postImages,
       isPrivate: false
     });
+    addPoints(20);
     setPostText("");
     setPostImages([]);
-    toast({ title: "Sovereign Win Dispatched" });
+    toast({ title: "Sovereign Win Dispatched", description: "+20 Points earned." });
     setActiveTab('hub'); 
   };
 
@@ -101,8 +108,32 @@ export default function DashboardPage() {
       userId: user?.uid || 'anon',
       nickname: nickname
     });
+    addPoints(10);
     setResTitle(""); setResContent("");
-    toast({ title: "Strategic Resource Shared" });
+    toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
+  };
+
+  const handleSendMessage = () => {
+    if (!chatInput.trim()) return;
+    const newMessage = {
+      id: Math.random().toString(),
+      sender: nickname,
+      text: chatInput,
+      timestamp: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, newMessage]);
+    setChatInput("");
+    
+    // Automatic Host Response
+    setTimeout(() => {
+      const response = {
+        id: Math.random().toString(),
+        sender: 'The Host',
+        text: 'Synchronizing... Message received. Keep executing.',
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, response]);
+    }, 1500);
   };
 
   return (
@@ -331,7 +362,10 @@ export default function DashboardPage() {
                               <div key={r.id} className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 space-y-4">
                                  <h4 className="font-black text-foreground uppercase text-lg italic">{r.title}</h4>
                                  <p className="text-[11px] text-primary font-black uppercase tracking-widest">By @{r.nickname}</p>
-                                 <Button variant="outline" className="h-10 rounded-full text-[10px] uppercase font-black px-8 border-primary/20 text-primary hover:bg-primary hover:text-background">Copy Lab Data</Button>
+                                 <div className="p-4 bg-background/50 rounded-2xl border-2 border-primary/10 text-sm font-bold text-foreground/80 italic leading-relaxed">
+                                    {r.content}
+                                 </div>
+                                 <Button variant="outline" className="h-10 rounded-full text-[10px] uppercase font-black px-8 border-primary/20 text-primary hover:bg-primary hover:text-background" onClick={() => { navigator.clipboard.writeText(r.content); toast({ title: "Prompt Copied" }); }}>Copy Lab Data</Button>
                               </div>
                             ))}
                          </TabsContent>
@@ -353,7 +387,7 @@ export default function DashboardPage() {
                                    <h4 className="font-black text-foreground uppercase text-xl italic">{r.title}</h4>
                                    <p className="text-sm font-bold text-foreground/60">Sovereign Knowledge Session</p>
                                  </div>
-                                 <Button className="rounded-full h-14 px-10 font-black uppercase text-xs shadow-xl active:scale-90" asChild><a href={r.content} target="_blank">Watch Now</a></Button>
+                                 <Button className="rounded-full h-14 px-10 font-black uppercase text-xs shadow-xl active:scale-95" asChild><a href={r.content} target="_blank">Watch Now</a></Button>
                               </div>
                             ))}
                          </TabsContent>
@@ -395,7 +429,7 @@ export default function DashboardPage() {
                       </div>
                    </div>
                    <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
-                      <div className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group cursor-pointer hover:bg-primary/10 transition-all">
+                      <div className="p-8 bg-primary/10 rounded-[3rem] border-4 border-primary/20 flex items-center justify-between group cursor-pointer hover:bg-primary/20 transition-all">
                          <div className="flex items-center gap-5">
                             <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-xl shadow-lg">HD</div>
                             <div>
@@ -418,17 +452,29 @@ export default function DashboardPage() {
                          </div>
                       </div>
                    </div>
-                   <div className="flex-1 overflow-y-auto p-12 space-y-10 bg-background/30 scrollbar-hide">
-                      <div className="flex gap-6">
-                         <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-sm">HD</div>
-                         <div className="max-w-[75%] p-8 bg-card rounded-r-[3rem] rounded-bl-[3rem] shadow-xl border-4 border-primary/10">
-                            <p className="text-lg font-bold text-foreground leading-relaxed">Welcome to MeText, Strategist. Empire alignment begins with synchronized communication.</p>
-                         </div>
-                      </div>
+                   <div className="flex-1 overflow-y-auto p-12 space-y-10 bg-background/30 scrollbar-hide flex flex-col">
+                      {messages.map((msg) => (
+                        <div key={msg.id} className={cn("flex gap-6", msg.sender === nickname ? "flex-row-reverse" : "flex-row")}>
+                           <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center font-black text-background text-sm">
+                              {msg.sender === nickname ? nickname.slice(0,2).toUpperCase() : "HD"}
+                           </div>
+                           <div className={cn("max-w-[75%] p-8 shadow-xl border-4 border-primary/10", 
+                              msg.sender === nickname ? "bg-primary/20 rounded-l-[3rem] rounded-br-[3rem]" : "bg-card rounded-r-[3rem] rounded-bl-[3rem]")}>
+                              <p className="text-lg font-bold text-foreground leading-relaxed">{msg.text}</p>
+                              <p className="text-[10px] font-black text-foreground/40 mt-3 uppercase tracking-widest">{new Date(msg.timestamp).toLocaleTimeString()}</p>
+                           </div>
+                        </div>
+                      ))}
                    </div>
                    <div className="p-10 bg-card border-t-4 border-primary/10 flex gap-6">
-                      <Input placeholder="Sync message..." className="flex-1 h-20 rounded-[2.5rem] bg-background/50 border-2 border-primary/10 px-10 text-lg font-black" />
-                      <Button className="h-20 w-20 rounded-[2.5rem] bg-primary text-background shadow-2xl hover:bg-white hover:text-primary transition-all"><Send className="h-8 w-8" /></Button>
+                      <Input 
+                        placeholder="Sync message..." 
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                        className="flex-1 h-20 rounded-[2.5rem] bg-background/50 border-2 border-primary/10 px-10 text-lg font-black" 
+                      />
+                      <Button onClick={handleSendMessage} className="h-20 w-20 rounded-[2.5rem] bg-primary text-background shadow-2xl hover:bg-white hover:text-primary transition-all"><Send className="h-8 w-8" /></Button>
                    </div>
                 </Card>
              </div>
