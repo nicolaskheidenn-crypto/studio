@@ -5,32 +5,32 @@
 @layer base {
   :root {
     /* NICO DIGITAL Brand Palette: Mocha Brown and Gold Yellow */
-    --background: 25 25% 6%; /* Deep Dark Mocha */
-    --foreground: 45 100% 98%; /* Ultra Soft Cream */
+    --background: 45 30% 98%; /* Calm Mocha Cream */
+    --foreground: 25 25% 6%; /* Deep Mocha Brown */
     
-    --card: 25 25% 10%;
-    --card-foreground: 45 100% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 25% 6%;
     
-    --popover: 25 25% 10%;
-    --popover-foreground: 45 100% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 25% 6%;
     
     --primary: 45 100% 50%; /* NICO Gold Yellow */
-    --primary-foreground: 25 25% 5%;
+    --primary-foreground: 25 25% 6%;
     
-    --secondary: 25 20% 15%;
-    --secondary-foreground: 45 100% 90%;
+    --secondary: 25 20% 92%;
+    --secondary-foreground: 25 25% 6%;
     
-    --muted: 25 20% 12%;
-    --muted-foreground: 25 10% 85%; /* High Contrast for readability */
+    --muted: 25 20% 90%;
+    --muted-foreground: 25 25% 20%; /* High contrast for readability */
     
     --accent: 45 100% 50%;
-    --accent-foreground: 25 25% 5%;
+    --accent-foreground: 25 25% 6%;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 45 100% 50% / 0.2;
-    --input: 45 100% 50% / 0.3;
+    --border: 25 25% 10% / 0.1;
+    --input: 25 25% 10% / 0.15;
     --ring: 45 100% 50%;
     
     --radius: 1.5rem;
@@ -43,32 +43,24 @@
   }
 
   body.theme-fire {
-    --background: 10 70% 8%;
-    --primary: 30 100% 50%;
     background: linear-gradient(-45deg, #1a0502, #3d120a, #1a0502);
     background-size: 400% 400%;
     animation: atmosphere-float 15s ease infinite;
   }
 
   body.theme-water {
-    --background: 210 60% 5%;
-    --primary: 200 90% 50%;
     background: linear-gradient(-45deg, #020d1a, #0a2d4a, #020d1a);
     background-size: 400% 400%;
     animation: atmosphere-float 15s ease infinite;
   }
 
   body.theme-nature {
-    --background: 140 50% 5%;
-    --primary: 140 60% 50%;
     background: linear-gradient(-45deg, #021a0a, #0a4a1d, #021a0a);
     background-size: 400% 400%;
     animation: atmosphere-float 15s ease infinite;
   }
 
   body.theme-raining {
-    --background: 220 30% 4%;
-    --primary: 210 60% 70%;
     background: linear-gradient(-45deg, #050608, #141821, #050608);
     background-size: 400% 400%;
     animation: atmosphere-float 10s ease infinite;
@@ -76,11 +68,20 @@
 
   body {
     @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
-    background-color: hsl(var(--background));
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline tracking-tighter;
+    @apply font-headline tracking-tighter text-foreground;
+  }
+
+  /* High contrast inputs for better visibility */
+  input, textarea, select {
+    @apply border-2 border-foreground/20 bg-white focus:border-primary focus:ring-1 focus:ring-primary !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  label {
+    @apply font-black uppercase tracking-widest text-foreground/80 !important;
   }
 }
 
@@ -90,12 +91,4 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-.text-muted-foreground {
-  color: hsl(45 10% 80%) !important;
-}
-
-input, textarea, select {
-  @apply border-2 border-primary/30 bg-background/50 focus:border-primary !important;
 }
