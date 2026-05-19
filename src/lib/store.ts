@@ -9,31 +9,16 @@ export type Theme = 'fire' | 'water' | 'nature' | 'raining' | 'default';
 interface AppState {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  applyTheme: () => void;
 }
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       theme: 'default',
       setTheme: (theme) => set({ theme }),
-      applyTheme: () => {
-        if (typeof document !== 'undefined') {
-          const body = document.body;
-          const themeClasses = ['theme-fire', 'theme-water', 'theme-nature', 'theme-raining'];
-          body.classList.remove(...themeClasses);
-          const currentTheme = get().theme;
-          if (currentTheme !== 'default') {
-            body.classList.add(`theme-${currentTheme}`);
-          }
-        }
-      }
     }),
     {
       name: 'fireproof-app-v15',
-      onRehydrateStorage: () => (state) => {
-        if (state) state.applyTheme();
-      }
     }
   )
 );

@@ -83,7 +83,7 @@ export default function LoginPage() {
         <Coffee className="w-96 h-96 text-primary" />
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-[#fdfaf6] rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border-8 border-primary/20 relative z-10">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-mocha-cream rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border-8 border-primary/20 relative z-10">
         {/* Left Column: Strategist Hub Branding */}
         <div className="p-12 md:p-20 space-y-12 bg-[#1f1610] text-[#fdfaf6] flex flex-col justify-center relative overflow-hidden border-r-4 border-primary/10">
           <div className="absolute top-0 right-0 p-12 opacity-10">
@@ -107,7 +107,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right Column: High-Contrast Login Form */}
-        <div className="p-12 md:p-20 space-y-14 bg-[#fdfaf6]">
+        <div className="p-12 md:p-20 space-y-14 bg-mocha-cream">
           <div className="space-y-4">
             <h1 className="text-5xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">Access Root</h1>
             <p className="text-sm text-[#FFD700] font-black uppercase tracking-[0.6em]">Protocol Authorization Required</p>

@@ -116,7 +116,7 @@ export default function EntryGate() {
       </div>
 
       <div className="w-full max-w-xl space-y-12 animate-in slide-in-from-bottom-20 duration-1000 relative z-10">
-        <div className="bg-[#fdfaf6] p-12 md:p-20 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-8 border-[#FFD700]/20 space-y-12 text-center">
+        <div className="bg-mocha-cream p-12 md:p-20 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-8 border-[#FFD700]/20 space-y-12 text-center">
           <div className="space-y-8">
             <div className="w-fit mx-auto">
                <Key className="h-20 w-20 text-[#FFD700]" />
@@ -131,6 +131,7 @@ export default function EntryGate() {
 
           <form onSubmit={verifyKey} className="space-y-10">
             <div className="space-y-6">
+              <Label className="text-[#1f1610]/60 font-black text-xs">PROTOCOL KEY</Label>
               <Input
                 type="text"
                 placeholder="Protocol Key"

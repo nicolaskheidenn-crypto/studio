@@ -69,6 +69,11 @@ export default function AdminPage() {
   const [webinTitle, setWebinTitle] = useState("");
   const [webinLink, setWebinLink] = useState("");
 
+  // Quiz State
+  const [quizTitle, setQuizTitle] = useState("");
+  const [quizQ, setQuizQ] = useState("");
+  const [quizA, setQuizA] = useState("");
+
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminKey === ADMIN_SECRET_KEY) {
@@ -123,7 +128,7 @@ export default function AdminPage() {
   if (!isAuthorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1f1610] p-6">
-        <Card className="w-full max-w-xl p-16 bg-[#fdfaf6] rounded-[4rem] shadow-2xl border-8 border-[#FFD700]/20">
+        <Card className="w-full max-w-xl p-16 bg-mocha-cream rounded-[4rem] shadow-2xl border-8 border-[#FFD700]/20">
           <CardHeader className="text-center space-y-8">
             <Key className="h-16 w-16 text-[#FFD700] mx-auto" />
             <CardTitle className="text-5xl font-headline font-black uppercase italic tracking-tighter text-[#1f1610]">Verify Host</CardTitle>
@@ -146,7 +151,7 @@ export default function AdminPage() {
         <h1 className="text-8xl font-headline font-black text-[#fdfaf6] uppercase tracking-tighter mb-16 italic">Host Command</h1>
 
         <Tabs defaultValue="moderation" className="space-y-12">
-          <TabsList className="bg-[#fdfaf6] p-2 rounded-full w-fit shadow-2xl border-4 border-[#FFD700]/20 overflow-x-auto scrollbar-hide">
+          <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-[#FFD700]/20 overflow-x-auto scrollbar-hide">
             <TabsTrigger value="moderation" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Moderation</TabsTrigger>
             <TabsTrigger value="assets" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Digital Assets</TabsTrigger>
             <TabsTrigger value="routines" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Routines</TabsTrigger>
@@ -156,7 +161,7 @@ export default function AdminPage() {
 
           <TabsContent value="moderation" className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <Card className="rounded-[4rem] border-4 border-[#FFD700]/20 bg-[#fdfaf6] p-12 shadow-2xl">
+              <Card className="rounded-[4rem] border-4 border-[#FFD700]/20 bg-mocha-cream p-12 shadow-2xl">
                  <CardTitle className="text-3xl font-black uppercase mb-10 flex items-center gap-4 text-[#1f1610]"><MessageSquare className="h-10 w-10 text-[#FFD700]" /> Strategist Wins</CardTitle>
                  <div className="space-y-6 max-h-[600px] overflow-y-auto pr-6 scrollbar-hide">
                    {activityWall.map(p => (
@@ -171,7 +176,7 @@ export default function AdminPage() {
                  </div>
               </Card>
 
-              <Card className="rounded-[4rem] border-4 border-[#FFD700]/20 bg-[#fdfaf6] p-12 shadow-2xl">
+              <Card className="rounded-[4rem] border-4 border-[#FFD700]/20 bg-mocha-cream p-12 shadow-2xl">
                  <CardTitle className="text-3xl font-black uppercase mb-10 flex items-center gap-4 text-[#1f1610]"><Lightbulb className="h-10 w-10 text-[#FFD700]" /> Resource moderation</CardTitle>
                  <div className="space-y-6 max-h-[600px] overflow-y-auto pr-6 scrollbar-hide">
                    {resources.map(r => (
@@ -190,7 +195,7 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="assets" className="space-y-12">
-            <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-[#fdfaf6] p-16 shadow-2xl space-y-12">
+            <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-16 shadow-2xl space-y-12">
                 <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]"><ShoppingBag className="h-12 w-12 text-[#FFD700]" /> Digital Asset Injector</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                    <div className="space-y-8">
@@ -237,7 +242,7 @@ export default function AdminPage() {
 
           <TabsContent value="routines" className="space-y-12">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-[#fdfaf6] p-12 shadow-2xl space-y-10">
+                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><CheckSquare className="h-10 w-10 text-[#FFD700]" /> TaskDo Injector</CardTitle>
                    <div className="space-y-6">
                       <div className="flex items-center gap-6 justify-between bg-white/50 p-8 rounded-[2rem] border-2 border-[#1f1610]/10">
@@ -260,7 +265,7 @@ export default function AdminPage() {
                    </div>
                 </Card>
 
-                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-[#fdfaf6] p-12 shadow-2xl space-y-10">
+                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-10 w-10 text-[#FFD700]" /> Quizzo Editor</CardTitle>
                    <div className="space-y-6">
                       <Input placeholder="Quiz Title" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 rounded-2xl font-black bg-white text-[#1f1610]" />
@@ -277,7 +282,7 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="broadcast" className="space-y-12">
-             <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-[#fdfaf6] p-16 shadow-2xl space-y-12">
+             <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-16 shadow-2xl space-y-12">
                 <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]"><Newspaper className="h-12 w-12 text-[#FFD700]" /> Global Broadcast Center</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                    <div className="space-y-8">
@@ -312,7 +317,7 @@ export default function AdminPage() {
 
           <TabsContent value="system" className="space-y-12">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-[#fdfaf6] p-12 shadow-2xl space-y-10 md:col-span-2">
+                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10 md:col-span-2">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Users className="h-10 w-10 text-[#FFD700]" /> Strategist monitor</CardTitle>
                    <div className="p-10 bg-white/50 rounded-[3rem] flex justify-between items-center border-4 border-[#1f1610]/10">
                       <div className="space-y-2">
@@ -326,7 +331,7 @@ export default function AdminPage() {
                    </div>
                 </Card>
 
-                <Card className="rounded-[4rem] border-4 border-[#FFD700]/10 bg-[#fdfaf6] p-12 shadow-2xl space-y-10">
+                <Card className="rounded-[4rem] border-4 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><HelpCircle className="h-10 w-10 text-[#FFD700]" /> FAQ engine</CardTitle>
                    <div className="space-y-6">
                       <Input placeholder="Inquiry Question" value={faqQ} onChange={e => setFaqQ(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610]" />
@@ -335,7 +340,7 @@ export default function AdminPage() {
                    </div>
                 </Card>
 
-                <Card className="rounded-[4rem] border-4 border-[#FFD700]/10 bg-[#fdfaf6] p-12 shadow-2xl space-y-10">
+                <Card className="rounded-[4rem] border-4 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Award className="h-10 w-10 text-[#FFD700]" /> Achievement Vault</CardTitle>
                    <div className="space-y-6">
                       <Input placeholder="Trophy Title" value={badgeTitle} onChange={e => setBadgeTitle(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610]" />
@@ -350,7 +355,7 @@ export default function AdminPage() {
                    </div>
                 </Card>
 
-                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-[#fdfaf6] p-12 shadow-2xl space-y-10 md:col-span-2">
+                <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10 md:col-span-2">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Video className="h-10 w-10 text-[#FFD700]" /> WeBin Archiver</CardTitle>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                       <div className="space-y-6">

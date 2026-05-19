@@ -39,28 +39,28 @@
     100% { background-position: 0% 50%; }
   }
 
-  body.theme-fire {
-    background: linear-gradient(-45deg, #1a0502, #3d120a, #1a0502);
-    background-size: 400% 400%;
-    animation: atmosphere-float 15s ease infinite;
+  .theme-fire {
+    background: linear-gradient(-45deg, #1a0502, #3d120a, #1a0502) !important;
+    background-size: 400% 400% !important;
+    animation: atmosphere-float 15s ease infinite !important;
   }
 
-  body.theme-water {
-    background: linear-gradient(-45deg, #020d1a, #0a2d4a, #020d1a);
-    background-size: 400% 400%;
-    animation: atmosphere-float 15s ease infinite;
+  .theme-water {
+    background: linear-gradient(-45deg, #020d1a, #0a2d4a, #020d1a) !important;
+    background-size: 400% 400% !important;
+    animation: atmosphere-float 15s ease infinite !important;
   }
 
-  body.theme-nature {
-    background: linear-gradient(-45deg, #021a0a, #0a4a1d, #021a0a);
-    background-size: 400% 400%;
-    animation: atmosphere-float 15s ease infinite;
+  .theme-nature {
+    background: linear-gradient(-45deg, #021a0a, #0a4a1d, #021a0a) !important;
+    background-size: 400% 400% !important;
+    animation: atmosphere-float 15s ease infinite !important;
   }
 
-  body.theme-raining {
-    background: linear-gradient(-45deg, #050608, #141821, #050608);
-    background-size: 400% 400%;
-    animation: atmosphere-float 10s ease infinite;
+  .theme-raining {
+    background: linear-gradient(-45deg, #050608, #141821, #050608) !important;
+    background-size: 400% 400% !important;
+    animation: atmosphere-float 10s ease infinite !important;
   }
 
   body {
@@ -71,6 +71,7 @@
     @apply font-headline tracking-tighter text-foreground font-black;
   }
 
+  /* High-Contrast Readability Pass */
   input, textarea, select {
     @apply border-4 border-primary/30 bg-card/80 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary !important;
     font-weight: 700 !important;
@@ -81,6 +82,23 @@
     @apply font-black uppercase tracking-widest text-primary !important;
     opacity: 1 !important;
     font-size: 0.75rem;
+  }
+
+  /* Semantic class for Mocha Cream Cards to ensure deep mocha text */
+  .bg-mocha-cream {
+    background-color: #fdfaf6 !important;
+  }
+
+  .bg-mocha-cream,
+  .bg-mocha-cream p, 
+  .bg-mocha-cream h1, 
+  .bg-mocha-cream h2, 
+  .bg-mocha-cream h3, 
+  .bg-mocha-cream h4, 
+  .bg-mocha-cream label,
+  .bg-mocha-cream div,
+  .bg-mocha-cream span {
+    color: #1f1610 !important;
   }
 
   .text-muted-foreground {
