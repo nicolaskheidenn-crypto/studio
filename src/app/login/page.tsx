@@ -83,9 +83,9 @@ export default function LoginPage() {
         <Coffee className="w-96 h-96 text-primary" />
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-mocha-cream rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border-8 border-primary/20 relative z-10">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border-8 border-primary/20 relative z-10 bg-[#1f1610]">
         {/* Left Column: Strategist Hub Branding */}
-        <div className="p-12 md:p-20 space-y-12 bg-[#1f1610] text-[#fdfaf6] flex flex-col justify-center relative overflow-hidden border-r-4 border-primary/10">
+        <div className="p-12 md:p-20 space-y-12 bg-[#1f1610] flex flex-col justify-center relative overflow-hidden border-r-4 border-primary/10">
           <div className="absolute top-0 right-0 p-12 opacity-10">
             <Lock className="h-64 w-64 rotate-12 text-primary" />
           </div>
@@ -95,12 +95,12 @@ export default function LoginPage() {
               <Lock className="h-16 w-16 text-[#1f1610]" />
             </div>
             <div className="space-y-6">
-              <h2 className="text-6xl md:text-8xl font-headline font-black leading-none tracking-tighter uppercase">
-                STRATEGIST <span className="text-[#FFD700] italic">HUB</span>
+              <h2 className="text-5xl md:text-6xl font-headline font-black leading-none tracking-tighter uppercase text-[#fdfaf6]">
+                STRATEGY <span className="text-[#FFD700] italic">HUB</span>
               </h2>
               <div className="h-3 w-40 bg-[#FFD700] rounded-full" />
             </div>
-            <p className="text-[#fdfaf6]/70 text-xl leading-relaxed font-black uppercase tracking-[0.2em] max-w-sm">
+            <p className="text-[#fdfaf6] text-xl leading-relaxed font-black uppercase tracking-[0.2em] max-w-sm">
               Sovereign infrastructure for high-impact execution.
             </p>
           </div>

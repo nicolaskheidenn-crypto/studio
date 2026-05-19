@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, Chrome, Facebook, Instagram, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Coffee, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -67,13 +67,13 @@ export default function SignUpPage() {
         <Coffee className="w-80 h-80 text-primary rotate-45" />
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-mocha-cream rounded-[3rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 backdrop-blur-sm">
-        <div className="p-12 md:p-16 space-y-10 bg-[#1f1610] text-[#fdfaf6] flex flex-col justify-center border-r-4 border-primary/10">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[3rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 backdrop-blur-sm bg-[#1f1610]">
+        <div className="p-12 md:p-16 space-y-10 bg-[#1f1610] flex flex-col justify-center border-r-4 border-primary/10">
           <div className="space-y-8">
-            <h2 className="text-5xl md:text-6xl font-headline font-black leading-tight tracking-tighter uppercase">
+            <h2 className="text-5xl md:text-6xl font-headline font-black leading-tight tracking-tighter uppercase text-[#fdfaf6]">
               Build your <span className="text-primary italic">Sovereign</span> Empire.
             </h2>
-            <p className="text-[#fdfaf6]/70 text-xl font-black uppercase tracking-widest leading-relaxed">
+            <p className="text-[#fdfaf6] text-xl font-black uppercase tracking-widest leading-relaxed">
               Every great strategy starts with a single daily task. Nico Digital provides the root for your growth.
             </p>
 
@@ -88,7 +88,7 @@ export default function SignUpPage() {
                   <div className="bg-primary p-1.5 rounded-full shadow-lg">
                     <CheckCircle2 className="h-5 w-5 text-[#1f1610]" />
                   </div>
-                  <span className="font-black text-lg uppercase tracking-tight">{text}</span>
+                  <span className="font-black text-lg uppercase tracking-tight text-[#fdfaf6]">{text}</span>
                 </li>
               ))}
             </ul>
