@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminStore, useUserStore } from "@/lib/store";
 import { useUser } from "@/firebase";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { Key, ShieldAlert, Plus, Trash2, Award, BookOpen, CheckSquare, Newspaper, ShoppingBag, Users, MessageSquare, Lightbulb, Video, HelpCircle } from "lucide-react";
+import { Key, ShieldAlert, Plus, Trash2, Award, BookOpen, CheckSquare, Newspaper, ShoppingBag, Users, MessageSquare, Lightbulb, Video, HelpCircle, FileText } from "lucide-react";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
 const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
@@ -56,8 +56,19 @@ export default function AdminPage() {
   const [newsContent, setNewsContent] = useState("");
   const [newsImg, setNewsImg] = useState("");
 
-  // Quiz State
-  const [quizTitle, setQuizTitle] = useState("");
+  // FAQ State
+  const [faqQ, setFaqQ] = useState("");
+  const [faqA, setFaqA] = useState("");
+
+  // Badge State
+  const [badgeTitle, setBadgeTitle] = useState("");
+  const [badgeDesc, setBadgeDesc] = useState("");
+  const [badgeDiff, setBadgeDiff] = useState<'Bronze' | 'Silver' | 'Gold' | 'Sovereign'>('Bronze');
+
+  // WeBin State
+  const [webinTitle, setWebinTitle] = useState("");
+  const [webinDesc, setWebinDesc] = useState("");
+  const [webinLink, setWebinLink] = useState("");
 
   if (user?.email !== ADMIN_EMAIL) {
     return (
@@ -116,10 +127,35 @@ export default function AdminPage() {
     toast({ title: "Broadcast Dispatched" });
   };
 
+  const handleAddFaq = () => {
+    addFAQ({ question: faqQ, answer: faqA });
+    setFaqQ(""); setFaqA("");
+    toast({ title: "FAQ Added" });
+  };
+
+  const handleAddBadge = () => {
+    addBadge({ title: badgeTitle, description: badgeDesc, difficulty: badgeDiff });
+    setBadgeTitle(""); setBadgeDesc("");
+    toast({ title: "Achievement Deployed" });
+  };
+
+  const handleAddWebin = () => {
+    addResource({
+      type: 'WeBin',
+      title: webinTitle,
+      description: webinDesc,
+      content: webinLink,
+      userId: user.uid,
+      nickname: 'The Host'
+    });
+    setWebinTitle(""); setWebinDesc(""); setWebinLink("");
+    toast({ title: "WeBin Archive Updated" });
+  };
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fdfaf6] p-4">
-        <Card className="w-full max-w-md p-10 bg-white rounded-[3.5rem] shadow-2xl border-4 border-foreground/5">
+        <Card className="w-full max-w-md p-10 bg-white rounded-[3.5rem] shadow-2xl border-4 border-foreground/10">
           <CardHeader className="text-center space-y-6">
             <Key className="h-12 w-12 text-primary mx-auto" />
             <CardTitle className="text-4xl font-headline font-black uppercase">Verify Host</CardTitle>
@@ -147,45 +183,79 @@ export default function AdminPage() {
             <TabsTrigger value="content" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Assets</TabsTrigger>
             <TabsTrigger value="broadcast" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Broadcast</TabsTrigger>
             <TabsTrigger value="users" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">Users</TabsTrigger>
+            <TabsTrigger value="system" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest">System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="moderation" className="space-y-8">
-            <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl">
-               <CardTitle className="text-3xl font-black uppercase mb-8 flex items-center gap-4"><MessageSquare className="h-8 w-8 text-primary" /> Active Moderation</CardTitle>
-               <div className="space-y-6">
-                 {activityWall.length === 0 ? <p className="text-foreground/40 italic font-medium">No community posts active.</p> : activityWall.map(p => (
-                   <div key={p.id} className="p-6 bg-secondary/20 rounded-3xl border border-foreground/5 flex justify-between items-center">
-                     <div>
-                       <p className="font-black text-foreground uppercase text-xs">@{p.nickname}</p>
-                       <p className="text-xs font-medium text-foreground/60">{p.description}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl">
+                 <CardTitle className="text-3xl font-black uppercase mb-8 flex items-center gap-4"><MessageSquare className="h-8 w-8 text-primary" /> Community Feed</CardTitle>
+                 <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
+                   {activityWall.length === 0 ? <p className="text-foreground/40 italic font-medium">No community posts active.</p> : activityWall.map(p => (
+                     <div key={p.id} className="p-6 bg-secondary/20 rounded-3xl border border-foreground/5 flex justify-between items-center">
+                       <div>
+                         <p className="font-black text-foreground uppercase text-xs">@{p.nickname}</p>
+                         <p className="text-xs font-medium text-foreground/60">{p.description}</p>
+                       </div>
+                       <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => deletePost(p.id)}><Trash2 className="h-5 w-5" /></Button>
                      </div>
-                     <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => deletePost(p.id)}><Trash2 className="h-5 w-5" /></Button>
-                   </div>
-                 ))}
-               </div>
-            </Card>
+                   ))}
+                 </div>
+              </Card>
+
+              <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl">
+                 <CardTitle className="text-3xl font-black uppercase mb-8 flex items-center gap-4"><Lightbulb className="h-8 w-8 text-primary" /> Resource Library</CardTitle>
+                 <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
+                   {resources.map(r => (
+                     <div key={r.id} className="p-6 bg-secondary/20 rounded-3xl border border-foreground/5 flex justify-between items-center">
+                       <div>
+                         <p className="font-black text-[10px] uppercase text-primary mb-1">{r.type}</p>
+                         <p className="font-black text-foreground uppercase text-xs">{r.title}</p>
+                         <p className="text-[10px] font-medium text-foreground/40">By @{r.nickname}</p>
+                       </div>
+                       <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => deleteResource(r.id)}><Trash2 className="h-5 w-5" /></Button>
+                     </div>
+                   ))}
+                 </div>
+              </Card>
+            </div>
           </TabsContent>
 
-          <TabsContent value="content" className="space-y-8">
+          <TabsContent value="content" className="space-y-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                {/* Shooppy Manager */}
                <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl space-y-8">
                   <CardTitle className="text-2xl font-black uppercase flex items-center gap-4"><ShoppingBag className="h-6 w-6 text-primary" /> Shooppy Catalog</CardTitle>
                   <div className="space-y-4">
-                     <Input placeholder="Asset Name" value={prodTitle} onChange={e => setProdTitle(e.target.value)} />
-                     <Textarea placeholder="Asset Description" value={prodDesc} onChange={e => setProdDesc(e.target.value)} />
-                     <select className="w-full h-12 bg-secondary/20 border-none rounded-xl px-4 font-black uppercase text-xs" value={prodType} onChange={e => setProdType(e.target.value as any)}>
-                        <option value="eBook">E-Book</option>
-                        <option value="Template">Template</option>
-                        <option value="Bundle">Bundle</option>
-                     </select>
-                     <div>
-                       <Label>Cover Photo</Label>
-                       <Input type="file" onChange={e => handleFileUpload(e, setProdImg)} className="mt-2" />
+                     <div className="space-y-2">
+                        <Label>Asset Name</Label>
+                        <Input placeholder="Asset Name" value={prodTitle} onChange={e => setProdTitle(e.target.value)} />
                      </div>
-                     <div>
-                       <Label>Digital File (PDF/ZIP)</Label>
-                       <Input type="file" onChange={e => handleFileUpload(e, setProdFile)} className="mt-2" />
+                     <div className="space-y-2">
+                        <Label>Description</Label>
+                        <Textarea placeholder="Asset Description" value={prodDesc} onChange={e => setProdDesc(e.target.value)} />
+                     </div>
+                     <div className="space-y-2">
+                        <Label>Category</Label>
+                        <select className="w-full h-12 bg-secondary/20 border-2 border-foreground/10 rounded-xl px-4 font-black uppercase text-xs" value={prodType} onChange={e => setProdType(e.target.value as any)}>
+                            <option value="eBook">E-Book</option>
+                            <option value="Template">Template</option>
+                            <option value="Bundle">Bundle</option>
+                        </select>
+                     </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Cover Photo</Label>
+                          <Input type="file" onChange={e => handleFileUpload(e, setProdImg)} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Digital File</Label>
+                          <Input type="file" onChange={e => handleFileUpload(e, setProdFile)} />
+                        </div>
+                     </div>
+                     <div className="space-y-2">
+                        <Label>Required Level</Label>
+                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} />
                      </div>
                      <Button onClick={handleSaveProduct} className="w-full h-16 rounded-full bg-foreground text-white font-black uppercase text-xs">Deploy Asset</Button>
                   </div>
@@ -200,16 +270,19 @@ export default function AdminPage() {
                         <Input type="number" min={1} max={7} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-20" />
                      </div>
                      <div className="space-y-2">
-                        <Input placeholder="Task 1 Title" value={task1T} onChange={e => setTask1T(e.target.value)} />
-                        <Input placeholder="Task 1 Description" value={task1D} onChange={e => setTask1D(e.target.value)} />
+                        <Label>Task 1</Label>
+                        <Input placeholder="Title" value={task1T} onChange={e => setTask1T(e.target.value)} />
+                        <Input placeholder="Description" value={task1D} onChange={e => setTask1D(e.target.value)} />
                      </div>
                      <div className="space-y-2">
-                        <Input placeholder="Task 2 Title" value={task2T} onChange={e => setTask2T(e.target.value)} />
-                        <Input placeholder="Task 2 Description" value={task2D} onChange={e => setTask2D(e.target.value)} />
+                        <Label>Task 2</Label>
+                        <Input placeholder="Title" value={task2T} onChange={e => setTask2T(e.target.value)} />
+                        <Input placeholder="Description" value={task2D} onChange={e => setTask2D(e.target.value)} />
                      </div>
                      <div className="space-y-2">
-                        <Input placeholder="Task 3 Title" value={task3T} onChange={e => setTask3T(e.target.value)} />
-                        <Input placeholder="Task 3 Description" value={task3D} onChange={e => setTask3D(e.target.value)} />
+                        <Label>Task 3</Label>
+                        <Input placeholder="Title" value={task3T} onChange={e => setTask3T(e.target.value)} />
+                        <Input placeholder="Description" value={task3D} onChange={e => setTask3D(e.target.value)} />
                      </div>
                      <Button onClick={handleSaveTasks} className="w-full h-16 rounded-full bg-primary text-foreground font-black uppercase text-xs">Inject Routine</Button>
                   </div>
@@ -222,15 +295,21 @@ export default function AdminPage() {
                 <CardTitle className="text-3xl font-black uppercase flex items-center gap-4"><Newspaper className="h-8 w-8 text-primary" /> Broadcast Center</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                    <div className="space-y-6">
-                      <Input placeholder="Broadcast Title" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} />
-                      <Textarea placeholder="Broadcast Content" value={newsContent} onChange={e => setNewsContent(e.target.value)} className="min-h-[200px]" />
-                      <div>
+                      <div className="space-y-2">
+                        <Label>Broadcast Title</Label>
+                        <Input placeholder="Broadcast Title" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Content</Label>
+                        <Textarea placeholder="Broadcast Content" value={newsContent} onChange={e => setNewsContent(e.target.value)} className="min-h-[200px]" />
+                      </div>
+                      <div className="space-y-2">
                         <Label>Attachment Photo</Label>
                         <Input type="file" onChange={e => handleFileUpload(e, setNewsImg)} className="mt-2" />
                       </div>
                       <Button onClick={handleBroadcast} className="w-full h-20 rounded-full bg-foreground text-white font-black text-2xl uppercase">Dispatch Broadcast</Button>
                    </div>
-                   <div className="p-8 bg-secondary/20 rounded-[3rem] border-4 border-dashed border-foreground/5 space-y-6">
+                   <div className="p-8 bg-secondary/20 rounded-[3rem] border-4 border-dashed border-foreground/10 space-y-6">
                       <h4 className="font-black text-foreground/40 uppercase text-xs text-center">Active Broadcasts</h4>
                       {newsPosts.map(p => (
                         <div key={p.id} className="p-4 bg-white rounded-2xl flex justify-between items-center shadow-sm">
@@ -247,7 +326,7 @@ export default function AdminPage() {
              <Card className="rounded-[3.5rem] border-foreground/5 bg-white p-12 shadow-xl">
                 <CardTitle className="text-3xl font-black uppercase mb-8 flex items-center gap-4"><Users className="h-8 w-8 text-primary" /> Strategist Monitor</CardTitle>
                 <div className="p-8 bg-secondary/10 rounded-[3rem] space-y-10">
-                   <div className="flex justify-between items-center border-b border-foreground/10 pb-8">
+                   <div className="flex justify-between items-center border-b border-foreground/20 pb-8">
                       <div>
                          <p className="font-black text-foreground text-2xl uppercase tracking-tighter">Identity: Succemazing (Demo)</p>
                          <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Global Protocol Monitoring Active</p>
@@ -259,6 +338,73 @@ export default function AdminPage() {
                    </div>
                 </div>
              </Card>
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-8">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* FAQ Manager */}
+                <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl space-y-8">
+                   <CardTitle className="text-2xl font-black uppercase flex items-center gap-4"><HelpCircle className="h-6 w-6 text-primary" /> FAQ Engine</CardTitle>
+                   <div className="space-y-4">
+                      <Input placeholder="Question" value={faqQ} onChange={e => setFaqQ(e.target.value)} />
+                      <Textarea placeholder="Answer" value={faqA} onChange={e => setFaqA(e.target.value)} />
+                      <Button onClick={handleAddFaq} className="w-full h-12 rounded-xl bg-foreground text-white font-black uppercase text-xs">Add Entry</Button>
+                   </div>
+                   <div className="space-y-2">
+                      {faqs.map(f => (
+                        <div key={f.id} className="p-4 bg-secondary/20 rounded-xl flex justify-between items-center">
+                           <p className="text-[10px] font-black uppercase truncate flex-1 mr-4">{f.question}</p>
+                           <Button variant="ghost" size="icon" className="text-red-500" onClick={() => deleteFAQ(f.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      ))}
+                   </div>
+                </Card>
+
+                {/* Badge Manager */}
+                <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl space-y-8">
+                   <CardTitle className="text-2xl font-black uppercase flex items-center gap-4"><Award className="h-6 w-6 text-primary" /> Achievement Vault</CardTitle>
+                   <div className="space-y-4">
+                      <Input placeholder="Trophy Title" value={badgeTitle} onChange={e => setBadgeTitle(e.target.value)} />
+                      <Textarea placeholder="Requirement Description" value={badgeDesc} onChange={e => setBadgeDesc(e.target.value)} />
+                      <select className="w-full h-12 bg-secondary/20 border-2 border-foreground/10 rounded-xl px-4 font-black uppercase text-xs" value={badgeDiff} onChange={e => setBadgeDiff(e.target.value as any)}>
+                         <option value="Bronze">Bronze</option>
+                         <option value="Silver">Silver</option>
+                         <option value="Gold">Gold</option>
+                         <option value="Sovereign">Sovereign</option>
+                      </select>
+                      <Button onClick={handleAddBadge} className="w-full h-12 rounded-xl bg-foreground text-white font-black uppercase text-xs">Deploy Trophy</Button>
+                   </div>
+                   <div className="space-y-2">
+                      {badges.map(b => (
+                        <div key={b.id} className="p-4 bg-secondary/20 rounded-xl flex justify-between items-center">
+                           <p className="text-[10px] font-black uppercase truncate flex-1 mr-4">{b.title}</p>
+                           <Button variant="ghost" size="icon" className="text-red-500" onClick={() => deleteBadge(b.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      ))}
+                   </div>
+                </Card>
+
+                {/* WeBin Manager */}
+                <Card className="rounded-[3rem] border-foreground/5 bg-white p-12 shadow-xl space-y-8 md:col-span-2">
+                   <CardTitle className="text-2xl font-black uppercase flex items-center gap-4"><Video className="h-6 w-6 text-primary" /> WeBin Archive</CardTitle>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                         <Input placeholder="Webinar Title" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} />
+                         <Textarea placeholder="Description" value={webinDesc} onChange={e => setWebinDesc(e.target.value)} />
+                         <Input placeholder="Watch Link (URL)" value={webinLink} onChange={e => setWebinLink(e.target.value)} />
+                         <Button onClick={handleAddWebin} className="w-full h-14 rounded-full bg-primary text-foreground font-black uppercase text-xs">Add to Archive</Button>
+                      </div>
+                      <div className="space-y-2">
+                        {resources.filter(r => r.type === 'WeBin').map(r => (
+                          <div key={r.id} className="p-4 bg-secondary/20 rounded-xl flex justify-between items-center">
+                             <p className="text-[10px] font-black uppercase truncate flex-1 mr-4">{r.title}</p>
+                             <Button variant="ghost" size="icon" className="text-red-500" onClick={() => deleteResource(r.id)}><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        ))}
+                      </div>
+                   </div>
+                </Card>
+             </div>
           </TabsContent>
         </Tabs>
       </main>

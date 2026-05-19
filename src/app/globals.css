@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* NICO DIGITAL Brand Palette: Mocha Brown and Gold Yellow */
-    --background: 45 30% 98%; /* Calm Mocha Cream */
-    --foreground: 25 25% 6%; /* Deep Mocha Brown */
+    --background: 45 30% 98%; /* #fdfaf6 - Calm Mocha Cream */
+    --foreground: 25 25% 6%; /* #1f1610 - Deep Mocha Brown */
     
     --card: 0 0% 100%;
     --card-foreground: 25 25% 6%;
@@ -20,8 +20,8 @@
     --secondary: 25 20% 92%;
     --secondary-foreground: 25 25% 6%;
     
-    --muted: 25 20% 90%;
-    --muted-foreground: 25 25% 20%; /* High contrast for readability */
+    --muted: 25 25% 15%; /* Darker for better readability */
+    --muted-foreground: 25 25% 30%; 
     
     --accent: 45 100% 50%;
     --accent-foreground: 25 25% 6%;
@@ -29,8 +29,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 25 25% 10% / 0.1;
-    --input: 25 25% 10% / 0.15;
+    --border: 25 25% 10% / 0.2;
+    --input: 25 25% 10% / 0.25;
     --ring: 45 100% 50%;
     
     --radius: 1.5rem;
@@ -68,20 +68,27 @@
 
   body {
     @apply bg-background text-foreground transition-all duration-700 font-body antialiased;
+    background-color: #fdfaf6;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline tracking-tighter text-foreground;
+    @apply font-headline tracking-tighter text-foreground font-black;
   }
 
-  /* High contrast inputs for better visibility */
   input, textarea, select {
-    @apply border-2 border-foreground/20 bg-white focus:border-primary focus:ring-1 focus:ring-primary !important;
-    color: hsl(var(--foreground)) !important;
+    @apply border-2 border-foreground/30 bg-white focus:border-primary focus:ring-1 focus:ring-primary !important;
+    color: #1f1610 !important;
+    font-weight: 500;
   }
 
   label {
-    @apply font-black uppercase tracking-widest text-foreground/80 !important;
+    @apply font-black uppercase tracking-widest text-foreground !important;
+    opacity: 1 !important;
+    font-size: 0.75rem;
+  }
+
+  .text-muted-foreground {
+    color: #4a3728 !important; /* Richer brown for visibility */
   }
 }
 
