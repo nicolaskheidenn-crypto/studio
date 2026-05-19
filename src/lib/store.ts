@@ -47,6 +47,7 @@ export interface ShooppyProduct {
   imageUrl: string;
   fileUrl?: string;
   type: 'Bundle' | 'Template' | 'eBook';
+  placement: 'Hub' | 'Marketplace';
   requiredLevel?: number;
 }
 
@@ -124,7 +125,9 @@ interface AdminStore {
   moveQuiz: (id: string, direction: 'up' | 'down') => void;
   addTasks: (day: number, tasks: Omit<ManagedTask, 'id' | 'day'>[]) => void;
   addProduct: (product: Omit<ShooppyProduct, 'id'>) => void;
+  updateProduct: (id: string, product: Partial<ShooppyProduct>) => void;
   deleteProduct: (id: string) => void;
+  moveProduct: (id: string, direction: 'up' | 'down') => void;
   addFAQ: (faq: Omit<FAQEntry, 'id'>) => void;
   deleteFAQ: (id: string) => void;
   addBadge: (badge: Omit<Badge, 'id'>) => void;
@@ -166,7 +169,17 @@ export const useAdminStore = create<AdminStore>()(
       }),
       addTasks: (day, tasks) => set((s) => ({ dailyTasks: [...s.dailyTasks.filter(t => t.day !== day), ...tasks.map(t => ({ ...t, day, id: Math.random().toString(36).substr(2, 9) }))] })),
       addProduct: (data) => set((s) => ({ shooppyProducts: [...s.shooppyProducts, { ...data, id: Math.random().toString(36).substr(2, 9) }] })),
+      updateProduct: (id, data) => set((s) => ({ shooppyProducts: s.shooppyProducts.map(p => p.id === id ? { ...p, ...data } : p) })),
       deleteProduct: (id) => set((s) => ({ shooppyProducts: s.shooppyProducts.filter(p => p.id !== id) })),
+      moveProduct: (id, direction) => set((s) => {
+        const index = s.shooppyProducts.findIndex(p => p.id === id);
+        if (index === -1) return s;
+        const newProducts = [...s.shooppyProducts];
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= newProducts.length) return s;
+        [newProducts[index], newProducts[newIndex]] = [newProducts[newIndex], newProducts[index]];
+        return { shooppyProducts: newProducts };
+      }),
       addFAQ: (data) => set((s) => ({ faqs: [...s.faqs, { ...data, id: Math.random().toString(36).substr(2, 9) }] })),
       deleteFAQ: (id) => set((s) => ({ faqs: s.faqs.filter(f => f.id !== id) })),
       addBadge: (data) => set((s) => ({ badges: [...s.badges, { ...data, id: Math.random().toString(36).substr(2, 9) }] })),

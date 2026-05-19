@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
-  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X
+  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X, Download
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useState, useEffect, useRef } from 'react';
@@ -119,6 +119,9 @@ export default function DashboardPage() {
     setResTitle(""); setResContent("");
     toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
   };
+
+  const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub');
+  const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -302,7 +305,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Sidebar Stats */}
+            {/* Sidebar Stats & Root Assets */}
             <div className="space-y-10">
               <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-12 text-center space-y-10 shadow-2xl">
                  <div className="w-28 h-28 bg-primary text-background rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl">
@@ -317,6 +320,28 @@ export default function DashboardPage() {
                    <p className="text-[10px] font-black uppercase text-primary mt-4 tracking-widest">Growth Multiplier</p>
                  </div>
               </Card>
+
+              {/* Root Assets Section */}
+              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
+                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Star className="h-6 w-6 text-primary" /> Root Assets</h3>
+                 <div className="space-y-6">
+                    {rootAssets.length === 0 ? (
+                      <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No root assets deployed.</p>
+                    ) : (
+                      rootAssets.map(p => (
+                        <div key={p.id} className="p-6 bg-background/50 rounded-3xl border-2 border-primary/10 flex items-center justify-between group">
+                          <div>
+                            <p className="font-black text-sm text-foreground uppercase italic">{p.title}</p>
+                            <p className="text-[9px] font-bold text-primary uppercase tracking-widest">{p.type}</p>
+                          </div>
+                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary">
+                            <Download className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                 </div>
+              </Card>
             </div>
           </TabsContent>
           
@@ -326,29 +351,23 @@ export default function DashboardPage() {
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Master Level Digital Assets</p>
              </div>
              
-             {shooppyProducts.length === 0 ? (
+             {marketplaceAssets.length === 0 ? (
                <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20">
                  <ShoppingBag className="h-20 w-20 mx-auto text-primary/20 mb-6" />
                  <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No digital assets deployed in the vault yet.</p>
                </div>
              ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                  {shooppyProducts.map((p) => (
+                  {marketplaceAssets.map((p) => (
                     <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
                       <div className="h-80 relative overflow-hidden bg-background/50">
                          {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.title} />}
                          <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
-                         {p.requiredLevel && level < p.requiredLevel && (
-                           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white backdrop-blur-md">
-                              <Lock className="h-16 w-16 text-primary mb-4" />
-                              <p className="font-black text-sm uppercase tracking-[0.3em]">Unlock at Level {p.requiredLevel}</p>
-                           </div>
-                         )}
                       </div>
                       <div className="p-12 space-y-8">
                          <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
                          <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
-                         <Button disabled={p.requiredLevel ? level < p.requiredLevel : false} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Acquire Strategic Asset</Button>
+                         <Button className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Acquire Strategic Asset</Button>
                       </div>
                     </Card>
                   ))}

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAdminStore, useUserStore, QuizQuestion, Quiz } from "@/lib/store";
+import { useAdminStore, useUserStore, QuizQuestion, Quiz, ShooppyProduct } from "@/lib/store";
 import { useUser } from "@/firebase";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -29,7 +29,7 @@ export default function AdminPage() {
   const { 
     dailyTasks, addTasks,
     quizzes, addQuiz, updateQuiz, deleteQuiz, moveQuiz,
-    shooppyProducts, addProduct, deleteProduct, 
+    shooppyProducts, addProduct, updateProduct, deleteProduct, moveProduct,
     newsPosts, addNewsPost, deleteNewsPost,
     faqs, addFAQ, deleteFAQ,
     badges, addBadge, deleteBadge,
@@ -39,6 +39,16 @@ export default function AdminPage() {
 
   const { resetUserStats, updateSpecificUser } = useUserStore();
 
+  // Asset State
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [prodTitle, setProdTitle] = useState("");
+  const [prodDesc, setProdDesc] = useState("");
+  const [prodImg, setProdImg] = useState("");
+  const [prodFile, setProdFile] = useState("");
+  const [prodType, setProdType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
+  const [prodPlacement, setProdPlacement] = useState<'Hub' | 'Marketplace'>('Marketplace');
+  const [prodLevel, setProdLevel] = useState(1);
+
   // Task State
   const [taskDay, setTaskDay] = useState(1);
   const [task1T, setTask1T] = useState("");
@@ -47,14 +57,6 @@ export default function AdminPage() {
   const [task2D, setTask2D] = useState("");
   const [task3T, setTask3T] = useState("");
   const [task3D, setTask3D] = useState("");
-
-  // Shooppy State
-  const [prodTitle, setProdTitle] = useState("");
-  const [prodDesc, setProdDesc] = useState("");
-  const [prodImg, setProdImg] = useState("");
-  const [prodFile, setProdFile] = useState("");
-  const [prodType, setProdType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
-  const [prodLevel, setProdLevel] = useState(1);
 
   // News State
   const [newsTitle, setNewsTitle] = useState("");
@@ -102,6 +104,42 @@ export default function AdminPage() {
     }
   };
 
+  const handleSaveProduct = () => {
+    const data = {
+      title: prodTitle,
+      description: prodDesc,
+      imageUrl: prodImg,
+      fileUrl: prodFile,
+      type: prodType,
+      placement: prodPlacement,
+      requiredLevel: prodLevel
+    };
+
+    if (editingProductId) {
+      updateProduct(editingProductId, data);
+      setEditingProductId(null);
+      toast({ title: "Strategic Asset Updated" });
+    } else {
+      addProduct(data);
+      toast({ title: "Strategic Asset Deployed" });
+    }
+    
+    setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPlacement('Marketplace');
+  };
+
+  const startEditProduct = (p: ShooppyProduct) => {
+    setEditingProductId(p.id);
+    setProdTitle(p.title);
+    setProdDesc(p.description);
+    setProdImg(p.imageUrl);
+    setProdFile(p.fileUrl || "");
+    setProdType(p.type);
+    setProdPlacement(p.placement);
+    setProdLevel(p.requiredLevel || 1);
+    toast({ title: "Asset Loaded into Editor" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSaveTasks = () => {
     addTasks(taskDay, [
       { title: task1T, description: task1D },
@@ -109,19 +147,6 @@ export default function AdminPage() {
       { title: task3T, description: task3D }
     ]);
     toast({ title: "Tasks Injected" });
-  };
-
-  const handleSaveProduct = () => {
-    addProduct({
-      title: prodTitle,
-      description: prodDesc,
-      imageUrl: prodImg,
-      fileUrl: prodFile,
-      type: prodType,
-      requiredLevel: prodLevel
-    });
-    setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile("");
-    toast({ title: "Strategic Asset Deployed" });
   };
 
   // --- Quizzo Logic ---
@@ -209,14 +234,101 @@ export default function AdminPage() {
       <main className="flex-1 container mx-auto px-4 py-16 max-w-6xl">
         <h1 className="text-8xl font-headline font-black text-[#fdfaf6] uppercase tracking-tighter mb-16 italic">Host Command</h1>
 
-        <Tabs defaultValue="moderation" className="space-y-12">
+        <Tabs defaultValue="assets" className="space-y-12">
           <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-[#FFD700]/20 overflow-x-auto scrollbar-hide">
-            <TabsTrigger value="moderation" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Moderation</TabsTrigger>
             <TabsTrigger value="assets" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Digital Assets</TabsTrigger>
+            <TabsTrigger value="moderation" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Moderation</TabsTrigger>
             <TabsTrigger value="routines" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Routines</TabsTrigger>
             <TabsTrigger value="broadcast" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">Broadcast</TabsTrigger>
             <TabsTrigger value="system" className="rounded-full px-12 h-14 text-[11px] font-black uppercase tracking-widest text-[#1f1610]">System</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="assets" className="space-y-12">
+            <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-16 shadow-2xl space-y-12">
+                <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]"><ShoppingBag className="h-12 w-12 text-[#FFD700]" /> Digital Asset Injector</CardTitle>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                   <div className="space-y-8">
+                      <div className="space-y-3">
+                        <Label className="text-[#1f1610]">Asset Name</Label>
+                        <Input placeholder="Master Strategy E-book" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="h-18 font-black text-xl rounded-2xl bg-white text-[#1f1610] border-[#1f1610]/20" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-[#1f1610]">Description</Label>
+                        <Textarea placeholder="Define the value of this asset..." value={prodDesc} onChange={e => setProdDesc(e.target.value)} className="min-h-[160px] rounded-[2.5rem] p-8 bg-white text-[#1f1610] border-[#1f1610]/20" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-[#1f1610]">Category</Label>
+                          <select className="w-full h-18 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-8 font-black uppercase text-sm text-[#1f1610]" value={prodType} onChange={e => setProdType(e.target.value as any)}>
+                              <option value="eBook">Sovereign E-Book</option>
+                              <option value="Template">Execution Template</option>
+                              <option value="Bundle">Strategy Bundle</option>
+                          </select>
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-[#1f1610]">Placement</Label>
+                          <select className="w-full h-18 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-8 font-black uppercase text-sm text-[#1f1610]" value={prodPlacement} onChange={e => setProdPlacement(e.target.value as any)}>
+                              <option value="Hub">Root (Hub Sidebar)</option>
+                              <option value="Marketplace">Shooppy (Marketplace)</option>
+                          </select>
+                        </div>
+                      </div>
+                   </div>
+                   <div className="space-y-8">
+                      <div className="p-10 bg-white/50 rounded-[3rem] border-4 border-dashed border-[#FFD700]/20 text-center space-y-6">
+                        <Upload className="h-12 w-12 mx-auto text-[#FFD700]" />
+                        <div className="space-y-4">
+                           <div className="space-y-2">
+                             <Label className="text-[#1f1610]">Cover Photo (Gallery)</Label>
+                             <Input type="file" onChange={e => handleFileUpload(e, setProdImg)} className="h-14 bg-white text-[#1f1610]" />
+                           </div>
+                           <div className="space-y-2">
+                             <Label className="text-[#1f1610]">Digital Asset File</Label>
+                             <Input type="file" onChange={e => handleFileUpload(e, setProdFile)} className="h-14 bg-white text-[#1f1610]" />
+                           </div>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-[#1f1610]">Mastery Level Requirement (Optional)</Label>
+                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-18 font-black text-3xl text-center bg-white text-[#1f1610] border-[#1f1610]/20" />
+                      </div>
+                      <Button onClick={handleSaveProduct} className="w-full h-24 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-2xl hover:bg-[#FFD700] hover:text-[#1f1610] transition-all">
+                        {editingProductId ? 'Update Strategic Asset' : 'Deploy Asset'}
+                      </Button>
+                      {editingProductId && (
+                        <Button onClick={() => { setEditingProductId(null); setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); }} variant="ghost" className="w-full text-xs font-black uppercase text-[#1f1610]/40">Cancel Edit</Button>
+                      )}
+                   </div>
+                </div>
+            </Card>
+
+            <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl mt-12">
+              <CardTitle className="text-3xl font-black uppercase mb-10 flex items-center gap-5 text-[#1f1610]"><ShoppingBag className="h-10 w-10 text-[#FFD700]" /> Deployed Assets</CardTitle>
+              <div className="space-y-6">
+                 {shooppyProducts.length === 0 ? (
+                   <p className="text-center text-[#1f1610]/30 font-black uppercase italic py-10">No active assets detected.</p>
+                 ) : (
+                   shooppyProducts.map((p, i) => (
+                     <div key={p.id} className="p-8 bg-white rounded-[3rem] border-4 border-[#1f1610]/5 flex items-center justify-between group">
+                        <div className="flex items-center gap-6 flex-1">
+                           <div className="w-16 h-16 bg-[#1f1610] text-[#FFD700] rounded-2xl flex items-center justify-center font-black text-2xl">{i + 1}</div>
+                           <div>
+                              <h4 className="font-black text-[#1f1610] uppercase text-xl italic">{p.title}</h4>
+                              <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{p.type} • {p.placement}</p>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary" onClick={() => moveProduct(p.id, 'up')}><MoveUp className="h-6 w-6" /></Button>
+                           <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary" onClick={() => moveProduct(p.id, 'down')}><MoveDown className="h-6 w-6" /></Button>
+                           <Button variant="ghost" size="icon" className="rounded-full hover:bg-blue-50 text-blue-500" onClick={() => startEditProduct(p)}><Edit3 className="h-6 w-6" /></Button>
+                           <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 text-red-500" onClick={() => deleteProduct(p.id)}><Trash2 className="h-6 w-6" /></Button>
+                        </div>
+                     </div>
+                   ))
+                 )}
+              </div>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="moderation" className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -251,52 +363,6 @@ export default function AdminPage() {
                  </div>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="assets" className="space-y-12">
-            <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-16 shadow-2xl space-y-12">
-                <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]"><ShoppingBag className="h-12 w-12 text-[#FFD700]" /> Digital Asset Injector</CardTitle>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                   <div className="space-y-8">
-                      <div className="space-y-3">
-                        <Label className="text-[#1f1610]">Asset Name</Label>
-                        <Input placeholder="Master Strategy E-book" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="h-18 font-black text-xl rounded-2xl bg-white text-[#1f1610] border-[#1f1610]/20" />
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="text-[#1f1610]">Description</Label>
-                        <Textarea placeholder="Define the value of this asset..." value={prodDesc} onChange={e => setProdDesc(e.target.value)} className="min-h-[160px] rounded-[2.5rem] p-8 bg-white text-[#1f1610] border-[#1f1610]/20" />
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="text-[#1f1610]">Category</Label>
-                        <select className="w-full h-18 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-8 font-black uppercase text-sm text-[#1f1610]" value={prodType} onChange={e => setProdType(e.target.value as any)}>
-                            <option value="eBook">Sovereign E-Book</option>
-                            <option value="Template">Execution Template</option>
-                            <option value="Bundle">Strategy Bundle</option>
-                        </select>
-                      </div>
-                   </div>
-                   <div className="space-y-8">
-                      <div className="p-10 bg-white/50 rounded-[3rem] border-4 border-dashed border-[#FFD700]/20 text-center space-y-6">
-                        <Upload className="h-12 w-12 mx-auto text-[#FFD700]" />
-                        <div className="space-y-4">
-                           <div className="space-y-2">
-                             <Label className="text-[#1f1610]">Cover Photo (Gallery)</Label>
-                             <Input type="file" onChange={e => handleFileUpload(e, setProdImg)} className="h-14 bg-white text-[#1f1610]" />
-                           </div>
-                           <div className="space-y-2">
-                             <Label className="text-[#1f1610]">Digital Asset File</Label>
-                             <Input type="file" onChange={e => handleFileUpload(e, setProdFile)} className="h-14 bg-white text-[#1f1610]" />
-                           </div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="text-[#1f1610]">Mastery Level Requirement</Label>
-                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-18 font-black text-3xl text-center bg-white text-[#1f1610] border-[#1f1610]/20" />
-                      </div>
-                      <Button onClick={handleSaveProduct} className="w-full h-24 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-2xl hover:bg-[#FFD700] hover:text-[#1f1610] transition-all">Deploy Asset</Button>
-                   </div>
-                </div>
-            </Card>
           </TabsContent>
 
           <TabsContent value="routines" className="space-y-12">
