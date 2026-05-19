@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* NICO DIGITAL Brand Palette: Mocha Brown Background and Gold Yellow Primary */
+    /* NICO DIGITAL Brand Palette: Mocha Brown & Gold Yellow */
     --background: 25 25% 6%; /* #1f1610 - Deep Mocha Brown */
     --foreground: 45 30% 98%; /* #fdfaf6 - Mocha Cream/White for text */
     
@@ -26,11 +26,8 @@
     --accent: 45 100% 50%;
     --accent-foreground: 25 25% 6%;
     
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    
     --border: 45 100% 50% / 0.2;
-    --input: 45 100% 50% / 0.3;
+    --input: 45 100% 50% / 0.4;
     --ring: 45 100% 50%;
     
     --radius: 2rem;
@@ -75,8 +72,9 @@
   }
 
   input, textarea, select {
-    @apply border-2 border-primary/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary !important;
-    font-weight: 600 !important;
+    @apply border-4 border-primary/30 bg-card/80 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary !important;
+    font-weight: 700 !important;
+    color: #fdfaf6 !important;
   }
 
   label {

@@ -77,62 +77,62 @@ export default function LoginPage() {
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#fdfaf6] relative overflow-hidden">
-      {/* Decorative Branding Elements */}
-      <div className="absolute top-[-10%] right-[-10%] opacity-10 pointer-events-none rotate-45 scale-150">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1f1610] relative overflow-hidden font-body">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] right-[-10%] opacity-5 pointer-events-none rotate-45 scale-150">
         <Coffee className="w-96 h-96 text-primary" />
       </div>
 
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.15)] overflow-hidden border-8 border-foreground/5 relative z-10">
-        {/* Left Column: Branding */}
-        <div className="p-12 md:p-16 space-y-8 bg-foreground text-white flex flex-col justify-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-12 opacity-5">
-            <Lock className="h-64 w-64 rotate-12" />
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-[#fdfaf6] rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border-8 border-primary/20 relative z-10">
+        {/* Left Column: Strategist Hub Branding */}
+        <div className="p-12 md:p-20 space-y-12 bg-[#1f1610] text-[#fdfaf6] flex flex-col justify-center relative overflow-hidden border-r-4 border-primary/10">
+          <div className="absolute top-0 right-0 p-12 opacity-10">
+            <Lock className="h-64 w-64 rotate-12 text-primary" />
           </div>
           
-          <div className="space-y-10 relative z-10">
-            <div className="p-6 bg-primary rounded-[2.5rem] w-fit shadow-[0_20px_40px_rgba(255,215,0,0.3)]">
-              <Lock className="h-12 w-12 text-foreground" />
+          <div className="space-y-12 relative z-10">
+            <div className="p-8 bg-[#FFD700] rounded-[3rem] w-fit shadow-[0_25px_50px_rgba(255,215,0,0.3)] border-4 border-[#1f1610]">
+              <Lock className="h-16 w-16 text-[#1f1610]" />
             </div>
-            <div className="space-y-4">
-              <h2 className="text-5xl md:text-6xl font-headline font-black leading-none tracking-tighter uppercase">
-                STRATEGIST <span className="text-primary italic">HUB</span>
+            <div className="space-y-6">
+              <h2 className="text-6xl md:text-8xl font-headline font-black leading-none tracking-tighter uppercase">
+                STRATEGIST <span className="text-[#FFD700] italic">HUB</span>
               </h2>
-              <div className="h-2 w-32 bg-primary rounded-full" />
+              <div className="h-3 w-40 bg-[#FFD700] rounded-full" />
             </div>
-            <p className="text-white/60 text-lg leading-relaxed font-bold uppercase tracking-widest max-w-xs">
+            <p className="text-[#fdfaf6]/70 text-xl leading-relaxed font-black uppercase tracking-[0.2em] max-w-sm">
               Sovereign infrastructure for high-impact execution.
             </p>
           </div>
         </div>
 
-        {/* Right Column: Form */}
-        <div className="p-10 md:p-14 space-y-12 bg-white">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-headline font-black text-foreground tracking-tight uppercase italic">Access Root</h1>
-            <p className="text-[11px] text-primary font-black uppercase tracking-[0.5em]">Protocol Authorization Required</p>
+        {/* Right Column: High-Contrast Login Form */}
+        <div className="p-12 md:p-20 space-y-14 bg-[#fdfaf6]">
+          <div className="space-y-4">
+            <h1 className="text-5xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">Access Root</h1>
+            <p className="text-sm text-[#FFD700] font-black uppercase tracking-[0.6em]">Protocol Authorization Required</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-8">
-            <div className="space-y-3">
-              <Label className="text-foreground/60">STRATEGIC EMAIL</Label>
+          <form onSubmit={handleLogin} className="space-y-10">
+            <div className="space-y-4">
+              <Label className="text-[#1f1610]/60 font-black text-xs">STRATEGIC EMAIL</Label>
               <Input
                 type="email"
                 placeholder="name@example.com"
                 required
-                className="rounded-3xl h-18 bg-secondary/10 border-foreground/10 text-xl font-black px-8"
+                className="rounded-3xl h-20 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-2xl font-black px-10 focus:border-[#FFD700]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-foreground/60">SECURITY KEY</Label>
+                <Label className="text-[#1f1610]/60 font-black text-xs">SECURITY KEY</Label>
                 <button 
                   type="button" 
                   onClick={handleForgotPassword} 
-                  className="text-[10px] text-primary font-black uppercase underline hover:text-foreground transition-colors"
+                  className="text-[10px] text-[#FFD700] font-black uppercase underline hover:text-[#1f1610] transition-colors"
                 >
                   Forgot Key?
                 </button>
@@ -141,7 +141,7 @@ export default function LoginPage() {
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="rounded-3xl h-18 bg-secondary/10 border-foreground/10 text-xl font-black px-8 pr-16"
+                  className="rounded-3xl h-20 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-2xl font-black px-10 pr-20 focus:border-[#FFD700]"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
@@ -149,32 +149,32 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-primary hover:text-foreground transition-colors"
+                  className="absolute right-8 top-1/2 -translate-y-1/2 text-[#FFD700] hover:text-[#1f1610] transition-colors"
                 >
-                  {showPassword ? <Eye className="h-6 w-6" /> : <EyeOff className="h-6 w-6" />}
+                  {showPassword ? <Eye className="h-8 w-8" /> : <EyeOff className="h-8 w-8" />}
                 </button>
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full rounded-full h-24 bg-foreground text-white hover:bg-primary hover:text-foreground font-black text-2xl shadow-[0_25px_50px_rgba(0,0,0,0.2)] transition-all transform active:scale-95 group"
+              className="w-full rounded-full h-24 bg-[#1f1610] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#1f1610] font-black text-3xl shadow-[0_30px_60px_rgba(0,0,0,0.3)] border-4 border-[#FFD700]/20 transition-all transform active:scale-95 group uppercase tracking-tighter"
               disabled={isLoading}
             >
               {isLoading ? (
-                <Loader2 className="h-10 w-10 animate-spin" />
+                <Loader2 className="h-12 w-12 animate-spin" />
               ) : (
-                <span className="flex items-center gap-4">
-                  AUTHORIZE SESSION <ArrowRight className="h-8 w-8 group-hover:translate-x-2 transition-transform" />
+                <span className="flex items-center gap-6">
+                  AUTHORIZE SESSION <ArrowRight className="h-10 w-10 group-hover:translate-x-3 transition-transform" />
                 </span>
               )}
             </Button>
           </form>
 
-          <div className="pt-6 border-t border-foreground/5 text-center">
-            <p className="text-sm text-foreground/40 font-black uppercase tracking-widest">
+          <div className="pt-8 border-t-4 border-[#1f1610]/5 text-center">
+            <p className="text-sm text-[#1f1610]/40 font-black uppercase tracking-[0.2em]">
               New strategist?{' '}
-              <Link href="/signup" className="text-primary font-black hover:underline hover:text-foreground transition-all">
+              <Link href="/signup" className="text-[#FFD700] font-black hover:underline hover:text-[#1f1610] transition-all">
                 Create Empire
               </Link>
             </p>
