@@ -64,7 +64,6 @@ export default function EntryGate() {
   if (step === 'ready') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] text-[#fdfaf6] p-6 text-center overflow-hidden relative">
-        {/* Decorative Coffee Elements */}
         <div className="absolute top-[10%] left-[10%] opacity-10 -rotate-12 pointer-events-none">
           <Coffee className="w-48 h-48 md:w-80 md:h-80 text-[#FFD700]" />
         </div>
@@ -108,8 +107,7 @@ export default function EntryGate() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] text-[#fdfaf6] p-6 relative overflow-hidden">
-      {/* Background Decor matches the Hub style */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] p-6 relative overflow-hidden">
       <div className="absolute top-[-5%] right-[-5%] opacity-10 pointer-events-none scale-150">
         <Coffee className="w-96 h-96 rotate-45 text-[#FFD700]" />
       </div>
@@ -118,7 +116,6 @@ export default function EntryGate() {
       </div>
 
       <div className="w-full max-w-xl space-y-12 animate-in slide-in-from-bottom-20 duration-1000 relative z-10">
-        {/* The Sovereign White Card for Entry */}
         <div className="bg-[#fdfaf6] p-12 md:p-20 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-8 border-[#FFD700]/20 space-y-12 text-center">
           <div className="space-y-8">
             <div className="w-fit mx-auto">
@@ -149,7 +146,7 @@ export default function EntryGate() {
               className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] transition-all active:scale-95 font-black text-3xl shadow-[0_30px_60px_rgba(255,215,0,0.2)] uppercase tracking-tighter"
               disabled={isVerifying}
             >
-              {isVerifying ? <Loader2 className="animate-spin h-10 w-10" /> : 'AUTHENTICATE'}
+              {isVerifying ? <Loader2 className="animate-spin h-10 w-10 text-[#1f1610]" /> : <span className="text-[#1f1610]">AUTHENTICATE</span>}
             </Button>
           </form>
         </div>
