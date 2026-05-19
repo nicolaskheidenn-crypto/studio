@@ -116,16 +116,16 @@ export default function DashboardPage() {
             <div className="flex flex-col">
               <div className="flex items-center gap-3 text-primary">
                 <Zap className="h-7 w-7 fill-primary" />
-                <span className="font-black text-3xl tracking-tighter">{points}</span>
+                <span className="font-black text-3xl tracking-tighter text-foreground">{points}</span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary/40">Points Vault</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Points Vault</span>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
-                <span className="font-black text-3xl tracking-tighter">{streak}</span>
+                <span className="font-black text-3xl tracking-tighter text-foreground">{streak}</span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary/40">Current Streak</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Current Streak</span>
             </div>
           </div>
           
@@ -204,8 +204,8 @@ export default function DashboardPage() {
                        <CardTitle className="text-4xl font-black text-foreground uppercase tracking-tighter mt-4 italic">{news.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-10 pt-0 space-y-8">
-                       {news.imageUrl && <img src={news.imageUrl} className="w-full h-[500px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/20" />}
-                       <p className="text-xl font-bold text-foreground/80 leading-relaxed">{news.content}</p>
+                       {news.imageUrl && <img src={news.imageUrl} className="w-full h-[500px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/20" alt={news.title} />}
+                       <p className="text-xl font-bold text-foreground leading-relaxed">{news.content}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                        <p className="text-lg font-bold text-foreground leading-relaxed">{post.description}</p>
                        {post.images.length > 0 && (
                          <div className={cn("grid gap-4", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
-                           {post.images.map((img, i) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" />)}
+                           {post.images.map((img, i) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" alt="Activity" />)}
                          </div>
                        )}
                        <div className="flex gap-8 pt-8 border-t-2 border-primary/10">
@@ -262,27 +262,34 @@ export default function DashboardPage() {
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Master Level Digital Assets</p>
              </div>
              
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                {shooppyProducts.map((p) => (
-                  <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
-                    <div className="h-80 relative overflow-hidden bg-background/50">
-                       {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />}
-                       <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
-                       {p.requiredLevel && level < p.requiredLevel && (
-                         <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white backdrop-blur-md">
-                            <Lock className="h-16 w-16 text-primary mb-4" />
-                            <p className="font-black text-sm uppercase tracking-[0.3em]">Unlock at Level {p.requiredLevel}</p>
-                         </div>
-                       )}
-                    </div>
-                    <div className="p-12 space-y-8">
-                       <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
-                       <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
-                       <Button disabled={p.requiredLevel ? level < p.requiredLevel : false} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Acquire Strategic Asset</Button>
-                    </div>
-                  </Card>
-                ))}
-             </div>
+             {shooppyProducts.length === 0 ? (
+               <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20">
+                 <ShoppingBag className="h-20 w-20 mx-auto text-primary/20 mb-6" />
+                 <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No digital assets deployed in the vault yet.</p>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                  {shooppyProducts.map((p) => (
+                    <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
+                      <div className="h-80 relative overflow-hidden bg-background/50">
+                         {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.title} />}
+                         <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
+                         {p.requiredLevel && level < p.requiredLevel && (
+                           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white backdrop-blur-md">
+                              <Lock className="h-16 w-16 text-primary mb-4" />
+                              <p className="font-black text-sm uppercase tracking-[0.3em]">Unlock at Level {p.requiredLevel}</p>
+                           </div>
+                         )}
+                      </div>
+                      <div className="p-12 space-y-8">
+                         <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
+                         <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
+                         <Button disabled={p.requiredLevel ? level < p.requiredLevel : false} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Acquire Strategic Asset</Button>
+                      </div>
+                    </Card>
+                  ))}
+               </div>
+             )}
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-12">
@@ -432,12 +439,14 @@ export default function DashboardPage() {
       {/* Daily Sync Modal */}
       <Dialog open={showDaily} onOpenChange={setShowDaily}>
         <DialogContent className="rounded-[5rem] border-[12px] border-primary/20 bg-card p-20 max-w-lg text-center shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
-          <div className="space-y-12">
+          <DialogHeader>
+            <DialogTitle className="text-5xl font-black text-foreground uppercase tracking-tighter italic text-center">Daily Sync</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-12 mt-8">
             <div className="w-40 h-40 bg-primary text-background rounded-[4rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
               <Award className="h-20 w-20" />
             </div>
             <div className="space-y-4">
-              <h2 className="text-5xl font-black text-foreground uppercase tracking-tighter italic">Daily Sync</h2>
               <p className="text-[11px] text-primary font-black uppercase tracking-[0.5em]">Sovereign Protocol Initiated</p>
             </div>
             <div className="p-10 bg-background/50 rounded-[3.5rem] border-4 border-primary/10 flex justify-around shadow-inner">
@@ -445,7 +454,7 @@ export default function DashboardPage() {
                <div className="w-px h-12 bg-primary/20" />
                <div><p className="text-4xl font-black text-foreground">50</p><p className="text-[10px] font-black uppercase text-primary/40">XP</p></div>
             </div>
-            <Button onClick={handleClaimDaily} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl hover:scale-105 hover:bg-white hover:text-primary transition-all">CLAIM REWARD</Button>
+            <Button onClick={handleClaimDaily} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl hover:scale-105 hover:bg-white hover:text-primary transition-all uppercase tracking-tighter">CLAIM REWARD</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -453,7 +462,9 @@ export default function DashboardPage() {
       {/* Level Rewards Modal */}
       <Dialog open={showRewardModal} onOpenChange={setShowRewardModal}>
         <DialogContent className="rounded-[5rem] border-[12px] border-primary/20 bg-card p-20 max-w-xl shadow-2xl">
-          <DialogHeader><DialogTitle className="text-5xl font-black text-foreground uppercase tracking-tighter text-center italic">Mastery Rewards</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="text-5xl font-black text-foreground uppercase tracking-tighter text-center italic">Mastery Rewards</DialogTitle>
+          </DialogHeader>
           <div className="space-y-8 mt-12">
             {[
               { lv: 5, reward: "Bronze Strategy Bundle" },
