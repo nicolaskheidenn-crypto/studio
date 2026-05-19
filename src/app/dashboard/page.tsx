@@ -15,23 +15,16 @@ import {
   Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
   MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, UserPlus, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, UserMinus, Check, X
 } from 'lucide-react';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useAdminStore, useUserStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
-
-const STRATEGIST_REGISTRY = [
-  { nickname: 'The Host', bio: 'Global Admin / Sovereign Strategist', type: 'Host' },
-  { nickname: 'Kheidenn', bio: 'Execution Specialist', type: 'Strategist' },
-  { nickname: 'ViperX', bio: 'AI Prompt Engineer', type: 'Strategist' },
-  { nickname: 'Phoenix', bio: 'Growth Architect', type: 'Strategist' },
-  { nickname: 'MochaMaster', bio: 'Consistency Lead', type: 'Strategist' },
-];
+import { collection, query, where, limit } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const db = useFirestore();
   const { 
     points, xp, level, streak, nickname,
     claimDaily, lastLogin, addPoints,
@@ -68,6 +61,10 @@ export default function DashboardPage() {
       { id: '1', sender: 'The Host', text: 'Welcome to MeText, Strategist. Empire alignment begins with synchronized communication.', timestamp: new Date().toISOString() }
     ]
   });
+
+  // Dynamic Real User Registry
+  const usersQuery = useMemo(() => query(collection(db, 'users'), limit(50)), [db]);
+  const { data: realUsers } = useCollection<{ id: string, nickname: string, bio: string }>(usersQuery);
 
   useEffect(() => {
     const checkDaily = () => {
@@ -173,12 +170,13 @@ export default function DashboardPage() {
   };
 
   const filteredStrategists = useMemo(() => {
-    if (!searchQuery) return STRATEGIST_REGISTRY.filter(s => s.nickname !== nickname);
-    return STRATEGIST_REGISTRY.filter(s => 
+    const list = realUsers || [];
+    if (!searchQuery) return list.filter(s => s.nickname !== nickname);
+    return list.filter(s => 
       s.nickname.toLowerCase().includes(searchQuery.toLowerCase()) && 
       s.nickname !== nickname
     );
-  }, [searchQuery, nickname]);
+  }, [realUsers, searchQuery, nickname]);
 
   const isFriend = (target: string) => friends.includes(target);
   const hasSentRequest = (target: string) => sentRequests.includes(target);
@@ -435,7 +433,7 @@ export default function DashboardPage() {
                    <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
                       {filteredStrategists.map((strat) => (
                         <div 
-                          key={strat.nickname} 
+                          key={strat.id} 
                           className={cn(
                             "p-8 rounded-[3rem] border-4 flex items-center justify-between group cursor-pointer transition-all",
                             activeChatTarget === strat.nickname ? "bg-primary/20 border-primary" : "bg-primary/5 border-primary/5 hover:bg-primary/10"
@@ -448,7 +446,7 @@ export default function DashboardPage() {
                               </div>
                               <div>
                                  <p className="font-black text-base uppercase text-foreground">{strat.nickname}</p>
-                                 <p className="text-[10px] text-primary uppercase font-black tracking-widest">{strat.type}</p>
+                                 <p className="text-[10px] text-primary uppercase font-black tracking-widest">Strategist</p>
                               </div>
                            </div>
                            <div className="flex gap-2">
@@ -525,7 +523,6 @@ export default function DashboardPage() {
              </div>
           </TabsContent>
           
-          {/* Other tabs remain unchanged... */}
           <TabsContent value="shooppy" className="space-y-16">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Strategic Marketplace</h3>

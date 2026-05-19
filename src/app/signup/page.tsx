@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,9 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { useFirebaseApp } from '@/firebase';
+import { getAuth, createUserWithEmailAndPassword, updateProfile as updateAuthProfile } from 'firebase/auth';
+import { useFirebaseApp, useFirestore } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +22,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const app = useFirebaseApp();
+  const db = useFirestore();
   const auth = getAuth(app);
   const router = useRouter();
   const { toast } = useToast();
@@ -38,8 +41,20 @@ export default function SignUpPage() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName} ${lastName}`.trim(),
+      const displayName = `${firstName} ${lastName}`.trim();
+      
+      await updateAuthProfile(userCredential.user, {
+        displayName: displayName,
+      });
+
+      // Create Sovereign Profile in Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        nickname: displayName,
+        bio: 'New Master Strategist',
+        points: 0,
+        level: 1,
+        xp: 0,
+        createdAt: new Date().toISOString()
       });
 
       toast({
