@@ -89,17 +89,19 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { title: "Goal Focused", desc: "Automated daily tasks designed for high earners.", icon: Target },
-                { title: "Future Proof", desc: "GoalCaps lock your vision for 5 years.", icon: Hourglass },
-                { title: "Host Powered", desc: "Direct access to expert eBooks and strategy bundles.", icon: Star },
+                { title: "Goal Focused", desc: "Automated daily tasks designed for high earners.", icon: Target, href: "/task-do" },
+                { title: "Future Proof", desc: "GoalCaps lock your vision for 5 years.", icon: Hourglass, href: "/goal-caps" },
+                { title: "Host Powered", desc: "Direct access to expert eBooks and strategy bundles.", icon: Star, href: "/dashboard" },
               ].map((feature, i) => (
-                <div key={i} className="bg-card p-10 rounded-[2.5rem] border border-primary/10 hover:border-primary/50 transition-all group shadow-sm hover:shadow-xl">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary transition-colors">
-                    <feature.icon className="h-8 w-8 text-primary group-hover:text-[#1f1610]" />
+                <Link key={i} href={feature.href} className="block group transition-all hover:scale-[1.02] active:scale-95">
+                  <div className="bg-card p-10 rounded-[2.5rem] border border-primary/10 group-hover:border-primary/50 transition-all shadow-sm group-hover:shadow-2xl h-full">
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary transition-colors">
+                      <feature.icon className="h-8 w-8 text-primary group-hover:text-[#1f1610]" />
+                    </div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight italic">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed text-lg font-medium">{feature.desc}</p>
                   </div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight italic">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg font-medium">{feature.desc}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
