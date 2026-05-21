@@ -17,6 +17,48 @@ export const useAppStore = create<AppState>()(
   )
 );
 
+export interface Page {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  createdAt: string;
+}
+
+interface PageStore {
+  pages: Page[];
+  isLoaded: boolean;
+  addPage: (page: Omit<Page, 'id' | 'createdAt'>) => void;
+  updatePage: (id: string, page: Partial<Page>) => void;
+  deletePage: (id: string) => void;
+}
+
+export const usePages = create<PageStore>()(
+  persist(
+    (set) => ({
+      pages: [],
+      isLoaded: false,
+      addPage: (data) => set((s) => ({ 
+        pages: [...s.pages, { ...data, id: Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() }] 
+      })),
+      updatePage: (id, data) => set((s) => ({ 
+        pages: s.pages.map(p => p.id === id ? { ...p, ...data } : p) 
+      })),
+      deletePage: (id) => set((s) => ({ 
+        pages: s.pages.filter(p => p.id !== id) 
+      })),
+    }),
+    { 
+      name: 'fireproof-pages-v15',
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isLoaded = true;
+        }
+      }
+    }
+  )
+);
+
 export interface QuizQuestion {
   id: string;
   type: 'multiple' | 'boolean' | 'id';
