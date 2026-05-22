@@ -4,7 +4,8 @@
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/tabs-ui'; // Fixed hypothetical import
+import { Tabs as ShadcnTabs, TabsList as ShadcnList, TabsTrigger as ShadcnTrigger, TabsContent as ShadcnContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,14 +13,14 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
-  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X, Download, Coins
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Download, Coins
 } from 'lucide-react';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { useAdminStore, useUserStore, UserProfile } from '@/lib/store';
+import { useUserStore, UserProfile } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, increment, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -49,6 +50,7 @@ const DEFAULT_PROFILE: UserProfile = {
 export default function DashboardPage() {
   const { user } = useUser();
   const uid = user?.uid;
+  const db = useFirestore();
 
   const profiles = useUserStore(s => s.profiles);
   const profile = useMemo(() => {
@@ -57,17 +59,25 @@ export default function DashboardPage() {
   }, [profiles, uid]);
   
   const { 
-    points = 0, xp = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = []
+    points = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = []
   } = profile;
 
   const {
     claimDaily, addPoints, trackVisit, incrementPrompt, incrementTrick, buyProduct
   } = useUserStore();
   
-  const { 
-    shooppyProducts = [], newsPosts = [], faqs = [], resources = [], activityWall = [], 
-    addActivityWall, addResource, heartPost, addComment, deleteComment 
-  } = useAdminStore();
+  // Firestore Collections
+  const resourcesQuery = useMemo(() => query(collection(db, 'resources'), orderBy('timestamp', 'desc')), [db]);
+  const activityQuery = useMemo(() => query(collection(db, 'activityWall'), orderBy('timestamp', 'desc')), [db]);
+  const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
+  const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
+  const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
+
+  const { data: sharedResources } = useCollection(resourcesQuery);
+  const { data: sharedActivity } = useCollection(activityQuery);
+  const { data: newsPosts } = useCollection(newsQuery);
+  const { data: shooppyProducts } = useCollection(productsQuery);
+  const { data: faqs } = useCollection(faqsQuery);
   
   const [showDaily, setShowDaily] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
@@ -96,19 +106,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!isHydrated || !uid) return;
-
     const checkDaily = () => {
       if (!lastLogin) return true;
       const lastDate = new Date(lastLogin).toDateString();
       const nowDate = new Date().toDateString();
       return lastDate !== nowDate;
     };
-
-    if (checkDaily()) {
-      setShowDaily(true);
-    } else {
-      setShowDaily(false);
-    }
+    if (checkDaily()) setShowDaily(true);
+    else setShowDaily(false);
   }, [lastLogin, isHydrated, uid]);
 
   const handleClaimDaily = () => {
@@ -143,12 +148,15 @@ export default function DashboardPage() {
 
   const handleDispatchWin = () => {
     if (!postText || !uid) return;
-    addActivityWall({
+    addDoc(collection(db, 'activityWall'), {
       userId: uid,
       nickname: nickname,
       description: postText,
       images: postImages,
-      isPrivate: false
+      isPrivate: false,
+      timestamp: serverTimestamp(),
+      hearts: 0,
+      comments: []
     });
     addPoints(uid, 20);
     setPostText("");
@@ -160,30 +168,41 @@ export default function DashboardPage() {
   const handleAddComment = (postId: string) => {
     const text = commentInputs[postId];
     if (!text?.trim() || !uid) return;
-    addComment(postId, {
-      userId: uid,
-      nickname: nickname,
-      text: text
+    const postRef = doc(db, 'activityWall', postId);
+    updateDoc(postRef, {
+      comments: arrayUnion({
+        id: Math.random().toString(36).substr(2, 9),
+        userId: uid,
+        nickname: nickname,
+        text: text,
+        timestamp: new Date().toISOString()
+      })
     });
     setCommentInputs(prev => ({ ...prev, [postId]: "" }));
     toast({ title: "Insight Recorded" });
   };
 
+  const handleHeartPost = (postId: string) => {
+    const postRef = doc(db, 'activityWall', postId);
+    updateDoc(postRef, { hearts: increment(1) });
+    toast({ title: "Sovereign Recognition Sent" });
+  };
+
   const handleAddResource = () => {
     if (!resTitle || !resContent || !uid) return;
     
+    addDoc(collection(db, 'resources'), {
+      title: resTitle,
+      description: "",
+      type: resType,
+      content: resContent,
+      userId: uid,
+      nickname: nickname,
+      timestamp: serverTimestamp()
+    });
+
     if (resType === 'AI_Prompt') incrementPrompt(uid);
     else if (resType === 'T&Triks') incrementTrick(uid);
-    else {
-      addResource({
-        title: resTitle,
-        description: "",
-        type: resType,
-        content: resContent,
-        userId: uid,
-        nickname: nickname
-      });
-    }
     
     setResTitle(""); setResContent("");
     toast({ title: "Strategic Resource Shared", description: "Gains boosted by growth multiplier." });
@@ -230,7 +249,7 @@ export default function DashboardPage() {
             <div className="relative w-16 h-16 flex items-center justify-center">
               <svg className="w-full h-full rotate-[-90deg]">
                 <circle cx="32" cy="32" r="28" fill="transparent" stroke="currentColor" strokeWidth="6" className="text-primary/10" />
-                <circle cx="32" cy="32" r="28" fill="transparent" stroke="currentColor" strokeWidth="6" strokeDasharray="176" strokeDashoffset={176 - (176 * xp) / 100} className="text-primary" />
+                <circle cx="32" cy="32" r="28" fill="transparent" stroke="currentColor" strokeWidth="6" strokeDasharray="176" strokeDashoffset={176 - (176 * profile.xp) / 100} className="text-primary" />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center text-sm font-black text-foreground">Lv.{level}</div>
             </div>
@@ -239,15 +258,15 @@ export default function DashboardPage() {
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
-          <TabsList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
-            <TabsTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</TabsTrigger>
-            <TabsTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</TabsTrigger>
-            <TabsTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</TabsTrigger>
-            <TabsTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</TabsTrigger>
-          </TabsList>
+        <ShadcnTabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
+          <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
+            <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
+            <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
+            <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
+            <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
+          </ShadcnList>
 
-          <TabsContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <ShadcnContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
               <Card className="rounded-[3.5rem] border-4 border-primary/10 shadow-2xl p-10 bg-card/40">
                 <div className="flex gap-6">
@@ -281,7 +300,7 @@ export default function DashboardPage() {
               </Card>
 
               <div className="space-y-12">
-                {newsPosts.map((news) => (
+                {newsPosts.map((news: any) => (
                   <Card key={news.id} className="rounded-[4rem] border-4 border-primary/20 bg-primary/5 overflow-hidden shadow-2xl">
                     <CardHeader className="p-10 pb-6">
                        <div className="flex items-center gap-4">
@@ -297,22 +316,24 @@ export default function DashboardPage() {
                   </Card>
                 ))}
 
-                {activityWall.map((post) => (
+                {sharedActivity.map((post: any) => (
                   <Card key={post.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden">
                     <CardHeader className="p-10 pb-6">
                        <div className="flex items-center gap-5">
-                         <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm border-2 border-primary/20">{post.nickname.slice(0,2).toUpperCase()}</div>
+                         <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm border-2 border-primary/20">{post.nickname?.slice(0,2).toUpperCase()}</div>
                          <div className="flex-1">
                             <p className="font-black text-xl uppercase text-foreground">{post.nickname}</p>
-                            <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">{new Date(post.timestamp).toLocaleString()}</p>
+                            <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">
+                              {post.timestamp?.toDate ? post.timestamp.toDate().toLocaleString() : 'Recent'}
+                            </p>
                          </div>
                        </div>
                     </CardHeader>
                     <CardContent className="p-10 pt-0 space-y-8">
                        <p className="text-2xl font-black text-foreground leading-tight tracking-tight uppercase italic">{post.description}</p>
-                       {post.images.length > 0 && (
+                       {post.images?.length > 0 && (
                          <div className={cn("grid gap-4", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
-                           {post.images.map((img, i) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" alt="Activity" />)}
+                           {post.images.map((img: string, i: number) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" alt="Activity" />)}
                          </div>
                        )}
                        
@@ -320,13 +341,13 @@ export default function DashboardPage() {
                           <Button 
                             variant="ghost" 
                             className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary transition-all"
-                            onClick={() => heartPost(post.id)}
+                            onClick={() => handleHeartPost(post.id)}
                           >
                             <Heart className="h-6 w-6 mr-3 fill-primary" /> 
                             {post.hearts || 0} Heart
                           </Button>
                           <Button variant="ghost" className="text-[11px] font-black uppercase tracking-widest text-primary/40 hover:text-primary">
-                            <MessageCircle className="h-6 w-6 mr-3" /> 
+                            <MessageSquare className="h-6 w-6 mr-3" /> 
                             {post.comments?.length || 0} Insight
                           </Button>
                        </div>
@@ -344,7 +365,7 @@ export default function DashboardPage() {
                           </div>
                           
                           <div className="space-y-4">
-                             {post.comments?.map((comment) => (
+                             {post.comments?.map((comment: any) => (
                                <div key={comment.id} className="p-6 bg-background/40 rounded-3xl border-2 border-primary/5 flex justify-between items-start group">
                                   <div className="flex-1">
                                      <div className="flex items-center gap-3 mb-1">
@@ -353,16 +374,6 @@ export default function DashboardPage() {
                                      </div>
                                      <p className="text-base font-bold text-foreground/80">{comment.text}</p>
                                   </div>
-                                  {(uid === post.userId || user?.email === 'nicolaskheidenn@gmail.com') && (
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      className="text-red-500/40 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                      onClick={() => deleteComment(post.id, comment.id)}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  )}
                                </div>
                              ))}
                           </div>
@@ -394,7 +405,7 @@ export default function DashboardPage() {
                     {rootAssets.length === 0 ? (
                       <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No root assets acquired.</p>
                     ) : (
-                      rootAssets.map(p => (
+                      rootAssets.map((p: any) => (
                         <div key={p.id} className="p-6 bg-background/50 rounded-3xl border-2 border-primary/10 flex items-center justify-between group">
                           <div>
                             <p className="font-black text-sm text-foreground uppercase italic">{p.title}</p>
@@ -409,9 +420,9 @@ export default function DashboardPage() {
                  </div>
               </Card>
             </div>
-          </TabsContent>
+          </ShadcnContent>
           
-          <TabsContent value="shooppy" className="space-y-16">
+          <ShadcnContent value="shooppy" className="space-y-16">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Strategic Marketplace</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Master Level Digital Assets</p>
@@ -424,7 +435,7 @@ export default function DashboardPage() {
                </div>
              ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                  {marketplaceAssets.map((p) => {
+                  {marketplaceAssets.map((p: any) => {
                     const isOwned = purchasedProductIds && purchasedProductIds.includes(p.id);
                     return (
                       <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
@@ -453,9 +464,9 @@ export default function DashboardPage() {
                   })}
                </div>
              )}
-          </TabsContent>
+          </ShadcnContent>
 
-          <TabsContent value="resources" className="space-y-12">
+          <ShadcnContent value="resources" className="space-y-12">
              <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl space-y-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                    <div className="space-y-10">
@@ -482,15 +493,15 @@ export default function DashboardPage() {
                    </div>
                    
                    <div className="space-y-10">
-                      <Tabs defaultValue="ai" className="w-full">
-                         <TabsList className="bg-primary/5 p-2 rounded-full w-full mb-10 border-2 border-primary/10">
-                            <TabsTrigger value="ai" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">AI Prompts</TabsTrigger>
-                            <TabsTrigger value="triks" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">T&Triks</TabsTrigger>
-                            <TabsTrigger value="webin" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">WeBin</TabsTrigger>
-                         </TabsList>
+                      <ShadcnTabs defaultValue="ai" className="w-full">
+                         <ShadcnList className="bg-primary/5 p-2 rounded-full w-full mb-10 border-2 border-primary/10">
+                            <ShadcnTrigger value="ai" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">AI Prompts</ShadcnTrigger>
+                            <ShadcnTrigger value="triks" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">T&Triks</ShadcnTrigger>
+                            <ShadcnTrigger value="webin" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">WeBin</ShadcnTrigger>
+                         </ShadcnList>
                          
-                         <TabsContent value="ai" className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
-                            {resources.filter(r => r.type === 'AI_Prompt').map(r => (
+                         <ShadcnContent value="ai" className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
+                            {sharedResources.filter((r: any) => r.type === 'AI_Prompt').map((r: any) => (
                               <div key={r.id} className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 space-y-4">
                                  <h4 className="font-black text-foreground uppercase text-lg italic">{r.title}</h4>
                                  <p className="text-[11px] text-primary font-black uppercase tracking-widest">By @{r.nickname}</p>
@@ -500,20 +511,20 @@ export default function DashboardPage() {
                                  <Button variant="outline" className="h-10 rounded-full text-[10px] uppercase font-black px-8 border-primary/20 text-primary hover:bg-primary hover:text-background" onClick={() => { navigator.clipboard.writeText(r.content); toast({ title: "Prompt Copied" }); }}>Copy Lab Data</Button>
                               </div>
                             ))}
-                         </TabsContent>
+                         </ShadcnContent>
                          
-                         <TabsContent value="triks" className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
-                            {resources.filter(r => r.type === 'T&Triks').map(r => (
+                         <ShadcnContent value="triks" className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
+                            {sharedResources.filter((r: any) => r.type === 'T&Triks').map((r: any) => (
                               <div key={r.id} className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 space-y-4">
                                  <h4 className="font-black text-foreground uppercase text-lg italic">{r.title}</h4>
                                  <p className="text-[11px] text-primary font-black uppercase tracking-widest">By @{r.nickname}</p>
                                  <p className="text-base font-bold text-foreground/70 leading-relaxed">{r.content}</p>
                               </div>
                             ))}
-                         </TabsContent>
+                         </ShadcnContent>
 
-                         <TabsContent value="webin" className="space-y-6">
-                            {resources.filter(r => r.type === 'WeBin').map(r => (
+                         <ShadcnContent value="webin" className="space-y-6">
+                            {sharedResources.filter((r: any) => r.type === 'WeBin').map((r: any) => (
                               <div key={r.id} className="p-10 bg-primary/10 rounded-[3rem] border-4 border-primary/20 flex justify-between items-center group">
                                  <div className="space-y-2">
                                    <h4 className="font-black text-foreground uppercase text-xl italic">{r.title}</h4>
@@ -522,21 +533,21 @@ export default function DashboardPage() {
                                  <Button className="rounded-full h-14 px-10 font-black uppercase text-xs shadow-xl active:scale-95" asChild><a href={r.content} target="_blank">Watch Now</a></Button>
                               </div>
                             ))}
-                         </TabsContent>
-                      </Tabs>
+                         </ShadcnContent>
+                      </ShadcnTabs>
                    </div>
                 </div>
              </Card>
-          </TabsContent>
+          </ShadcnContent>
 
-          <TabsContent value="faq" className="max-w-4xl mx-auto space-y-12">
+          <ShadcnContent value="faq" className="max-w-4xl mx-auto space-y-12">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Protocol Inquiry</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.5em]">Frequently Asked Strategic Questions</p>
              </div>
              <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl">
                 <Accordion type="single" collapsible className="w-full space-y-6">
-                  {faqs.map((f) => (
+                  {faqs.map((f: any) => (
                     <AccordionItem key={f.id} value={f.id} className="border-none bg-background/50 rounded-[3rem] px-12 transition-all data-[state=open]:shadow-2xl overflow-hidden">
                       <AccordionTrigger className="text-lg font-black text-foreground uppercase tracking-widest hover:no-underline py-10 [&>svg]:h-6 [&>svg]:w-6 [&>svg]:text-primary">
                         {f.question}
@@ -548,8 +559,8 @@ export default function DashboardPage() {
                   ))}
                 </Accordion>
              </Card>
-          </TabsContent>
-        </Tabs>
+          </ShadcnContent>
+        </ShadcnTabs>
       </main>
 
       <Dialog open={showDaily} onOpenChange={setShowDaily}>
@@ -588,7 +599,7 @@ export default function DashboardPage() {
             ].map((r) => (
               <div key={r.lv} className={cn("p-10 rounded-[3.5rem] border-4 flex items-center justify-between transition-all", level >= r.lv ? "bg-primary/10 border-primary" : "bg-white/5 border-white/10 opacity-40")}>
                 <div><p className="text-[11px] font-black text-primary uppercase mb-2 tracking-widest">Level {r.lv}</p><p className="text-2xl font-black text-foreground uppercase italic">{r.reward}</p></div>
-                <ShieldCheck className={cn("h-12 w-12", level >= r.lv ? "text-primary" : "text-foreground/20")} />
+                <Award className={cn("h-12 w-12", level >= r.lv ? "text-primary" : "text-foreground/20")} />
               </div>
             ))}
           </div>

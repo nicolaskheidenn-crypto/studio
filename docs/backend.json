@@ -22,42 +22,57 @@
         "nickname": { "type": "string" },
         "bio": { "type": "string", "minLength": 15, "maxLength": 60 },
         "coverPhotoUrl": { "type": "string" },
-        "avatarUrl": { "type": "string" }
+        "avatarUrl": { "type": "string" },
+        "points": { "type": "number" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "streak": { "type": "number" }
       }
     },
-    "FriendRequest": {
-      "title": "Friend Request",
-      "description": "Request to connect between users.",
+    "Resource": {
+      "title": "Strategic Resource",
+      "description": "A shared strategic tool (AI Prompt, T&Triks, or WeBin).",
       "type": "object",
       "properties": {
-        "fromId": { "type": "string" },
-        "toId": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "ChatMessage": {
-      "title": "Chat Message",
-      "description": "A message in a conversation.",
-      "type": "object",
-      "properties": {
-        "senderId": { "type": "string" },
-        "text": { "type": "string" },
-        "mediaUrl": { "type": "string" },
-        "mediaType": { "type": "string", "enum": ["image", "video"] },
-        "timestamp": { "type": "string", "format": "date-time" }
-      }
-    },
-    "AppNotification": {
-      "title": "Notification",
-      "description": "System or social alert.",
-      "type": "object",
-      "properties": {
-        "userId": { "type": "string" },
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["AI_Prompt", "T&Triks", "WeBin"] },
         "title": { "type": "string" },
-        "message": { "type": "string" },
-        "type": { "type": "string", "enum": ["system", "friend_request", "admin"] },
-        "isRead": { "type": "boolean" }
+        "description": { "type": "string" },
+        "content": { "type": "string" },
+        "nickname": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "title", "content", "nickname", "userId"]
+    },
+    "ActivityPost": {
+      "title": "Activity Post",
+      "description": "A shared 'Sovereign Win' on the activity wall.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "nickname": { "type": "string" },
+        "description": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "isPrivate": { "type": "boolean" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "hearts": { "type": "number" }
+      },
+      "required": ["userId", "nickname", "description"]
+    },
+    "ShooppyProduct": {
+      "title": "Shooppy Product",
+      "description": "A digital asset in the marketplace.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "price": { "type": "number" },
+        "type": { "type": "string", "enum": ["Bundle", "Template", "eBook"] },
+        "placement": { "type": "string", "enum": ["Hub", "Marketplace"] }
       }
     }
   },
@@ -67,8 +82,10 @@
   "firestore": {
     "/tasks/{taskId}": { "schema": "Task", "description": "Global daily tasks." },
     "/users/{userId}": { "schema": "UserProfile", "description": "User profile data." },
-    "/friendRequests/{requestId}": { "schema": "FriendRequest", "description": "Social connections." },
-    "/chats/{chatId}/messages/{msgId}": { "schema": "ChatMessage", "description": "Conversation data." },
-    "/notifications/{notifId}": { "schema": "AppNotification", "description": "User alerts." }
+    "/resources/{resourceId}": { "schema": "Resource", "description": "Global strategic resources." },
+    "/activityWall/{postId}": { "schema": "ActivityPost", "description": "Shared activity wall wins." },
+    "/shooppyProducts/{productId}": { "schema": "ShooppyProduct", "description": "Global digital marketplace assets." },
+    "/newsPosts/{postId}": { "schema": "object", "description": "Global broadcast messages." },
+    "/faqs/{faqId}": { "schema": "object", "description": "Global FAQs." }
   }
 }
