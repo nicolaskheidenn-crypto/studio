@@ -326,15 +326,19 @@ export const useUserStore = create<UserProgressStore>()(
     (set, get) => ({
       profiles: {},
 
-      updateProfile: (uid, data) => set((s) => ({
-        profiles: {
-          ...s.profiles,
-          [uid]: { ...(s.profiles[uid] || DEFAULT_PROFILE), ...data }
-        }
-      })),
+      updateProfile: (uid, data) => set((s) => {
+        const existing = s.profiles[uid] || DEFAULT_PROFILE;
+        return {
+          profiles: {
+            ...s.profiles,
+            [uid]: { ...DEFAULT_PROFILE, ...existing, ...data }
+          }
+        };
+      }),
 
       addXP: (uid, amount) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         let newXP = current.xp + amount;
         let newLevel = current.level;
         while (newXP >= 100) {
@@ -345,12 +349,14 @@ export const useUserStore = create<UserProgressStore>()(
       },
 
       addPoints: (uid, amount) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         get().updateProfile(uid, { points: current.points + amount });
       },
 
       toggleTask: (uid, id) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const isCompleting = !current.completedTaskIds.includes(id);
         if (isCompleting) {
           get().addXP(uid, 20);
@@ -364,7 +370,8 @@ export const useUserStore = create<UserProgressStore>()(
       },
 
       claimDaily: (uid) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const now = new Date();
         const last = current.lastLogin ? new Date(current.lastLogin) : null;
         
@@ -398,12 +405,14 @@ export const useUserStore = create<UserProgressStore>()(
       },
 
       unlockNextDay: (uid) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         get().updateProfile(uid, { currentTaskDay: Math.min(current.currentTaskDay + 1, 7) });
       },
 
       addCapsule: (uid, cap) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         get().updateProfile(uid, { capsules: [...(current.capsules || []), cap] });
         get().addPoints(uid, 50);
         get().addXP(uid, 30);
@@ -421,8 +430,9 @@ export const useUserStore = create<UserProgressStore>()(
       },
 
       trackVisit: (uid, feature) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
-        const stats = current.stats || DEFAULT_PROFILE.stats;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
+        const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
         const visitedFeatures = stats.visitedFeatures || [];
         if (!visitedFeatures.includes(feature)) {
           const newVisited = [...visitedFeatures, feature];
@@ -431,25 +441,29 @@ export const useUserStore = create<UserProgressStore>()(
       },
 
       incrementPrompt: (uid) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
-        const stats = current.stats || DEFAULT_PROFILE.stats;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
+        const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
         get().updateProfile(uid, { stats: { ...stats, promptsShared: (stats.promptsShared || 0) + 1 } });
       },
 
       incrementTrick: (uid) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
-        const stats = current.stats || DEFAULT_PROFILE.stats;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
+        const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
         get().updateProfile(uid, { stats: { ...stats, triksShared: (stats.triksShared || 0) + 1 } });
       },
 
       incrementQuiz: (uid) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
-        const stats = current.stats || DEFAULT_PROFILE.stats;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
+        const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
         get().updateProfile(uid, { stats: { ...stats, quizzesPassed: (stats.quizzesPassed || 0) + 1 } });
       },
 
       unlockBadge: (uid, badgeId) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const unlockedBadgeIds = current.unlockedBadgeIds || [];
         if (!unlockedBadgeIds.includes(badgeId)) {
           get().updateProfile(uid, { unlockedBadgeIds: [...unlockedBadgeIds, badgeId] });
@@ -457,7 +471,8 @@ export const useUserStore = create<UserProgressStore>()(
       },
 
       buyProduct: (uid, productId, price) => {
-        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const purchasedProductIds = current.purchasedProductIds || [];
         if (current.points >= price && !purchasedProductIds.includes(productId)) {
           get().updateProfile(uid, { 

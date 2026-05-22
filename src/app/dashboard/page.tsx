@@ -51,7 +51,10 @@ export default function DashboardPage() {
   const uid = user?.uid;
 
   const profiles = useUserStore(s => s.profiles);
-  const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
+  const profile = useMemo(() => {
+    const raw = uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE;
+    return { ...DEFAULT_PROFILE, ...raw };
+  }, [profiles, uid]);
   
   const { 
     points = 0, xp = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = []
@@ -185,7 +188,7 @@ export default function DashboardPage() {
     toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
   };
 
-  const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub' || purchasedProductIds.includes(p.id));
+  const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub' || (purchasedProductIds && purchasedProductIds.includes(p.id)));
   const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
 
   if (!isHydrated) return null;
@@ -197,7 +200,6 @@ export default function DashboardPage() {
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-10">
-            {/* Points Vault Column */}
             <div className="flex flex-col">
               <div className="flex items-center gap-3 text-primary">
                 <Zap className="h-7 w-7 fill-primary" />
@@ -205,7 +207,6 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary">Points Vault</span>
             </div>
-            {/* Current Streak Column */}
             <div className="flex flex-col">
               <div className="flex items-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
@@ -421,7 +422,7 @@ export default function DashboardPage() {
              ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                   {marketplaceAssets.map((p) => {
-                    const isOwned = purchasedProductIds.includes(p.id);
+                    const isOwned = purchasedProductIds && purchasedProductIds.includes(p.id);
                     return (
                       <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
                         <div className="h-80 relative overflow-hidden bg-background/50">

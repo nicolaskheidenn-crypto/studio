@@ -33,6 +33,7 @@ const DEFAULT_PROFILE: UserProfile = {
   completedTaskIds: [],
   capsules: [],
   unlockedBadgeIds: [],
+  purchasedProductIds: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
@@ -57,9 +58,12 @@ export default function SettingsPage() {
   const auth = getAuth();
   
   const profiles = useUserStore(s => s.profiles);
-  const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
-  const { updateProfile: updateStoreProfile, unlockBadge } = useUserStore();
+  const profile = useMemo(() => {
+    const raw = uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE;
+    return { ...DEFAULT_PROFILE, ...raw };
+  }, [profiles, uid]);
 
+  const { updateProfile: updateStoreProfile, unlockBadge } = useUserStore();
   const { badges: adminBadges } = useAdminStore();
 
   const [displayName, setDisplayName] = useState(profile.nickname);
@@ -97,7 +101,7 @@ export default function SettingsPage() {
     if (profile.stats.promptsShared >= 10) unlockBadge(uid, 'sb-prompt');
     if (profile.stats.triksShared >= 10) unlockBadge(uid, 'sb-trick');
 
-  }, [uid, profile.stats, profile.currentTaskDay, profile.completedTaskIds, unlockBadge]);
+  }, [uid, profile, unlockBadge]);
 
   const handleUpdateProfile = async () => {
     if (!uid) return;
@@ -224,7 +228,7 @@ export default function SettingsPage() {
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   {allBadges.map((b) => {
-                    const isUnlocked = profile.unlockedBadgeIds.includes(b.id);
+                    const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
                       <div key={b.id} className={cn("p-10 bg-white rounded-[3rem] border-4 flex items-center gap-8 group transition-all shadow-sm", 
                         isUnlocked ? "border-primary opacity-100" : "border-transparent opacity-40 grayscale"
