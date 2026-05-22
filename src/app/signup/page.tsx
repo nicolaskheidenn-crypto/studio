@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -38,9 +39,10 @@ export default function SignUpPage() {
   }, [router]);
 
   const initProfile = async (uid: string, displayName: string | null) => {
-    const userDoc = await getDoc(doc(db, 'users', uid));
+    const userDocRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
-      await setDoc(doc(db, 'users', uid), {
+      await setDoc(userDocRef, {
         nickname: displayName || 'New Strategist',
         bio: 'New Master Strategist',
         points: 0,
@@ -49,7 +51,7 @@ export default function SignUpPage() {
         streak: 0,
         currentTaskDay: 1,
         createdAt: new Date().toISOString()
-      });
+      }, { merge: true });
     }
   };
 
@@ -80,13 +82,22 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
     try {
       const result = await signInWithPopup(auth, provider);
       await initProfile(result.user.uid, result.user.displayName);
       toast({ title: 'Google Authorized', description: `Empire Established, ${result.user.displayName}` });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({ title: 'Authorization Failed', description: error.message, variant: 'destructive' });
+      console.error("Google SSO Error:", error);
+      toast({ 
+        title: 'Authorization Failed', 
+        description: error.code === 'auth/operation-not-allowed' 
+          ? 'Google provider not enabled in Firebase Console.' 
+          : error.message, 
+        variant: 'destructive' 
+      });
     } finally {
       setIsLoading(false);
     }
