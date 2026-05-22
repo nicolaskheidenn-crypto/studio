@@ -42,6 +42,8 @@ export default function ResetKeyPage() {
     setIsLoading(true);
 
     try {
+      // Firebase standard password reset sends an authorization link to the email.
+      // This is the "Verification" step required before changing the passkey.
       await sendPasswordResetEmail(auth, email);
       setIsSent(true);
       toast({ title: 'Authorization Dispatched', description: 'Verification link sent to your inbox.' });
