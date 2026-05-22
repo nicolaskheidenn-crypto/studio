@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Lock, Award, Trophy, Coffee, FileText } from "lucide-react";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { getAuth, updateProfile } from "firebase/auth";
+import { getAuth, updateProfile, updatePassword } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -48,7 +48,10 @@ export default function SettingsPage() {
   const [bio, setBio] = useState(profile.bio);
   const [avatar, setAvatar] = useState(profile.avatarUrl);
   const [cover, setCover] = useState(profile.coverPhotoUrl);
+  
   const [newPass, setNewPass] = useState("");
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [isUpdatingPass, setIsUpdatingPass] = useState(false);
 
   useEffect(() => {
     if (uid && profiles[uid]) {
@@ -67,6 +70,32 @@ export default function SettingsPage() {
       toast({ title: "Sovereign Profile Updated" });
     } catch (e) {
       toast({ title: "Update Failed", variant: "destructive" });
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPass) {
+      toast({ title: "Protocol Error", description: "New key required.", variant: "destructive" });
+      return;
+    }
+    if (!auth.currentUser) return;
+
+    setIsUpdatingPass(true);
+    try {
+      await updatePassword(auth.currentUser, newPass);
+      setNewPass("");
+      setShowNewPass(false);
+      toast({ title: "Root Security Updated", description: "Access key changed successfully." });
+    } catch (error: any) {
+      toast({ 
+        title: "Security Alert", 
+        description: error.message.includes("recent-login") 
+          ? "Critical security protocol: Please log in again to verify your identity before changing your key." 
+          : error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsUpdatingPass(false);
     }
   };
 
@@ -122,9 +151,26 @@ export default function SettingsPage() {
                     <h3 className="text-2xl font-black uppercase tracking-tighter text-[#1f1610] flex items-center gap-3"><Lock className="h-6 w-6 text-primary" /> Root Security</h3>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]/60">New Security Key</Label>
-                      <Input type="password" placeholder="••••••••" value={newPass} onChange={e => setNewPass(e.target.value)} className="h-16 bg-white text-[#1f1610]" />
+                      <div className="relative">
+                        <Input 
+                          type={showNewPass ? 'text' : 'password'} 
+                          placeholder="••••••••" 
+                          value={newPass} 
+                          onChange={e => setNewPass(e.target.value)} 
+                          className="h-16 bg-white text-[#1f1610] pr-14" 
+                        />
+                        <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-6 top-1/2 -translate-y-1/2 text-[#1f1610]/40">
+                          {showNewPass ? <Eye className="h-6 w-6" /> : <EyeOff className="h-6 w-6" />}
+                        </button>
+                      </div>
                     </div>
-                    <Button className="w-full h-16 rounded-2xl bg-[#1f1610] border-2 border-[#FFD700] text-[#FFD700] font-black uppercase text-xs hover:bg-[#FFD700] hover:text-[#1f1610] transition-all">Update Access Key</Button>
+                    <Button 
+                      onClick={handleUpdatePassword}
+                      disabled={isUpdatingPass}
+                      className="w-full h-16 rounded-2xl bg-[#1f1610] border-2 border-[#FFD700] text-[#FFD700] font-black uppercase text-xs hover:bg-[#FFD700] hover:text-[#1f1610] transition-all shadow-xl"
+                    >
+                      {isUpdatingPass ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Update Access Key'}
+                    </Button>
                   </div>
                </div>
             </Card>

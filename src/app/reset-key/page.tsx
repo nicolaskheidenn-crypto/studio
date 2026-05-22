@@ -1,9 +1,10 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, Loader2, Lock, ArrowLeft, Send, CheckCircle2, ShieldCheck, Key } from 'lucide-react';
+import { Coffee, Loader2, Lock, ArrowLeft, Send, CheckCircle2, ShieldCheck, Key, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -15,6 +16,7 @@ function ResetKeyContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [isResetSuccessful, setIsResetSuccessful] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
@@ -118,14 +120,19 @@ function ResetKeyContent() {
         <form onSubmit={handleConfirmReset} className="space-y-10">
           <div className="space-y-4">
             <Label className="text-[#1f1610] font-black text-xs">NEW SECURITY KEY</Label>
-            <Input
-              type="password"
-              required
-              placeholder="••••••••"
-              className="rounded-3xl h-20 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-3xl font-black px-10"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                required
+                placeholder="••••••••"
+                className="rounded-3xl h-20 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-3xl font-black px-10 pr-16"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-[#1f1610]/40">
+                {showPassword ? <Eye className="h-7 w-7" /> : <EyeOff className="h-7 w-7" />}
+              </button>
+            </div>
           </div>
           <Button type="submit" className="w-full rounded-full h-24 bg-[#FFD700] text-[#1f1610] font-black text-2xl shadow-2xl uppercase tracking-tighter" disabled={isLoading}>
             {isLoading ? <Loader2 className="h-10 w-10 animate-spin" /> : 'RESTORE ACCESS'}
