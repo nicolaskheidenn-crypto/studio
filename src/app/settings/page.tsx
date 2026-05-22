@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -147,7 +146,7 @@ export default function SettingsPage() {
                     </div>
                     <Button onClick={handleUpdateProfile} className="w-full h-20 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-xl active:scale-95 transition-all">Update Protocol</Button>
                   </div>
-                  <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-2 border-[#1f1610]/10 space-y-8">
+                  <div className="p-10 bg-[#1f1610]/10 rounded-[3rem] border-4 border-[#1f1610]/5 space-y-8">
                     <h3 className="text-2xl font-black uppercase tracking-tighter text-[#1f1610] flex items-center gap-3"><Lock className="h-6 w-6 text-primary" /> Root Security</h3>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]/60">New Security Key</Label>
