@@ -115,7 +115,7 @@ export default function DashboardPage() {
     if (!uid) return;
     claimDaily(uid);
     setShowDaily(false);
-    toast({ title: "Daily Sync Complete", description: "+100 Points, +50 XP Added." });
+    toast({ title: "Daily Sync Complete", description: "Strategic rewards added with growth multiplier." });
   };
 
   const handleAcquireAsset = (productId: string, price: number) => {
@@ -153,7 +153,7 @@ export default function DashboardPage() {
     addPoints(uid, 20);
     setPostText("");
     setPostImages([]);
-    toast({ title: "Sovereign Win Dispatched", description: "+20 Points earned." });
+    toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
     setActiveTab('hub'); 
   };
 
@@ -171,27 +171,30 @@ export default function DashboardPage() {
 
   const handleAddResource = () => {
     if (!resTitle || !resContent || !uid) return;
-    addResource({
-      title: resTitle,
-      description: "",
-      type: resType,
-      content: resContent,
-      userId: uid,
-      nickname: nickname
-    });
-    addPoints(uid, 10);
     
     if (resType === 'AI_Prompt') incrementPrompt(uid);
-    if (resType === 'T&Triks') incrementTrick(uid);
+    else if (resType === 'T&Triks') incrementTrick(uid);
+    else {
+      addResource({
+        title: resTitle,
+        description: "",
+        type: resType,
+        content: resContent,
+        userId: uid,
+        nickname: nickname
+      });
+    }
     
     setResTitle(""); setResContent("");
-    toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
+    toast({ title: "Strategic Resource Shared", description: "Gains boosted by growth multiplier." });
   };
 
   const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub' || (purchasedProductIds && purchasedProductIds.includes(p.id)));
   const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
 
   if (!isHydrated) return null;
+
+  const growthMultiplier = (1 + level / 10).toFixed(1);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -380,7 +383,7 @@ export default function DashboardPage() {
                    <p className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Protocol Consistency Level</p>
                  </div>
                  <div className="p-10 bg-primary/5 rounded-[3rem] border-2 border-primary/10">
-                   <p className="text-5xl font-black text-primary italic tracking-tighter">x{(1 + level/10).toFixed(1)}</p>
+                   <p className="text-5xl font-black text-primary italic tracking-tighter">x{growthMultiplier}</p>
                    <p className="text-[10px] font-black uppercase text-primary mt-4 tracking-widest">Growth Multiplier</p>
                  </div>
               </Card>

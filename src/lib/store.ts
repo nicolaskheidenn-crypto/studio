@@ -339,22 +339,30 @@ export const useUserStore = create<UserProgressStore>()(
       addXP: (uid, amount) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
-        if (current.level >= 30) return; // Max Level Cap reached
+        if (current.level >= 30) {
+          get().updateProfile(uid, { xp: 0 });
+          return;
+        }
         
-        let newXP = current.xp + amount;
+        const multiplier = 1 + (current.level / 10);
+        const actualAmount = amount * multiplier;
+
+        let newXP = current.xp + actualAmount;
         let newLevel = current.level;
         while (newXP >= 100 && newLevel < 30) {
           newXP -= 100;
           newLevel += 1;
         }
-        if (newLevel >= 30) newXP = 0; // XP reset at cap
+        if (newLevel >= 30) newXP = 0; 
         get().updateProfile(uid, { xp: newXP, level: newLevel });
       },
 
       addPoints: (uid, amount) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
-        get().updateProfile(uid, { points: current.points + amount });
+        const multiplier = 1 + (current.level / 10);
+        const actualAmount = amount * multiplier;
+        get().updateProfile(uid, { points: Math.floor(current.points + actualAmount) });
       },
 
       toggleTask: (uid, id) => {
@@ -398,11 +406,11 @@ export const useUserStore = create<UserProgressStore>()(
         const createdDate = new Date(current.createdAt);
         const diffInDays = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
 
+        get().addPoints(uid, 100);
+        get().addXP(uid, 50);
         get().updateProfile(uid, { 
           lastLogin: now.toISOString(), 
           streak: newStreak, 
-          points: current.points + 100, 
-          xp: current.xp + 50,
           stats: { ...(current.stats || DEFAULT_PROFILE.stats), totalDaysInApp: diffInDays }
         });
       },
@@ -447,6 +455,7 @@ export const useUserStore = create<UserProgressStore>()(
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
+        get().addPoints(uid, 10);
         get().updateProfile(uid, { stats: { ...stats, promptsShared: (stats.promptsShared || 0) + 1 } });
       },
 
@@ -454,6 +463,7 @@ export const useUserStore = create<UserProgressStore>()(
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
+        get().addPoints(uid, 10);
         get().updateProfile(uid, { stats: { ...stats, triksShared: (stats.triksShared || 0) + 1 } });
       },
 
