@@ -64,7 +64,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: 'Access Granted', description: 'Welcome back to NICO DIGITAL.' });
+      toast({ title: 'Access Granted', description: 'Welcome back.' });
       router.push('/dashboard');
     } catch (error: any) {
       toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
@@ -123,7 +123,7 @@ export default function LoginPage() {
       toast({ title: 'Phone Verified', description: 'Access Granted.' });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({ title: 'Verification Failed', description: 'Invalid security code.', variant: 'destructive' });
+      toast({ title: 'Verification Failed', description: 'Invalid code.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -134,25 +134,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#1f1610] relative overflow-hidden font-body">
       <div id="recaptcha-container"></div>
-      <div className="absolute top-[-10%] right-[-10%] opacity-5 pointer-events-none rotate-45 scale-150">
-        <Coffee className="w-96 h-96 text-primary" />
-      </div>
-
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden border-8 border-primary/20 relative z-10 bg-[#1f1610]">
-        <div className="p-12 md:p-20 space-y-12 bg-[#1f1610] flex flex-col justify-center relative overflow-hidden border-r-4 border-primary/10">
-          <div className="absolute top-0 right-0 p-12 opacity-10">
-            <Lock className="h-64 w-64 rotate-12 text-primary" />
-          </div>
-          
+      
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[4rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 bg-[#1f1610]">
+        <div className="p-12 md:p-20 bg-[#1f1610] flex flex-col justify-center border-r-4 border-primary/10">
           <div className="space-y-12 relative z-10">
-            <div className="p-8 bg-[#FFD700] rounded-[3rem] w-fit shadow-[0_25px_50px_rgba(255,215,0,0.3)] border-4 border-[#1f1610]">
-              <Lock className="h-16 w-16 text-[#1f1610]" />
-            </div>
             <div className="space-y-6">
-              <h2 className="text-5xl md:text-6xl font-headline font-black leading-none tracking-tighter uppercase text-[#fdfaf6]">
+              <div className="flex flex-col">
+                <h1 className="text-9xl font-headline font-black tracking-tighter text-[#fdfaf6] leading-none">ND</h1>
+                <div className="h-4 w-40 bg-[#FFD700] rounded-full" />
+              </div>
+              <h2 className="text-5xl md:text-6xl font-headline font-black uppercase text-[#fdfaf6]">
                 STRATEGY <span className="text-[#FFD700] italic">HUB</span>
               </h2>
-              <div className="h-3 w-40 bg-[#FFD700] rounded-full" />
             </div>
             <p className="text-[#fdfaf6] text-xl leading-relaxed font-black uppercase tracking-[0.2em] max-w-sm">
               Sovereign infrastructure for high-impact execution.
@@ -161,7 +154,7 @@ export default function LoginPage() {
         </div>
 
         <div className="p-12 md:p-16 space-y-10 bg-mocha-cream overflow-y-auto">
-          <div className="space-y-4">
+          <div className="space-y-4 text-center">
             <h1 className="text-5xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">Access Root</h1>
             <p className="text-sm text-[#FFD700] font-black uppercase tracking-[0.6em]">Protocol Authorization Required</p>
           </div>
@@ -169,14 +162,14 @@ export default function LoginPage() {
           <div className="grid grid-cols-2 gap-4">
             <Button 
               variant="outline" 
-              className={cn("rounded-2xl h-14 font-black uppercase text-[10px] tracking-widest transition-all", method === 'email' ? "bg-[#1f1610] text-[#FFD700] border-[#1f1610]" : "border-[#1f1610]/10 text-[#1f1610]")}
+              className={`rounded-2xl h-14 font-black uppercase text-[10px] tracking-widest transition-all ${method === 'email' ? "bg-[#1f1610] text-[#FFD700]" : "text-[#1f1610] border-[#1f1610]/10"}`}
               onClick={() => setMethod('email')}
             >
               Email Access
             </Button>
             <Button 
               variant="outline" 
-              className={cn("rounded-2xl h-14 font-black uppercase text-[10px] tracking-widest transition-all", method === 'phone' ? "bg-[#1f1610] text-[#FFD700] border-[#1f1610]" : "border-[#1f1610]/10 text-[#1f1610]")}
+              className={`rounded-2xl h-14 font-black uppercase text-[10px] tracking-widest transition-all ${method === 'phone' ? "bg-[#1f1610] text-[#FFD700]" : "text-[#1f1610] border-[#1f1610]/10"}`}
               onClick={() => setMethod('phone')}
             >
               Phone Access
@@ -188,28 +181,15 @@ export default function LoginPage() {
               <form onSubmit={handleEmailLogin} className="space-y-6">
                 <div className="space-y-3">
                   <Label className="text-[#1f1610] font-black text-[10px]">STRATEGIC EMAIL</Label>
-                  <Input
-                    type="email"
-                    placeholder="name@example.com"
-                    required
-                    className="rounded-2xl h-16 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-xl font-black px-6"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <Input type="email" placeholder="name@example.com" required className="rounded-2xl h-16 bg-[#1f1610]/5 text-[#1f1610] text-xl font-black px-6" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-[#1f1610] font-black text-[10px]">SECURITY KEY</Label>
-                    <Link href="/reset-key" className="text-[9px] text-[#FFD700] font-black uppercase underline">Forgot Key?</Link>
+                    <Link href="/reset-key" className="text-[10px] text-[#FFD700] font-black uppercase underline decoration-2">Forgot Key?</Link>
                   </div>
                   <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      className="rounded-2xl h-16 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-xl font-black px-6 pr-14"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <Input type={showPassword ? 'text' : 'password'} required className="rounded-2xl h-16 bg-[#1f1610]/5 text-[#1f1610] text-xl font-black px-6 pr-14" value={password} onChange={(e) => setPassword(e.target.value)} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-[#1f1610]/40">
                       {showPassword ? <Eye className="h-6 w-6" /> : <EyeOff className="h-6 w-6" />}
                     </button>
@@ -224,15 +204,8 @@ export default function LoginPage() {
                 {!confirmationResult ? (
                   <form onSubmit={handleSendCode} className="space-y-6">
                     <div className="space-y-3">
-                      <Label className="text-[#1f1610] font-black text-[10px]">PHONE NUMBER (E.164)</Label>
-                      <Input
-                        type="tel"
-                        placeholder="+1 555 000 0000"
-                        required
-                        className="rounded-2xl h-16 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-xl font-black px-6"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                      />
+                      <Label className="text-[#1f1610] font-black text-[10px]">PHONE NUMBER</Label>
+                      <Input type="tel" placeholder="+1 555 000 0000" required className="rounded-2xl h-16 bg-[#1f1610]/5 text-[#1f1610] text-xl font-black px-6" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
                     </div>
                     <Button type="submit" className="w-full rounded-full h-20 bg-[#1f1610] text-[#FFD700] font-black text-xl shadow-xl uppercase" disabled={isLoading}>
                       {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'SEND VERIFICATION'}
@@ -242,14 +215,7 @@ export default function LoginPage() {
                   <form onSubmit={handleVerifyCode} className="space-y-6">
                     <div className="space-y-3">
                       <Label className="text-[#1f1610] font-black text-[10px]">VERIFICATION CODE</Label>
-                      <Input
-                        type="text"
-                        placeholder="6-Digit Code"
-                        required
-                        className="rounded-2xl h-16 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-3xl text-center font-black px-6"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                      />
+                      <Input type="text" placeholder="6-Digit Code" required className="rounded-2xl h-16 bg-[#1f1610]/5 text-[#1f1610] text-3xl text-center font-black px-6" value={verificationCode} onChange={(e) => setVerificationCode(e.target.value)} />
                     </div>
                     <Button type="submit" className="w-full rounded-full h-20 bg-[#FFD700] text-[#1f1610] font-black text-xl shadow-xl uppercase" disabled={isLoading}>
                       {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'VERIFY & ACCESS'}
@@ -262,7 +228,7 @@ export default function LoginPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-[#1f1610]/10"></span></div>
-              <div className="relative flex justify-center text-[10px] uppercase font-black"><span className="bg-mocha-cream px-4 text-[#1f1610]/40 tracking-widest">Or Continue With</span></div>
+              <div className="relative flex justify-center text-[10px] uppercase font-black"><span className="bg-mocha-cream px-4 text-[#1f1610]/40 tracking-widest">Rapid Founding</span></div>
             </div>
 
             <Button 
@@ -284,8 +250,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
 }
