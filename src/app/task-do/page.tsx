@@ -2,16 +2,17 @@
 "use client";
 
 import { Navigation } from "@/components/Navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Trophy, ArrowRight, Lock, Award, ShieldCheck } from "lucide-react";
+import { Trophy, ArrowRight, Lock, Award, ShieldCheck } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
-import { useAdminStore, useUserStore, UserProfile } from "@/lib/store";
+import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useCollection } from "@/firebase";
+import { collection, query, orderBy } from 'firebase/firestore';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -31,7 +32,10 @@ const DEFAULT_PROFILE: UserProfile = {
 export default function TaskDoPage() {
   const { user } = useUser();
   const uid = user?.uid;
-  const { dailyTasks } = useAdminStore();
+  const db = useFirestore();
+  
+  const tasksQuery = useMemo(() => query(collection(db, 'tasks'), orderBy('day', 'asc')), [db]);
+  const { data: globalTasks } = useCollection(tasksQuery);
   
   const profiles = useUserStore(s => s.profiles);
   const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
@@ -47,8 +51,8 @@ export default function TaskDoPage() {
     setIsMounted(true);
   }, []);
 
-  const dayTasks = dailyTasks.filter(t => t.day === currentTaskDay);
-  const isDayComplete = dayTasks.length >= 3 && dayTasks.every(t => completedTaskIds.includes(t.id));
+  const dayTasks = useMemo(() => globalTasks.filter(t => t.day === currentTaskDay), [globalTasks, currentTaskDay]);
+  const isDayComplete = useMemo(() => dayTasks.length > 0 && dayTasks.every(t => (completedTaskIds || []).includes(t.id)), [dayTasks, completedTaskIds]);
 
   useEffect(() => {
     if (isDayComplete && isMounted && uid) {
@@ -80,7 +84,7 @@ export default function TaskDoPage() {
       <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
         <header className="text-center mb-10 space-y-2">
           <h1 className="text-6xl font-headline font-black text-white tracking-tighter uppercase">Task<span className="text-primary italic">Do</span></h1>
-          <p className="text-primary/40 text-[10px] font-black uppercase tracking-[0.5em]">Nico Digital Root Infrastructure</p>
+          <p className="text-primary/40 text-[10px] font-black uppercase tracking-[0.5em]">Global Strategy Root Infrastructure</p>
         </header>
 
         <div className="flex gap-4 mb-12 overflow-x-auto pb-6 scrollbar-hide px-2">
@@ -102,14 +106,14 @@ export default function TaskDoPage() {
         {dayTasks.length === 0 ? (
           <div className="text-center p-20 bg-secondary/20 rounded-[3rem] border-4 border-dashed border-primary/10 shadow-2xl">
             <Lock className="h-16 w-16 mx-auto text-primary/20 mb-8" />
-            <p className="text-2xl text-white/50 font-black uppercase tracking-tight">The Host is finalizing Day {currentTaskDay} tasks.</p>
+            <p className="text-2xl text-white/50 font-black uppercase tracking-tight italic">Waiting for Host deployment...</p>
           </div>
         ) : (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5">
             <div className="flex items-center justify-between px-4">
                <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">Day {currentTaskDay} Routine</h2>
                <Badge className="bg-primary text-background h-8 px-5 text-[10px] font-black rounded-full uppercase tracking-widest shadow-xl">
-                {completedTaskIds.filter(id => dayTasks.some(t => t.id === id)).length} / 3 COMPLETED
+                {completedTaskIds?.filter(id => dayTasks.some(t => t.id === id)).length || 0} / {dayTasks.length} COMPLETED
                </Badge>
             </div>
             
@@ -120,18 +124,18 @@ export default function TaskDoPage() {
                     key={task.id} 
                     className={cn(
                       "flex items-center space-x-6 p-8 rounded-[2.5rem] transition-all cursor-pointer border-2",
-                      completedTaskIds.includes(task.id) 
+                      (completedTaskIds || []).includes(task.id) 
                         ? "border-primary/40 bg-primary/10" 
                         : "border-primary/5 bg-background/40 hover:border-primary/20"
                     )}
                     onClick={() => uid && toggleTask(uid, task.id)}
                   >
                     <Checkbox 
-                      checked={completedTaskIds.includes(task.id)} 
+                      checked={(completedTaskIds || []).includes(task.id)} 
                       className="h-8 w-8 rounded-full border-4 border-primary data-[state=checked]:bg-primary shadow-lg" 
                     />
                     <div className="flex-1">
-                      <p className={cn("text-2xl font-black text-white uppercase tracking-tight leading-none mb-2", completedTaskIds.includes(task.id) && "line-through opacity-20")}>
+                      <p className={cn("text-2xl font-black text-white uppercase tracking-tight leading-none mb-2", (completedTaskIds || []).includes(task.id) && "line-through opacity-20")}>
                         {task.title}
                       </p>
                       <p className="text-[11px] text-primary/60 font-black uppercase tracking-widest">{task.description}</p>
@@ -144,11 +148,11 @@ export default function TaskDoPage() {
         )}
 
         {showAward && (
-          <div className="mt-12 p-12 rounded-[3.5rem] bg-primary text-background text-center animate-in zoom-in duration-700 shadow-[0_40px_80px_rgba(255,215,0,0.3)] relative border-4 border-white rotate-1">
+          <div className="mt-12 p-12 rounded-[3.5rem] bg-primary text-background text-center animate-in zoom-in duration-700 shadow-[0_40px_80px_rgba(255,215,0,0.3)] relative border-4 border-white">
             <Trophy className="h-20 w-20 mx-auto mb-6 animate-bounce" />
-            <h2 className="text-5xl font-headline font-black mb-4 uppercase tracking-tighter">Day Mastered!</h2>
+            <h2 className="text-5xl font-headline font-black mb-4 uppercase tracking-tighter italic">Day Mastered!</h2>
             <p className="text-xl font-black uppercase tracking-widest opacity-80 mb-10 leading-relaxed">
-              Strategic consistency complete.<br/>The routine is archived. No turning back.
+              Strategic consistency complete.<br/>The routine is archived.
             </p>
             <Button 
               className="rounded-full font-black text-2xl px-16 h-20 bg-background text-primary hover:bg-secondary transition-all active:scale-95 shadow-2xl uppercase tracking-tighter" 
@@ -161,13 +165,10 @@ export default function TaskDoPage() {
 
         {showFinalAward && (
           <div className="mt-12 p-12 rounded-[4rem] bg-background text-white text-center animate-in slide-in-from-bottom-20 duration-1000 shadow-2xl border-8 border-primary relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-12 opacity-5">
-              <Award className="h-56 w-56 rotate-12 text-primary" />
-            </div>
             <Award className="h-28 w-28 mx-auto mb-8 text-primary animate-pulse" />
             <h2 className="text-6xl font-headline font-black mb-6 tracking-tighter uppercase italic">Sovereign Consistency</h2>
             <p className="text-2xl font-black uppercase tracking-widest opacity-60 mb-12">
-              Status: ELITE STRATEGIST.<br/>Full 7-Day Nico Digital routine mastered.
+              Status: ELITE STRATEGIST.<br/>Full 7-Day routine mastered.
             </p>
             <Button 
               className="rounded-full bg-primary text-background font-black px-20 h-24 text-3xl shadow-[0_30px_60px_rgba(255,215,0,0.4)] hover:scale-105 transition-transform uppercase tracking-tighter" 

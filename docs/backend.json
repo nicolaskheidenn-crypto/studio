@@ -74,6 +74,30 @@
         "type": { "type": "string", "enum": ["Bundle", "Template", "eBook"] },
         "placement": { "type": "string", "enum": ["Hub", "Marketplace"] }
       }
+    },
+    "Quiz": {
+      "title": "Strategic Quiz",
+      "description": "A quiz to test strategist mastery.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "questionCount": { "type": "number" },
+        "questions": { 
+          "type": "array", 
+          "items": {
+             "type": "object",
+             "properties": {
+                "id": { "type": "string" },
+                "type": { "type": "string", "enum": ["multiple", "boolean", "id"] },
+                "question": { "type": "string" },
+                "options": { "type": "array", "items": { "type": "string" } },
+                "answer": { "type": "string" }
+             }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -86,6 +110,7 @@
     "/activityWall/{postId}": { "schema": "ActivityPost", "description": "Shared activity wall wins." },
     "/shooppyProducts/{productId}": { "schema": "ShooppyProduct", "description": "Global digital marketplace assets." },
     "/newsPosts/{postId}": { "schema": "object", "description": "Global broadcast messages." },
-    "/faqs/{faqId}": { "schema": "object", "description": "Global FAQs." }
+    "/faqs/{faqId}": { "schema": "object", "description": "Global FAQs." },
+    "/quizzes/{quizId}": { "schema": "Quiz", "description": "Global strategic quizzes." }
   }
 }

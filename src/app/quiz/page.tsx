@@ -1,21 +1,26 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Navigation } from "@/components/Navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft, BookOpen, CheckCircle2 } from "lucide-react";
-import { useAdminStore, useUserStore, QuizQuestion } from "@/lib/store";
-import { useUser } from "@/firebase";
+import { XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft, BookOpen } from "lucide-react";
+import { useUserStore, QuizQuestion } from "@/lib/store";
+import { useUser, useFirestore, useCollection } from "@/firebase";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { collection, query, orderBy } from 'firebase/firestore';
 
 export default function QuizPage() {
   const { user } = useUser();
   const uid = user?.uid;
-  const { quizzes } = useAdminStore();
+  const db = useFirestore();
+
+  const quizzesQuery = useMemo(() => query(collection(db, 'quizzes'), orderBy('createdAt', 'desc')), [db]);
+  const { data: globalQuizzes } = useCollection(quizzesQuery);
+  
   const { incrementQuiz, trackVisit } = useUserStore();
 
   const [activeQuiz, setActiveQuiz] = useState<any>(null);
@@ -31,7 +36,7 @@ export default function QuizPage() {
   }, []);
 
   useEffect(() => {
-    if (uid) trackVisit(uid, 'faq'); // Tracking as 'faq' hub visit as per instructions
+    if (uid) trackVisit(uid, 'faq');
   }, [uid, trackVisit]);
 
   const handleCheat = useCallback(() => {
@@ -104,18 +109,18 @@ export default function QuizPage() {
                 Fire<span className="text-[#fdfaf6]">Quizzo</span>
               </h1>
               <p className="text-lg text-foreground/60 font-black uppercase tracking-widest max-w-xl mx-auto">
-                Reach the passing threshold to earn mastery. Nico Digital security active.
+                Global mastery certification. Security active.
               </p>
             </header>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {quizzes.length === 0 ? (
+              {globalQuizzes.length === 0 ? (
                 <div className="col-span-full py-16 text-center bg-mocha-cream rounded-[2rem] border-4 border-dashed border-primary/20">
                   <ShieldAlert className="h-12 w-12 mx-auto text-[#1f1610] mb-4 opacity-20" />
-                  <p className="text-[#1f1610] font-black uppercase tracking-widest italic">No active protocols published.</p>
+                  <p className="text-[#1f1610] font-black uppercase tracking-widest italic">Waiting for Host protocols...</p>
                 </div>
               ) : (
-                quizzes.map((q) => (
+                globalQuizzes.map((q) => (
                   <Card 
                     key={q.id} 
                     className="hover:border-primary transition-all cursor-pointer group rounded-[2.5rem] border-primary/10 bg-mocha-cream shadow-lg hover:shadow-2xl active:scale-95" 
@@ -151,19 +156,12 @@ export default function QuizPage() {
         <p className="text-4xl font-black mb-4">SCORE: {score} / {shuffledQuestions.length}</p>
         <p className="text-xl font-black uppercase tracking-widest opacity-80 mb-12 max-w-md leading-relaxed">
           {hasPassed 
-            ? "Strategic filtration complete. You are certified Succemazing." 
-            : `Requirement: ${passing} points. Study the routine and attempt again.`}
+            ? "Strategic filtration complete. Certification granted." 
+            : `Requirement: ${passing} points. Attempt again.`}
         </p>
-        <div className="flex gap-6">
-          <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-16 h-20 text-xl font-black shadow-2xl hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
-            RETURN TO HUB
-          </Button>
-          {!hasPassed && (
-            <Button onClick={() => startQuiz(activeQuiz)} variant="outline" className="rounded-full px-16 h-20 text-xl font-black bg-transparent border-4 border-white text-white hover:bg-white hover:text-red-600 uppercase tracking-tighter">
-              TRY AGAIN
-            </Button>
-          )}
-        </div>
+        <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-16 h-20 text-xl font-black shadow-2xl hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
+          RETURN TO HUB
+        </Button>
       </div>
     );
   }
