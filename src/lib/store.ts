@@ -339,12 +339,15 @@ export const useUserStore = create<UserProgressStore>()(
       addXP: (uid, amount) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
+        if (current.level >= 30) return; // Max Level Cap reached
+        
         let newXP = current.xp + amount;
         let newLevel = current.level;
-        while (newXP >= 100) {
+        while (newXP >= 100 && newLevel < 30) {
           newXP -= 100;
           newLevel += 1;
         }
+        if (newLevel >= 30) newXP = 0; // XP reset at cap
         get().updateProfile(uid, { xp: newXP, level: newLevel });
       },
 
@@ -386,7 +389,7 @@ export const useUserStore = create<UserProgressStore>()(
           if (diffDays === 1) {
             newStreak += 1;
           } else if (diffDays > 1) {
-            newStreak = 1;
+            newStreak = 1; // Reset to 1 if skipped a day
           } else if (diffDays === 0) {
             return;
           }

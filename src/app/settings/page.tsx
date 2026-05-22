@@ -50,6 +50,10 @@ const SYSTEM_BADGES: BadgeType[] = [
   { id: 'sb-explorer', title: 'Protocol Explorer', description: 'Explored all hubs of the infrastructure.', difficulty: 'Bronze', iconType: 'explorer' },
   { id: 'sb-prompt', title: 'Prompt Architect', description: 'Uploaded 10 AI Prompt strategic resources.', difficulty: 'Silver', iconType: 'prompt' },
   { id: 'sb-trick', title: 'Trick Strategist', description: 'Uploaded 10 T&Triks tactical resources.', difficulty: 'Silver', iconType: 'trick' },
+  { id: 'sb-level-15', title: 'Elite Executioner', description: 'Reached Level 15 strategic mastery.', difficulty: 'Gold', iconType: 'veteran' },
+  { id: 'sb-level-20', title: 'Grand Strategist', description: 'Reached Level 20 strategic mastery.', difficulty: 'Gold', iconType: 'veteran' },
+  { id: 'sb-level-30', title: 'Sovereign Zenith', description: 'Reached the absolute maximum Level 30 status.', difficulty: 'Sovereign', iconType: 'veteran' },
+  { id: 'sb-streak-30', title: 'Monthly Execution', description: 'Maintained a 30-day consistency streak.', difficulty: 'Sovereign', iconType: 'consistency' },
 ];
 
 export default function SettingsPage() {
@@ -88,18 +92,31 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!uid) return;
 
+    const handleUnlock = (badgeId: string, title: string) => {
+      if (!profile.unlockedBadgeIds?.includes(badgeId)) {
+        unlockBadge(uid, badgeId);
+        toast({ title: "Sovereign Achievement Unlocked", description: `Congratulations! You've earned: ${title}` });
+      }
+    };
+
     // Quiz Check
-    if (profile.stats.quizzesPassed > 0) unlockBadge(uid, 'sb-quiz');
-    // Veteran Check (30 days)
-    if (profile.stats.totalDaysInApp >= 30) unlockBadge(uid, 'sb-veteran');
+    if (profile.stats?.quizzesPassed > 0) handleUnlock('sb-quiz', 'Sovereign Mastery');
+    // Veteran Check (30 days total in app)
+    if (profile.stats?.totalDaysInApp >= 30) handleUnlock('sb-veteran', 'Strategic Veteran');
     // Consistency Check
-    if (profile.currentTaskDay >= 7 && profile.completedTaskIds.length >= 21) unlockBadge(uid, 'sb-consistency');
+    if (profile.currentTaskDay >= 7 && profile.completedTaskIds?.length >= 21) handleUnlock('sb-consistency', 'Consistency King');
     // Explorer Check
     const required = ['hub', 'shooppy', 'library', 'faq'];
-    if (required.every(f => profile.stats.visitedFeatures.includes(f))) unlockBadge(uid, 'sb-explorer');
+    if (required.every(f => profile.stats?.visitedFeatures?.includes(f))) handleUnlock('sb-explorer', 'Protocol Explorer');
     // Resource Checks
-    if (profile.stats.promptsShared >= 10) unlockBadge(uid, 'sb-prompt');
-    if (profile.stats.triksShared >= 10) unlockBadge(uid, 'sb-trick');
+    if (profile.stats?.promptsShared >= 10) handleUnlock('sb-prompt', 'Prompt Architect');
+    if (profile.stats?.triksShared >= 10) handleUnlock('sb-trick', 'Trick Strategist');
+
+    // NEW Milestones
+    if (profile.level >= 15) handleUnlock('sb-level-15', 'Elite Executioner');
+    if (profile.level >= 20) handleUnlock('sb-level-20', 'Grand Strategist');
+    if (profile.level >= 30) handleUnlock('sb-level-30', 'Sovereign Zenith');
+    if (profile.streak >= 30) handleUnlock('sb-streak-30', 'Monthly Execution');
 
   }, [uid, profile, unlockBadge]);
 
