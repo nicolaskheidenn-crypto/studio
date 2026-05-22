@@ -197,6 +197,7 @@ export default function DashboardPage() {
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-10">
+            {/* Points Vault Column */}
             <div className="flex flex-col">
               <div className="flex items-center gap-3 text-primary">
                 <Zap className="h-7 w-7 fill-primary" />
@@ -204,7 +205,9 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary">Points Vault</span>
             </div>
-            <div className="flex items-center gap-3 text-orange-500">
+            {/* Current Streak Column */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
                 <span className="font-black text-3xl tracking-tighter text-foreground">{streak}</span>
               </div>
