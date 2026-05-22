@@ -7,12 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft, BookOpen, CheckCircle2 } from "lucide-react";
-import { useAdminStore, QuizQuestion } from "@/lib/store";
+import { useAdminStore, useUserStore, QuizQuestion } from "@/lib/store";
+import { useUser } from "@/firebase";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export default function QuizPage() {
+  const { user } = useUser();
+  const uid = user?.uid;
   const { quizzes } = useAdminStore();
+  const { incrementQuiz, trackVisit } = useUserStore();
+
   const [activeQuiz, setActiveQuiz] = useState<any>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
@@ -24,6 +29,10 @@ export default function QuizPage() {
   const shuffle = useCallback((array: any[]) => {
     return [...array].sort(() => Math.random() - 0.5);
   }, []);
+
+  useEffect(() => {
+    if (uid) trackVisit(uid, 'faq'); // Tracking as 'faq' hub visit as per instructions
+  }, [uid, trackVisit]);
 
   const handleCheat = useCallback(() => {
     if (activeQuiz && !isFinished && !cheatTriggered) {
@@ -71,6 +80,10 @@ export default function QuizPage() {
       setUserAnswer("");
     } else {
       setIsFinished(true);
+      const passing = getPassingScore(shuffledQuestions.length);
+      if (score + (isCorrect ? 1 : 0) >= passing && uid) {
+        incrementQuiz(uid);
+      }
     }
   };
 
@@ -251,4 +264,3 @@ export default function QuizPage() {
     </div>
   );
 }
-

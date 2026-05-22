@@ -104,6 +104,7 @@ export interface Badge {
   title: string;
   description: string;
   difficulty: 'Bronze' | 'Silver' | 'Gold' | 'Sovereign';
+  iconType?: 'quiz' | 'veteran' | 'consistency' | 'explorer' | 'prompt' | 'trick' | 'custom';
 }
 
 export interface PostComment {
@@ -260,6 +261,14 @@ export const useAdminStore = create<AdminStore>()(
   )
 );
 
+export interface UserStats {
+  quizzesPassed: number;
+  promptsShared: number;
+  triksShared: number;
+  visitedFeatures: string[];
+  totalDaysInApp: number;
+}
+
 export interface UserProfile {
   nickname: string;
   bio: string;
@@ -270,9 +279,12 @@ export interface UserProfile {
   level: number;
   streak: number;
   lastLogin: string | null;
+  createdAt: string;
   currentTaskDay: number;
   completedTaskIds: string[];
   capsules: GoalCapsule[];
+  unlockedBadgeIds: string[];
+  stats: UserStats;
 }
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -286,8 +298,17 @@ const DEFAULT_PROFILE: UserProfile = {
   streak: 0,
   currentTaskDay: 1,
   lastLogin: null,
+  createdAt: new Date().toISOString(),
   completedTaskIds: [],
   capsules: [],
+  unlockedBadgeIds: [],
+  stats: {
+    quizzesPassed: 0,
+    promptsShared: 0,
+    triksShared: 0,
+    visitedFeatures: [],
+    totalDaysInApp: 0
+  }
 };
 
 interface UserProgressStore {
@@ -302,6 +323,11 @@ interface UserProgressStore {
   resetUserStats: (uid: string) => void;
   unlockNextDay: (uid: string) => void;
   updateSpecificUser: (uid: string, data: Partial<{ points: number; xp: number; level: number; streak: number; currentTaskDay: number }>) => void;
+  trackVisit: (uid: string, feature: string) => void;
+  incrementPrompt: (uid: string) => void;
+  incrementTrick: (uid: string) => void;
+  incrementQuiz: (uid: string) => void;
+  unlockBadge: (uid: string, badgeId: string) => void;
 }
 
 export const useUserStore = create<UserProgressStore>()(
@@ -368,11 +394,16 @@ export const useUserStore = create<UserProgressStore>()(
           }
         }
 
+        // Calculate total days in app since creation
+        const createdDate = new Date(current.createdAt);
+        const diffInDays = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
         get().updateProfile(uid, { 
           lastLogin: now.toISOString(), 
           streak: newStreak, 
           points: current.points + 100, 
-          xp: current.xp + 50 
+          xp: current.xp + 50,
+          stats: { ...current.stats, totalDaysInApp: diffInDays }
         });
       },
 
@@ -391,13 +422,43 @@ export const useUserStore = create<UserProgressStore>()(
       resetUserStats: (uid) => set((s) => ({
         profiles: {
           ...s.profiles,
-          [uid]: { ...DEFAULT_PROFILE }
+          [uid]: { ...DEFAULT_PROFILE, createdAt: s.profiles[uid]?.createdAt || new Date().toISOString() }
         }
       })),
 
       updateSpecificUser: (uid, data) => {
         get().updateProfile(uid, data);
       },
+
+      trackVisit: (uid, feature) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        if (!current.stats.visitedFeatures.includes(feature)) {
+          const newVisited = [...current.stats.visitedFeatures, feature];
+          get().updateProfile(uid, { stats: { ...current.stats, visitedFeatures: newVisited } });
+        }
+      },
+
+      incrementPrompt: (uid) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        get().updateProfile(uid, { stats: { ...current.stats, promptsShared: current.stats.promptsShared + 1 } });
+      },
+
+      incrementTrick: (uid) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        get().updateProfile(uid, { stats: { ...current.stats, triksShared: current.stats.triksShared + 1 } });
+      },
+
+      incrementQuiz: (uid) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        get().updateProfile(uid, { stats: { ...current.stats, quizzesPassed: current.stats.quizzesPassed + 1 } });
+      },
+
+      unlockBadge: (uid, badgeId) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        if (!current.unlockedBadgeIds.includes(badgeId)) {
+          get().updateProfile(uid, { unlockedBadgeIds: [...current.unlockedBadgeIds, badgeId] });
+        }
+      }
     }),
     { name: 'fireproof-user-v15' }
   )

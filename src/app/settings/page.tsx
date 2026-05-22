@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -6,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useUserStore, useAdminStore, UserProfile } from "@/lib/store";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
 import { useState, useMemo, useEffect } from "react";
@@ -28,9 +29,27 @@ const DEFAULT_PROFILE: UserProfile = {
   streak: 0,
   currentTaskDay: 1,
   lastLogin: null,
+  createdAt: new Date().toISOString(),
   completedTaskIds: [],
   capsules: [],
+  unlockedBadgeIds: [],
+  stats: {
+    quizzesPassed: 0,
+    promptsShared: 0,
+    triksShared: 0,
+    visitedFeatures: [],
+    totalDaysInApp: 0
+  }
 };
+
+const SYSTEM_BADGES: BadgeType[] = [
+  { id: 'sb-quiz', title: 'Sovereign Mastery', description: 'Passed a strategic quiz protocol.', difficulty: 'Silver', iconType: 'quiz' },
+  { id: 'sb-veteran', title: 'Strategic Veteran', description: '30 days of active empire participation.', difficulty: 'Gold', iconType: 'veteran' },
+  { id: 'sb-consistency', title: 'Consistency King', description: 'Completed a full 7-day routine cycle.', difficulty: 'Sovereign', iconType: 'consistency' },
+  { id: 'sb-explorer', title: 'Protocol Explorer', description: 'Explored all hubs of the infrastructure.', difficulty: 'Bronze', iconType: 'explorer' },
+  { id: 'sb-prompt', title: 'Prompt Architect', description: 'Uploaded 10 AI Prompt strategic resources.', difficulty: 'Silver', iconType: 'prompt' },
+  { id: 'sb-trick', title: 'Trick Strategist', description: 'Uploaded 10 T&Triks tactical resources.', difficulty: 'Silver', iconType: 'trick' },
+];
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -39,9 +58,9 @@ export default function SettingsPage() {
   
   const profiles = useUserStore(s => s.profiles);
   const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
-  const { updateProfile: updateStoreProfile } = useUserStore();
+  const { updateProfile: updateStoreProfile, unlockBadge } = useUserStore();
 
-  const { badges } = useAdminStore();
+  const { badges: adminBadges } = useAdminStore();
 
   const [displayName, setDisplayName] = useState(profile.nickname);
   const [bio, setBio] = useState(profile.bio);
@@ -60,6 +79,25 @@ export default function SettingsPage() {
       setCover(profiles[uid].coverPhotoUrl);
     }
   }, [uid, profiles]);
+
+  // Achievement Check Logic
+  useEffect(() => {
+    if (!uid) return;
+
+    // Quiz Check
+    if (profile.stats.quizzesPassed > 0) unlockBadge(uid, 'sb-quiz');
+    // Veteran Check (30 days)
+    if (profile.stats.totalDaysInApp >= 30) unlockBadge(uid, 'sb-veteran');
+    // Consistency Check
+    if (profile.currentTaskDay >= 7 && profile.completedTaskIds.length >= 21) unlockBadge(uid, 'sb-consistency');
+    // Explorer Check
+    const required = ['hub', 'shooppy', 'library', 'faq'];
+    if (required.every(f => profile.stats.visitedFeatures.includes(f))) unlockBadge(uid, 'sb-explorer');
+    // Resource Checks
+    if (profile.stats.promptsShared >= 10) unlockBadge(uid, 'sb-prompt');
+    if (profile.stats.triksShared >= 10) unlockBadge(uid, 'sb-trick');
+
+  }, [uid, profile.stats, profile.currentTaskDay, profile.completedTaskIds, unlockBadge]);
 
   const handleUpdateProfile = async () => {
     if (!uid) return;
@@ -106,6 +144,8 @@ export default function SettingsPage() {
       reader.readAsDataURL(file);
     }
   };
+
+  const allBadges = [...SYSTEM_BADGES, ...adminBadges];
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
@@ -183,23 +223,26 @@ export default function SettingsPage() {
                   <p className="text-[10px] text-primary font-black uppercase tracking-widest">Strategy milestones unlocked</p>
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  {badges.length === 0 ? (
-                    <p className="col-span-full text-center text-[#1f1610]/30 font-black uppercase italic py-20">No badges deployed by the Host.</p>
-                  ) : badges.map((b) => (
-                    <div key={b.id} className="p-10 bg-white rounded-[3rem] border-4 border-transparent flex items-center gap-8 group hover:border-primary transition-all shadow-sm">
-                       <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform", 
-                         b.difficulty === 'Bronze' ? 'bg-[#cd7f32]' : 
-                         b.difficulty === 'Silver' ? 'bg-[#c0c0c0]' : 
-                         b.difficulty === 'Gold' ? 'bg-primary' : 'bg-purple-900')}>
-                          <Award className="h-10 w-10 text-white" />
+                  {allBadges.map((b) => {
+                    const isUnlocked = profile.unlockedBadgeIds.includes(b.id);
+                    return (
+                      <div key={b.id} className={cn("p-10 bg-white rounded-[3rem] border-4 flex items-center gap-8 group transition-all shadow-sm", 
+                        isUnlocked ? "border-primary opacity-100" : "border-transparent opacity-40 grayscale"
+                      )}>
+                         <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform", 
+                           b.difficulty === 'Bronze' ? 'bg-[#cd7f32]' : 
+                           b.difficulty === 'Silver' ? 'bg-[#c0c0c0]' : 
+                           b.difficulty === 'Gold' ? 'bg-primary' : 'bg-purple-900')}>
+                          {isUnlocked ? <Award className="h-10 w-10 text-white" /> : <Lock className="h-10 w-10 text-white/50" />}
                        </div>
                        <div>
                          <Badge className="mb-2 bg-primary text-background text-[8px] uppercase border-none">{b.difficulty}</Badge>
                          <h4 className="text-2xl font-black text-[#1f1610] uppercase tracking-tight italic">{b.title}</h4>
                          <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-widest">{b.description}</p>
+                         {isUnlocked && <CheckCircle2 className="h-4 w-4 text-green-500 mt-2" />}
                        </div>
                     </div>
-                  ))}
+                  )})}
                </div>
             </Card>
           </TabsContent>

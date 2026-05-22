@@ -32,8 +32,17 @@ const DEFAULT_PROFILE: UserProfile = {
   streak: 0,
   currentTaskDay: 1,
   lastLogin: null,
+  createdAt: new Date().toISOString(),
   completedTaskIds: [],
   capsules: [],
+  unlockedBadgeIds: [],
+  stats: {
+    quizzesPassed: 0,
+    promptsShared: 0,
+    triksShared: 0,
+    visitedFeatures: [],
+    totalDaysInApp: 0
+  }
 };
 
 export default function DashboardPage() {
@@ -48,7 +57,7 @@ export default function DashboardPage() {
   } = profile;
 
   const {
-    claimDaily, addPoints
+    claimDaily, addPoints, trackVisit, incrementPrompt, incrementTrick
   } = useUserStore();
   
   const { 
@@ -75,6 +84,11 @@ export default function DashboardPage() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isHydrated || !uid) return;
+    trackVisit(uid, activeTab);
+  }, [activeTab, isHydrated, uid, trackVisit]);
 
   useEffect(() => {
     if (!isHydrated || !uid) return;
@@ -152,6 +166,11 @@ export default function DashboardPage() {
       nickname: nickname
     });
     addPoints(uid, 10);
+    
+    // Achievement tracking
+    if (resType === 'AI_Prompt') incrementPrompt(uid);
+    if (resType === 'T&Triks') incrementTrick(uid);
+    
     setResTitle(""); setResContent("");
     toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
   };
