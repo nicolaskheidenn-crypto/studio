@@ -91,7 +91,6 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
-    // Prompting for account ensures the user can switch accounts if needed
     provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
@@ -158,7 +157,7 @@ export default function LoginPage() {
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1f1610] relative overflow-hidden font-body">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1f1610] relative overflow-hidden font-body text-[#fdfaf6]">
       <div id="recaptcha-container"></div>
       
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[4rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 bg-[#1f1610]">
@@ -167,7 +166,7 @@ export default function LoginPage() {
             <div className="space-y-6">
               <div className="flex flex-col">
                 <h1 className="text-9xl font-headline font-black tracking-tighter text-[#fdfaf6] leading-none">ND</h1>
-                <div className="h-4 w-40 bg-[#FFD700] rounded-full" />
+                <div className="h-4 w-40 bg-[#FFD700] rounded-full shadow-[0_0_20px_rgba(255,215,0,0.4)]" />
               </div>
               <h2 className="text-5xl md:text-6xl font-headline font-black uppercase text-[#fdfaf6]">
                 STRATEGY <span className="text-[#FFD700] italic">HUB</span>
