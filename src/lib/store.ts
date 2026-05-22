@@ -4,19 +4,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface AppState {
-  // App-wide state can be added here in the future
-}
-
-export const useAppStore = create<AppState>()(
-  persist(
-    () => ({}),
-    {
-      name: 'fireproof-app-v15',
-    }
-  )
-);
-
 export interface Page {
   id: string;
   title: string;
@@ -91,6 +78,7 @@ export interface ShooppyProduct {
   type: 'Bundle' | 'Template' | 'eBook';
   placement: 'Hub' | 'Marketplace';
   requiredLevel?: number;
+  price: number;
 }
 
 export interface FAQEntry {
@@ -284,6 +272,7 @@ export interface UserProfile {
   completedTaskIds: string[];
   capsules: GoalCapsule[];
   unlockedBadgeIds: string[];
+  purchasedProductIds: string[];
   stats: UserStats;
 }
 
@@ -302,6 +291,7 @@ const DEFAULT_PROFILE: UserProfile = {
   completedTaskIds: [],
   capsules: [],
   unlockedBadgeIds: [],
+  purchasedProductIds: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
@@ -328,6 +318,7 @@ interface UserProgressStore {
   incrementTrick: (uid: string) => void;
   incrementQuiz: (uid: string) => void;
   unlockBadge: (uid: string, badgeId: string) => void;
+  buyProduct: (uid: string, productId: string, price: number) => void;
 }
 
 export const useUserStore = create<UserProgressStore>()(
@@ -394,7 +385,6 @@ export const useUserStore = create<UserProgressStore>()(
           }
         }
 
-        // Calculate total days in app since creation
         const createdDate = new Date(current.createdAt);
         const diffInDays = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -457,6 +447,16 @@ export const useUserStore = create<UserProgressStore>()(
         const current = get().profiles[uid] || DEFAULT_PROFILE;
         if (!current.unlockedBadgeIds.includes(badgeId)) {
           get().updateProfile(uid, { unlockedBadgeIds: [...current.unlockedBadgeIds, badgeId] });
+        }
+      },
+
+      buyProduct: (uid, productId, price) => {
+        const current = get().profiles[uid] || DEFAULT_PROFILE;
+        if (current.points >= price && !current.purchasedProductIds.includes(productId)) {
+          get().updateProfile(uid, { 
+            points: current.points - price, 
+            purchasedProductIds: [...current.purchasedProductIds, productId] 
+          });
         }
       }
     }),

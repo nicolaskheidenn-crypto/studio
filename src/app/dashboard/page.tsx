@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Trophy, Flame, Zap, Award, Search, Plus, ExternalLink,
-  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X, Download
+  MessageCircle, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Check, X, Download, Coins
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -36,6 +36,7 @@ const DEFAULT_PROFILE: UserProfile = {
   completedTaskIds: [],
   capsules: [],
   unlockedBadgeIds: [],
+  purchasedProductIds: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
@@ -53,11 +54,11 @@ export default function DashboardPage() {
   const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
   
   const { 
-    points, xp, level, streak, nickname, lastLogin
+    points, xp, level, streak, nickname, lastLogin, purchasedProductIds = []
   } = profile;
 
   const {
-    claimDaily, addPoints, trackVisit, incrementPrompt, incrementTrick
+    claimDaily, addPoints, trackVisit, incrementPrompt, incrementTrick, buyProduct
   } = useUserStore();
   
   const { 
@@ -114,6 +115,16 @@ export default function DashboardPage() {
     toast({ title: "Daily Sync Complete", description: "+100 Points, +50 XP Added." });
   };
 
+  const handleAcquireAsset = (productId: string, price: number) => {
+    if (!uid) return;
+    if (points < price) {
+      toast({ title: "Insufficient Points", description: "Deploy more routines to earn points.", variant: "destructive" });
+      return;
+    }
+    buyProduct(uid, productId, price);
+    toast({ title: "Sovereign Acquisition", description: "Asset unlocked in your Root Archive." });
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + postImages.length > 6) {
@@ -167,7 +178,6 @@ export default function DashboardPage() {
     });
     addPoints(uid, 10);
     
-    // Achievement tracking
     if (resType === 'AI_Prompt') incrementPrompt(uid);
     if (resType === 'T&Triks') incrementTrick(uid);
     
@@ -175,7 +185,7 @@ export default function DashboardPage() {
     toast({ title: "Strategic Resource Shared", description: "+10 Points earned." });
   };
 
-  const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub');
+  const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub' || purchasedProductIds.includes(p.id));
   const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
 
   if (!isHydrated) return null;
@@ -184,7 +194,6 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Navigation />
       
-      {/* Gamification Stats Bar */}
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-10">
@@ -232,10 +241,8 @@ export default function DashboardPage() {
             <TabsTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</TabsTrigger>
           </TabsList>
 
-          {/* Hub Tab Content */}
           <TabsContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
-              {/* Win Dispatcher */}
               <Card className="rounded-[3.5rem] border-4 border-primary/10 shadow-2xl p-10 bg-card/40">
                 <div className="flex gap-6">
                   <div className="w-16 h-16 rounded-3xl bg-primary flex items-center justify-center font-black text-background text-xl shadow-xl">
@@ -267,7 +274,6 @@ export default function DashboardPage() {
                 </div>
               </Card>
 
-              {/* Newsfeed Content */}
               <div className="space-y-12">
                 {newsPosts.map((news) => (
                   <Card key={news.id} className="rounded-[4rem] border-4 border-primary/20 bg-primary/5 overflow-hidden shadow-2xl">
@@ -319,7 +325,6 @@ export default function DashboardPage() {
                           </Button>
                        </div>
 
-                       {/* Comment Section */}
                        <div className="space-y-6 pt-6 bg-background/20 rounded-[2.5rem] p-6">
                           <div className="flex gap-4">
                              <Input 
@@ -362,7 +367,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Sidebar Stats & Root Assets */}
             <div className="space-y-10">
               <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-12 text-center space-y-10 shadow-2xl">
                  <div className="w-28 h-28 bg-primary text-background rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl">
@@ -378,12 +382,11 @@ export default function DashboardPage() {
                  </div>
               </Card>
 
-              {/* Root Assets Section */}
               <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
                  <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Star className="h-6 w-6 text-primary" /> Root Assets</h3>
                  <div className="space-y-6">
                     {rootAssets.length === 0 ? (
-                      <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No root assets deployed.</p>
+                      <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No root assets acquired.</p>
                     ) : (
                       rootAssets.map(p => (
                         <div key={p.id} className="p-6 bg-background/50 rounded-3xl border-2 border-primary/10 flex items-center justify-between group">
@@ -415,19 +418,33 @@ export default function DashboardPage() {
                </div>
              ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                  {marketplaceAssets.map((p) => (
-                    <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
-                      <div className="h-80 relative overflow-hidden bg-background/50">
-                         {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.title} />}
-                         <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
-                      </div>
-                      <div className="p-12 space-y-8">
-                         <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
-                         <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
-                         <Button className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Acquire Strategic Asset</Button>
-                      </div>
-                    </Card>
-                  ))}
+                  {marketplaceAssets.map((p) => {
+                    const isOwned = purchasedProductIds.includes(p.id);
+                    return (
+                      <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
+                        <div className="h-80 relative overflow-hidden bg-background/50">
+                           {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.title} />}
+                           <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
+                           <Badge className="absolute top-8 right-8 bg-background text-primary font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-2 border-primary/20 flex items-center gap-2">
+                            <Coins className="h-4 w-4" /> {p.price}
+                           </Badge>
+                        </div>
+                        <div className="p-12 space-y-8">
+                           <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
+                           <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
+                           {isOwned ? (
+                             <Button disabled className="w-full h-18 rounded-[2rem] bg-background text-primary border-4 border-primary font-black uppercase text-sm shadow-2xl opacity-80 cursor-default">
+                                Strategic Asset Owned
+                             </Button>
+                           ) : (
+                             <Button onClick={() => handleAcquireAsset(p.id, p.price)} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">
+                                Acquire for {p.price} Points
+                             </Button>
+                           )}
+                        </div>
+                      </Card>
+                    );
+                  })}
                </div>
              )}
           </TabsContent>
@@ -529,7 +546,6 @@ export default function DashboardPage() {
         </Tabs>
       </main>
 
-      {/* Daily Sync Modal */}
       <Dialog open={showDaily} onOpenChange={setShowDaily}>
         <DialogContent className="rounded-[5rem] border-[12px] border-primary/20 bg-card p-20 max-w-lg text-center shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
           <DialogHeader>
@@ -552,7 +568,6 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Level Rewards Modal */}
       <Dialog open={showRewardModal} onOpenChange={setShowRewardModal}>
         <DialogContent className="rounded-[5rem] border-[12px] border-primary/20 bg-card p-20 max-w-xl shadow-2xl">
           <DialogHeader>

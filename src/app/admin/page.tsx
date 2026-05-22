@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, CheckSquare, 
   Newspaper, ShoppingBag, Users, MessageSquare, Lightbulb, 
-  Video, HelpCircle, Upload, Plus, MoveUp, MoveDown, CheckCircle2, Edit3 
+  Video, HelpCircle, Upload, Plus, MoveUp, MoveDown, CheckCircle2, Edit3, Coins 
 } from "lucide-react";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
@@ -49,6 +49,7 @@ export default function AdminPage() {
   const [prodType, setProdType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
   const [prodPlacement, setProdPlacement] = useState<'Hub' | 'Marketplace'>('Marketplace');
   const [prodLevel, setProdLevel] = useState(1);
+  const [prodPrice, setProdPrice] = useState(0);
 
   // Task State
   const [taskDay, setTaskDay] = useState(1);
@@ -113,7 +114,8 @@ export default function AdminPage() {
       fileUrl: prodFile,
       type: prodType,
       placement: prodPlacement,
-      requiredLevel: prodLevel
+      requiredLevel: prodLevel,
+      price: prodPrice
     };
 
     if (editingProductId) {
@@ -125,7 +127,7 @@ export default function AdminPage() {
       toast({ title: "Strategic Asset Deployed" });
     }
     
-    setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPlacement('Marketplace');
+    setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0); setProdPlacement('Marketplace');
   };
 
   const startEditProduct = (p: ShooppyProduct) => {
@@ -137,6 +139,7 @@ export default function AdminPage() {
     setProdType(p.type);
     setProdPlacement(p.placement);
     setProdLevel(p.requiredLevel || 1);
+    setProdPrice(p.price || 0);
     toast({ title: "Asset Loaded into Editor" });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -150,7 +153,6 @@ export default function AdminPage() {
     toast({ title: "Tasks Injected" });
   };
 
-  // --- Quizzo Logic ---
   const addQuestionToTemp = () => {
     if (!qText || !qAnswer) {
       toast({ title: "Missing Question Data", variant: "destructive" });
@@ -289,9 +291,18 @@ export default function AdminPage() {
                            </div>
                         </div>
                       </div>
-                      <div className="space-y-3">
-                        <Label className="text-[#1f1610]">Mastery Level Requirement (Optional)</Label>
-                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-18 font-black text-3xl text-center bg-white text-[#1f1610] border-[#1f1610]/20" />
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-[#1f1610]">Mastery Level</Label>
+                          <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-18 font-black text-3xl text-center bg-white text-[#1f1610] border-[#1f1610]/20" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-[#1f1610]">Point Price</Label>
+                          <div className="relative">
+                            <Coins className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-[#FFD700] pointer-events-none" />
+                            <Input type="number" min={0} value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-18 pl-12 font-black text-3xl text-center bg-white text-[#1f1610] border-[#1f1610]/20" />
+                          </div>
+                        </div>
                       </div>
                       <Button onClick={handleSaveProduct} className="w-full h-24 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-2xl hover:bg-[#FFD700] hover:text-[#1f1610] transition-all">
                         {editingProductId ? 'Update Strategic Asset' : 'Deploy Asset'}
@@ -315,7 +326,7 @@ export default function AdminPage() {
                            <div className="w-16 h-16 bg-[#1f1610] text-[#FFD700] rounded-2xl flex items-center justify-center font-black text-2xl">{i + 1}</div>
                            <div>
                               <h4 className="font-black text-[#1f1610] uppercase text-xl italic">{p.title}</h4>
-                              <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{p.type} • {p.placement}</p>
+                              <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{p.type} • {p.placement} • {p.price} Points</p>
                            </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -368,7 +379,6 @@ export default function AdminPage() {
 
           <TabsContent value="routines" className="space-y-12">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {/* TaskDo Injector */}
                 <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><CheckSquare className="h-10 w-10 text-[#FFD700]" /> TaskDo Injector</CardTitle>
                    <div className="space-y-6">
@@ -392,7 +402,6 @@ export default function AdminPage() {
                    </div>
                 </Card>
 
-                {/* Comprehensive Quizzo Editor */}
                 <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <CardHeader>
                       <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-10 w-10 text-[#FFD700]" /> Quizzo Editor</CardTitle>
@@ -461,7 +470,6 @@ export default function AdminPage() {
                 </Card>
              </div>
 
-             {/* Manage Existing Quizzes (Move/Delete/Edit) */}
              <Card className="rounded-[4rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl mt-12">
                 <CardTitle className="text-3xl font-black uppercase mb-10 flex items-center gap-5 text-[#1f1610]"><CheckCircle2 className="h-10 w-10 text-[#FFD700]" /> Active Protocols (Quizzes)</CardTitle>
                 <div className="space-y-6">
