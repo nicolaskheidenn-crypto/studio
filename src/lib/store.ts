@@ -393,7 +393,7 @@ export const useUserStore = create<UserProgressStore>()(
           streak: newStreak, 
           points: current.points + 100, 
           xp: current.xp + 50,
-          stats: { ...current.stats, totalDaysInApp: diffInDays }
+          stats: { ...(current.stats || DEFAULT_PROFILE.stats), totalDaysInApp: diffInDays }
         });
       },
 
@@ -404,7 +404,7 @@ export const useUserStore = create<UserProgressStore>()(
 
       addCapsule: (uid, cap) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        get().updateProfile(uid, { capsules: [...current.capsules, cap] });
+        get().updateProfile(uid, { capsules: [...(current.capsules || []), cap] });
         get().addPoints(uid, 50);
         get().addXP(uid, 30);
       },
@@ -422,40 +422,47 @@ export const useUserStore = create<UserProgressStore>()(
 
       trackVisit: (uid, feature) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        if (!current.stats.visitedFeatures.includes(feature)) {
-          const newVisited = [...current.stats.visitedFeatures, feature];
-          get().updateProfile(uid, { stats: { ...current.stats, visitedFeatures: newVisited } });
+        const stats = current.stats || DEFAULT_PROFILE.stats;
+        const visitedFeatures = stats.visitedFeatures || [];
+        if (!visitedFeatures.includes(feature)) {
+          const newVisited = [...visitedFeatures, feature];
+          get().updateProfile(uid, { stats: { ...stats, visitedFeatures: newVisited } });
         }
       },
 
       incrementPrompt: (uid) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        get().updateProfile(uid, { stats: { ...current.stats, promptsShared: current.stats.promptsShared + 1 } });
+        const stats = current.stats || DEFAULT_PROFILE.stats;
+        get().updateProfile(uid, { stats: { ...stats, promptsShared: (stats.promptsShared || 0) + 1 } });
       },
 
       incrementTrick: (uid) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        get().updateProfile(uid, { stats: { ...current.stats, triksShared: current.stats.triksShared + 1 } });
+        const stats = current.stats || DEFAULT_PROFILE.stats;
+        get().updateProfile(uid, { stats: { ...stats, triksShared: (stats.triksShared || 0) + 1 } });
       },
 
       incrementQuiz: (uid) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        get().updateProfile(uid, { stats: { ...current.stats, quizzesPassed: current.stats.quizzesPassed + 1 } });
+        const stats = current.stats || DEFAULT_PROFILE.stats;
+        get().updateProfile(uid, { stats: { ...stats, quizzesPassed: (stats.quizzesPassed || 0) + 1 } });
       },
 
       unlockBadge: (uid, badgeId) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        if (!current.unlockedBadgeIds.includes(badgeId)) {
-          get().updateProfile(uid, { unlockedBadgeIds: [...current.unlockedBadgeIds, badgeId] });
+        const unlockedBadgeIds = current.unlockedBadgeIds || [];
+        if (!unlockedBadgeIds.includes(badgeId)) {
+          get().updateProfile(uid, { unlockedBadgeIds: [...unlockedBadgeIds, badgeId] });
         }
       },
 
       buyProduct: (uid, productId, price) => {
         const current = get().profiles[uid] || DEFAULT_PROFILE;
-        if (current.points >= price && !current.purchasedProductIds.includes(productId)) {
+        const purchasedProductIds = current.purchasedProductIds || [];
+        if (current.points >= price && !purchasedProductIds.includes(productId)) {
           get().updateProfile(uid, { 
             points: current.points - price, 
-            purchasedProductIds: [...current.purchasedProductIds, productId] 
+            purchasedProductIds: [...purchasedProductIds, productId] 
           });
         }
       }

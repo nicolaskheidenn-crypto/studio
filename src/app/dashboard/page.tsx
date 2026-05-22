@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const profile = useMemo(() => (uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE), [profiles, uid]);
   
   const { 
-    points, xp, level, streak, nickname, lastLogin, purchasedProductIds = []
+    points = 0, xp = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = []
   } = profile;
 
   const {
@@ -62,7 +62,7 @@ export default function DashboardPage() {
   } = useUserStore();
   
   const { 
-    shooppyProducts, newsPosts, faqs, resources, activityWall, 
+    shooppyProducts = [], newsPosts = [], faqs = [], resources = [], activityWall = [], 
     addActivityWall, addResource, heartPost, addComment, deleteComment 
   } = useAdminStore();
   
@@ -204,8 +204,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary">Points Vault</span>
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-3 text-orange-500">
+            <div className="flex items-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
                 <span className="font-black text-3xl tracking-tighter text-foreground">{streak}</span>
               </div>
