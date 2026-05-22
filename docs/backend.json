@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Task": {
@@ -61,7 +62,7 @@
     }
   },
   "auth": {
-    "providers": ["google.com", "password", "phone"]
+    "providers": ["password"]
   },
   "firestore": {
     "/tasks/{taskId}": { "schema": "Task", "description": "Global daily tasks." },

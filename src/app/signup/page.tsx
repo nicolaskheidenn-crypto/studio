@@ -4,16 +4,14 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, CheckCircle2, Loader2, Eye, EyeOff, Chrome, Phone } from 'lucide-react';
+import { Coffee, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { 
   createUserWithEmailAndPassword, 
-  updateProfile as updateAuthProfile,
-  signInWithPopup,
-  GoogleAuthProvider
+  updateProfile as updateAuthProfile
 } from 'firebase/auth';
 import { useAuth, useFirestore } from '@/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -74,30 +72,6 @@ export default function SignUpPage() {
       router.push('/dashboard');
     } catch (error: any) {
       toast({ title: 'Registration Failed', description: error.message, variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    setIsLoading(true);
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    
-    try {
-      const result = await signInWithPopup(auth, provider);
-      await initProfile(result.user.uid, result.user.displayName);
-      toast({ title: 'Google Authorized', description: `Empire Established, ${result.user.displayName}` });
-      router.push('/dashboard');
-    } catch (error: any) {
-      console.error("Google SSO Error:", error);
-      toast({ 
-        title: 'Authorization Failed', 
-        description: error.code === 'auth/operation-not-allowed' 
-          ? 'Google provider not enabled in Firebase Console.' 
-          : error.message, 
-        variant: 'destructive' 
-      });
     } finally {
       setIsLoading(false);
     }
@@ -208,32 +182,7 @@ export default function SignUpPage() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-[#1f1610]/10"></span></div>
-            <div className="relative flex justify-center text-[10px] uppercase font-black"><span className="bg-mocha-cream px-4 text-[#1f1610]/40 tracking-widest">Rapid Founding</span></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-16 rounded-2xl border-4 border-[#1f1610]/10 bg-white text-[#1f1610] font-black uppercase text-[10px] gap-3"
-              onClick={handleGoogleSignUp}
-              disabled={isLoading}
-            >
-              <Chrome className="h-5 w-5" /> Google
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 rounded-2xl border-4 border-[#1f1610]/10 bg-white text-[#1f1610] font-black uppercase text-[10px] gap-3"
-              asChild
-            >
-              <Link href="/login">
-                <Phone className="h-5 w-5" /> Phone
-              </Link>
-            </Button>
-          </div>
-
-          <p className="text-center text-[10px] text-[#1f1610]/60 font-black uppercase">
+          <p className="text-center text-[10px] text-[#1f1610]/60 font-black uppercase pt-6 border-t border-[#1f1610]/5">
             Already a strategist? <Link href="/login" className="text-primary font-black underline">Sign In</Link>
           </p>
         </div>
