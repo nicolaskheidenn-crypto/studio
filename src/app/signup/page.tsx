@@ -1,17 +1,21 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Coffee, CheckCircle2, Loader2, Eye, EyeOff, Chrome, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { getAuth, createUserWithEmailAndPassword, updateProfile as updateAuthProfile } from 'firebase/auth';
-import { useFirebaseApp, useFirestore } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { 
+  createUserWithEmailAndPassword, 
+  updateProfile as updateAuthProfile,
+  signInWithPopup,
+  GoogleAuthProvider
+} from 'firebase/auth';
+import { useAuth, useFirestore } from '@/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,9 +25,8 @@ export default function SignUpPage() {
   const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const app = useFirebaseApp();
+  const auth = useAuth();
   const db = useFirestore();
-  const auth = getAuth(app);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -33,6 +36,20 @@ export default function SignUpPage() {
       router.push('/');
     }
   }, [router]);
+
+  const initProfile = async (uid: string, displayName: string | null) => {
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    if (!userDoc.exists()) {
+      await setDoc(doc(db, 'users', uid), {
+        nickname: displayName || 'New Strategist',
+        bio: 'New Master Strategist',
+        points: 0,
+        level: 1,
+        xp: 0,
+        createdAt: new Date().toISOString()
+      });
+    }
+  };
 
   const handleSignUp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -47,27 +64,27 @@ export default function SignUpPage() {
         displayName: displayName,
       });
 
-      // Create Sovereign Profile in Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        nickname: displayName,
-        bio: 'New Master Strategist',
-        points: 0,
-        level: 1,
-        xp: 0,
-        createdAt: new Date().toISOString()
-      });
+      await initProfile(userCredential.user.uid, displayName);
 
-      toast({
-        title: 'Empire Founded',
-        description: 'Your strategist account is active.',
-      });
+      toast({ title: 'Empire Founded', description: 'Your strategist account is active.' });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({
-        title: 'Registration Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Registration Failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await initProfile(result.user.uid, result.user.displayName);
+      toast({ title: 'Google Authorized', description: `Empire Established, ${result.user.displayName}` });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({ title: 'Authorization Failed', description: error.message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -110,16 +127,16 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="p-10 md:p-14 space-y-10 bg-mocha-cream">
+        <div className="p-10 md:p-14 space-y-8 bg-mocha-cream overflow-y-auto">
           <div className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">New Empire</h1>
             <p className="text-sm text-primary font-black uppercase tracking-[0.4em] opacity-80">Initialize Strategist Account</p>
           </div>
 
-          <form onSubmit={handleSignUp} className="space-y-5">
+          <form onSubmit={handleSignUp} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">First Name</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#1f1610]">First Name</Label>
                 <Input
                   placeholder="John"
                   required
@@ -129,7 +146,7 @@ export default function SignUpPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">Last Name</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Last Name</Label>
                 <Input
                   placeholder="Doe"
                   required
@@ -140,7 +157,7 @@ export default function SignUpPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">Strategic Email</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Strategic Email</Label>
               <Input
                 type="email"
                 placeholder="name@example.com"
@@ -151,7 +168,7 @@ export default function SignUpPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-widest text-[#1f1610]">Security Key</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Security Key</Label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
@@ -159,31 +176,48 @@ export default function SignUpPage() {
                   className="rounded-xl h-14 bg-[#1f1610]/5 border-[#1f1610]/20 text-[#1f1610] text-base font-black px-5 pr-12"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSignUp()}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1f1610]/40"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1f1610]/40">
                   {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                 </button>
               </div>
             </div>
             <Button
               type="submit"
-              className="w-full rounded-2xl h-16 bg-[#FFD700] text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] font-black text-lg shadow-xl transition-all active:scale-95 border-2 border-[#1f1610]/10 uppercase tracking-widest"
+              className="w-full rounded-2xl h-16 bg-[#FFD700] text-[#1f1610] font-black text-lg shadow-xl uppercase tracking-widest"
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-7 w-7 animate-spin" /> : 'BUILD EMPIRE'}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-[#1f1610]/60 font-black uppercase">
-            Already a strategist?{' '}
-            <Link href="/login" className="text-primary font-black hover:text-[#1f1610] transition-colors underline">
-              Sign In
-            </Link>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-[#1f1610]/10"></span></div>
+            <div className="relative flex justify-center text-[10px] uppercase font-black"><span className="bg-mocha-cream px-4 text-[#1f1610]/40 tracking-widest">Rapid Founding</span></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Button 
+              variant="outline" 
+              className="h-16 rounded-2xl border-4 border-[#1f1610]/10 bg-white text-[#1f1610] font-black uppercase text-[10px] gap-3"
+              onClick={handleGoogleSignUp}
+              disabled={isLoading}
+            >
+              <Chrome className="h-5 w-5" /> Google
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-16 rounded-2xl border-4 border-[#1f1610]/10 bg-white text-[#1f1610] font-black uppercase text-[10px] gap-3"
+              asChild
+            >
+              <Link href="/login">
+                <Phone className="h-5 w-5" /> Phone
+              </Link>
+            </Button>
+          </div>
+
+          <p className="text-center text-[10px] text-[#1f1610]/60 font-black uppercase">
+            Already a strategist? <Link href="/login" className="text-primary font-black underline">Sign In</Link>
           </p>
         </div>
       </div>
