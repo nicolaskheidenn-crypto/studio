@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Coffee, Loader2, Eye, EyeOff, Lock, ArrowRight, Phone, Github, Chrome } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -19,18 +20,28 @@ import {
 import { useAuth, useFirestore } from '@/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+const COUNTRY_CODES = [
+  { label: 'PH (+63)', value: '+63' },
+  { label: 'US (+1)', value: '+1' },
+  { label: 'UK (+44)', value: '+44' },
+  { label: 'AU (+61)', value: '+61' },
+  { label: 'CA (+1)', value: '+1' },
+  { label: 'MY (+60)', value: '+60' },
+  { label: 'SG (+65)', value: '+65' },
+];
+
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [countryCode, setCountryCode] = useState('+63');
+  const [rawPhone, setRawPhone] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   
-  const recaptchaRef = useRef<HTMLDivElement>(null);
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
@@ -53,6 +64,8 @@ export default function LoginPage() {
         points: 0,
         level: 1,
         xp: 0,
+        streak: 0,
+        currentTaskDay: 1,
         createdAt: new Date().toISOString()
       });
     }
@@ -98,14 +111,15 @@ export default function LoginPage() {
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneNumber) return;
+    if (!rawPhone) return;
     setIsLoading(true);
     setupRecaptcha();
     const appVerifier = (window as any).recaptchaVerifier;
+    const fullPhone = countryCode + rawPhone.replace(/\s+/g, '');
     try {
-      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+      const confirmation = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
       setConfirmationResult(confirmation);
-      toast({ title: 'Code Dispatched', description: 'Check your mobile device.' });
+      toast({ title: 'Code Dispatched', description: `Check your device for the ${fullPhone} login code.` });
     } catch (error: any) {
       toast({ title: 'Dispatch Failed', description: error.message, variant: 'destructive' });
     } finally {
@@ -163,7 +177,7 @@ export default function LoginPage() {
             <Button 
               variant="outline" 
               className={`rounded-2xl h-14 font-black uppercase text-[10px] tracking-widest transition-all ${method === 'email' ? "bg-[#1f1610] text-[#FFD700]" : "text-[#1f1610] border-[#1f1610]/10"}`}
-              onClick={() => setMethod('email')}
+              onClick={() => { setMethod('email'); setConfirmationResult(null); }}
             >
               Email Access
             </Button>
@@ -205,7 +219,26 @@ export default function LoginPage() {
                   <form onSubmit={handleSendCode} className="space-y-6">
                     <div className="space-y-3">
                       <Label className="text-[#1f1610] font-black text-[10px]">PHONE NUMBER</Label>
-                      <Input type="tel" placeholder="+1 555 000 0000" required className="rounded-2xl h-16 bg-[#1f1610]/5 text-[#1f1610] text-xl font-black px-6" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                      <div className="flex gap-2">
+                        <Select value={countryCode} onValueChange={setCountryCode}>
+                          <SelectTrigger className="w-[120px] h-16 rounded-2xl bg-[#1f1610]/5 text-[#1f1610] font-black border-[#1f1610]/10">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-[#1f1610]/10 font-black">
+                            {COUNTRY_CODES.map(c => (
+                              <SelectItem key={c.label} value={c.value} className="focus:bg-primary/10">{c.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input 
+                          type="tel" 
+                          placeholder="912 345 6789" 
+                          required 
+                          className="flex-1 rounded-2xl h-16 bg-[#1f1610]/5 text-[#1f1610] text-xl font-black px-6" 
+                          value={rawPhone} 
+                          onChange={(e) => setRawPhone(e.target.value)} 
+                        />
+                      </div>
                     </div>
                     <Button type="submit" className="w-full rounded-full h-20 bg-[#1f1610] text-[#FFD700] font-black text-xl shadow-xl uppercase" disabled={isLoading}>
                       {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'SEND VERIFICATION'}

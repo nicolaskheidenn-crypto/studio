@@ -46,6 +46,8 @@ export default function SignUpPage() {
         points: 0,
         level: 1,
         xp: 0,
+        streak: 0,
+        currentTaskDay: 1,
         createdAt: new Date().toISOString()
       });
     }
@@ -101,7 +103,11 @@ export default function SignUpPage() {
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[3rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 backdrop-blur-sm bg-[#1f1610]">
         <div className="p-12 md:p-16 space-y-10 bg-[#1f1610] flex flex-col justify-center border-r-4 border-primary/10">
-          <div className="space-y-8">
+          <div className="space-y-8 relative z-10">
+            <div className="flex flex-col mb-8">
+              <h1 className="text-9xl font-headline font-black tracking-tighter text-[#fdfaf6] leading-none">ND</h1>
+              <div className="h-4 w-40 bg-[#FFD700] rounded-full" />
+            </div>
             <h2 className="text-5xl md:text-6xl font-headline font-black leading-tight tracking-tighter uppercase text-[#fdfaf6]">
               Build your <span className="text-primary italic">Sovereign</span> Empire.
             </h2>
