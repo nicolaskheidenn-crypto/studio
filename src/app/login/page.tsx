@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '@/firebase';
 
 export default function LoginPage() {
@@ -54,23 +54,6 @@ export default function LoginPage() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      toast({ 
-        title: 'Email Required', 
-        description: 'Enter your email to reset password.', 
-        variant: 'destructive' 
-      });
-      return;
-    }
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast({ title: 'Email Sent', description: 'Check your inbox for reset instructions.' });
-    } catch (e: any) {
-      toast({ title: 'Reset Failed', description: e.message, variant: 'destructive' });
     }
   };
 
@@ -129,13 +112,12 @@ export default function LoginPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-[#1f1610] font-black text-xs">SECURITY KEY</Label>
-                <button 
-                  type="button" 
-                  onClick={handleForgotPassword} 
+                <Link 
+                  href="/reset-key" 
                   className="text-[10px] text-[#FFD700] font-black uppercase underline hover:text-[#1f1610] transition-colors"
                 >
                   Forgot Key?
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <Input
