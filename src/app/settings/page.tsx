@@ -53,8 +53,8 @@ const SYSTEM_BADGES: BadgeType[] = [
   { id: 'sb-trick', title: 'Trick Strategist', description: 'Uploaded 10 T&Triks tactical resources.', difficulty: 'Silver', iconType: 'trick' },
   { id: 'sb-level-15', title: 'Elite Executioner', description: 'Reached Level 15 strategic mastery.', difficulty: 'Gold', iconType: 'veteran' },
   { id: 'sb-level-20', title: 'Grand Strategist', description: 'Reached Level 20 strategic mastery.', difficulty: 'Gold', iconType: 'veteran' },
-  { id: 'sb-level-30', title: 'Sovereign Zenith', description: 'Reached the absolute maximum Level 30 status.', difficulty: 'Sovereign', iconType: 'veteran' },
-  { id: 'sb-streak-30', title: 'Monthly Execution', description: 'Maintained a 30-day consistency streak.', difficulty: 'Sovereign', iconType: 'consistency' },
+  { id: 'sb-level-30', title: 'SOVEREIGN ZENITH', description: 'REACHED THE ABSOLUTE MAXIMUM LEVEL 30 STATUS.', difficulty: 'Sovereign', iconType: 'veteran' },
+  { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'Sovereign', iconType: 'consistency' },
 ];
 
 export default function SettingsPage() {
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                           {isUnlocked ? <Award className="h-14 w-14 text-white" /> : <Lock className="h-12 w-12 text-white/50" />}
                        </div>
                        <div className="space-y-4">
-                         <div className={cn("px-6 py-1 rounded-full w-fit text-[10px] font-black uppercase tracking-[0.2em] shadow-inner",
+                         <div className={cn("px-6 py-1 rounded-full w-fit text-[10px] font-black uppercase tracking-[0.2em] shadow-inner mb-2",
                             b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary/60'
                          )}>
                             {b.difficulty}
