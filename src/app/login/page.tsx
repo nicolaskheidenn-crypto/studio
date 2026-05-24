@@ -111,7 +111,7 @@ export default function LoginPage() {
 
           <div className="text-center pt-4 border-t-2 border-[#1f1610]/5">
             <p className="text-[11px] text-[#1f1610]/40 font-black uppercase tracking-[0.2em]">
-              New strategist? <Link href="/signup" className="text-[#FFD700] font-black hover:underline">Create Empire</Link>
+              New strategist? <Link href="/signup" className="text-[#FFD700] font-black hover:underline">Create Account</Link>
             </p>
           </div>
         </div>
