@@ -174,7 +174,6 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* Background Ambience */}
       <div className="absolute top-[10%] right-[5%] opacity-10 -rotate-12 pointer-events-none">
         <Coffee className="w-64 h-64 text-primary" />
       </div>
@@ -301,23 +300,25 @@ export default function SettingsPage() {
                     const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
                       <div key={b.id} className={cn(
-                        "p-12 bg-white rounded-[4.5rem] border-4 flex items-center gap-10 group transition-all relative overflow-hidden", 
-                        isUnlocked ? "border-primary shadow-[0_20px_50px_rgba(255,215,0,0.08)]" : "border-[#1f1610]/5 opacity-40 grayscale"
+                        "p-12 bg-white rounded-[4.5rem] border-[6px] flex items-center gap-10 group transition-all relative overflow-hidden", 
+                        isUnlocked ? "border-primary shadow-[0_30px_60px_rgba(0,0,0,0.05)]" : "border-[#1f1610]/5 opacity-40"
                       )}>
                          <div className={cn("w-28 h-28 rounded-[2.5rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform border-4 shrink-0", 
+                           !isUnlocked ? 'bg-[#1f1610]/5 border-[#1f1610]/10' :
                            b.difficulty === 'Bronze' ? 'bg-[#cd7f32] border-[#cd7f32]/20' : 
                            b.difficulty === 'Silver' ? 'bg-[#c0c0c0] border-[#c0c0c0]/20' : 
                            b.difficulty === 'Gold' ? 'bg-primary border-primary/20' : 'bg-[#1f1610] border-[#FFD700]/40')}>
-                          {isUnlocked ? <Award className="h-14 w-14 text-white" /> : <Lock className="h-12 w-12 text-white/50" />}
+                          {isUnlocked ? <Award className="h-14 w-14 text-white" /> : <Lock className="h-12 w-12 text-[#1f1610]/20" />}
                        </div>
-                       <div className="space-y-4">
-                         <div className={cn("px-6 py-1 rounded-full w-fit text-[10px] font-black uppercase tracking-[0.2em] shadow-inner mb-2",
+                       <div className="space-y-4 flex-1">
+                         <div className={cn("px-6 py-1.5 rounded-full w-fit text-[10px] font-black uppercase tracking-[0.2em] shadow-inner mb-2",
+                            !isUnlocked ? 'bg-[#1f1610]/5 text-[#1f1610]/40' :
                             b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary/60'
                          )}>
                             {b.difficulty}
                          </div>
-                         <h4 className="text-4xl font-black text-[#1f1610] uppercase tracking-tighter italic leading-tight">{b.title}</h4>
-                         <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-[0.3em] leading-relaxed max-w-xs">{b.description}</p>
+                         <h4 className="text-4xl md:text-5xl font-black text-[#1f1610] uppercase tracking-tighter italic leading-tight">{b.title}</h4>
+                         <p className="text-[11px] font-black text-[#1f1610]/40 uppercase tracking-[0.3em] leading-relaxed max-w-xs">{b.description}</p>
                          {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-8 w-8 text-green-500/20" />}
                        </div>
                     </div>
