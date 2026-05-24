@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
@@ -78,6 +78,7 @@ export default function SettingsPage() {
   const [newPass, setNewPass] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);
   const [isUpdatingPass, setIsUpdatingPass] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   useEffect(() => {
     if (uid && profiles[uid]) {
@@ -99,20 +100,13 @@ export default function SettingsPage() {
       }
     };
 
-    // Quiz Check
     if (profile.stats?.quizzesPassed > 0) handleUnlock('sb-quiz', 'Sovereign Mastery');
-    // Veteran Check (30 days total in app)
     if (profile.stats?.totalDaysInApp >= 30) handleUnlock('sb-veteran', 'Strategic Veteran');
-    // Consistency Check
     if (profile.currentTaskDay >= 7 && profile.completedTaskIds?.length >= 21) handleUnlock('sb-consistency', 'Consistency King');
-    // Explorer Check
     const required = ['hub', 'shooppy', 'library', 'faq'];
     if (required.every(f => profile.stats?.visitedFeatures?.includes(f))) handleUnlock('sb-explorer', 'Protocol Explorer');
-    // Resource Checks
     if (profile.stats?.promptsShared >= 10) handleUnlock('sb-prompt', 'Prompt Architect');
     if (profile.stats?.triksShared >= 10) handleUnlock('sb-trick', 'Trick Strategist');
-
-    // NEW Milestones
     if (profile.level >= 15) handleUnlock('sb-level-15', 'Elite Executioner');
     if (profile.level >= 20) handleUnlock('sb-level-20', 'Grand Strategist');
     if (profile.level >= 30) handleUnlock('sb-level-30', 'Sovereign Zenith');
@@ -122,12 +116,15 @@ export default function SettingsPage() {
 
   const handleUpdateProfile = async () => {
     if (!uid) return;
+    setIsUpdatingProfile(true);
     try {
       if (auth.currentUser) await updateProfile(auth.currentUser, { displayName });
       updateStoreProfile(uid, { nickname: displayName, bio, avatarUrl: avatar, coverPhotoUrl: cover });
-      toast({ title: "Sovereign Profile Updated" });
+      toast({ title: "Sovereign Profile Updated", description: "Your strategic identity has been synchronized." });
     } catch (e) {
       toast({ title: "Update Failed", variant: "destructive" });
+    } finally {
+      setIsUpdatingProfile(false);
     }
   };
 
@@ -172,6 +169,7 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
+      {/* Background Ambience */}
       <div className="absolute top-[10%] right-[5%] opacity-10 -rotate-12 pointer-events-none">
         <Coffee className="w-64 h-64 text-primary" />
       </div>
@@ -179,88 +177,141 @@ export default function SettingsPage() {
         <Coffee className="w-80 h-80 text-primary" />
       </div>
 
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-5xl relative z-10">
-        <h1 className="text-6xl font-headline font-black mb-12 text-foreground uppercase tracking-tighter italic">Settings</h1>
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
+        <header className="mb-12 space-y-4">
+           <h1 className="text-6xl font-headline font-black text-foreground uppercase tracking-tighter italic">Settings</h1>
+           <div className="h-1.5 w-24 bg-primary rounded-full shadow-[0_0_15px_rgba(255,215,0,0.3)]" />
+        </header>
         
-        <Tabs defaultValue="profile" className="space-y-10">
-          <TabsList className="bg-card/40 p-1.5 rounded-full w-fit shadow-md border-2 border-primary/10">
-            <TabsTrigger value="profile" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Identity</TabsTrigger>
-            <TabsTrigger value="achievements" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Vault</TabsTrigger>
-            <TabsTrigger value="privacy" className="rounded-full px-12 h-12 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-background">Privacy</TabsTrigger>
+        <Tabs defaultValue="profile" className="space-y-12">
+          {/* Pill Styled Tabs - Matching provided image */}
+          <TabsList className="bg-[#1f1610] p-1.5 rounded-full w-fit shadow-2xl border-4 border-primary/10 flex gap-2">
+            <TabsTrigger value="profile" className="rounded-full px-12 h-12 text-[11px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] data-[state=active]:shadow-lg">Identity</TabsTrigger>
+            <TabsTrigger value="achievements" className="rounded-full px-12 h-12 text-[11px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] data-[state=active]:shadow-lg">Vault</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-12 h-12 text-[11px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] data-[state=active]:shadow-lg">Privacy</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-mocha-cream p-12 shadow-xl">
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                  <div className="space-y-8">
-                    <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Nickname</Label>
-                      <Input value={displayName} onChange={e => setDisplayName(e.target.value)} className="h-16 font-black text-xl bg-white text-[#1f1610]" />
+          <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-[0_50px_100px_rgba(0,0,0,0.4)]">
+               <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
+                  
+                  {/* Nickname & Bio - Left Column */}
+                  <div className="lg:col-span-3 space-y-10">
+                    <div className="space-y-4">
+                      <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Nickname</Label>
+                      <Input 
+                        value={displayName} 
+                        onChange={e => setDisplayName(e.target.value)} 
+                        className="h-20 font-black text-2xl bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-[2rem] px-8 focus:border-primary transition-all shadow-inner" 
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Strategic Bio</Label>
-                      <Textarea value={bio} onChange={e => setBio(e.target.value)} className="min-h-[140px] font-medium bg-white text-[#1f1610]" />
+                    
+                    <div className="space-y-4">
+                      <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Strategic Bio</Label>
+                      <Textarea 
+                        value={bio} 
+                        onChange={e => setBio(e.target.value)} 
+                        placeholder="Document your strategic narrative..."
+                        className="min-h-[200px] font-bold text-xl bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-[2.5rem] p-10 focus:border-primary transition-all shadow-inner leading-relaxed placeholder:text-[#1f1610]/20" 
+                      />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                       <div><Label className="text-[#1f1610]">Avatar</Label><Input type="file" onChange={e => handleFile(e, setAvatar)} className="mt-2 h-12 bg-white text-[#1f1610]" /></div>
-                       <div><Label className="text-[#1f1610]">Cover</Label><Input type="file" onChange={e => handleFile(e, setCover)} className="mt-2 h-12 bg-white text-[#1f1610]" /></div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-4">
+                          <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Avatar</Label>
+                          <div className="relative">
+                             <Input type="file" onChange={e => handleFile(e, setAvatar)} className="h-16 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-2xl px-6 pt-3.5 text-xs font-black uppercase" />
+                             <User className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1f1610]/20" />
+                          </div>
+                       </div>
+                       <div className="space-y-4">
+                          <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Cover</Label>
+                          <div className="relative">
+                            <Input type="file" onChange={e => handleFile(e, setCover)} className="h-16 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-2xl px-6 pt-3.5 text-xs font-black uppercase" />
+                            <Coffee className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1f1610]/20" />
+                          </div>
+                       </div>
                     </div>
-                    <Button onClick={handleUpdateProfile} className="w-full h-20 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-xl active:scale-95 transition-all">Update Protocol</Button>
-                  </div>
-                  <div className="p-10 bg-[#1f1610]/10 rounded-[3rem] border-4 border-[#1f1610]/5 space-y-8">
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#1f1610] flex items-center gap-3"><Lock className="h-6 w-6 text-primary" /> Root Security</h3>
-                    <div className="space-y-2">
-                      <Label className="text-[#1f1610]/60">New Security Key</Label>
-                      <div className="relative">
-                        <Input 
-                          type={showNewPass ? 'text' : 'password'} 
-                          placeholder="••••••••" 
-                          value={newPass} 
-                          onChange={e => setNewPass(e.target.value)} 
-                          className="h-16 bg-white text-[#1f1610] pr-14" 
-                        />
-                        <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-6 top-1/2 -translate-y-1/2 text-[#1f1610]/40">
-                          {showNewPass ? <Eye className="h-6 w-6" /> : <EyeOff className="h-6 w-6" />}
-                        </button>
-                      </div>
-                    </div>
+
                     <Button 
-                      onClick={handleUpdatePassword}
-                      disabled={isUpdatingPass}
-                      className="w-full h-16 rounded-2xl bg-[#1f1610] border-2 border-[#FFD700] text-[#FFD700] font-black uppercase text-xs hover:bg-[#FFD700] hover:text-[#1f1610] transition-all shadow-xl"
+                      onClick={handleUpdateProfile} 
+                      disabled={isUpdatingProfile}
+                      className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-3xl uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all tracking-tighter"
                     >
-                      {isUpdatingPass ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Update Access Key'}
+                      {isUpdatingProfile ? <Loader2 className="h-10 w-10 animate-spin" /> : 'UPDATE PROTOCOL'}
                     </Button>
+                  </div>
+
+                  {/* Root Security - Right Column (Sub-card styled as seen in image) */}
+                  <div className="lg:col-span-2">
+                    <div className="p-12 bg-[#1f1610]/5 rounded-[3.5rem] border-4 border-[#1f1610]/5 space-y-10 shadow-inner">
+                      <div className="flex items-center gap-4 text-[#1f1610]">
+                        <Lock className="h-8 w-8 text-primary" />
+                        <h3 className="text-3xl font-black uppercase tracking-tighter italic">ROOT SECURITY</h3>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <Label className="text-[#1f1610]/40 font-black text-[10px] uppercase tracking-[0.4em]">New Security Key</Label>
+                        <div className="relative">
+                          <Input 
+                            type={showNewPass ? 'text' : 'password'} 
+                            placeholder="••••••••" 
+                            value={newPass} 
+                            onChange={e => setNewPass(e.target.value)} 
+                            className="h-20 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-8 pr-16 text-3xl font-black text-[#1f1610] shadow-md focus:border-primary transition-all" 
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setShowNewPass(!showNewPass)} 
+                            className="absolute right-6 top-1/2 -translate-y-1/2 text-[#1f1610]/30 hover:text-primary transition-colors"
+                          >
+                            {showNewPass ? <Eye className="h-7 w-7" /> : <EyeOff className="h-7 w-7" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <Button 
+                        onClick={handleUpdatePassword}
+                        disabled={isUpdatingPass}
+                        className="w-full h-20 rounded-2xl bg-[#1f1610] border-4 border-primary/20 text-primary font-black uppercase text-sm hover:bg-primary hover:text-[#1f1610] transition-all shadow-xl tracking-widest"
+                      >
+                        {isUpdatingPass ? <Loader2 className="h-6 w-6 animate-spin" /> : 'UPDATE ACCESS KEY'}
+                      </Button>
+                    </div>
                   </div>
                </div>
             </Card>
           </TabsContent>
 
-          <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-mocha-cream p-16 shadow-xl">
-               <div className="text-center mb-16 space-y-4">
-                  <Trophy className="h-16 w-16 mx-auto text-primary" />
-                  <h2 className="text-5xl font-black text-[#1f1610] uppercase tracking-tighter italic">Achievement Vault</h2>
-                  <p className="text-[10px] text-primary font-black uppercase tracking-widest">Strategy milestones unlocked</p>
+          <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl">
+               <div className="text-center mb-20 space-y-6">
+                  <div className="w-24 h-24 bg-primary text-[#1f1610] rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl">
+                    <Trophy className="h-12 w-12" />
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="text-6xl font-black text-[#1f1610] uppercase tracking-tighter italic">Achievement Vault</h2>
+                    <p className="text-[11px] text-primary font-black uppercase tracking-[0.8em]">Sovereign Milestones Unlocked</p>
+                  </div>
                </div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                   {allBadges.map((b) => {
                     const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
-                      <div key={b.id} className={cn("p-10 bg-white rounded-[3rem] border-4 flex items-center gap-8 group transition-all shadow-sm", 
-                        isUnlocked ? "border-primary opacity-100" : "border-transparent opacity-40 grayscale"
+                      <div key={b.id} className={cn("p-12 bg-white rounded-[4rem] border-4 flex items-center gap-10 group transition-all shadow-md relative overflow-hidden", 
+                        isUnlocked ? "border-primary opacity-100" : "border-transparent opacity-30 grayscale"
                       )}>
-                         <div className={cn("w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform", 
-                           b.difficulty === 'Bronze' ? 'bg-[#cd7f32]' : 
-                           b.difficulty === 'Silver' ? 'bg-[#c0c0c0]' : 
-                           b.difficulty === 'Gold' ? 'bg-primary' : 'bg-purple-900')}>
-                          {isUnlocked ? <Award className="h-10 w-10 text-white" /> : <Lock className="h-10 w-10 text-white/50" />}
+                         <div className={cn("w-24 h-24 rounded-[1.5rem] flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-transform border-4", 
+                           b.difficulty === 'Bronze' ? 'bg-[#cd7f32] border-[#cd7f32]/20' : 
+                           b.difficulty === 'Silver' ? 'bg-[#c0c0c0] border-[#c0c0c0]/20' : 
+                           b.difficulty === 'Gold' ? 'bg-primary border-primary/20' : 'bg-purple-900 border-purple-900/20')}>
+                          {isUnlocked ? <Award className="h-12 w-12 text-white" /> : <Lock className="h-12 w-12 text-white/50" />}
                        </div>
-                       <div>
-                         <Badge className="mb-2 bg-primary text-background text-[8px] uppercase border-none">{b.difficulty}</Badge>
-                         <h4 className="text-2xl font-black text-[#1f1610] uppercase tracking-tight italic">{b.title}</h4>
+                       <div className="space-y-2">
+                         <Badge className="bg-primary text-[#1f1610] text-[9px] font-black uppercase border-none tracking-widest">{b.difficulty}</Badge>
+                         <h4 className="text-3xl font-black text-[#1f1610] uppercase tracking-tight italic leading-none">{b.title}</h4>
                          <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-widest">{b.description}</p>
-                         {isUnlocked && <CheckCircle2 className="h-4 w-4 text-green-500 mt-2" />}
+                         {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-6 w-6 text-green-500" />}
                        </div>
                     </div>
                   )})}
@@ -268,69 +319,41 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-4">
-            <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-mocha-cream p-12 shadow-xl">
-              <CardHeader className="text-center pb-8">
-                <FileText className="h-12 w-12 mx-auto text-primary mb-4" />
-                <CardTitle className="text-4xl font-black text-[#1f1610] uppercase italic">Privacy Policy</CardTitle>
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest">Last Updated: May 19, 2026</p>
+          <TabsContent value="privacy" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl">
+              <CardHeader className="text-center pb-12 space-y-6">
+                <div className="w-20 h-20 bg-[#1f1610]/5 rounded-full flex items-center justify-center mx-auto border-2 border-[#1f1610]/10">
+                  <FileText className="h-10 w-10 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <CardTitle className="text-5xl font-black text-[#1f1610] uppercase italic tracking-tighter">Privacy Policy</CardTitle>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Protocol Release: May 2026</p>
+                </div>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[600px] pr-6">
-                  <div className="prose prose-sm prose-stone max-w-none text-[#1f1610] space-y-8">
-                    <p className="text-lg leading-relaxed">At <strong>Nico Digital</strong>, we are committed to protecting your privacy and building trust through transparency. This Privacy Policy explains how we collect, use, disclose, store, and protect your personal information when you interact with our website, membership platform, and services.</p>
-                    <p className="text-lg leading-relaxed"><strong>Nico Digital</strong> (referred to as “we,” “us,” or “our”) is a digital business established in 2026, specializing in eBooks, templates, bundles, and membership programs. Our flagship offering includes the “Fail-Proof” 30-Day Implementation Sprint — a guided membership experience with daily tasks, progress tracking, Time Capsule, gamification elements, and community features.</p>
-
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black uppercase italic">1. Information We Collect</h3>
-                      <p>We collect information to provide, improve, and personalize our services while ensuring a safe and effective learning environment.</p>
-                      <h4 className="font-black">Information You Provide Directly:</h4>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>Account Information</strong>: Full name, email, username, nickname, password, profile picture, and cover image.</li>
-                        <li><strong>Profile Details</strong>: UID, date of birth, and location.</li>
-                        <li><strong>Content You Create</strong>: Daily task responses, Time Capsule entries, journal reflections, and Messenger data.</li>
-                        <li><strong>Payment Information</strong>: Billing details processed securely by third-party providers (Stripe, PayPal).</li>
+                <ScrollArea className="h-[600px] pr-10">
+                  <div className="prose prose-lg prose-stone max-w-none text-[#1f1610] space-y-10">
+                    <p className="text-xl leading-relaxed font-medium">At <strong>Nico Digital</strong>, we are committed to protecting your privacy and building trust through transparency. This Privacy Policy explains how we collect, use, and protect your sovereign data.</p>
+                    
+                    <div className="space-y-6">
+                      <h3 className="text-3xl font-black uppercase italic tracking-tight">1. Information Collection</h3>
+                      <p className="leading-relaxed">We collect information to provide, improve, and personalize our services while ensuring a safe and effective learning environment.</p>
+                      <ul className="list-disc pl-8 space-y-4 font-bold">
+                        <li><strong>Account Protocols</strong>: Strategic email, passkeys, and identity profiles.</li>
+                        <li><strong>Temporal Data</strong>: Time Capsule entries and daily routine progress.</li>
+                        <li><strong>Visual Assets</strong>: Avatars, cover photos, and gallery uploads.</li>
                       </ul>
                     </div>
 
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black uppercase italic">2. How We Collect Your Information</h3>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li>Through registration, login, and profile setup.</li>
-                        <li>When you complete daily tasks or engage with the Time Capsule.</li>
-                        <li>Automatically via server logs and cookies.</li>
-                        <li>During purchases of our digital products.</li>
-                      </ul>
+                    <div className="space-y-6">
+                      <h3 className="text-3xl font-black uppercase italic tracking-tight">2. Sovereign Security</h3>
+                      <p className="leading-relaxed">We implement high-impact administrative, technical, and physical safeguards. However, no digital infrastructure is completely absolute. Active membership data is retained while your command remains open.</p>
                     </div>
 
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black uppercase italic">3. How We Use Your Information</h3>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>Managing Services</strong>: Delivering daily tasks and managing the 30-Day Sprint.</li>
-                        <li><strong>Gamification</strong>: Customizing themes, streaks, badges, and levels.</li>
-                        <li><strong>Communication</strong>: Milestone updates and administrative notices.</li>
-                        <li><strong>Security</strong>: Detecting unauthorized access and protecting platform integrity.</li>
-                      </ul>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black uppercase italic">4. Sharing and Disclosure</h3>
-                      <p>We do not sell your personal data. We may share information with trusted service providers who help operate the platform under strict confidentiality agreements.</p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black uppercase italic">5. Data Storage and Security</h3>
-                      <p>We implement reasonable administrative, technical, and physical safeguards. However, no system is completely secure. <strong>Retention Period</strong>: Active membership data is retained while your account is open.</p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-black uppercase italic">6. Your Rights</h3>
-                      <p>You have the right to access, correct, delete, or port your personal data. To exercise these rights, contact us at our official support email.</p>
-                    </div>
-
-                    <div className="space-y-4 pt-8 border-t-2 border-[#1f1610]/10">
-                      <h3 className="text-2xl font-black uppercase italic">Acknowledgment</h3>
-                      <p className="italic">By using Nico Digital’s services, you confirm that you have read and understood this Privacy Policy, including how your information is protected in the context of the Fail-Proof 30-Day Implementation Sprint.</p>
+                    <div className="pt-12 border-t-4 border-[#1f1610]/5">
+                      <p className="italic text-center font-black text-[#1f1610]/40 uppercase tracking-widest text-xs">
+                        By using the infrastructure, you acknowledge these temporal protection protocols.
+                      </p>
                     </div>
                   </div>
                 </ScrollArea>
