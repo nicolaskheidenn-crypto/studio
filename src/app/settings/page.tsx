@@ -285,8 +285,8 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl overflow-hidden">
-               <div className="text-center mb-16 space-y-8">
+            <Card className="rounded-[4.5rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl overflow-hidden">
+               <div className="text-center mb-20 space-y-8">
                   <div className="w-24 h-24 bg-primary text-[#1f1610] rounded-[2rem] flex items-center justify-center mx-auto shadow-[0_20px_40px_rgba(255,215,0,0.3)] border-4 border-white/20">
                     <Trophy className="h-12 w-12" />
                   </div>
@@ -296,27 +296,29 @@ export default function SettingsPage() {
                   </div>
                </div>
                
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
                   {allBadges.map((b) => {
                     const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
-                      <div key={b.id} className={cn("p-12 bg-white rounded-[4rem] border-4 flex items-center gap-10 group transition-all shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative overflow-hidden", 
-                        isUnlocked ? "border-primary opacity-100" : "border-[#1f1610]/5 opacity-30 grayscale"
+                      <div key={b.id} className={cn(
+                        "p-12 bg-white rounded-[4.5rem] border-4 flex items-center gap-10 group transition-all relative overflow-hidden", 
+                        isUnlocked ? "border-primary shadow-[0_20px_50px_rgba(255,215,0,0.08)]" : "border-[#1f1610]/5 opacity-40 grayscale"
                       )}>
-                         <div className={cn("w-24 h-24 rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform border-4", 
+                         <div className={cn("w-28 h-28 rounded-[2.5rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform border-4 shrink-0", 
                            b.difficulty === 'Bronze' ? 'bg-[#cd7f32] border-[#cd7f32]/20' : 
                            b.difficulty === 'Silver' ? 'bg-[#c0c0c0] border-[#c0c0c0]/20' : 
                            b.difficulty === 'Gold' ? 'bg-primary border-primary/20' : 'bg-[#1f1610] border-[#FFD700]/40')}>
-                          {isUnlocked ? <Award className="h-12 w-12 text-white" /> : <Lock className="h-10 w-10 text-white/50" />}
+                          {isUnlocked ? <Award className="h-14 w-14 text-white" /> : <Lock className="h-12 w-12 text-white/50" />}
                        </div>
-                       <div className="space-y-2">
-                         <Badge className={cn("text-[9px] font-black uppercase border-none tracking-widest px-4 h-7 flex items-center", 
-                            b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary shadow-[0_0_10px_rgba(255,215,0,0.4)]' : 'bg-primary text-[#1f1610]')}>
+                       <div className="space-y-4">
+                         <div className={cn("px-6 py-1 rounded-full w-fit text-[10px] font-black uppercase tracking-[0.2em] shadow-inner",
+                            b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary/60'
+                         )}>
                             {b.difficulty}
-                         </Badge>
-                         <h4 className="text-3xl font-black text-[#1f1610] uppercase tracking-tight italic leading-none">{b.title}</h4>
-                         <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-widest leading-relaxed">{b.description}</p>
-                         {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-8 w-8 text-green-500/40" />}
+                         </div>
+                         <h4 className="text-4xl font-black text-[#1f1610] uppercase tracking-tighter italic leading-tight">{b.title}</h4>
+                         <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-[0.3em] leading-relaxed max-w-xs">{b.description}</p>
+                         {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-8 w-8 text-green-500/20" />}
                        </div>
                     </div>
                   )})}
