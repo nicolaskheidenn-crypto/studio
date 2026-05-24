@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
@@ -80,6 +81,9 @@ export default function SettingsPage() {
   const [isUpdatingPass, setIsUpdatingPass] = useState(false);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
+  // Celebration Modal State
+  const [unlockedBadge, setUnlockedBadge] = useState<BadgeType | null>(null);
+
   useEffect(() => {
     if (uid && profiles[uid]) {
       setDisplayName(profiles[uid].nickname);
@@ -89,30 +93,33 @@ export default function SettingsPage() {
     }
   }, [uid, profiles]);
 
+  const allBadges = useMemo(() => [...SYSTEM_BADGES, ...adminBadges], [adminBadges]);
+
   // Achievement Check Logic
   useEffect(() => {
     if (!uid) return;
 
-    const handleUnlock = (badgeId: string, title: string) => {
-      if (!profile.unlockedBadgeIds?.includes(badgeId)) {
+    const handleUnlock = (badgeId: string) => {
+      const badge = allBadges.find(b => b.id === badgeId);
+      if (badge && !profile.unlockedBadgeIds?.includes(badgeId)) {
         unlockBadge(uid, badgeId);
-        toast({ title: "Sovereign Achievement Unlocked", description: `Congratulations! You've earned: ${title}` });
+        setUnlockedBadge(badge);
       }
     };
 
-    if (profile.stats?.quizzesPassed > 0) handleUnlock('sb-quiz', 'Sovereign Mastery');
-    if (profile.stats?.totalDaysInApp >= 30) handleUnlock('sb-veteran', 'Strategic Veteran');
-    if (profile.currentTaskDay >= 7 && profile.completedTaskIds?.length >= 21) handleUnlock('sb-consistency', 'Consistency King');
+    if (profile.stats?.quizzesPassed > 0) handleUnlock('sb-quiz');
+    if (profile.stats?.totalDaysInApp >= 30) handleUnlock('sb-veteran');
+    if (profile.currentTaskDay >= 7 && (profile.completedTaskIds || []).length >= 21) handleUnlock('sb-consistency');
     const required = ['hub', 'shooppy', 'library', 'faq'];
-    if (required.every(f => profile.stats?.visitedFeatures?.includes(f))) handleUnlock('sb-explorer', 'Protocol Explorer');
-    if (profile.stats?.promptsShared >= 10) handleUnlock('sb-prompt', 'Prompt Architect');
-    if (profile.stats?.triksShared >= 10) handleUnlock('sb-trick', 'Trick Strategist');
-    if (profile.level >= 15) handleUnlock('sb-level-15', 'Elite Executioner');
-    if (profile.level >= 20) handleUnlock('sb-level-20', 'Grand Strategist');
-    if (profile.level >= 30) handleUnlock('sb-level-30', 'Sovereign Zenith');
-    if (profile.streak >= 30) handleUnlock('sb-streak-30', 'Monthly Execution');
+    if (required.every(f => profile.stats?.visitedFeatures?.includes(f))) handleUnlock('sb-explorer');
+    if (profile.stats?.promptsShared >= 10) handleUnlock('sb-prompt');
+    if (profile.stats?.triksShared >= 10) handleUnlock('sb-trick');
+    if (profile.level >= 15) handleUnlock('sb-level-15');
+    if (profile.level >= 20) handleUnlock('sb-level-20');
+    if (profile.level >= 30) handleUnlock('sb-level-30');
+    if (profile.streak >= 30) handleUnlock('sb-streak-30');
 
-  }, [uid, profile, unlockBadge]);
+  }, [uid, profile, unlockBadge, allBadges]);
 
   const handleUpdateProfile = async () => {
     if (!uid) return;
@@ -163,8 +170,6 @@ export default function SettingsPage() {
     }
   };
 
-  const allBadges = [...SYSTEM_BADGES, ...adminBadges];
-
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
@@ -184,7 +189,6 @@ export default function SettingsPage() {
         </header>
         
         <Tabs defaultValue="profile" className="space-y-12">
-          {/* Pill Styled Tabs - Matching provided image */}
           <TabsList className="bg-[#1f1610] p-1.5 rounded-full w-fit shadow-2xl border-4 border-primary/10 flex gap-2">
             <TabsTrigger value="profile" className="rounded-full px-12 h-12 text-[11px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] data-[state=active]:shadow-lg">Identity</TabsTrigger>
             <TabsTrigger value="achievements" className="rounded-full px-12 h-12 text-[11px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] data-[state=active]:shadow-lg">Vault</TabsTrigger>
@@ -194,8 +198,6 @@ export default function SettingsPage() {
           <TabsContent value="profile" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-[0_50px_100px_rgba(0,0,0,0.4)]">
                <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
-                  
-                  {/* Nickname & Bio - Left Column */}
                   <div className="lg:col-span-3 space-y-10">
                     <div className="space-y-4">
                       <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Nickname</Label>
@@ -242,7 +244,6 @@ export default function SettingsPage() {
                     </Button>
                   </div>
 
-                  {/* Root Security - Right Column (Sub-card styled as seen in image) */}
                   <div className="lg:col-span-2">
                     <div className="p-12 bg-[#1f1610]/5 rounded-[3.5rem] border-4 border-[#1f1610]/5 space-y-10 shadow-inner">
                       <div className="flex items-center gap-4 text-[#1f1610]">
@@ -284,34 +285,38 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl">
-               <div className="text-center mb-20 space-y-6">
-                  <div className="w-24 h-24 bg-primary text-[#1f1610] rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl">
+            <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl overflow-hidden">
+               <div className="text-center mb-16 space-y-8">
+                  <div className="w-24 h-24 bg-primary text-[#1f1610] rounded-[2rem] flex items-center justify-center mx-auto shadow-[0_20px_40px_rgba(255,215,0,0.3)] border-4 border-white/20">
                     <Trophy className="h-12 w-12" />
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-6xl font-black text-[#1f1610] uppercase tracking-tighter italic">Achievement Vault</h2>
-                    <p className="text-[11px] text-primary font-black uppercase tracking-[0.8em]">Sovereign Milestones Unlocked</p>
+                    <h2 className="text-7xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">ACHIEVEMENT VAULT</h2>
+                    <p className="text-[11px] text-[#1f1610] font-black uppercase tracking-[0.8em] opacity-80">SOVEREIGN MILESTONES UNLOCKED</p>
                   </div>
                </div>
+               
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                   {allBadges.map((b) => {
                     const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
-                      <div key={b.id} className={cn("p-12 bg-white rounded-[4rem] border-4 flex items-center gap-10 group transition-all shadow-md relative overflow-hidden", 
-                        isUnlocked ? "border-primary opacity-100" : "border-transparent opacity-30 grayscale"
+                      <div key={b.id} className={cn("p-12 bg-white rounded-[4rem] border-4 flex items-center gap-10 group transition-all shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative overflow-hidden", 
+                        isUnlocked ? "border-primary opacity-100" : "border-[#1f1610]/5 opacity-30 grayscale"
                       )}>
-                         <div className={cn("w-24 h-24 rounded-[1.5rem] flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-transform border-4", 
+                         <div className={cn("w-24 h-24 rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform border-4", 
                            b.difficulty === 'Bronze' ? 'bg-[#cd7f32] border-[#cd7f32]/20' : 
                            b.difficulty === 'Silver' ? 'bg-[#c0c0c0] border-[#c0c0c0]/20' : 
-                           b.difficulty === 'Gold' ? 'bg-primary border-primary/20' : 'bg-purple-900 border-purple-900/20')}>
-                          {isUnlocked ? <Award className="h-12 w-12 text-white" /> : <Lock className="h-12 w-12 text-white/50" />}
+                           b.difficulty === 'Gold' ? 'bg-primary border-primary/20' : 'bg-[#1f1610] border-[#FFD700]/40')}>
+                          {isUnlocked ? <Award className="h-12 w-12 text-white" /> : <Lock className="h-10 w-10 text-white/50" />}
                        </div>
                        <div className="space-y-2">
-                         <Badge className="bg-primary text-[#1f1610] text-[9px] font-black uppercase border-none tracking-widest">{b.difficulty}</Badge>
+                         <Badge className={cn("text-[9px] font-black uppercase border-none tracking-widest px-4 h-7 flex items-center", 
+                            b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary shadow-[0_0_10px_rgba(255,215,0,0.4)]' : 'bg-primary text-[#1f1610]')}>
+                            {b.difficulty}
+                         </Badge>
                          <h4 className="text-3xl font-black text-[#1f1610] uppercase tracking-tight italic leading-none">{b.title}</h4>
-                         <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-widest">{b.description}</p>
-                         {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-6 w-6 text-green-500" />}
+                         <p className="text-[10px] font-bold text-[#1f1610]/40 uppercase tracking-widest leading-relaxed">{b.description}</p>
+                         {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-8 w-8 text-green-500/40" />}
                        </div>
                     </div>
                   )})}
@@ -334,7 +339,6 @@ export default function SettingsPage() {
                 <ScrollArea className="h-[600px] pr-10">
                   <div className="prose prose-lg prose-stone max-w-none text-[#1f1610] space-y-10">
                     <p className="text-xl leading-relaxed font-medium">At <strong>Nico Digital</strong>, we are committed to protecting your privacy and building trust through transparency. This Privacy Policy explains how we collect, use, and protect your sovereign data.</p>
-                    
                     <div className="space-y-6">
                       <h3 className="text-3xl font-black uppercase italic tracking-tight">1. Information Collection</h3>
                       <p className="leading-relaxed">We collect information to provide, improve, and personalize our services while ensuring a safe and effective learning environment.</p>
@@ -344,12 +348,10 @@ export default function SettingsPage() {
                         <li><strong>Visual Assets</strong>: Avatars, cover photos, and gallery uploads.</li>
                       </ul>
                     </div>
-
                     <div className="space-y-6">
                       <h3 className="text-3xl font-black uppercase italic tracking-tight">2. Sovereign Security</h3>
                       <p className="leading-relaxed">We implement high-impact administrative, technical, and physical safeguards. However, no digital infrastructure is completely absolute. Active membership data is retained while your command remains open.</p>
                     </div>
-
                     <div className="pt-12 border-t-4 border-[#1f1610]/5">
                       <p className="italic text-center font-black text-[#1f1610]/40 uppercase tracking-widest text-xs">
                         By using the infrastructure, you acknowledge these temporal protection protocols.
@@ -362,6 +364,38 @@ export default function SettingsPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Celebration Modal */}
+      <Dialog open={!!unlockedBadge} onOpenChange={() => setUnlockedBadge(null)}>
+        <DialogContent className="rounded-[5rem] border-[15px] border-primary/20 bg-mocha-cream p-24 max-w-2xl text-center shadow-[0_50px_150px_rgba(255,215,0,0.4)] overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.1),transparent)] pointer-events-none" />
+          <div className="relative z-10 space-y-12">
+            <div className="w-48 h-48 bg-primary text-background rounded-[4rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce border-[10px] border-white/40">
+              <Award className="h-24 w-24" />
+            </div>
+            <div className="space-y-6">
+              <h2 className="text-6xl md:text-8xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none animate-in zoom-in-90 duration-500">
+                MILESTONE REACHED
+              </h2>
+              <div className="h-2 w-32 bg-primary mx-auto rounded-full" />
+              <p className="text-2xl font-black text-[#1f1610] uppercase italic tracking-widest">
+                YOU'VE UNLOCKED: <span className="text-primary bg-[#1f1610] px-4 py-1 rounded-lg">{unlockedBadge?.title}</span>
+              </p>
+            </div>
+            <p className="text-lg font-bold text-[#1f1610]/60 uppercase tracking-[0.2em] max-w-sm mx-auto">
+              Your sovereign achievement has been archived in the Achievement Vault.
+            </p>
+            <Button 
+              onClick={() => setUnlockedBadge(null)} 
+              className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-tighter"
+            >
+              CLAIM TROPHY
+            </Button>
+          </div>
+          <div className="absolute top-10 right-10 animate-pulse"><Sparkles className="h-12 w-12 text-primary/40" /></div>
+          <div className="absolute bottom-10 left-10 animate-pulse delay-700"><Sparkles className="h-16 w-16 text-primary/40" /></div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
