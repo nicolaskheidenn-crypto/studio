@@ -4,7 +4,6 @@
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/tabs-ui'; // Fixed hypothetical import
 import { Tabs as ShadcnTabs, TabsList as ShadcnList, TabsTrigger as ShadcnTrigger, TabsContent as ShadcnContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -13,14 +12,14 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Lightbulb, Star, Video, Heart, ShieldCheck, Mail, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, MessageSquare, Lock, Trash2, Download, Coins
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useUserStore, UserProfile } from '@/lib/store';
 import { cn } from '@/lib/utils';
-import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, increment, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -66,16 +65,16 @@ export default function DashboardPage() {
     claimDaily, addPoints, trackVisit, incrementPrompt, incrementTrick, buyProduct
   } = useUserStore();
   
-  // Firestore Collections
-  const resourcesQuery = useMemo(() => query(collection(db, 'resources'), orderBy('timestamp', 'desc')), [db]);
+  // Firestore Collections (Global)
   const activityQuery = useMemo(() => query(collection(db, 'activityWall'), orderBy('timestamp', 'desc')), [db]);
   const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
+  const resourcesQuery = useMemo(() => query(collection(db, 'resources'), orderBy('timestamp', 'desc')), [db]);
   const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
 
-  const { data: sharedResources } = useCollection(resourcesQuery);
   const { data: sharedActivity } = useCollection(activityQuery);
   const { data: newsPosts } = useCollection(newsQuery);
+  const { data: sharedResources } = useCollection(resourcesQuery);
   const { data: shooppyProducts } = useCollection(productsQuery);
   const { data: faqs } = useCollection(faqsQuery);
   
@@ -88,6 +87,7 @@ export default function DashboardPage() {
   const [postText, setPostText] = useState("");
   const [postImages, setPostImages] = useState<string[]>([]);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Resource State
@@ -146,66 +146,85 @@ export default function DashboardPage() {
     });
   };
 
-  const handleDispatchWin = () => {
-    if (!postText || !uid) return;
-    addDoc(collection(db, 'activityWall'), {
-      userId: uid,
-      nickname: nickname,
-      description: postText,
-      images: postImages,
-      isPrivate: false,
-      timestamp: serverTimestamp(),
-      hearts: 0,
-      comments: []
-    });
-    addPoints(uid, 20);
-    setPostText("");
-    setPostImages([]);
-    toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
-    setActiveTab('hub'); 
-  };
-
-  const handleAddComment = (postId: string) => {
-    const text = commentInputs[postId];
-    if (!text?.trim() || !uid) return;
-    const postRef = doc(db, 'activityWall', postId);
-    updateDoc(postRef, {
-      comments: arrayUnion({
-        id: Math.random().toString(36).substr(2, 9),
+  const handleDispatchWin = async () => {
+    if (!postText.trim() || !uid) return;
+    setIsPosting(true);
+    try {
+      await addDoc(collection(db, 'activityWall'), {
         userId: uid,
         nickname: nickname,
-        text: text,
-        timestamp: new Date().toISOString()
-      })
-    });
-    setCommentInputs(prev => ({ ...prev, [postId]: "" }));
-    toast({ title: "Insight Recorded" });
+        description: postText,
+        images: postImages,
+        isPrivate: false,
+        timestamp: serverTimestamp(),
+        hearts: 0,
+        comments: []
+      });
+      addPoints(uid, 20);
+      setPostText("");
+      setPostImages([]);
+      toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
+    } catch (e) {
+      toast({ title: "Dispatch Failed", variant: "destructive" });
+    } finally {
+      setIsPosting(false);
+    }
   };
 
-  const handleHeartPost = (postId: string) => {
+  const handleAddComment = async (postId: string) => {
+    const text = commentInputs[postId];
+    if (!text?.trim() || !uid) return;
+    
     const postRef = doc(db, 'activityWall', postId);
-    updateDoc(postRef, { hearts: increment(1) });
-    toast({ title: "Sovereign Recognition Sent" });
+    try {
+      await updateDoc(postRef, {
+        comments: arrayUnion({
+          id: Math.random().toString(36).substr(2, 9),
+          userId: uid,
+          nickname: nickname,
+          text: text,
+          timestamp: new Date().toISOString()
+        })
+      });
+      setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+      toast({ title: "Insight Recorded" });
+    } catch (e) {
+      toast({ title: "Comment Failed", variant: "destructive" });
+    }
   };
 
-  const handleAddResource = () => {
+  const handleHeartPost = async (postId: string) => {
+    const postRef = doc(db, 'activityWall', postId);
+    try {
+      await updateDoc(postRef, { hearts: increment(1) });
+      toast({ title: "Sovereign Recognition Sent" });
+    } catch (e) {
+      toast({ title: "Action Denied", variant: "destructive" });
+    }
+  };
+
+  const handleAddResource = async () => {
     if (!resTitle || !resContent || !uid) return;
     
-    addDoc(collection(db, 'resources'), {
-      title: resTitle,
-      description: "",
-      type: resType,
-      content: resContent,
-      userId: uid,
-      nickname: nickname,
-      timestamp: serverTimestamp()
-    });
+    try {
+      await addDoc(collection(db, 'resources'), {
+        title: resTitle,
+        description: "",
+        type: resType,
+        content: resContent,
+        userId: uid,
+        nickname: nickname,
+        timestamp: serverTimestamp()
+      });
 
-    if (resType === 'AI_Prompt') incrementPrompt(uid);
-    else if (resType === 'T&Triks') incrementTrick(uid);
-    
-    setResTitle(""); setResContent("");
-    toast({ title: "Strategic Resource Shared", description: "Gains boosted by growth multiplier." });
+      if (resType === 'AI_Prompt') incrementPrompt(uid);
+      else if (resType === 'T&Triks') incrementTrick(uid);
+      
+      setResTitle(""); setResContent("");
+      toast({ title: "Strategic Resource Shared", description: "Gains boosted by growth multiplier." });
+    } catch (e) {
+      toast({ title: "Share Failed", variant: "destructive" });
+    }
   };
 
   const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub' || (purchasedProductIds && purchasedProductIds.includes(p.id)));
@@ -285,7 +304,7 @@ export default function DashboardPage() {
                     {postImages.map((img, i) => (
                       <div key={i} className="relative aspect-square rounded-3xl overflow-hidden group border-2 border-primary/20">
                         <img src={img} className="w-full h-full object-cover" />
-                        <button onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Plus className="h-4 w-4 rotate-45" /></button>
+                        <button onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-4 w-4" /></button>
                       </div>
                     ))}
                   </div>
@@ -295,7 +314,13 @@ export default function DashboardPage() {
                     <Plus className="h-6 w-6 mr-3" /> Gallery (1-6)
                    </Button>
                    <input type="file" min={1} max={6} ref={fileInputRef} hidden multiple accept="image/*" onChange={handleFileChange} />
-                   <Button onClick={handleDispatchWin} className="bg-primary text-background rounded-full px-14 h-16 font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">Dispatch Win</Button>
+                   <Button 
+                    onClick={handleDispatchWin} 
+                    disabled={isPosting || !postText.trim()}
+                    className="bg-primary text-background rounded-full px-14 h-16 font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all disabled:opacity-50"
+                   >
+                    {isPosting ? 'Dispatching...' : 'Dispatch Win'}
+                   </Button>
                 </div>
               </Card>
 
@@ -311,7 +336,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="p-10 pt-0 space-y-8">
                        {news.imageUrl && <img src={news.imageUrl} className="w-full h-[500px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/20" alt={news.title} />}
-                       <p className="text-xl font-bold text-foreground leading-relaxed">{news.content}</p>
+                       <p className="text-xl font-bold text-foreground leading-relaxed whitespace-pre-wrap">{news.content}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -324,13 +349,13 @@ export default function DashboardPage() {
                          <div className="flex-1">
                             <p className="font-black text-xl uppercase text-foreground">{post.nickname}</p>
                             <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">
-                              {post.timestamp?.toDate ? post.timestamp.toDate().toLocaleString() : 'Recent'}
+                              {post.timestamp?.toDate ? post.timestamp.toDate().toLocaleString() : 'Recent Session'}
                             </p>
                          </div>
                        </div>
                     </CardHeader>
                     <CardContent className="p-10 pt-0 space-y-8">
-                       <p className="text-2xl font-black text-foreground leading-tight tracking-tight uppercase italic">{post.description}</p>
+                       <p className="text-2xl font-black text-foreground leading-tight tracking-tight uppercase italic whitespace-pre-wrap">{post.description}</p>
                        {post.images?.length > 0 && (
                          <div className={cn("grid gap-4", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
                            {post.images.map((img: string, i: number) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" alt="Activity" />)}
@@ -518,7 +543,7 @@ export default function DashboardPage() {
                               <div key={r.id} className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 space-y-4">
                                  <h4 className="font-black text-foreground uppercase text-lg italic">{r.title}</h4>
                                  <p className="text-[11px] text-primary font-black uppercase tracking-widest">By @{r.nickname}</p>
-                                 <p className="text-base font-bold text-foreground/70 leading-relaxed">{r.content}</p>
+                                 <p className="text-base font-bold text-foreground/70 leading-relaxed whitespace-pre-wrap">{r.content}</p>
                               </div>
                             ))}
                          </ShadcnContent>
