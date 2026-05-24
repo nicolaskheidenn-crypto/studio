@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Trophy, ArrowRight, Lock, Award, ShieldCheck, 
   Flame, Zap, Target, Coffee, BarChart3, ChevronRight 
@@ -76,7 +77,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     if (isDayComplete && isMounted && uid) {
-      if (currentTaskDay === 7) {
+      if (currentTaskDay === 30) {
         setShowFinalAward(true);
       } else {
         setShowAward(true);
@@ -99,6 +100,8 @@ export default function TaskDoPage() {
   const growthMultiplier = (1 + level / 10).toFixed(1);
 
   if (!isMounted) return null;
+
+  const ALL_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
@@ -159,11 +162,11 @@ export default function TaskDoPage() {
           <div className="lg:col-span-2 space-y-12">
             <header className="text-center space-y-4">
               <h1 className="text-6xl md:text-8xl font-headline font-black text-white tracking-tighter uppercase italic">Task<span className="text-primary">Do</span></h1>
-              <p className="text-primary/40 text-[10px] font-black uppercase tracking-[0.8em] max-w-sm mx-auto">Sovereign Routine Infrastructure</p>
+              <p className="text-primary/40 text-[10px] font-black uppercase tracking-[0.8em] max-w-sm mx-auto">Sovereign 30-Day Routine Infrastructure</p>
             </header>
 
             <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide px-2 lg:hidden">
-              {[1, 2, 3, 4, 5, 6, 7].map(d => (
+              {ALL_DAYS.map(d => (
                 <Button 
                   key={d}
                   variant={currentTaskDay === d ? "default" : "outline"}
@@ -182,7 +185,7 @@ export default function TaskDoPage() {
               <div className="text-center p-24 bg-card/20 rounded-[4rem] border-8 border-dashed border-primary/10 shadow-2xl animate-in fade-in zoom-in duration-700">
                 <Lock className="h-20 w-20 mx-auto text-primary/10 mb-8" />
                 <p className="text-3xl text-white/30 font-black uppercase tracking-tighter italic">Waiting for Host deployment...</p>
-                <p className="text-[10px] font-black text-primary/20 uppercase mt-4 tracking-widest">Protocol Sync in progress</p>
+                <p className="text-[10px] font-black text-primary/20 uppercase mt-4 tracking-widest">Protocol Sync (Day {currentTaskDay})</p>
               </div>
             ) : (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-700">
@@ -248,7 +251,7 @@ export default function TaskDoPage() {
                 <Award className="h-32 w-32 mx-auto mb-10 text-primary animate-pulse relative z-10" />
                 <h2 className="text-7xl font-headline font-black mb-6 tracking-tighter uppercase italic relative z-10">Sovereign Mastery</h2>
                 <p className="text-2xl font-black uppercase tracking-widest opacity-60 mb-14 relative z-10">
-                  Status: ELITE STRATEGIST.<br/>Full 7-Day routine completed.
+                  Status: ELITE STRATEGIST.<br/>Full 30-Day Fail-Proof Routine completed.
                 </p>
                 <Button 
                   className="rounded-full bg-primary text-background font-black px-24 h-28 text-4xl shadow-[0_40px_80px_rgba(255,215,0,0.5)] hover:scale-105 transition-transform uppercase tracking-tighter relative z-10" 
@@ -263,52 +266,54 @@ export default function TaskDoPage() {
           {/* Right Side: Consistency Roadmap */}
           <div className="hidden lg:flex flex-col gap-10">
              <div className="px-6 space-y-2">
-                <h3 className="text-2xl font-black text-foreground uppercase italic">7-Day Roadmap</h3>
+                <h3 className="text-2xl font-black text-foreground uppercase italic">30-Day Roadmap</h3>
                 <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Protocol Cycle</p>
              </div>
 
-             <div className="space-y-6">
-                {[1, 2, 3, 4, 5, 6, 7].map((d) => {
-                  const isActive = currentTaskDay === d;
-                  const isPast = currentTaskDay > d;
-                  const isLocked = currentTaskDay < d;
+             <ScrollArea className="h-[700px] pr-4">
+               <div className="space-y-6">
+                  {ALL_DAYS.map((d) => {
+                    const isActive = currentTaskDay === d;
+                    const isPast = currentTaskDay > d;
+                    const isLocked = currentTaskDay < d;
 
-                  return (
-                    <div 
-                      key={d} 
-                      className={cn(
-                        "relative flex items-center gap-6 p-6 rounded-[2.5rem] border-4 transition-all duration-500",
-                        isActive ? "bg-primary/20 border-primary shadow-xl scale-105" : 
-                        isPast ? "bg-primary/5 border-primary/20 opacity-40" : 
-                        "bg-card/20 border-white/5 opacity-20"
-                      )}
-                    >
-                       <div className={cn(
-                        "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic shadow-inner",
-                        isActive ? "bg-primary text-background" : 
-                        isPast ? "bg-primary/20 text-primary" : 
-                        "bg-white/5 text-white/20"
-                       )}>
-                        {isPast ? <ShieldCheck className="h-8 w-8" /> : `D${d}`}
-                       </div>
-                       
-                       <div className="flex-1">
-                          <p className={cn("text-xs font-black uppercase tracking-widest", isActive ? "text-primary" : "text-foreground/40")}>
-                            {isActive ? "ACTIVE PROTOCOL" : isPast ? "ARCHIVED" : "LOCKED"}
-                          </p>
-                       </div>
+                    return (
+                      <div 
+                        key={d} 
+                        className={cn(
+                          "relative flex items-center gap-6 p-6 rounded-[2.5rem] border-4 transition-all duration-500",
+                          isActive ? "bg-primary/20 border-primary shadow-xl scale-105" : 
+                          isPast ? "bg-primary/5 border-primary/20 opacity-40" : 
+                          "bg-card/20 border-white/5 opacity-20"
+                        )}
+                      >
+                         <div className={cn(
+                          "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic shadow-inner",
+                          isActive ? "bg-primary text-background" : 
+                          isPast ? "bg-primary/20 text-primary" : 
+                          "bg-white/5 text-white/20"
+                         )}>
+                          {isPast ? <ShieldCheck className="h-8 w-8" /> : `D${d}`}
+                         </div>
+                         
+                         <div className="flex-1">
+                            <p className={cn("text-xs font-black uppercase tracking-widest", isActive ? "text-primary" : "text-foreground/40")}>
+                              {isActive ? "ACTIVE PROTOCOL" : isPast ? "ARCHIVED" : "LOCKED"}
+                            </p>
+                         </div>
 
-                       {isActive && <ChevronRight className="h-6 w-6 text-primary animate-pulse" />}
-                       {isLocked && <Lock className="h-5 w-5 text-white/10" />}
-                    </div>
-                  );
-                })}
-             </div>
+                         {isActive && <ChevronRight className="h-6 w-6 text-primary animate-pulse" />}
+                         {isLocked && <Lock className="h-5 w-5 text-white/10" />}
+                      </div>
+                    );
+                  })}
+               </div>
+             </ScrollArea>
 
              <Card className="mt-6 rounded-[3rem] border-4 border-dashed border-primary/20 bg-card/10 p-10 text-center">
                 <Award className="h-10 w-10 text-primary/20 mx-auto mb-4" />
                 <p className="text-[10px] font-black text-primary/20 uppercase tracking-[0.4em] leading-relaxed">
-                  Complete all 7 days to unlock the "Sovereign Elite" Achievement
+                  Complete all 30 days to unlock the "Sovereign Elite" Achievement
                 </p>
              </Card>
           </div>

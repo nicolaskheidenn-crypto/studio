@@ -88,15 +88,6 @@ export default function AdminPage() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setter(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSaveProduct = async () => {
     const data = {
       title: prodTitle,
@@ -317,8 +308,8 @@ export default function AdminPage() {
                 <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]"><ListChecks className="h-12 w-12 text-[#FFD700]" /> Routine Protocol Updates</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
                    <div className="space-y-3">
-                      <Label className="text-[#1f1610]">Target Day (1-7)</Label>
-                      <Input type="number" min={1} max={7} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="h-18 font-black text-center text-3xl bg-white text-[#1f1610]" />
+                      <Label className="text-[#1f1610]">Target Day (1-30)</Label>
+                      <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="h-18 font-black text-center text-3xl bg-white text-[#1f1610]" />
                    </div>
                    <div className="md:col-span-2 space-y-3">
                       <Label className="text-[#1f1610]">Task Headline</Label>

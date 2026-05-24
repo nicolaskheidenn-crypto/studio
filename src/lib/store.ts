@@ -335,7 +335,7 @@ export const useUserStore = create<UserProgressStore>()(
       unlockNextDay: (uid) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
-        get().updateProfile(uid, { currentTaskDay: Math.min(current.currentTaskDay + 1, 7) });
+        get().updateProfile(uid, { currentTaskDay: Math.min(current.currentTaskDay + 1, 30) });
       },
 
       addCapsule: (uid, cap) => {
