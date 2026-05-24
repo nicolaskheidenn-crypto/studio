@@ -4,7 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Coffee, CheckCircle2, Loader2, Eye, EyeOff, ShieldCheck, Zap, Award } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -86,18 +86,18 @@ export default function SignUpPage() {
         <Coffee className="w-80 h-80 text-primary rotate-45" />
       </div>
 
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-[3rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 backdrop-blur-sm bg-[#1f1610]">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 rounded-[3rem] shadow-2xl overflow-hidden border-8 border-primary/20 relative z-10 backdrop-blur-sm bg-[#1f1610]">
         <div className="p-12 md:p-16 space-y-10 bg-[#1f1610] flex flex-col justify-center border-r-4 border-primary/10">
           <div className="space-y-8 relative z-10">
             <div className="flex flex-col mb-8">
               <h1 className="text-9xl font-headline font-black tracking-tighter text-[#fdfaf6] leading-none">ND</h1>
-              <div className="h-4 w-40 bg-[#FFD700] rounded-full" />
+              <div className="h-4 w-40 bg-[#FFD700] rounded-full shadow-[0_0_20px_rgba(255,215,0,0.3)]" />
             </div>
             <h2 className="text-5xl md:text-6xl font-headline font-black leading-tight tracking-tighter uppercase text-[#fdfaf6]">
-              Build your <span className="text-primary italic">Sovereign</span> Empire.
+              Found your <span className="text-primary italic">Sovereign</span> Empire.
             </h2>
             <p className="text-[#fdfaf6] text-xl font-black uppercase tracking-widest leading-relaxed">
-              Every great strategy starts with a single daily task. Nico Digital provides the root for your growth.
+              Precision execution infrastructure for high-impact growth.
             </p>
 
             <ul className="space-y-6 pt-4">
@@ -105,7 +105,7 @@ export default function SignUpPage() {
                 'Strategic routine checklists',
                 'Advanced FireQuizzo testing',
                 'GoalCaps vision vault',
-                'MeText Secure Networking',
+                'Global Resource Syncing',
               ].map((text, i) => (
                 <li key={i} className="flex items-center gap-4">
                   <div className="bg-primary p-1.5 rounded-full shadow-lg">
@@ -118,10 +118,10 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="p-10 md:p-14 space-y-8 bg-mocha-cream overflow-y-auto">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">New Empire</h1>
-            <p className="text-sm text-primary font-black uppercase tracking-[0.4em] opacity-80">Initialize Strategist Account</p>
+        <div className="p-10 md:p-14 space-y-12 bg-mocha-cream overflow-y-auto">
+          <div className="space-y-2 text-center">
+            <h1 className="text-4xl md:text-5xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">Create Account</h1>
+            <p className="text-sm text-primary font-black uppercase tracking-[0.4em] opacity-80">Initialize Strategic Protocol</p>
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-4">
@@ -175,16 +175,39 @@ export default function SignUpPage() {
             </div>
             <Button
               type="submit"
-              className="w-full rounded-2xl h-16 bg-[#FFD700] text-[#1f1610] font-black text-lg shadow-xl uppercase tracking-widest"
+              className="w-full rounded-2xl h-20 bg-[#FFD700] text-[#1f1610] font-black text-2xl shadow-xl uppercase tracking-widest active:scale-95 transition-all"
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-7 w-7 animate-spin" /> : 'BUILD EMPIRE'}
+              {isLoading ? <Loader2 className="h-10 w-10 animate-spin" /> : 'BUILD EMPIRE'}
             </Button>
           </form>
 
-          <p className="text-center text-[10px] text-[#1f1610]/60 font-black uppercase pt-6 border-t border-[#1f1610]/5">
-            Already a strategist? <Link href="/login" className="text-primary font-black underline">Sign In</Link>
-          </p>
+          <div className="pt-10 space-y-10 border-t-2 border-[#1f1610]/5">
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div className="space-y-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+                  <ShieldCheck className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-[#1f1610]/40">Secure Vault</p>
+              </div>
+              <div className="space-y-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-[#1f1610]/40">Fast Growth</p>
+              </div>
+              <div className="space-y-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+                  <Award className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-[#1f1610]/40">Master Status</p>
+              </div>
+            </div>
+
+            <p className="text-center text-[10px] text-[#1f1610]/60 font-black uppercase tracking-[0.2em]">
+              Already a strategist? <Link href="/login" className="text-primary font-black hover:underline underline-offset-4 decoration-2">Sign In</Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

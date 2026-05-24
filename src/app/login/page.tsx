@@ -4,7 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Coffee, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Coffee, Loader2, Eye, EyeOff, ShieldCheck, Zap, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -68,13 +68,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="p-12 md:p-16 space-y-10 bg-mocha-cream overflow-y-auto">
+        <div className="p-12 md:p-16 space-y-12 bg-mocha-cream overflow-y-auto">
           <div className="space-y-4 text-center">
             <h1 className="text-5xl font-headline font-black text-[#1f1610] tracking-tight uppercase italic">Access Root</h1>
             <p className="text-sm text-[#FFD700] font-black uppercase tracking-[0.6em]">Protocol Authorization Required</p>
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-6">
+          <form onSubmit={handleEmailLogin} className="space-y-8">
             <div className="space-y-3">
               <Label className="text-[#1f1610] font-black text-[10px]">STRATEGIC EMAIL</Label>
               <Input 
@@ -104,14 +104,35 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full rounded-full h-20 bg-[#FFD700] text-[#1f1610] font-black text-2xl shadow-xl uppercase tracking-tighter" disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'AUTHORIZE SESSION'}
+            <Button type="submit" className="w-full rounded-full h-24 bg-[#FFD700] text-[#1f1610] font-black text-2xl shadow-xl uppercase tracking-tighter active:scale-95 transition-all" disabled={isLoading}>
+              {isLoading ? <Loader2 className="h-10 w-10 animate-spin" /> : 'AUTHORIZE SESSION'}
             </Button>
           </form>
 
-          <div className="text-center pt-4 border-t-2 border-[#1f1610]/5">
-            <p className="text-[11px] text-[#1f1610]/40 font-black uppercase tracking-[0.2em]">
-              New strategist? <Link href="/signup" className="text-[#FFD700] font-black hover:underline">Create Account</Link>
+          <div className="pt-10 space-y-10 border-t-2 border-[#1f1610]/5">
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div className="space-y-3">
+                <div className="w-12 h-12 bg-[#1f1610]/5 rounded-2xl flex items-center justify-center mx-auto">
+                  <ShieldCheck className="h-6 w-6 text-[#1f1610]/40" />
+                </div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-[#1f1610]/30">Encrypted</p>
+              </div>
+              <div className="space-y-3">
+                <div className="w-12 h-12 bg-[#1f1610]/5 rounded-2xl flex items-center justify-center mx-auto">
+                  <Zap className="h-6 w-6 text-[#1f1610]/40" />
+                </div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-[#1f1610]/30">Live Sync</p>
+              </div>
+              <div className="space-y-3">
+                <div className="w-12 h-12 bg-[#1f1610]/5 rounded-2xl flex items-center justify-center mx-auto">
+                  <Lock className="h-6 w-6 text-[#1f1610]/40" />
+                </div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-[#1f1610]/30">Root Only</p>
+              </div>
+            </div>
+
+            <p className="text-center text-[11px] text-[#1f1610]/40 font-black uppercase tracking-[0.2em]">
+              New strategist? <Link href="/signup" className="text-[#FFD700] font-black hover:underline underline-offset-4 decoration-2">Create Account</Link>
             </p>
           </div>
         </div>
