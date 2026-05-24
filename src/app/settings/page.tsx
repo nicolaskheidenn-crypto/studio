@@ -45,16 +45,16 @@ const DEFAULT_PROFILE: UserProfile = {
 };
 
 const SYSTEM_BADGES: BadgeType[] = [
-  { id: 'sb-quiz', title: 'Sovereign Mastery', description: 'Passed a strategic quiz protocol.', difficulty: 'Silver', iconType: 'quiz' },
-  { id: 'sb-veteran', title: 'Strategic Veteran', description: '30 days of active empire participation.', difficulty: 'Gold', iconType: 'veteran' },
-  { id: 'sb-consistency', title: 'Consistency King', description: 'Completed a full 7-day routine cycle.', difficulty: 'Sovereign', iconType: 'consistency' },
-  { id: 'sb-explorer', title: 'Protocol Explorer', description: 'Explored all hubs of the infrastructure.', difficulty: 'Bronze', iconType: 'explorer' },
-  { id: 'sb-prompt', title: 'Prompt Architect', description: 'Uploaded 10 AI Prompt strategic resources.', difficulty: 'Silver', iconType: 'prompt' },
-  { id: 'sb-trick', title: 'Trick Strategist', description: 'Uploaded 10 T&Triks tactical resources.', difficulty: 'Silver', iconType: 'trick' },
-  { id: 'sb-level-15', title: 'Elite Executioner', description: 'Reached Level 15 strategic mastery.', difficulty: 'Gold', iconType: 'veteran' },
-  { id: 'sb-level-20', title: 'Grand Strategist', description: 'Reached Level 20 strategic mastery.', difficulty: 'Gold', iconType: 'veteran' },
-  { id: 'sb-level-30', title: 'SOVEREIGN ZENITH', description: 'REACHED THE ABSOLUTE MAXIMUM LEVEL 30 STATUS.', difficulty: 'Sovereign', iconType: 'veteran' },
-  { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'Sovereign', iconType: 'consistency' },
+  { id: 'sb-quiz', title: 'SOVEREIGN MASTERY', description: 'PASSED A STRATEGIC QUIZ PROTOCOL.', difficulty: 'SILVER', iconType: 'quiz' },
+  { id: 'sb-veteran', title: 'STRATEGIC VETERAN', description: '30 DAYS OF ACTIVE EMPIRE PARTICIPATION.', difficulty: 'GOLD', iconType: 'veteran' },
+  { id: 'sb-consistency', title: 'CONSISTENCY KING', description: 'COMPLETED A FULL 7-DAY ROUTINE CYCLE.', difficulty: 'SOVEREIGN', iconType: 'consistency' },
+  { id: 'sb-explorer', title: 'PROTOCOL EXPLORER', description: 'EXPLORED ALL HUBS OF THE INFRASTRUCTURE.', difficulty: 'BRONZE', iconType: 'explorer' },
+  { id: 'sb-prompt', title: 'PROMPT ARCHITECT', description: 'UPLOADED 10 AI PROMPT STRATEGIC RESOURCES.', difficulty: 'SILVER', iconType: 'prompt' },
+  { id: 'sb-trick', title: 'TRICK STRATEGIST', description: 'UPLOADED 10 T&TRIKS TACTICAL RESOURCES.', difficulty: 'SILVER', iconType: 'trick' },
+  { id: 'sb-level-15', title: 'ELITE EXECUTIONER', description: 'REACHED LEVEL 15 STRATEGIC MASTERY.', difficulty: 'GOLD', iconType: 'veteran' },
+  { id: 'sb-level-20', title: 'GRAND STRATEGIST', description: 'REACHED LEVEL 20 STRATEGIC MASTERY.', difficulty: 'GOLD', iconType: 'veteran' },
+  { id: 'sb-level-30', title: 'SOVEREIGN ZENITH', description: 'REACHED THE ABSOLUTE MAXIMUM LEVEL 30 STATUS.', difficulty: 'SOVEREIGN', iconType: 'veteran' },
+  { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'SOVEREIGN', iconType: 'consistency' },
 ];
 
 export default function SettingsPage() {
@@ -295,31 +295,28 @@ export default function SettingsPage() {
                   </div>
                </div>
                
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   {allBadges.map((b) => {
                     const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
                       <div key={b.id} className={cn(
-                        "p-12 bg-white rounded-[4.5rem] border-[6px] flex items-center gap-10 group transition-all relative overflow-hidden", 
-                        isUnlocked ? "border-primary shadow-[0_30px_60px_rgba(0,0,0,0.05)]" : "border-[#1f1610]/5 opacity-40"
+                        "p-8 bg-white rounded-[3rem] border-[4px] flex items-center gap-8 group transition-all relative overflow-hidden", 
+                        isUnlocked ? "border-primary/40 shadow-xl" : "border-[#1f1610]/5 opacity-40"
                       )}>
-                         <div className={cn("w-28 h-28 rounded-[2.5rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform border-4 shrink-0", 
-                           !isUnlocked ? 'bg-[#1f1610]/5 border-[#1f1610]/10' :
-                           b.difficulty === 'Bronze' ? 'bg-[#cd7f32] border-[#cd7f32]/20' : 
-                           b.difficulty === 'Silver' ? 'bg-[#c0c0c0] border-[#c0c0c0]/20' : 
-                           b.difficulty === 'Gold' ? 'bg-primary border-primary/20' : 'bg-[#1f1610] border-[#FFD700]/40')}>
-                          {isUnlocked ? <Award className="h-14 w-14 text-white" /> : <Lock className="h-12 w-12 text-[#1f1610]/20" />}
+                         <div className={cn("w-20 h-20 rounded-[1.5rem] flex items-center justify-center shadow-lg border-2 shrink-0 transition-transform group-hover:scale-105", 
+                           !isUnlocked ? 'bg-[#1f1610]/5 border-[#1f1610]/5' :
+                           b.difficulty === 'SOVEREIGN' ? 'bg-[#1f1610] border-primary/40' : 'bg-primary/10 border-primary/20')}>
+                          {isUnlocked ? <Award className={cn("h-10 w-10", b.difficulty === 'SOVEREIGN' ? "text-primary" : "text-primary/60")} /> : <Lock className="h-8 w-8 text-[#1f1610]/10" />}
                        </div>
-                       <div className="space-y-4 flex-1">
-                         <div className={cn("px-6 py-1.5 rounded-full w-fit text-[10px] font-black uppercase tracking-[0.2em] shadow-inner mb-2",
-                            !isUnlocked ? 'bg-[#1f1610]/5 text-[#1f1610]/40' :
-                            b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary/60'
+                       <div className="space-y-2 flex-1">
+                         <div className={cn("px-4 py-1 rounded-full w-fit text-[8px] font-black uppercase tracking-[0.3em] mb-1",
+                            !isUnlocked ? 'bg-[#1f1610]/5 text-[#1f1610]/20' :
+                            b.difficulty === 'SOVEREIGN' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary'
                          )}>
                             {b.difficulty}
                          </div>
-                         <h4 className="text-4xl md:text-5xl font-black text-[#1f1610] uppercase tracking-tighter italic leading-tight">{b.title}</h4>
-                         <p className="text-[11px] font-black text-[#1f1610]/40 uppercase tracking-[0.3em] leading-relaxed max-w-xs">{b.description}</p>
-                         {isUnlocked && <CheckCircle2 className="absolute top-8 right-8 h-8 w-8 text-green-500/20" />}
+                         <h4 className="text-2xl md:text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter leading-none">{b.title}</h4>
+                         <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-[0.2em] leading-relaxed line-clamp-2">{b.description}</p>
                        </div>
                     </div>
                   )})}
