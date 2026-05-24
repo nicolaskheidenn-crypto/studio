@@ -45,16 +45,16 @@ const DEFAULT_PROFILE: UserProfile = {
 };
 
 const SYSTEM_BADGES: BadgeType[] = [
-  { id: 'sb-quiz', title: 'SOVEREIGN MASTERY', description: 'PASSED A STRATEGIC QUIZ PROTOCOL.', difficulty: 'SILVER', iconType: 'quiz' },
-  { id: 'sb-veteran', title: 'STRATEGIC VETERAN', description: '30 DAYS OF ACTIVE EMPIRE PARTICIPATION.', difficulty: 'GOLD', iconType: 'veteran' },
-  { id: 'sb-consistency', title: 'CONSISTENCY KING', description: 'COMPLETED A FULL 7-DAY ROUTINE CYCLE.', difficulty: 'SOVEREIGN', iconType: 'consistency' },
-  { id: 'sb-explorer', title: 'PROTOCOL EXPLORER', description: 'EXPLORED ALL HUBS OF THE INFRASTRUCTURE.', difficulty: 'BRONZE', iconType: 'explorer' },
-  { id: 'sb-prompt', title: 'PROMPT ARCHITECT', description: 'UPLOADED 10 AI PROMPT STRATEGIC RESOURCES.', difficulty: 'SILVER', iconType: 'prompt' },
-  { id: 'sb-trick', title: 'TRICK STRATEGIST', description: 'UPLOADED 10 T&TRIKS TACTICAL RESOURCES.', difficulty: 'SILVER', iconType: 'trick' },
-  { id: 'sb-level-15', title: 'ELITE EXECUTIONER', description: 'REACHED LEVEL 15 STRATEGIC MASTERY.', difficulty: 'GOLD', iconType: 'veteran' },
-  { id: 'sb-level-20', title: 'GRAND STRATEGIST', description: 'REACHED LEVEL 20 STRATEGIC MASTERY.', difficulty: 'GOLD', iconType: 'veteran' },
-  { id: 'sb-level-30', title: 'SOVEREIGN ZENITH', description: 'REACHED THE ABSOLUTE MAXIMUM LEVEL 30 STATUS.', difficulty: 'SOVEREIGN', iconType: 'veteran' },
-  { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'SOVEREIGN', iconType: 'consistency' },
+  { id: 'sb-quiz', title: 'SOVEREIGN MASTERY', description: 'PASSED A STRATEGIC QUIZ PROTOCOL.', difficulty: 'Silver', iconType: 'quiz' },
+  { id: 'sb-veteran', title: 'STRATEGIC VETERAN', description: '30 DAYS OF ACTIVE EMPIRE PARTICIPATION.', difficulty: 'Gold', iconType: 'veteran' },
+  { id: 'sb-consistency', title: 'CONSISTENCY KING', description: 'COMPLETED A FULL 7-DAY ROUTINE CYCLE.', difficulty: 'Sovereign', iconType: 'consistency' },
+  { id: 'sb-explorer', title: 'PROTOCOL EXPLORER', description: 'EXPLORED ALL HUBS OF THE INFRASTRUCTURE.', difficulty: 'Bronze', iconType: 'explorer' },
+  { id: 'sb-prompt', title: 'PROMPT ARCHITECT', description: 'UPLOADED 10 AI PROMPT STRATEGIC RESOURCES.', difficulty: 'Silver', iconType: 'prompt' },
+  { id: 'sb-trick', title: 'TRICK STRATEGIST', description: 'UPLOADED 10 T&TRIKS TACTICAL RESOURCES.', difficulty: 'Silver', iconType: 'trick' },
+  { id: 'sb-level-15', title: 'ELITE EXECUTIONER', description: 'REACHED LEVEL 15 STRATEGIC MASTERY.', difficulty: 'Gold', iconType: 'veteran' },
+  { id: 'sb-level-20', title: 'GRAND STRATEGIST', description: 'REACHED LEVEL 20 STRATEGIC MASTERY.', difficulty: 'Gold', iconType: 'veteran' },
+  { id: 'sb-level-30', title: 'SOVEREIGN ZENITH', description: 'REACHED THE ABSOLUTE MAXIMUM LEVEL 30 STATUS.', difficulty: 'Sovereign', iconType: 'veteran' },
+  { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'Sovereign', iconType: 'consistency' },
 ];
 
 export default function SettingsPage() {
@@ -285,13 +285,16 @@ export default function SettingsPage() {
 
           <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Card className="rounded-[4.5rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl overflow-hidden">
-               <div className="text-center mb-20 space-y-8">
-                  <div className="w-24 h-24 bg-primary text-[#1f1610] rounded-[2rem] flex items-center justify-center mx-auto shadow-[0_20px_40px_rgba(255,215,0,0.3)] border-4 border-white/20">
-                    <Trophy className="h-12 w-12" />
+               <div className="text-center mb-16 space-y-8">
+                  <div className="relative w-20 h-20 mx-auto">
+                    <div className="absolute inset-0 bg-primary/40 blur-xl rounded-full" />
+                    <div className="relative w-20 h-20 bg-primary text-[#1f1610] rounded-2xl flex items-center justify-center shadow-2xl border-2 border-white/20">
+                      <Trophy className="h-10 w-10" />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <h2 className="text-7xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">ACHIEVEMENT VAULT</h2>
-                    <p className="text-[11px] text-[#1f1610] font-black uppercase tracking-[0.8em] opacity-80">SOVEREIGN MILESTONES UNLOCKED</p>
+                  <div className="space-y-3">
+                    <h2 className="text-6xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">ACHIEVEMENT VAULT</h2>
+                    <p className="text-[10px] text-[#1f1610] font-black uppercase tracking-[0.6em] opacity-80">SOVEREIGN MILESTONES UNLOCKED</p>
                   </div>
                </div>
                
@@ -300,18 +303,18 @@ export default function SettingsPage() {
                     const isUnlocked = (profile.unlockedBadgeIds || []).includes(b.id);
                     return (
                       <div key={b.id} className={cn(
-                        "p-8 bg-white rounded-[3rem] border-[4px] flex items-center gap-8 group transition-all relative overflow-hidden", 
-                        isUnlocked ? "border-primary/40 shadow-xl" : "border-[#1f1610]/5 opacity-40"
+                        "p-10 bg-white rounded-[3.5rem] border-[6px] flex items-center gap-10 group transition-all relative overflow-hidden", 
+                        isUnlocked ? "border-primary/20 shadow-xl" : "border-[#1f1610]/5 opacity-40"
                       )}>
-                         <div className={cn("w-20 h-20 rounded-[1.5rem] flex items-center justify-center shadow-lg border-2 shrink-0 transition-transform group-hover:scale-105", 
+                         <div className={cn("w-20 h-20 rounded-[1.8rem] flex items-center justify-center shadow-lg border-2 shrink-0 transition-transform group-hover:scale-105", 
                            !isUnlocked ? 'bg-[#1f1610]/5 border-[#1f1610]/5' :
-                           b.difficulty === 'SOVEREIGN' ? 'bg-[#1f1610] border-primary/40' : 'bg-primary/10 border-primary/20')}>
-                          {isUnlocked ? <Award className={cn("h-10 w-10", b.difficulty === 'SOVEREIGN' ? "text-primary" : "text-primary/60")} /> : <Lock className="h-8 w-8 text-[#1f1610]/10" />}
+                           b.difficulty === 'Sovereign' ? 'bg-[#1f1610] border-primary/40' : 'bg-primary/10 border-primary/20')}>
+                          {isUnlocked ? <Award className={cn("h-10 w-10", b.difficulty === 'Sovereign' ? "text-primary" : "text-primary/60")} /> : <Lock className="h-8 w-8 text-[#1f1610]/10" />}
                        </div>
                        <div className="space-y-2 flex-1">
                          <div className={cn("px-4 py-1 rounded-full w-fit text-[8px] font-black uppercase tracking-[0.3em] mb-1",
                             !isUnlocked ? 'bg-[#1f1610]/5 text-[#1f1610]/20' :
-                            b.difficulty === 'SOVEREIGN' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary'
+                            b.difficulty === 'Sovereign' ? 'bg-[#1f1610] text-primary' : 'bg-primary/10 text-primary'
                          )}>
                             {b.difficulty}
                          </div>
@@ -374,7 +377,7 @@ export default function SettingsPage() {
               <Award className="h-24 w-24" />
             </div>
             <div className="space-y-6">
-              <h2 className="text-6xl md:text-8xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none animate-in zoom-in-90 duration-500">
+              <h2 className="text-6xl md:text-7xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none animate-in zoom-in-90 duration-500">
                 MILESTONE REACHED
               </h2>
               <div className="h-2 w-32 bg-primary mx-auto rounded-full" />
