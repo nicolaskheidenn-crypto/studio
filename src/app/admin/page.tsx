@@ -102,7 +102,7 @@ export default function AdminPage() {
       title: prodTitle,
       description: prodDesc,
       imageUrl: prodImg,
-      fileUrl: prodFile,
+      fileUrl: prodFile, // Shop link for Marketplace, Download link for Hub
       type: prodType,
       placement: prodPlacement,
       requiredLevel: prodLevel,
@@ -284,7 +284,7 @@ export default function AdminPage() {
           <CardHeader className="text-center space-y-8">
             <Key className="h-16 w-16 text-[#FFD700] mx-auto" />
             <CardTitle className="text-5xl font-headline font-black uppercase italic tracking-tighter text-[#1f1610]">Verify Host</CardTitle>
-          </CardHeader>
+          </Header>
           <CardContent className="mt-10">
             <form onSubmit={handleAuthorize} className="space-y-10">
               <Input type="password" placeholder="Protocol Key" className="h-24 text-center text-5xl font-mono rounded-[2.5rem] border-4 border-[#1f1610]/10 bg-white text-[#1f1610]" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} />
@@ -337,22 +337,26 @@ export default function AdminPage() {
                           </select>
                         </div>
                         <div className="space-y-3">
-                          <Label className="text-[#1f1610]">Placement</Label>
+                          <Label className="text-[#1f1610]">Placement Hub</Label>
                           <select className="w-full h-18 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-8 font-black uppercase text-sm text-[#1f1610]" value={prodPlacement} onChange={e => setProdPlacement(e.target.value as any)}>
-                              <option value="Hub">Root Hub</option>
-                              <option value="Marketplace">Shooppy</option>
+                              <option value="Hub">Root Hub (Points/Level)</option>
+                              <option value="Marketplace">Shooppy (External Shop)</option>
                           </select>
                         </div>
                       </div>
                    </div>
                    <div className="space-y-8">
+                      <div className="space-y-3">
+                        <Label className="text-[#1f1610]">File/Shop URL</Label>
+                        <Input placeholder="https://..." value={prodFile} onChange={e => setProdFile(e.target.value)} className="h-18 font-black text-sm bg-white text-[#1f1610]" />
+                      </div>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-3">
-                          <Label className="text-[#1f1610]">Level req.</Label>
+                          <Label className="text-[#1f1610]">Level Req.</Label>
                           <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-18 font-black text-3xl text-center bg-white text-[#1f1610]" />
                         </div>
                         <div className="space-y-3">
-                          <Label className="text-[#1f1610]">Price</Label>
+                          <Label className="text-[#1f1610]">Points Price</Label>
                           <div className="relative">
                             <Coins className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-[#FFD700]" />
                             <Input type="number" min={0} value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-18 pl-12 font-black text-3xl text-center bg-white text-[#1f1610]" />

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, Lock
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -72,11 +72,11 @@ export default function DashboardPage() {
   const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
 
-  const { data: sharedActivity } = useCollection(activityQuery);
-  const { data: newsPosts } = useCollection(newsQuery);
-  const { data: sharedResources } = useCollection(resourcesQuery);
-  const { data: shooppyProducts } = useCollection(productsQuery);
-  const { data: faqs } = useCollection(faqsQuery);
+  const { data: sharedActivity = [] } = useCollection(activityQuery);
+  const { data: newsPosts = [] } = useCollection(newsQuery);
+  const { data: sharedResources = [] } = useCollection(resourcesQuery);
+  const { data: shooppyProducts = [] } = useCollection(productsQuery);
+  const { data: faqs = [] } = useCollection(faqsQuery);
   
   const [showDaily, setShowDaily] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
@@ -123,27 +123,18 @@ export default function DashboardPage() {
     toast({ title: "Daily Sync Complete", description: "Strategic rewards added with growth multiplier." });
   };
 
-  const handleAcquireAsset = (productId: string, price: number) => {
+  const handleAcquireAsset = (product: any) => {
     if (!uid) return;
-    if (points < price) {
+    if (points < product.price) {
       toast({ title: "Insufficient Points", description: "Deploy more routines to earn points.", variant: "destructive" });
       return;
     }
-    buyProduct(uid, productId, price);
-    toast({ title: "Sovereign Acquisition", description: "Asset unlocked in your Root Archive." });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length + postImages.length > 6) {
-      toast({ title: "Limit Reached", description: "Max 6 photos allowed.", variant: "destructive" });
+    if (level < (product.requiredLevel || 1)) {
+      toast({ title: "Mastery Level Low", description: `Level ${product.requiredLevel} required for this protocol.`, variant: "destructive" });
       return;
     }
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => setPostImages(prev => [...prev, reader.result as string]);
-      reader.readAsDataURL(file);
-    });
+    buyProduct(uid, product.id, product.price);
+    toast({ title: "Sovereign Acquisition", description: "Protocol unlocked in your Root Archive." });
   };
 
   const handleDispatchWin = async () => {
@@ -227,7 +218,8 @@ export default function DashboardPage() {
     }
   };
 
-  const rootAssets = shooppyProducts.filter(p => p.placement === 'Hub' || (purchasedProductIds && purchasedProductIds.includes(p.id)));
+  const availableInHub = shooppyProducts.filter(p => p.placement === 'Hub' && !purchasedProductIds.includes(p.id));
+  const ownedAssets = shooppyProducts.filter(p => purchasedProductIds.includes(p.id));
   const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
 
   if (!isHydrated) return null;
@@ -424,20 +416,51 @@ export default function DashboardPage() {
                  </div>
               </Card>
 
+              {/* Protocol Acquisition - Points Shop */}
               <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
-                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Star className="h-6 w-6 text-primary" /> Root Assets</h3>
+                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Zap className="h-6 w-6 text-primary" /> Acquire Protocols</h3>
                  <div className="space-y-6">
-                    {rootAssets.length === 0 ? (
-                      <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No root assets acquired.</p>
+                    {availableInHub.length === 0 ? (
+                      <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No protocols currently deployable.</p>
                     ) : (
-                      rootAssets.map((p: any) => (
+                      availableInHub.map((p: any) => (
+                        <div key={p.id} className="p-6 bg-background/50 rounded-3xl border-2 border-primary/10 flex items-center justify-between group">
+                          <div>
+                            <p className="font-black text-sm text-foreground uppercase italic">{p.title}</p>
+                            <div className="flex items-center gap-3">
+                              <p className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-1"><Coins className="h-3 w-3" /> {p.price}</p>
+                              {p.requiredLevel > 1 && <p className="text-[9px] font-black text-orange-500 uppercase tracking-widest">LV {p.requiredLevel}</p>}
+                            </div>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="rounded-full hover:bg-primary/10 text-primary"
+                            onClick={() => handleAcquireAsset(p)}
+                          >
+                            <Plus className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                 </div>
+              </Card>
+
+              {/* Root Archive - Owned Assets */}
+              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
+                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Star className="h-6 w-6 text-primary" /> Root Archive</h3>
+                 <div className="space-y-6">
+                    {ownedAssets.length === 0 ? (
+                      <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">Archive empty. Acquire protocols to expand.</p>
+                    ) : (
+                      ownedAssets.map((p: any) => (
                         <div key={p.id} className="p-6 bg-background/50 rounded-3xl border-2 border-primary/10 flex items-center justify-between group">
                           <div>
                             <p className="font-black text-sm text-foreground uppercase italic">{p.title}</p>
                             <p className="text-[9px] font-bold text-primary uppercase tracking-widest">{p.type}</p>
                           </div>
-                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary">
-                            <Download className="h-5 w-5" />
+                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary" asChild>
+                            <a href={p.fileUrl} target="_blank" download><Download className="h-5 w-5" /></a>
                           </Button>
                         </div>
                       ))
@@ -447,42 +470,33 @@ export default function DashboardPage() {
             </div>
           </ShadcnContent>
           
+          {/* Shooppy Tab - Redirects to External Store */}
           <ShadcnContent value="shooppy" className="space-y-16">
              <div className="text-center space-y-3">
-                <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Strategic Marketplace</h3>
-                <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Master Level Digital Assets</p>
+                <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Shooppy Marketplace</h3>
+                <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Official External Digital Storefront</p>
              </div>
              
              {marketplaceAssets.length === 0 ? (
                <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20">
                  <ShoppingBag className="h-20 w-20 mx-auto text-primary/20 mb-6" />
-                 <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No digital assets deployed in the vault yet.</p>
+                 <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No storefront assets deployed yet.</p>
                </div>
              ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                   {marketplaceAssets.map((p: any) => {
-                    const isOwned = purchasedProductIds && purchasedProductIds.includes(p.id);
                     return (
                       <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
                         <div className="h-80 relative overflow-hidden bg-background/50">
                            {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.title} />}
                            <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
-                           <Badge className="absolute top-8 right-8 bg-background text-primary font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-2 border-primary/20 flex items-center gap-2">
-                            <Coins className="h-4 w-4" /> {p.price}
-                           </Badge>
                         </div>
                         <div className="p-12 space-y-8">
                            <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
                            <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
-                           {isOwned ? (
-                             <Button disabled className="w-full h-18 rounded-[2rem] bg-background text-primary border-4 border-primary font-black uppercase text-sm shadow-2xl opacity-80 cursor-default">
-                                Strategic Asset Owned
-                             </Button>
-                           ) : (
-                             <Button onClick={() => handleAcquireAsset(p.id, p.price)} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all">
-                                Acquire for {p.price} Points
-                             </Button>
-                           )}
+                           <Button onClick={() => window.open(p.fileUrl, '_blank')} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all gap-4">
+                              <ExternalLink className="h-5 w-5" /> Visit Official Shop
+                           </Button>
                         </div>
                       </Card>
                     );
