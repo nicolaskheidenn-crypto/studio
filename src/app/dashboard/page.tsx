@@ -1,5 +1,4 @@
-
-'use client';
+"use client";
 
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -474,7 +473,7 @@ export default function DashboardPage() {
                             <p className="text-[9px] font-bold text-primary uppercase tracking-widest">{p.type}</p>
                           </div>
                           <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 text-primary" asChild>
-                            <a href={p.fileUrl} target="_blank" download><Download className="h-5 w-5" /></a>
+                            <a href={p.fileUrl} target="_blank" download={`${p.title.replace(/\s+/g, '_')}_Protocol`}><Download className="h-5 w-5" /></a>
                           </Button>
                         </div>
                       ))

@@ -14,7 +14,7 @@ import {
   Key, ShieldAlert, Trash2, Award, BookOpen, 
   Newspaper, ShoppingBag, MessageSquare, 
   Plus, Coins, ListChecks,
-  ChevronLeft, ChevronRight, Minus, HelpCircle
+  ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -58,7 +58,7 @@ export default function AdminPage() {
   const [prodTitle, setProdTitle] = useState("");
   const [prodDesc, setProdDesc] = useState("");
   const [prodImg, setProdImg] = useState("");
-  const [prodFile, setProdFile] = useState("");
+  const [prodFile, setProdFile] = useState(""); // URL or Base64
   const [prodType, setProdType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
   const [prodPlacement, setProdPlacement] = useState<'Hub' | 'Marketplace'>('Marketplace');
   const [prodLevel, setProdLevel] = useState(1);
@@ -92,6 +92,16 @@ export default function AdminPage() {
       toast({ title: "Identity Verified" });
     } else {
       toast({ title: "Invalid Protocol Key", variant: "destructive" });
+    }
+  };
+
+  const handleAssetFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setProdFile(reader.result as string);
+      reader.readAsDataURL(file);
+      toast({ title: "Protocol File Loaded" });
     }
   };
 
@@ -248,6 +258,15 @@ export default function AdminPage() {
     toast({ title: "Data Purged" });
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setProdImg(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (user?.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] p-6 text-center">
@@ -328,8 +347,29 @@ export default function AdminPage() {
                    </div>
                    <div className="space-y-8">
                       <div className="space-y-3">
-                        <Label className="text-[#1f1610]">File/Shop URL</Label>
-                        <Input placeholder="https://..." value={prodFile} onChange={e => setProdFile(e.target.value)} className="h-18 font-black text-sm bg-white text-[#1f1610]" />
+                        <Label className="text-[#1f1610]">
+                          {prodPlacement === 'Hub' ? 'Digital Asset File (Import)' : 'Official Shop URL'}
+                        </Label>
+                        {prodPlacement === 'Hub' ? (
+                          <div className="relative">
+                            <Upload className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[#1f1610]/40" />
+                            <Input 
+                              type="file" 
+                              onChange={handleAssetFileImport} 
+                              className="h-18 pl-16 pt-5 font-black text-xs bg-white text-[#1f1610] rounded-2xl border-4 border-[#1f1610]/10" 
+                            />
+                          </div>
+                        ) : (
+                          <div className="relative">
+                            <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[#1f1610]/40" />
+                            <Input 
+                              placeholder="https://official-shop.com/product" 
+                              value={prodFile} 
+                              onChange={e => setProdFile(e.target.value)} 
+                              className="h-18 pl-16 font-black text-sm bg-white text-[#1f1610] rounded-2xl border-4 border-[#1f1610]/10" 
+                            />
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-3">
