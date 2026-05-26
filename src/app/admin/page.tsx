@@ -80,11 +80,6 @@ export default function AdminPage() {
   ]);
   const [currentQIdx, setCurrentQIdx] = useState(0);
 
-  // Task State
-  const [taskDay, setTaskDay] = useState(1);
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
-
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminKey === ADMIN_SECRET_KEY) {
@@ -324,19 +319,24 @@ export default function AdminPage() {
                       <div className="flex items-center justify-between">
                         <h4 className="font-black text-[#1f1610] uppercase tracking-widest text-xs">Question Constructor</h4>
                         <div className="flex items-center gap-6">
-                           <Button type="button" variant="ghost" size="icon" className="rounded-full bg-[#1f1610] text-[#FFD700] h-14 w-14 shadow-xl border-2 border-primary/20" onClick={() => handleRemoveQuestion(currentQIdx)} disabled={draftQuestions.length <= 1}>
+                           <Button type="button" variant="ghost" size="icon" className="rounded-full bg-[#1f1610] text-[#FFD700] h-14 w-14 shadow-xl border-2 border-[#FFD700]/20 hover:scale-110" onClick={() => handleRemoveQuestion(currentQIdx)} disabled={draftQuestions.length <= 1}>
                             <Minus className="h-8 w-8" />
                            </Button>
-                           <div className="flex items-center gap-4 bg-[#1f1610] text-[#FFD700] h-16 px-10 rounded-full font-black border-4 border-[#FFD700]/20 shadow-2xl">
-                              <button type="button" className="hover:scale-125 transition-transform" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))}>
-                                <ChevronLeft className="h-8 w-8" />
+                           
+                           {/* HIGH VISIBILITY PAGER PILL */}
+                           <div className="flex items-center gap-8 bg-[#FFD700] text-[#1f1610] h-20 px-12 rounded-full font-black shadow-[0_20px_40px_rgba(255,215,0,0.4)] border-4 border-[#1f1610]/10">
+                              <button type="button" className="hover:scale-150 transition-transform active:scale-95" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))}>
+                                <ChevronLeft className="h-10 w-10" />
                               </button>
-                              <span className="mx-4 text-2xl min-w-[60px] text-center tracking-tighter italic">( {currentQIdx + 1} )</span>
-                              <button type="button" className="hover:scale-125 transition-transform" onClick={() => setCurrentQIdx(Math.min(draftQuestions.length - 1, currentQIdx + 1))}>
-                                <ChevronRight className="h-8 w-8" />
+                              <span className="mx-6 text-4xl tracking-tighter italic font-black min-w-[60px] text-center">
+                                {currentQIdx + 1}
+                              </span>
+                              <button type="button" className="hover:scale-150 transition-transform active:scale-95" onClick={() => setCurrentQIdx(Math.min(draftQuestions.length - 1, currentQIdx + 1))}>
+                                <ChevronRight className="h-10 w-10" />
                               </button>
                            </div>
-                           <Button type="button" variant="ghost" size="icon" className="rounded-full bg-[#FFD700] text-[#1f1610] h-14 w-14 shadow-2xl hover:scale-110 transition-all" onClick={handleAddQuestion}>
+                           
+                           <Button type="button" variant="ghost" size="icon" className="rounded-full bg-[#FFD700] text-[#1f1610] h-14 w-14 shadow-2xl hover:scale-110 transition-all border-2 border-[#1f1610]/10" onClick={handleAddQuestion}>
                             <Plus className="h-8 w-8" />
                            </Button>
                         </div>
