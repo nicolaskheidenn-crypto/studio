@@ -56,7 +56,7 @@ const TUTORIAL_STEPS = [
     color: "text-green-500"
   },
   {
-    title: "ACQUIRE PROTOCOLS",
+    title: "PROTOCOL ACQUISITION",
     desc: "Spend your earned Points in the Hub to acquire free strategic assets base on Level.",
     icon: Zap,
     color: "text-primary"
@@ -125,7 +125,7 @@ export function Navigation() {
                       <div key={i} className="flex gap-6 p-8 bg-white rounded-[3rem] border-4 border-[#1f1610]/5 group hover:border-primary/30 transition-all shadow-sm">
                         <div className="w-20 h-20 rounded-[1.5rem] bg-[#1f1610] flex flex-col items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform relative border-2 border-primary/10">
                           <step.icon className={cn("h-8 w-8 mb-1", step.color)} />
-                          <span className="text-[8px] font-black text-white/60 tracking-widest uppercase">STEP 0{i + 1}</span>
+                          <span className="text-[8px] font-black tracking-widest uppercase" style={{ color: '#fdfaf6' }}>STEP 0{i + 1}</span>
                         </div>
                         <div className="space-y-1">
                           <h4 className="text-2xl font-black text-[#1f1610] uppercase italic tracking-tight">{step.title}</h4>
@@ -133,11 +133,12 @@ export function Navigation() {
                         </div>
                       </div>
                     ))}
-                    {/* Command Footer Banner */}
-                    <div className="p-10 bg-[#1f1610] rounded-[3rem] text-center space-y-4 shadow-2xl border-4 border-primary/20 relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.1),transparent)] pointer-events-none" />
-                      <p className="text-[10px] font-black uppercase text-primary tracking-[0.5em] relative z-10">Command Authenticated</p>
-                      <p className="text-white font-black uppercase italic text-2xl tracking-tighter relative z-10 group-hover:scale-110 transition-transform">STAY GOLD, STRATEGIST.</p>
+                    {/* Command Footer Banner - Enhanced Visibility */}
+                    <div className="p-12 bg-[#1f1610] rounded-[3rem] text-center space-y-6 shadow-[0_40px_80px_rgba(0,0,0,0.6)] border-4 border-primary/20 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)] pointer-events-none" />
+                      <p className="text-[11px] font-black uppercase tracking-[0.6em] relative z-10" style={{ color: '#FFD700' }}>Command Authenticated</p>
+                      <p className="font-black uppercase italic text-3xl tracking-tighter relative z-10 group-hover:scale-110 transition-transform leading-none" style={{ color: '#fdfaf6' }}>STAY GOLD, STRATEGIST.</p>
+                      <div className="h-1 w-16 bg-primary mx-auto rounded-full relative z-10 opacity-50" />
                     </div>
                   </div>
                 </ScrollArea>
