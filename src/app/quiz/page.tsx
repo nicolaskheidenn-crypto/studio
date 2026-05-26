@@ -290,15 +290,15 @@ export default function QuizPage() {
     return (
       <div className={cn("min-h-screen flex flex-col items-center justify-center p-8 text-center transition-all duration-1000", hasPassed ? "bg-primary text-[#1f1610]" : "bg-red-600 text-white")}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1),transparent)] pointer-events-none" />
-        {hasPassed ? <Trophy className="h-32 w-32 md:h-64 md:w-64 mb-12 animate-bounce drop-shadow-2xl" /> : <XCircle className="h-32 w-32 md:h-64 md:w-64 mb-12 animate-pulse drop-shadow-2xl" />}
-        <h1 className="text-5xl md:text-7xl font-headline font-black mb-6 tracking-tighter uppercase italic leading-none">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
-        <p className="text-4xl md:text-5xl font-black mb-8 tracking-tighter italic">SCORE: {score} / {shuffledQuestions.length}</p>
-        <p className="text-lg md:text-xl font-black uppercase tracking-[0.2em] opacity-80 mb-20 max-w-3xl leading-relaxed mx-auto italic">
+        {hasPassed ? <Trophy className="h-24 w-24 md:h-32 md:w-32 mb-8 animate-bounce drop-shadow-2xl" /> : <XCircle className="h-24 w-24 md:h-32 md:w-32 mb-8 animate-pulse drop-shadow-2xl" />}
+        <h1 className="text-4xl md:text-6xl font-headline font-black mb-4 tracking-tighter uppercase italic leading-none">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
+        <p className="text-3xl md:text-4xl font-black mb-6 tracking-tighter italic">SCORE: {score} / {shuffledQuestions.length}</p>
+        <p className="text-base md:text-lg font-black uppercase tracking-[0.2em] opacity-80 mb-12 max-w-2xl leading-relaxed mx-auto italic">
           {hasPassed 
             ? "Strategic filtration complete. Sovereign certification has been injected into your profile vault." 
             : `Requirement not met. ${passing} correct responses required for protocol certification. Re-initialize.`}
         </p>
-        <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-12 h-16 md:px-20 md:h-20 text-xl md:text-2xl font-black shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
+        <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-10 h-14 md:px-16 md:h-18 text-lg md:text-xl font-black shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
           RETURN TO COMMAND
         </Button>
       </div>
@@ -320,32 +320,32 @@ export default function QuizPage() {
       )}
 
       {cheatTriggered && (
-        <div className="fixed inset-0 z-[200] bg-[#1f1610] flex flex-col items-center justify-center text-[#fdfaf6] p-10 text-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[200] bg-[#1f1610] flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-300">
           <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
-          <div className="relative space-y-12">
+          <div className="relative space-y-8 max-w-4xl w-full">
             <div className="relative w-fit mx-auto">
               <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse rounded-full" />
-              <AlertTriangle className="h-40 w-40 text-primary animate-[bounce_0.5s_infinite] relative z-10" />
+              <AlertTriangle className="h-24 w-24 md:h-32 md:w-32 text-primary animate-[bounce_0.5s_infinite] relative z-10" />
             </div>
             
-            <div className="space-y-6">
-              <h1 className="text-6xl md:text-9xl font-headline font-black mb-4 uppercase tracking-[0.2em] italic leading-none animate-[glitch_0.3s_infinite] text-primary">
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-7xl font-headline font-black mb-2 uppercase tracking-[0.2em] italic leading-none animate-[glitch_0.3s_infinite] text-primary">
                 SECURITY ALERT
               </h1>
-              <div className="h-2 w-48 bg-primary mx-auto rounded-full shadow-[0_0_30px_rgba(255,215,0,0.8)]" />
+              <div className="h-1.5 w-32 bg-primary mx-auto rounded-full shadow-[0_0_30px_rgba(255,215,0,0.8)]" />
             </div>
 
-            <p className="text-2xl md:text-3xl text-[#fdfaf6] font-black uppercase tracking-[0.4em] max-w-5xl leading-relaxed italic">
+            <p className="text-lg md:text-2xl text-[#fdfaf6] font-black uppercase tracking-[0.4em] max-w-3xl mx-auto leading-relaxed italic">
               INTEGRITY SENSOR BREACHED. <br/>
               <span className="text-primary">RESETTING PROTOCOL IN REAL-TIME...</span>
             </p>
 
-            <div className="mt-20 w-full max-w-2xl mx-auto space-y-4">
+            <div className="mt-10 w-full max-w-xl mx-auto space-y-4">
               <div className="flex justify-between items-end mb-2">
-                 <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">System Purge in Progress</span>
-                 <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">0.00% Progress Retained</span>
+                 <span className="text-[8px] font-black uppercase tracking-widest text-primary/60">System Purge in Progress</span>
+                 <span className="text-[8px] font-black uppercase tracking-widest text-primary/60">0.00% Progress Retained</span>
               </div>
-              <div className="h-5 bg-white/5 rounded-full border-4 border-white/10 overflow-hidden shadow-inner">
+              <div className="h-4 bg-white/5 rounded-full border-2 border-white/10 overflow-hidden shadow-inner">
                  <div className="h-full bg-primary shadow-[0_0_20px_rgba(255,215,0,0.6)] animate-[progress_3s_linear] origin-left" style={{ width: '100%' }} />
               </div>
             </div>
