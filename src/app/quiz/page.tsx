@@ -48,7 +48,7 @@ export default function QuizPage() {
   const db = useFirestore();
 
   const quizzesQuery = useMemo(() => query(collection(db, 'quizzes'), orderBy('createdAt', 'desc')), [db]);
-  const { data: globalQuizzes } = useCollection(quizzesQuery);
+  const { data: globalQuizzes = [] } = useCollection(quizzesQuery);
   
   const profiles = useUserStore(s => s.profiles);
   const profile = useMemo(() => {
@@ -216,7 +216,7 @@ export default function QuizPage() {
                     <p className="text-[10px] font-black text-primary/20 uppercase mt-4 tracking-widest">Strategic Verification Offline</p>
                   </div>
                 ) : (
-                  globalQuizzes.map((q) => (
+                  globalQuizzes.map((q: any) => (
                     <Card 
                       key={q.id} 
                       className="group relative overflow-hidden rounded-[4rem] border-4 border-primary/10 bg-mocha-cream shadow-2xl hover:border-primary transition-all cursor-pointer active:scale-[0.98] animate-in slide-in-from-bottom-10" 
@@ -320,12 +320,35 @@ export default function QuizPage() {
       )}
 
       {cheatTriggered && (
-        <div className="fixed inset-0 z-[100] bg-[#1f1610]/98 flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-500">
-          <AlertTriangle className="h-24 w-24 text-primary mb-12 animate-pulse" />
-          <h1 className="text-5xl md:text-7xl font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">SECURITY ALERT</h1>
-          <p className="text-xl text-primary font-black uppercase tracking-[0.5em] max-w-3xl leading-relaxed">INTEGRITY SENSOR BREACHED. RESETTING PROTOCOL IN REAL-TIME...</p>
-          <div className="mt-16 w-80 h-3 bg-primary/20 rounded-full overflow-hidden">
-             <div className="h-full bg-primary animate-[progress_3s_linear] origin-left" style={{ width: '100%' }} />
+        <div className="fixed inset-0 z-[200] bg-[#1f1610] flex flex-col items-center justify-center text-[#fdfaf6] p-10 text-center animate-in fade-in duration-300">
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+          <div className="relative space-y-12">
+            <div className="relative w-fit mx-auto">
+              <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse rounded-full" />
+              <AlertTriangle className="h-40 w-40 text-primary animate-[bounce_0.5s_infinite] relative z-10" />
+            </div>
+            
+            <div className="space-y-6">
+              <h1 className="text-6xl md:text-9xl font-headline font-black mb-4 uppercase tracking-[0.2em] italic leading-none animate-[glitch_0.3s_infinite] text-primary">
+                SECURITY ALERT
+              </h1>
+              <div className="h-2 w-48 bg-primary mx-auto rounded-full shadow-[0_0_30px_rgba(255,215,0,0.8)]" />
+            </div>
+
+            <p className="text-2xl md:text-3xl text-[#fdfaf6] font-black uppercase tracking-[0.4em] max-w-5xl leading-relaxed italic">
+              INTEGRITY SENSOR BREACHED. <br/>
+              <span className="text-primary">RESETTING PROTOCOL IN REAL-TIME...</span>
+            </p>
+
+            <div className="mt-20 w-full max-w-2xl mx-auto space-y-4">
+              <div className="flex justify-between items-end mb-2">
+                 <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">System Purge in Progress</span>
+                 <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">0.00% Progress Retained</span>
+              </div>
+              <div className="h-5 bg-white/5 rounded-full border-4 border-white/10 overflow-hidden shadow-inner">
+                 <div className="h-full bg-primary shadow-[0_0_20px_rgba(255,215,0,0.6)] animate-[progress_3s_linear] origin-left" style={{ width: '100%' }} />
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -419,6 +442,13 @@ export default function QuizPage() {
         @keyframes progress {
           from { transform: scaleX(0); }
           to { transform: scaleX(1); }
+        }
+        @keyframes glitch {
+          0% { transform: translate(2px, 2px); text-shadow: 2px 0 #fff; }
+          25% { transform: translate(-2px, -2px); text-shadow: -2px 0 #FFD700; }
+          50% { transform: translate(1px, -1px); text-shadow: 1px 0 #fff; }
+          75% { transform: translate(-1px, 1px); text-shadow: -1px 0 #FFD700; }
+          100% { transform: translate(0); text-shadow: 0; }
         }
       `}</style>
     </div>
