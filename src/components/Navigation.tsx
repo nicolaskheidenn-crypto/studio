@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { 
   CheckSquare, Hourglass, Settings, LayoutDashboard, 
   Menu, X, User, Crown, BookOpen, HelpCircle,
-  Zap, Trophy, Target, ShieldCheck, Share2
+  Zap, Trophy, Target, ShieldCheck, Share2, ShoppingBag
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+const HOST_EMAIL = "nicolaskheidenn@gmail.com";
+
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "TaskDo", href: "/task-do", icon: CheckSquare },
@@ -27,8 +29,6 @@ const NAV_ITEMS = [
   { label: "GoalCaps", href: "/goal-caps", icon: Hourglass },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
-
-const HOST_EMAIL = "nicolaskheidenn@gmail.com";
 
 const TUTORIAL_STEPS = [
   {
@@ -56,14 +56,20 @@ const TUTORIAL_STEPS = [
     color: "text-green-500"
   },
   {
-    title: "SHOOPPY MARKET",
-    desc: "Spend your earned points on eBooks, strategy bundles, and digital assets.",
+    title: "ACQUIRE PROTOCOLS",
+    desc: "Spend your earned Points in the Hub to acquire free strategic assets base on Level.",
     icon: Zap,
     color: "text-primary"
   },
   {
+    title: "SHOOPPY MARKET",
+    desc: "Direct redirect to the official external digital store for premium assets.",
+    icon: ShoppingBag,
+    color: "text-amber-500"
+  },
+  {
     title: "LIBRARY LABS",
-    desc: "Contribute AI Prompts and Tactical Archives to the collective strategist library.",
+    desc: "Contribute AI Prompts and Tactical Archives to the collective library.",
     icon: Share2,
     color: "text-blue-500"
   }
@@ -127,9 +133,11 @@ export function Navigation() {
                         </div>
                       </div>
                     ))}
-                    <div className="p-10 bg-[#1f1610] rounded-[3rem] text-center space-y-4 shadow-2xl border-4 border-primary/20">
-                      <p className="text-[10px] font-black uppercase text-primary tracking-[0.5em]">Command Authenticated</p>
-                      <p className="text-white font-black uppercase italic text-2xl tracking-tighter">STAY GOLD, STRATEGIST.</p>
+                    {/* Command Footer Banner */}
+                    <div className="p-10 bg-[#1f1610] rounded-[3rem] text-center space-y-4 shadow-2xl border-4 border-primary/20 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.1),transparent)] pointer-events-none" />
+                      <p className="text-[10px] font-black uppercase text-primary tracking-[0.5em] relative z-10">Command Authenticated</p>
+                      <p className="text-white font-black uppercase italic text-2xl tracking-tighter relative z-10 group-hover:scale-110 transition-transform">STAY GOLD, STRATEGIST.</p>
                     </div>
                   </div>
                 </ScrollArea>
