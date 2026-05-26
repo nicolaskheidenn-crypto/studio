@@ -10,12 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserStore, QuizQuestion } from "@/lib/store";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, CheckSquare, 
   Newspaper, ShoppingBag, MessageSquare, Lightbulb, 
-  Video, HelpCircle, Upload, Plus, Coins, ListChecks 
+  Video, HelpCircle, Upload, Plus, Coins, ListChecks,
+  ChevronLeft, ChevronRight, Minus
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 
@@ -40,7 +41,7 @@ export default function AdminPage() {
   const { data: shooppyProducts } = useCollection(productsQuery);
   const { data: newsPosts } = useCollection(newsQuery);
   const { data: faqs } = useCollection(faqsQuery);
-  const { data: activityWall } = useCollection(activityQuery);
+  const { data: activityWall } = useCollection(activityWall);
   const { data: sharedResources } = useCollection(resourcesQuery);
   const { data: globalTasks } = useCollection(tasksQuery);
   const { data: globalQuizzes } = useCollection(quizzesQuery);
@@ -65,13 +66,12 @@ export default function AdminPage() {
   const [faqQ, setFaqQ] = useState("");
   const [faqA, setFaqA] = useState("");
 
-  // Quiz State
+  // Quiz Architect State
   const [quizTitle, setQuizTitle] = useState("");
-  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
-  const [qType, setQType] = useState<'multiple' | 'boolean' | 'id'>('multiple');
-  const [qText, setQText] = useState("");
-  const [qAnswer, setQAnswer] = useState("");
-  const [qOptions, setQOptions] = useState("");
+  const [draftQuestions, setDraftQuestions] = useState<QuizQuestion[]>([
+    { id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }
+  ]);
+  const [currentQIdx, setCurrentQIdx] = useState(0);
 
   // Task State
   const [taskDay, setTaskDay] = useState(1);
@@ -102,11 +102,11 @@ export default function AdminPage() {
 
     if (editingProductId) {
       const ref = doc(db, 'shooppyProducts', editingProductId);
-      await updateDoc(ref, data);
+      updateDoc(ref, data);
       setEditingProductId(null);
       toast({ title: "Strategic Asset Updated" });
     } else {
-      await addDoc(collection(db, 'shooppyProducts'), data);
+      addDoc(collection(db, 'shooppyProducts'), data);
       toast({ title: "Strategic Asset Deployed" });
     }
     
@@ -114,7 +114,7 @@ export default function AdminPage() {
   };
 
   const handleDispatchBroadcast = async () => {
-    await addDoc(collection(db, 'newsPosts'), {
+    addDoc(collection(db, 'newsPosts'), {
       title: newsTitle,
       content: newsContent,
       imageUrl: newsImg,
@@ -124,33 +124,74 @@ export default function AdminPage() {
     toast({ title: "Broadcast Dispatched" });
   };
 
+  // Quiz Architect Actions
   const handleAddQuestion = () => {
     const newQ: QuizQuestion = {
       id: Math.random().toString(36).substr(2, 9),
-      type: qType,
-      question: qText,
-      answer: qAnswer,
-      options: qType === 'multiple' ? qOptions.split(',').map(o => o.trim()) : undefined
+      type: 'multiple',
+      question: "",
+      answer: "",
+      options: ["", "", "", ""]
     };
-    setQuizQuestions([...quizQuestions, newQ]);
-    setQText(""); setQAnswer(""); setQOptions("");
+    setDraftQuestions([...draftQuestions, newQ]);
+    setCurrentQIdx(draftQuestions.length);
+    toast({ title: "New Protocol Slot Created" });
+  };
+
+  const handleRemoveQuestion = (idx: number) => {
+    if (draftQuestions.length <= 1) return;
+    const newDrafts = draftQuestions.filter((_, i) => i !== idx);
+    setDraftQuestions(newDrafts);
+    if (currentQIdx >= newDrafts.length) setCurrentQIdx(newDrafts.length - 1);
+    toast({ title: "Protocol Slot Removed" });
+  };
+
+  const updateCurrentQ = (field: keyof QuizQuestion, value: any) => {
+    const newDrafts = [...draftQuestions];
+    newDrafts[currentQIdx] = { ...newDrafts[currentQIdx], [field]: value };
+    
+    // Auto-adjust options based on type
+    if (field === 'type') {
+      if (value === 'boolean') {
+        newDrafts[currentQIdx].options = ["True", "False"];
+      } else if (value === 'multiple') {
+        newDrafts[currentQIdx].options = ["", "", "", ""];
+      } else {
+        newDrafts[currentQIdx].options = undefined;
+      }
+    }
+    
+    setDraftQuestions(newDrafts);
+  };
+
+  const updateOption = (optIdx: number, value: string) => {
+    const newDrafts = [...draftQuestions];
+    const currentOptions = [...(newDrafts[currentQIdx].options || [])];
+    currentOptions[optIdx] = value;
+    newDrafts[currentQIdx].options = currentOptions;
+    setDraftQuestions(newDrafts);
   };
 
   const handleSaveQuiz = async () => {
-    if (!quizTitle || quizQuestions.length === 0) return;
-    await addDoc(collection(db, 'quizzes'), {
+    if (!quizTitle || draftQuestions.some(q => !q.question || !q.answer)) {
+      toast({ title: "Incomplete Protocol", description: "Ensure all questions and answers are defined.", variant: "destructive" });
+      return;
+    }
+    addDoc(collection(db, 'quizzes'), {
       title: quizTitle,
-      questionCount: quizQuestions.length,
-      questions: quizQuestions,
+      questionCount: draftQuestions.length,
+      questions: draftQuestions,
       createdAt: serverTimestamp()
     });
-    setQuizTitle(""); setQuizQuestions([]);
+    setQuizTitle(""); 
+    setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
+    setCurrentQIdx(0);
     toast({ title: "Quiz Protocol Deployed" });
   };
 
   const handleSaveTask = async () => {
     if (!taskTitle || !taskDesc) return;
-    await addDoc(collection(db, 'tasks'), {
+    addDoc(collection(db, 'tasks'), {
       day: taskDay,
       title: taskTitle,
       description: taskDesc
@@ -160,7 +201,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteDoc = async (coll: string, id: string) => {
-    await deleteDoc(doc(db, coll, id));
+    deleteDoc(doc(db, coll, id));
     toast({ title: "Data Purged" });
   };
 
@@ -192,6 +233,8 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const currentDraftQ = draftQuestions[currentQIdx];
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1f1610]">
@@ -263,27 +306,78 @@ export default function AdminPage() {
           <TabsContent value="quizzo" className="space-y-12">
              <Card className="rounded-[5rem] border-8 border-[#FFD700]/10 bg-mocha-cream p-16 shadow-2xl space-y-10">
                 <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]"><BookOpen className="h-12 w-12 text-[#FFD700]" /> Quizzo Protocol Architect</CardTitle>
-                <div className="space-y-8">
+                <div className="space-y-10">
                    <div className="space-y-3">
                       <Label className="text-[#1f1610]">Quiz Title</Label>
-                      <Input placeholder="Mastery Test Phase 1" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-18 font-black text-xl rounded-2xl bg-white text-[#1f1610]" />
+                      <Input placeholder="Test title" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-18 font-black text-xl rounded-2xl bg-[#3d332d] border-4 border-[#FFD700]/30 text-white placeholder:text-white/20" />
                    </div>
                    
-                   <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-4 border-[#1f1610]/10 space-y-6">
-                      <h4 className="font-black text-[#1f1610] uppercase">Question Constructor</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                         <select className="h-18 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-[#1f1610]" value={qType} onChange={e => setQType(e.target.value as any)}>
+                   <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-4 border-[#1f1610]/10 space-y-10">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-black text-[#1f1610] uppercase tracking-widest text-xs">Question Constructor</h4>
+                        <div className="flex items-center gap-4">
+                           <Button variant="ghost" size="icon" className="rounded-full bg-[#1f1610] text-[#FFD700] h-12 w-12" onClick={() => handleRemoveQuestion(currentQIdx)} disabled={draftQuestions.length <= 1}><Minus className="h-6 w-6" /></Button>
+                           <div className="flex items-center gap-2 bg-[#1f1610] text-[#FFD700] h-12 px-6 rounded-full font-black">
+                              <button onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))}><ChevronLeft className="h-5 w-5" /></button>
+                              <span className="mx-2">( {currentQIdx + 1} )</span>
+                              <button onClick={() => setCurrentQIdx(Math.min(draftQuestions.length - 1, currentQIdx + 1))}><ChevronRight className="h-5 w-5" /></button>
+                           </div>
+                           <Button variant="ghost" size="icon" className="rounded-full bg-[#FFD700] text-[#1f1610] h-12 w-12 shadow-lg" onClick={handleAddQuestion}><Plus className="h-6 w-6" /></Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                         <select 
+                            className="h-18 bg-[#1f1610] text-[#FFD700] border-4 border-[#FFD700]/30 rounded-2xl px-6 font-black uppercase" 
+                            value={currentDraftQ.type} 
+                            onChange={e => updateCurrentQ('type', e.target.value as any)}
+                          >
                             <option value="multiple">Multiple Choice</option>
                             <option value="boolean">True/False</option>
                             <option value="id">ID Verification</option>
                          </select>
-                         <Input placeholder="The question text..." value={qText} onChange={e => setQText(e.target.value)} className="h-18 md:col-span-2 bg-white text-[#1f1610] font-bold" />
+                         <Input 
+                            placeholder="The question text..." 
+                            value={currentDraftQ.question} 
+                            onChange={e => updateCurrentQ('question', e.target.value)} 
+                            className="h-18 md:col-span-2 bg-[#3d332d] border-4 border-[#FFD700]/30 text-white font-bold" 
+                          />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <Input placeholder="Correct Answer" value={qAnswer} onChange={e => setQAnswer(e.target.value)} className="h-18 bg-white text-[#1f1610]" />
-                         {qType === 'multiple' && <Input placeholder="Options (comma separated)" value={qOptions} onChange={e => setQOptions(e.target.value)} className="h-18 bg-white text-[#1f1610]" />}
+
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                           <Label className="text-[#1f1610]">Correct Answer</Label>
+                           <Input 
+                            placeholder="Correct Answer" 
+                            value={currentDraftQ.answer} 
+                            onChange={e => updateCurrentQ('answer', e.target.value)} 
+                            className="h-18 bg-[#3d332d] border-4 border-[#FFD700]/30 text-white" 
+                          />
+                        </div>
+                        
+                        {currentDraftQ.type === 'multiple' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {(currentDraftQ.options || ["", "", "", ""]).map((opt, i) => (
+                              <div key={i} className="space-y-2">
+                                <Label className="text-[#1f1610]">Option {i + 1}</Label>
+                                <Input 
+                                  placeholder={`Option ${i + 1}`} 
+                                  value={opt} 
+                                  onChange={e => updateOption(i, e.target.value)} 
+                                  className="h-16 bg-[#3d332d] border-4 border-[#FFD700]/30 text-white" 
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {currentDraftQ.type === 'boolean' && (
+                          <div className="grid grid-cols-2 gap-6 opacity-60">
+                            <div className="p-6 bg-[#1f1610] text-[#FFD700] rounded-2xl font-black text-center">TRUE</div>
+                            <div className="p-6 bg-[#1f1610] text-[#FFD700] rounded-2xl font-black text-center">FALSE</div>
+                          </div>
+                        )}
                       </div>
-                      <Button onClick={handleAddQuestion} variant="outline" className="w-full h-18 rounded-2xl border-4 border-[#1f1610] text-[#1f1610] font-black uppercase">Inject Question ({quizQuestions.length})</Button>
                    </div>
 
                    <Button onClick={handleSaveQuiz} className="w-full h-24 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-3xl uppercase shadow-2xl">Deploy Quiz Protocol</Button>
