@@ -1,0 +1,26 @@
+'use client';
+
+export type SecurityRuleContext = {
+  path: string;
+  operation: 'get' | 'list' | 'create' | 'update' | 'delete' | 'write';
+  requestResourceData?: any;
+};
+
+/**
+ * A specialized error class for Firestore permission denials.
+ * Designed to provide rich context (path, operation, data) to the error listener.
+ */
+export class FirestorePermissionError extends Error {
+  context: SecurityRuleContext;
+
+  constructor(context: SecurityRuleContext) {
+    const message = `FirestoreError: Missing or insufficient permissions: The following request was denied by Firestore Security Rules:
+{
+  "operation": "${context.operation}",
+  "path": "${context.path}"${context.requestResourceData ? `,\n  "requestResourceData": ${JSON.stringify(context.requestResourceData, null, 2)}` : ''}
+}`;
+    super(message);
+    this.name = 'FirestorePermissionError';
+    this.context = context;
+  }
+}
