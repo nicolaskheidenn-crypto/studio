@@ -203,7 +203,7 @@ export default function QuizPage() {
             {/* Vanguard: Quiz List */}
             <div className="lg:col-span-2 space-y-12">
               <header className="text-center space-y-6">
-                <h1 className="text-7xl md:text-9xl font-headline font-black text-foreground tracking-tighter uppercase italic leading-none">
+                <h1 className="text-7xl md:text-8xl font-headline font-black text-foreground tracking-tighter uppercase italic leading-none">
                   Fire<span className="text-primary">Quizzo</span>
                 </h1>
                 <div className="h-2 w-48 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(255,215,0,0.3)]" />
@@ -294,15 +294,15 @@ export default function QuizPage() {
     return (
       <div className={cn("min-h-screen flex flex-col items-center justify-center p-8 text-center transition-all duration-1000", hasPassed ? "bg-primary text-[#1f1610]" : "bg-red-600 text-white")}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.1),transparent)] pointer-events-none" />
-        {hasPassed ? <Trophy className="h-64 w-64 mb-12 animate-bounce drop-shadow-2xl" /> : <XCircle className="h-64 w-64 mb-12 animate-pulse drop-shadow-2xl" />}
-        <h1 className="text-[12rem] font-headline font-black mb-6 tracking-tighter uppercase italic leading-none">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
-        <p className="text-6xl font-black mb-8 tracking-tighter italic">SCORE: {score} / {shuffledQuestions.length}</p>
-        <p className="text-3xl font-black uppercase tracking-[0.3em] opacity-80 mb-20 max-w-3xl leading-relaxed mx-auto italic">
+        {hasPassed ? <Trophy className="h-32 w-32 md:h-64 md:w-64 mb-12 animate-bounce drop-shadow-2xl" /> : <XCircle className="h-32 w-32 md:h-64 md:w-64 mb-12 animate-pulse drop-shadow-2xl" />}
+        <h1 className="text-5xl md:text-7xl font-headline font-black mb-6 tracking-tighter uppercase italic leading-none">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
+        <p className="text-4xl md:text-5xl font-black mb-8 tracking-tighter italic">SCORE: {score} / {shuffledQuestions.length}</p>
+        <p className="text-lg md:text-xl font-black uppercase tracking-[0.2em] opacity-80 mb-20 max-w-3xl leading-relaxed mx-auto italic">
           {hasPassed 
             ? "Strategic filtration complete. Sovereign certification has been injected into your profile vault." 
             : `Requirement not met. ${passing} correct responses required for protocol certification. Re-initialize.`}
         </p>
-        <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-28 h-32 text-4xl font-black shadow-[0_50px_100px_rgba(0,0,0,0.4)] hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
+        <Button onClick={() => setActiveQuiz(null)} className={cn("rounded-full px-12 h-16 md:px-20 md:h-20 text-xl md:text-2xl font-black shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform uppercase tracking-tighter", hasPassed ? "bg-[#1f1610] text-primary" : "bg-white text-red-600")}>
           RETURN TO COMMAND
         </Button>
       </div>
@@ -317,48 +317,48 @@ export default function QuizPage() {
       
       {cheatTriggered && (
         <div className="fixed inset-0 z-[100] bg-[#1f1610]/98 flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-500">
-          <AlertTriangle className="h-48 w-48 text-primary mb-12 animate-pulse" />
-          <h1 className="text-8xl md:text-[12rem] font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">SECURITY ALERT</h1>
-          <p className="text-3xl text-primary font-black uppercase tracking-[0.5em] max-w-3xl leading-relaxed">INTEGRITY SENSOR BREACHED. RESETTING PROTOCOL IN REAL-TIME...</p>
+          <AlertTriangle className="h-24 w-24 text-primary mb-12 animate-pulse" />
+          <h1 className="text-5xl md:text-7xl font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">SECURITY ALERT</h1>
+          <p className="text-xl text-primary font-black uppercase tracking-[0.5em] max-w-3xl leading-relaxed">INTEGRITY SENSOR BREACHED. RESETTING PROTOCOL IN REAL-TIME...</p>
           <div className="mt-16 w-80 h-3 bg-primary/20 rounded-full overflow-hidden">
              <div className="h-full bg-primary animate-[progress_3s_linear]" style={{ width: '100%' }} />
           </div>
         </div>
       )}
 
-      <main className="flex-1 container mx-auto px-4 py-16 flex flex-col items-center relative z-10">
-        <div className="max-w-5xl w-full space-y-16">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 flex flex-col items-center relative z-10">
+        <div className="max-w-4xl w-full space-y-10">
           <div className="flex items-center justify-between px-4">
-            <Button variant="ghost" className="text-primary hover:text-primary/60 rounded-full h-16 px-12 font-black uppercase text-sm tracking-[0.2em] border-4 border-primary/20" onClick={() => setActiveQuiz(null)}>
-              <ArrowLeft className="mr-4 h-6 w-6" /> EXIT PROTOCOL
+            <Button variant="ghost" className="text-primary hover:text-primary/60 rounded-full h-10 md:h-12 px-6 md:px-10 font-black uppercase text-xs tracking-[0.2em] border-2 border-primary/20" onClick={() => setActiveQuiz(null)}>
+              <ArrowLeft className="mr-3 h-4 w-4" /> EXIT PROTOCOL
             </Button>
-            <div className="text-4xl font-black bg-mocha-cream text-[#1f1610] px-16 py-6 rounded-[2.5rem] shadow-2xl border-8 border-primary/20">
-              {currentIdx + 1} <span className="text-[#1f1610]/30 mx-4">/</span> {shuffledQuestions.length}
+            <div className="text-xl md:text-2xl font-black bg-mocha-cream text-[#1f1610] px-8 py-3 rounded-2xl shadow-xl border-4 border-primary/20">
+              {currentIdx + 1} <span className="text-[#1f1610]/30 mx-2">/</span> {shuffledQuestions.length}
             </div>
           </div>
 
-          <Card className="rounded-[6rem] border-primary/10 border-[15px] shadow-[0_100px_200px_rgba(0,0,0,0.7)] p-24 bg-mocha-cream relative overflow-hidden animate-in zoom-in-95 duration-700">
-            <div className="absolute top-0 right-0 p-12 opacity-5">
-              <Sparkles className="h-40 w-40 text-[#1f1610]" />
+          <Card className="rounded-[3rem] border-primary/10 border-8 md:border-[10px] shadow-[0_40px_80px_rgba(0,0,0,0.5)] p-8 md:p-12 bg-mocha-cream relative overflow-hidden animate-in zoom-in-95 duration-700">
+            <div className="absolute top-0 right-0 p-6 opacity-5">
+              <Sparkles className="h-24 w-24 text-[#1f1610]" />
             </div>
             
-            <h3 className="text-6xl font-black mb-24 leading-tight text-center text-[#1f1610] uppercase italic tracking-tighter">{currentQ.question}</h3>
+            <h3 className="text-3xl md:text-4xl font-black mb-12 md:mb-16 leading-tight text-center text-[#1f1610] uppercase italic tracking-tighter">{currentQ.question}</h3>
             
-            <div className="space-y-10">
+            <div className="space-y-6 md:space-y-8">
               {currentQ.type === 'multiple' && currentQ.options && (
-                <div className="grid gap-8">
+                <div className="grid gap-4 md:gap-6">
                   {currentQ.options.map((opt: string, i: number) => (
                     <button 
                       key={i} 
                       onClick={() => setUserAnswer(opt)}
                       className={cn(
-                        "p-12 text-left border-[8px] rounded-[3.5rem] text-3xl font-black transition-all active:scale-95 flex items-center gap-12 uppercase tracking-tight",
+                        "p-6 md:p-8 text-left border-4 md:border-[6px] rounded-[2.5rem] text-lg md:text-xl font-black transition-all active:scale-95 flex items-center gap-6 uppercase tracking-tight",
                         userAnswer === opt 
-                          ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-[0_30px_60px_rgba(0,0,0,0.4)]" 
+                          ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-[0_15px_30px_rgba(0,0,0,0.2)]" 
                           : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50"
                       )}
                     >
-                      <span className="w-20 h-20 rounded-[1.8rem] bg-primary text-[#1f1610] flex items-center justify-center text-2xl font-black shadow-inner">
+                      <span className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary text-[#1f1610] flex items-center justify-center text-lg md:text-xl font-black shadow-inner">
                         {String.fromCharCode(65 + i)}
                       </span>
                       {opt}
@@ -368,15 +368,15 @@ export default function QuizPage() {
               )}
 
               {currentQ.type === 'boolean' && (
-                <div className="grid grid-cols-2 gap-12">
+                <div className="grid grid-cols-2 gap-4 md:gap-8">
                   {['True', 'False'].map((opt) => (
                     <button 
                       key={opt}
                       onClick={() => setUserAnswer(opt)}
                       className={cn(
-                        "p-24 text-center border-[10px] rounded-[4.5rem] text-6xl font-black transition-all active:scale-95 uppercase italic",
+                        "p-12 md:p-16 text-center border-4 md:border-[8px] rounded-[3rem] text-3xl md:text-4xl font-black transition-all active:scale-95 uppercase italic",
                         userAnswer === opt 
-                          ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-2xl" 
+                          ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-xl" 
                           : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50"
                       )}
                     >
@@ -387,21 +387,21 @@ export default function QuizPage() {
               )}
 
               {currentQ.type === 'id' && (
-                <div className="space-y-10">
+                <div className="space-y-6">
                   <Input 
                     placeholder="ENTER PROTOCOL CODE..." 
-                    className="h-36 rounded-[4rem] text-6xl text-center font-black bg-white border-[10px] border-[#1f1610]/5 text-[#1f1610] focus:border-primary shadow-inner placeholder:text-[#1f1610]/10" 
+                    className="h-20 md:h-24 rounded-2xl text-3xl md:text-4xl text-center font-black bg-white border-4 md:border-8 border-[#1f1610]/5 text-[#1f1610] focus:border-primary shadow-inner placeholder:text-[#1f1610]/10" 
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && userAnswer && handleNext()}
                   />
-                  <p className="text-center text-[#1f1610]/30 font-black uppercase tracking-[0.8em] text-sm">SECURITY VERIFICATION REQUIRED (ENTER)</p>
+                  <p className="text-center text-[#1f1610]/30 font-black uppercase tracking-[0.8em] text-[10px]">SECURITY VERIFICATION REQUIRED (ENTER)</p>
                 </div>
               )}
             </div>
 
             <Button 
-              className="w-full mt-24 h-32 rounded-full font-black text-5xl bg-primary text-[#1f1610] hover:bg-[#1f1610] hover:text-primary transition-all shadow-[0_50px_100px_rgba(255,215,0,0.3)] active:scale-95 disabled:opacity-20 uppercase tracking-tighter" 
+              className="w-full mt-12 md:mt-16 h-16 md:h-20 rounded-full font-black text-xl md:text-2xl bg-primary text-[#1f1610] hover:bg-[#1f1610] hover:text-primary transition-all shadow-[0_20px_40px_rgba(255,215,0,0.2)] active:scale-95 disabled:opacity-20 uppercase tracking-tighter" 
               onClick={handleNext} 
               disabled={!userAnswer}
             >
