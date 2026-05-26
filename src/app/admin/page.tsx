@@ -38,13 +38,13 @@ export default function AdminPage() {
   const tasksQuery = useMemo(() => query(collection(db, 'tasks'), orderBy('day', 'asc')), [db]);
   const quizzesQuery = useMemo(() => query(collection(db, 'quizzes'), orderBy('createdAt', 'desc')), [db]);
 
-  const { data: shooppyProducts } = useCollection(productsQuery);
-  const { data: newsPosts } = useCollection(newsQuery);
-  const { data: faqs } = useCollection(faqsQuery);
-  const { data: activityWall } = useCollection(activityWall);
-  const { data: sharedResources } = useCollection(resourcesQuery);
-  const { data: globalTasks } = useCollection(tasksQuery);
-  const { data: globalQuizzes } = useCollection(quizzesQuery);
+  const { data: shooppyProducts = [] } = useCollection(productsQuery);
+  const { data: newsPosts = [] } = useCollection(newsQuery);
+  const { data: faqs = [] } = useCollection(faqsQuery);
+  const { data: activityWallData = [] } = useCollection(activityQuery);
+  const { data: sharedResources = [] } = useCollection(resourcesQuery);
+  const { data: globalTasks = [] } = useCollection(tasksQuery);
+  const { data: globalQuizzes = [] } = useCollection(quizzesQuery);
 
   // Asset State
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -133,8 +133,9 @@ export default function AdminPage() {
       answer: "",
       options: ["", "", "", ""]
     };
-    setDraftQuestions([...draftQuestions, newQ]);
-    setCurrentQIdx(draftQuestions.length);
+    const newDrafts = [...draftQuestions, newQ];
+    setDraftQuestions(newDrafts);
+    setCurrentQIdx(newDrafts.length - 1);
     toast({ title: "New Protocol Slot Created" });
   };
 
@@ -465,7 +466,7 @@ export default function AdminPage() {
               <Card className="rounded-[4rem] border-4 border-[#FFD700]/20 bg-mocha-cream p-12 shadow-2xl">
                  <CardTitle className="text-3xl font-black uppercase mb-10 text-[#1f1610]">Strategist Wins</CardTitle>
                  <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
-                   {activityWall.map((p: any) => (
+                   {activityWallData.map((p: any) => (
                      <div key={p.id} className="p-8 bg-white/50 rounded-[3rem] border-2 border-[#1f1610]/10 flex justify-between items-center">
                        <div>
                          <p className="font-black text-[#1f1610] uppercase text-sm">@{p.nickname}</p>
