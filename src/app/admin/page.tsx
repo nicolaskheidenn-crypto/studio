@@ -18,6 +18,8 @@ import {
   ChevronLeft, ChevronRight, Minus, HelpCircle
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
 const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
@@ -95,7 +97,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveProduct = async () => {
+  const handleSaveProduct = () => {
     const data = {
       title: prodTitle,
       description: prodDesc,
@@ -109,23 +111,44 @@ export default function AdminPage() {
 
     if (editingProductId) {
       const ref = doc(db, 'shooppyProducts', editingProductId);
-      updateDoc(ref, data);
+      updateDoc(ref, data).catch(async (error) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: ref.path,
+          operation: 'update',
+          requestResourceData: data,
+        }));
+      });
       setEditingProductId(null);
       toast({ title: "Strategic Asset Updated" });
     } else {
-      addDoc(collection(db, 'shooppyProducts'), data);
+      const collRef = collection(db, 'shooppyProducts');
+      addDoc(collRef, data).catch(async (error) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: collRef.path,
+          operation: 'create',
+          requestResourceData: data,
+        }));
+      });
       toast({ title: "Strategic Asset Deployed" });
     }
     
     setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0); setProdPlacement('Marketplace');
   };
 
-  const handleDispatchBroadcast = async () => {
-    addDoc(collection(db, 'newsPosts'), {
+  const handleDispatchBroadcast = () => {
+    const data = {
       title: newsTitle,
       content: newsContent,
       imageUrl: newsImg,
       timestamp: serverTimestamp()
+    };
+    const collRef = collection(db, 'newsPosts');
+    addDoc(collRef, data).catch(async (error) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: collRef.path,
+        operation: 'create',
+        requestResourceData: data,
+      }));
     });
     setNewsTitle(""); setNewsContent(""); setNewsImg("");
     toast({ title: "Broadcast Dispatched" });
@@ -167,6 +190,8 @@ export default function AdminPage() {
       } else {
         newDrafts[currentQIdx].options = undefined;
       }
+      // Reset answer when type changes to ensure integrity
+      newDrafts[currentQIdx].answer = "";
     }
     
     setDraftQuestions(newDrafts);
@@ -175,21 +200,36 @@ export default function AdminPage() {
   const updateOption = (optIdx: number, value: string) => {
     const newDrafts = [...draftQuestions];
     const currentOptions = [...(newDrafts[currentQIdx].options || ["", "", "", ""])];
+    const oldVal = currentOptions[optIdx];
     currentOptions[optIdx] = value;
     newDrafts[currentQIdx].options = currentOptions;
+    
+    // If the answer was this option, update it too
+    if (newDrafts[currentQIdx].answer === oldVal) {
+      newDrafts[currentQIdx].answer = value;
+    }
+    
     setDraftQuestions(newDrafts);
   };
 
-  const handleSaveQuiz = async () => {
+  const handleSaveQuiz = () => {
     if (!quizTitle || draftQuestions.some(q => !q.question || !q.answer)) {
       toast({ title: "Incomplete Protocol", description: "Ensure all questions and answers are defined.", variant: "destructive" });
       return;
     }
-    addDoc(collection(db, 'quizzes'), {
+    const data = {
       title: quizTitle,
       questionCount: draftQuestions.length,
       questions: draftQuestions,
       createdAt: serverTimestamp()
+    };
+    const collRef = collection(db, 'quizzes');
+    addDoc(collRef, data).catch(async (error) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: collRef.path,
+        operation: 'create',
+        requestResourceData: data,
+      }));
     });
     setQuizTitle(""); 
     setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
@@ -197,19 +237,33 @@ export default function AdminPage() {
     toast({ title: "Quiz Protocol Deployed" });
   };
 
-  const handleSaveTask = async () => {
+  const handleSaveTask = () => {
     if (!taskTitle || !taskDesc) return;
-    addDoc(collection(db, 'tasks'), {
+    const data = {
       day: taskDay,
       title: taskTitle,
       description: taskDesc
+    };
+    const collRef = collection(db, 'tasks');
+    addDoc(collRef, data).catch(async (error) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: collRef.path,
+        operation: 'create',
+        requestResourceData: data,
+      }));
     });
     setTaskTitle(""); setTaskDesc("");
     toast({ title: "Daily Protocol Updated" });
   };
 
-  const handleDeleteDoc = async (coll: string, id: string) => {
-    deleteDoc(doc(db, coll, id));
+  const handleDeleteDoc = (coll: string, id: string) => {
+    const docRef = doc(db, coll, id);
+    deleteDoc(docRef).catch(async (error) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'delete',
+      }));
+    });
     toast({ title: "Data Purged" });
   };
 
@@ -328,7 +382,6 @@ export default function AdminPage() {
                             <Minus className="h-8 w-8" />
                            </Button>
                            
-                           {/* HIGH VISIBILITY PAGER PILL */}
                            <div className="flex items-center gap-8 bg-[#FFD700] text-[#1f1610] h-20 px-12 rounded-full font-black shadow-[0_20px_40px_rgba(255,215,0,0.4)] border-4 border-[#1f1610]/10">
                               <button type="button" className="hover:scale-150 transition-transform active:scale-95" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))}>
                                 <ChevronLeft className="h-10 w-10" />
@@ -367,13 +420,26 @@ export default function AdminPage() {
 
                       <div className="space-y-6">
                         <div className="space-y-2">
-                           <Label className="text-[#1f1610]">Correct Answer</Label>
-                           <Input 
-                            placeholder="Correct Answer" 
-                            value={currentDraftQ.answer} 
-                            onChange={e => updateCurrentQ('answer', e.target.value)} 
-                            className="h-18 bg-[#3d332d] border-4 border-[#FFD700]/30 text-white" 
-                          />
+                           <Label className="text-[#1f1610]">Correct Answer Selection</Label>
+                           {currentDraftQ.type === 'id' ? (
+                             <Input 
+                               placeholder="Correct Code" 
+                               value={currentDraftQ.answer} 
+                               onChange={e => updateCurrentQ('answer', e.target.value)} 
+                               className="h-18 bg-[#3d332d] border-4 border-[#FFD700]/30 text-white font-bold" 
+                             />
+                           ) : (
+                             <select 
+                               className="w-full h-18 bg-[#3d332d] border-4 border-[#FFD700]/30 rounded-2xl px-6 font-black uppercase text-white"
+                               value={currentDraftQ.answer}
+                               onChange={e => updateCurrentQ('answer', e.target.value)}
+                             >
+                               <option value="">Select Correct Strategic Response</option>
+                               {(currentDraftQ.type === 'multiple' ? (currentDraftQ.options || ["", "", "", ""]) : ["True", "False"])?.map((opt, i) => (
+                                 opt ? <option key={i} value={opt}>{opt}</option> : null
+                               ))}
+                             </select>
+                           )}
                         </div>
                         
                         {currentDraftQ.type === 'multiple' && (
