@@ -102,7 +102,7 @@ export default function AdminPage() {
       title: prodTitle,
       description: prodDesc,
       imageUrl: prodImg,
-      fileUrl: prodFile, // Shop link for Marketplace, Download link for Hub
+      fileUrl: prodFile, 
       type: prodType,
       placement: prodPlacement,
       requiredLevel: prodLevel,
@@ -154,7 +154,6 @@ export default function AdminPage() {
     toast({ title: "Broadcast Dispatched" });
   };
 
-  // Quiz Architect Actions
   const handleAddQuestion = () => {
     const newQ: QuizQuestion = {
       id: Math.random().toString(36).substr(2, 9),
@@ -181,7 +180,6 @@ export default function AdminPage() {
     const newDrafts = [...draftQuestions];
     newDrafts[currentQIdx] = { ...newDrafts[currentQIdx], [field]: value };
     
-    // Auto-adjust options based on type
     if (field === 'type') {
       if (value === 'boolean') {
         newDrafts[currentQIdx].options = ["True", "False"];
@@ -190,7 +188,6 @@ export default function AdminPage() {
       } else {
         newDrafts[currentQIdx].options = undefined;
       }
-      // Reset answer when type changes to ensure integrity
       newDrafts[currentQIdx].answer = "";
     }
     
@@ -204,7 +201,6 @@ export default function AdminPage() {
     currentOptions[optIdx] = value;
     newDrafts[currentQIdx].options = currentOptions;
     
-    // If the answer was this option, update it too
     if (newDrafts[currentQIdx].answer === oldVal) {
       newDrafts[currentQIdx].answer = value;
     }
@@ -284,7 +280,7 @@ export default function AdminPage() {
           <CardHeader className="text-center space-y-8">
             <Key className="h-16 w-16 text-[#FFD700] mx-auto" />
             <CardTitle className="text-5xl font-headline font-black uppercase italic tracking-tighter text-[#1f1610]">Verify Host</CardTitle>
-          </Header>
+          </CardHeader>
           <CardContent className="mt-10">
             <form onSubmit={handleAuthorize} className="space-y-10">
               <Input type="password" placeholder="Protocol Key" className="h-24 text-center text-5xl font-mono rounded-[2.5rem] border-4 border-[#1f1610]/10 bg-white text-[#1f1610]" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} />

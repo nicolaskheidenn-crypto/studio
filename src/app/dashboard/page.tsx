@@ -137,6 +137,20 @@ export default function DashboardPage() {
     toast({ title: "Sovereign Acquisition", description: "Protocol unlocked in your Root Archive." });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    const limitedFiles = files.slice(0, 6);
+    limitedFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPostImages(prev => [...prev, reader.result as string].slice(0, 6));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleDispatchWin = async () => {
     if (!postText.trim() || !uid) return;
     setIsPosting(true);
