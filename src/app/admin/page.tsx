@@ -8,20 +8,27 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUserStore, QuizQuestion } from "@/lib/store";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
-  Key, ShieldAlert, Trash2, Award, BookOpen, CheckSquare, 
-  Newspaper, ShoppingBag, MessageSquare, Lightbulb, 
-  Video, HelpCircle, Upload, Plus, Coins, ListChecks,
-  ChevronLeft, ChevronRight, Minus
+  Key, ShieldAlert, Trash2, Award, BookOpen, 
+  Newspaper, ShoppingBag, MessageSquare, 
+  Plus, Coins, ListChecks,
+  ChevronLeft, ChevronRight, Minus, HelpCircle
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
 const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
+
+export interface QuizQuestion {
+  id: string;
+  type: 'multiple' | 'boolean' | 'id';
+  question: string;
+  options?: string[];
+  answer: string;
+}
 
 export default function AdminPage() {
   const { user } = useUser();
@@ -143,7 +150,7 @@ export default function AdminPage() {
     if (draftQuestions.length <= 1) return;
     const newDrafts = draftQuestions.filter((_, i) => i !== idx);
     setDraftQuestions(newDrafts);
-    if (currentQIdx >= newDrafts.length) setCurrentQIdx(newDrafts.length - 1);
+    if (currentQIdx >= newDrafts.length) setCurrentQIdx(Math.max(0, newDrafts.length - 1));
     toast({ title: "Protocol Slot Removed" });
   };
 
@@ -167,7 +174,7 @@ export default function AdminPage() {
 
   const updateOption = (optIdx: number, value: string) => {
     const newDrafts = [...draftQuestions];
-    const currentOptions = [...(newDrafts[currentQIdx].options || [])];
+    const currentOptions = [...(newDrafts[currentQIdx].options || ["", "", "", ""])];
     currentOptions[optIdx] = value;
     newDrafts[currentQIdx].options = currentOptions;
     setDraftQuestions(newDrafts);
@@ -316,14 +323,22 @@ export default function AdminPage() {
                    <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-4 border-[#1f1610]/10 space-y-10">
                       <div className="flex items-center justify-between">
                         <h4 className="font-black text-[#1f1610] uppercase tracking-widest text-xs">Question Constructor</h4>
-                        <div className="flex items-center gap-4">
-                           <Button variant="ghost" size="icon" className="rounded-full bg-[#1f1610] text-[#FFD700] h-12 w-12" onClick={() => handleRemoveQuestion(currentQIdx)} disabled={draftQuestions.length <= 1}><Minus className="h-6 w-6" /></Button>
-                           <div className="flex items-center gap-2 bg-[#1f1610] text-[#FFD700] h-12 px-6 rounded-full font-black">
-                              <button onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))}><ChevronLeft className="h-5 w-5" /></button>
-                              <span className="mx-2">( {currentQIdx + 1} )</span>
-                              <button onClick={() => setCurrentQIdx(Math.min(draftQuestions.length - 1, currentQIdx + 1))}><ChevronRight className="h-5 w-5" /></button>
+                        <div className="flex items-center gap-6">
+                           <Button type="button" variant="ghost" size="icon" className="rounded-full bg-[#1f1610] text-[#FFD700] h-14 w-14 shadow-xl border-2 border-primary/20" onClick={() => handleRemoveQuestion(currentQIdx)} disabled={draftQuestions.length <= 1}>
+                            <Minus className="h-8 w-8" />
+                           </Button>
+                           <div className="flex items-center gap-4 bg-[#1f1610] text-[#FFD700] h-16 px-10 rounded-full font-black border-4 border-[#FFD700]/20 shadow-2xl">
+                              <button type="button" className="hover:scale-125 transition-transform" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))}>
+                                <ChevronLeft className="h-8 w-8" />
+                              </button>
+                              <span className="mx-4 text-2xl min-w-[60px] text-center tracking-tighter italic">( {currentQIdx + 1} )</span>
+                              <button type="button" className="hover:scale-125 transition-transform" onClick={() => setCurrentQIdx(Math.min(draftQuestions.length - 1, currentQIdx + 1))}>
+                                <ChevronRight className="h-8 w-8" />
+                              </button>
                            </div>
-                           <Button variant="ghost" size="icon" className="rounded-full bg-[#FFD700] text-[#1f1610] h-12 w-12 shadow-lg" onClick={handleAddQuestion}><Plus className="h-6 w-6" /></Button>
+                           <Button type="button" variant="ghost" size="icon" className="rounded-full bg-[#FFD700] text-[#1f1610] h-14 w-14 shadow-2xl hover:scale-110 transition-all" onClick={handleAddQuestion}>
+                            <Plus className="h-8 w-8" />
+                           </Button>
                         </div>
                       </div>
 
@@ -374,8 +389,8 @@ export default function AdminPage() {
 
                         {currentDraftQ.type === 'boolean' && (
                           <div className="grid grid-cols-2 gap-6 opacity-60">
-                            <div className="p-6 bg-[#1f1610] text-[#FFD700] rounded-2xl font-black text-center">TRUE</div>
-                            <div className="p-6 bg-[#1f1610] text-[#FFD700] rounded-2xl font-black text-center">FALSE</div>
+                            <div className="p-6 bg-[#1f1610] text-[#FFD700] rounded-2xl font-black text-center border-4 border-primary/20">TRUE</div>
+                            <div className="p-6 bg-[#1f1610] text-[#FFD700] rounded-2xl font-black text-center border-4 border-primary/20">FALSE</div>
                           </div>
                         )}
                       </div>
