@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -118,9 +117,9 @@ export function Navigation() {
                   <div className="space-y-6">
                     {TUTORIAL_STEPS.map((step, i) => (
                       <div key={i} className="flex gap-6 p-8 bg-white rounded-[3rem] border-4 border-[#1f1610]/5 group hover:border-primary/30 transition-all shadow-sm">
-                        <div className={cn("w-20 h-20 rounded-[1.5rem] bg-[#1f1610] flex flex-col items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform relative", step.color)}>
-                          <step.icon className="h-10 w-10" />
-                          <span className="absolute bottom-1 right-2 text-[10px] font-black opacity-20 text-white">0{i + 1}</span>
+                        <div className="w-20 h-20 rounded-[1.5rem] bg-[#1f1610] flex flex-col items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform relative border-2 border-primary/10">
+                          <step.icon className={cn("h-8 w-8 mb-1", step.color)} />
+                          <span className="text-[8px] font-black text-white/60 tracking-widest uppercase">STEP 0{i + 1}</span>
                         </div>
                         <div className="space-y-1">
                           <h4 className="text-2xl font-black text-[#1f1610] uppercase italic tracking-tight">{step.title}</h4>
