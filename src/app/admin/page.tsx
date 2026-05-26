@@ -56,7 +56,6 @@ export default function AdminPage() {
   const { data: globalQuizzes = [] } = useCollection(quizzesQuery);
 
   // Asset State
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [prodTitle, setProdTitle] = useState("");
   const [prodDesc, setProdDesc] = useState("");
   const [prodImg, setProdImg] = useState("");
@@ -109,28 +108,15 @@ export default function AdminPage() {
       price: prodPrice
     };
 
-    if (editingProductId) {
-      const ref = doc(db, 'shooppyProducts', editingProductId);
-      updateDoc(ref, data).catch(async (error) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: ref.path,
-          operation: 'update',
-          requestResourceData: data,
-        }));
-      });
-      setEditingProductId(null);
-      toast({ title: "Strategic Asset Updated" });
-    } else {
-      const collRef = collection(db, 'shooppyProducts');
-      addDoc(collRef, data).catch(async (error) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: collRef.path,
-          operation: 'create',
-          requestResourceData: data,
-        }));
-      });
-      toast({ title: "Strategic Asset Deployed" });
-    }
+    const collRef = collection(db, 'shooppyProducts');
+    addDoc(collRef, data).catch(async (error) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: collRef.path,
+        operation: 'create',
+        requestResourceData: data,
+      }));
+    });
+    toast({ title: "Strategic Asset Deployed" });
     
     setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0); setProdPlacement('Marketplace');
   };
