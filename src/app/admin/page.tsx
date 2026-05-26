@@ -80,6 +80,11 @@ export default function AdminPage() {
   ]);
   const [currentQIdx, setCurrentQIdx] = useState(0);
 
+  // Task State
+  const [taskDay, setTaskDay] = useState(1);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDesc, setTaskDesc] = useState("");
+
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminKey === ADMIN_SECRET_KEY) {
