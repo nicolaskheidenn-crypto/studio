@@ -2,11 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckSquare, Hourglass, Settings, LayoutDashboard, Menu, X, User, Crown, BookOpen } from "lucide-react";
+import { 
+  CheckSquare, Hourglass, Settings, LayoutDashboard, 
+  Menu, X, User, Crown, BookOpen, HelpCircle,
+  Zap, Trophy, Target, ShieldCheck
+} from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -17,6 +29,39 @@ const NAV_ITEMS = [
 ];
 
 const HOST_EMAIL = "nicolaskheidenn@gmail.com";
+
+const TUTORIAL_STEPS = [
+  {
+    title: "ROOT HUB",
+    desc: "Your primary command center. Document Sovereign Wins, heart other strategists' insights, and monitor host broadcasts for protocol updates.",
+    icon: LayoutDashboard,
+    color: "text-primary"
+  },
+  {
+    title: "TASKDO PROTOCOL",
+    desc: "Complete your daily routines to earn XP and Points. Finishing a 30-day cycle unlocks the 'Sovereign Elite' achievement status.",
+    icon: Target,
+    color: "text-orange-500"
+  },
+  {
+    title: "FIREQUIZZO",
+    desc: "Pass high-impact certification tests to prove your mastery. Pass with 85% accuracy to gain massive level progression. Watch the anti-cheat sensor!",
+    icon: Trophy,
+    color: "text-yellow-500"
+  },
+  {
+    title: "GOALCAPS VAULT",
+    desc: "Encrypt your future visions. Document your long-term goals and seal them in the vault. They remain locked until your target unlock date.",
+    icon: ShieldCheck,
+    color: "text-green-500"
+  },
+  {
+    title: "SHOOPPY MARKET",
+    desc: "Use your earned points to acquire digital assets, eBooks, and strategy bundles directly from the host archive.",
+    icon: Zap,
+    color: "text-primary"
+  }
+];
 
 export function Navigation() {
   const pathname = usePathname();
@@ -31,17 +76,59 @@ export function Navigation() {
     <nav className="sticky top-0 z-50 w-full border-b bg-white/90 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/home" className="flex items-center gap-3 group">
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-headline font-black tracking-tighter text-black leading-none group-hover:text-primary transition-colors">
-                ND
+          <div className="flex items-center gap-6">
+            <Link href="/home" className="flex items-center gap-3 group">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-headline font-black tracking-tighter text-black leading-none group-hover:text-primary transition-colors">
+                  ND
+                </span>
+                <div className="h-1 w-full bg-primary rounded-full" />
+              </div>
+              <span className="text-xl font-headline font-black tracking-tight text-black hidden sm:block uppercase">
+                NICO <span className="text-primary">DIGITAL</span>
               </span>
-              <div className="h-1 w-full bg-primary rounded-full" />
-            </div>
-            <span className="text-xl font-headline font-black tracking-tight text-black hidden sm:block uppercase">
-              NICO <span className="text-primary">DIGITAL</span>
-            </span>
-          </Link>
+            </Link>
+
+            {/* Tutorial Trigger - Placed to the right of the Brand section */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="rounded-full h-9 px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 border border-primary/20 gap-2 transition-all active:scale-95"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                  Tutorial
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="rounded-[4rem] border-[10px] border-primary/20 bg-mocha-cream p-12 max-w-2xl shadow-2xl">
+                <DialogHeader className="text-center mb-10 space-y-4">
+                  <DialogTitle className="text-5xl font-headline font-black text-[#1f1610] uppercase italic tracking-tighter">
+                    SOVEREIGN <span className="text-primary">BRIEFING</span>
+                  </DialogTitle>
+                  <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
+                </DialogHeader>
+                <ScrollArea className="h-[500px] pr-6">
+                  <div className="space-y-8">
+                    {TUTORIAL_STEPS.map((step, i) => (
+                      <div key={i} className="flex gap-6 p-8 bg-white rounded-[2.5rem] border-2 border-[#1f1610]/5 group hover:border-primary/20 transition-all">
+                        <div className={cn("w-16 h-16 rounded-2xl bg-[#1f1610] flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform", step.color)}>
+                          <step.icon className="h-8 w-8" />
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-2xl font-black text-[#1f1610] uppercase italic tracking-tight">{step.title}</h4>
+                          <p className="text-sm font-bold text-[#1f1610]/60 leading-relaxed uppercase tracking-tight">{step.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="p-8 bg-[#1f1610] rounded-[2.5rem] text-center space-y-4">
+                      <p className="text-[10px] font-black uppercase text-primary tracking-[0.4em]">Ready to Execute?</p>
+                      <p className="text-white font-black uppercase italic text-xl">STAY GOLD, STRATEGIST.</p>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
+          </div>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-4">
