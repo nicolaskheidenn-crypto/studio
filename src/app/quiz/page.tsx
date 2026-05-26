@@ -6,6 +6,7 @@ import { Navigation } from "@/components/Navigation";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { 
   XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft, 
   BookOpen, Award, Zap, Coffee, ShieldCheck, Info, Sparkles 
@@ -269,7 +270,7 @@ export default function QuizPage() {
                  </div>
               </Card>
 
-              {/* Global Registry Module - Matching User Requested Design */}
+              {/* Global Registry Module */}
               <Card className="rounded-[4rem] border-4 border-dashed border-primary/10 bg-card/20 p-12 text-center flex flex-col items-center justify-center space-y-8 group hover:border-primary/30 transition-all">
                 <div className="w-16 h-16 rounded-full border-2 border-primary/20 flex items-center justify-center">
                   <Info className="h-8 w-8 text-primary/40 group-hover:text-primary transition-colors" />
@@ -412,4 +413,3 @@ export default function QuizPage() {
     </div>
   );
 }
-
