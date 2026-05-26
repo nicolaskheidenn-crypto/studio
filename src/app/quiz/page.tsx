@@ -82,6 +82,7 @@ export default function QuizPage() {
   const handleCheat = useCallback(() => {
     if (activeQuiz && !isFinished && !cheatTriggered) {
       setCheatTriggered(true);
+      // Immediate Reset logic
       setTimeout(() => {
         setShuffledQuestions(shuffle(activeQuiz.questions));
         setCurrentIdx(0);
@@ -136,10 +137,10 @@ export default function QuizPage() {
   };
 
   const getPassingScore = (total: number) => {
-    if (total <= 5) return total; // Perfect score for short quizzes
+    if (total <= 5) return total; 
     if (total <= 10) return 8;
     if (total <= 15) return 13;
-    return Math.ceil(total * 0.85); // 85% requirement for long quizzes
+    return Math.ceil(total * 0.85); 
   };
 
   if (!isMounted) return null;
@@ -149,7 +150,6 @@ export default function QuizPage() {
       <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
         <Navigation />
         
-        {/* Sovereign Background Decor */}
         <div className="absolute top-[15%] left-[5%] opacity-5 -rotate-12 pointer-events-none">
           <Coffee className="w-96 h-96 text-primary" />
         </div>
@@ -160,7 +160,6 @@ export default function QuizPage() {
         <main className="flex-1 container mx-auto px-4 py-12 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start">
             
-            {/* Left Flank: Mastery Summary */}
             <div className="hidden lg:flex flex-col gap-10">
               <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8 animate-in slide-in-from-left-10 duration-700">
                 <div className="space-y-2">
@@ -200,7 +199,6 @@ export default function QuizPage() {
               </Card>
             </div>
 
-            {/* Vanguard: Quiz List */}
             <div className="lg:col-span-2 space-y-12">
               <header className="text-center space-y-6">
                 <h1 className="text-7xl md:text-8xl font-headline font-black text-foreground tracking-tighter uppercase italic leading-none">
@@ -247,7 +245,6 @@ export default function QuizPage() {
               </div>
             </div>
 
-            {/* Right Flank: Security Briefing */}
             <div className="hidden lg:flex flex-col gap-10">
               <div className="px-6 space-y-2">
                 <h3 className="text-2xl font-black text-foreground uppercase italic">Security Briefing</h3>
@@ -270,7 +267,6 @@ export default function QuizPage() {
                  </div>
               </Card>
 
-              {/* Global Registry Module */}
               <Card className="rounded-[4rem] border-4 border-dashed border-primary/10 bg-card/20 p-12 text-center flex flex-col items-center justify-center space-y-8 group hover:border-primary/30 transition-all">
                 <div className="w-16 h-16 rounded-full border-2 border-primary/20 flex items-center justify-center">
                   <Info className="h-8 w-8 text-primary/40 group-hover:text-primary transition-colors" />
@@ -315,13 +311,21 @@ export default function QuizPage() {
     <div className="min-h-screen flex flex-col bg-[#1f1610] relative">
       <Navigation />
       
+      {/* High Visibility Security Sensor Badge */}
+      {!isFinished && !cheatTriggered && (
+        <div className="fixed top-20 right-8 z-[60] flex items-center gap-3 bg-red-600/10 border-2 border-red-600/30 px-6 py-3 rounded-full animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.2)]">
+          <ShieldAlert className="h-5 w-5 text-red-600" />
+          <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">Anti-Cheat Sensor Active</span>
+        </div>
+      )}
+
       {cheatTriggered && (
         <div className="fixed inset-0 z-[100] bg-[#1f1610]/98 flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-500">
           <AlertTriangle className="h-24 w-24 text-primary mb-12 animate-pulse" />
           <h1 className="text-5xl md:text-7xl font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">SECURITY ALERT</h1>
           <p className="text-xl text-primary font-black uppercase tracking-[0.5em] max-w-3xl leading-relaxed">INTEGRITY SENSOR BREACHED. RESETTING PROTOCOL IN REAL-TIME...</p>
           <div className="mt-16 w-80 h-3 bg-primary/20 rounded-full overflow-hidden">
-             <div className="h-full bg-primary animate-[progress_3s_linear]" style={{ width: '100%' }} />
+             <div className="h-full bg-primary animate-[progress_3s_linear] origin-left" style={{ width: '100%' }} />
           </div>
         </div>
       )}
@@ -410,6 +414,13 @@ export default function QuizPage() {
           </Card>
         </div>
       </main>
+
+      <style jsx global>{`
+        @keyframes progress {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+      `}</style>
     </div>
   );
 }
