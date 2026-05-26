@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { 
   CheckSquare, Hourglass, Settings, LayoutDashboard, 
   Menu, X, User, Crown, BookOpen, HelpCircle,
-  Zap, Trophy, Target, ShieldCheck
+  Zap, Trophy, Target, ShieldCheck, Share2
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -33,33 +34,39 @@ const HOST_EMAIL = "nicolaskheidenn@gmail.com";
 const TUTORIAL_STEPS = [
   {
     title: "ROOT HUB",
-    desc: "Your primary command center. Document Sovereign Wins, heart other strategists' insights, and monitor host broadcasts for protocol updates.",
+    desc: "Share your 'Sovereign Wins' and monitor Host broadcasts for protocol updates.",
     icon: LayoutDashboard,
     color: "text-primary"
   },
   {
     title: "TASKDO PROTOCOL",
-    desc: "Complete your daily routines to earn XP and Points. Finishing a 30-day cycle unlocks the 'Sovereign Elite' achievement status.",
+    desc: "Execute daily routines to earn Points and XP. Complete 30 days for Elite Status.",
     icon: Target,
     color: "text-orange-500"
   },
   {
     title: "FIREQUIZZO",
-    desc: "Pass high-impact certification tests to prove your mastery. Pass with 85% accuracy to gain massive level progression. Watch the anti-cheat sensor!",
+    desc: "Pass certifications with 85% accuracy. Stay focused—don't trigger the anti-cheat sensor!",
     icon: Trophy,
     color: "text-yellow-500"
   },
   {
     title: "GOALCAPS VAULT",
-    desc: "Encrypt your future visions. Document your long-term goals and seal them in the vault. They remain locked until your target unlock date.",
+    desc: "Write future goals and lock them in the temporal vault until your target date.",
     icon: ShieldCheck,
     color: "text-green-500"
   },
   {
     title: "SHOOPPY MARKET",
-    desc: "Use your earned points to acquire digital assets, eBooks, and strategy bundles directly from the host archive.",
+    desc: "Spend your earned points on eBooks, strategy bundles, and digital assets.",
     icon: Zap,
     color: "text-primary"
+  },
+  {
+    title: "LIBRARY LABS",
+    desc: "Contribute AI Prompts and Tactical Archives to the collective strategist library.",
+    icon: Share2,
+    color: "text-blue-500"
   }
 ];
 
@@ -89,40 +96,40 @@ export function Navigation() {
               </span>
             </Link>
 
-            {/* Tutorial Trigger - Placed to the right of the Brand section */}
+            {/* Tutorial Trigger */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="rounded-full h-9 px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 border border-primary/20 gap-2 transition-all active:scale-95"
+                  className="rounded-full h-9 px-5 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 border border-primary/20 gap-2 transition-all active:scale-95 shadow-sm"
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
                   Tutorial
                 </Button>
               </DialogTrigger>
-              <DialogContent className="rounded-[4rem] border-[10px] border-primary/20 bg-mocha-cream p-12 max-w-2xl shadow-2xl">
+              <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 max-w-2xl shadow-2xl">
                 <DialogHeader className="text-center mb-10 space-y-4">
                   <DialogTitle className="text-5xl font-headline font-black text-[#1f1610] uppercase italic tracking-tighter">
                     SOVEREIGN <span className="text-primary">BRIEFING</span>
                   </DialogTitle>
-                  <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
+                  <div className="h-2 w-24 bg-primary mx-auto rounded-full" />
                 </DialogHeader>
-                <ScrollArea className="h-[500px] pr-6">
-                  <div className="space-y-8">
+                <ScrollArea className="h-[550px] pr-6">
+                  <div className="space-y-6">
                     {TUTORIAL_STEPS.map((step, i) => (
-                      <div key={i} className="flex gap-6 p-8 bg-white rounded-[2.5rem] border-2 border-[#1f1610]/5 group hover:border-primary/20 transition-all">
-                        <div className={cn("w-16 h-16 rounded-2xl bg-[#1f1610] flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform", step.color)}>
-                          <step.icon className="h-8 w-8" />
+                      <div key={i} className="flex gap-6 p-8 bg-white rounded-[3rem] border-4 border-[#1f1610]/5 group hover:border-primary/30 transition-all shadow-sm">
+                        <div className={cn("w-20 h-20 rounded-[1.5rem] bg-[#1f1610] flex items-center justify-center shrink-0 shadow-lg group-hover:scale-105 transition-transform", step.color)}>
+                          <step.icon className="h-10 w-10" />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <h4 className="text-2xl font-black text-[#1f1610] uppercase italic tracking-tight">{step.title}</h4>
-                          <p className="text-sm font-bold text-[#1f1610]/60 leading-relaxed uppercase tracking-tight">{step.desc}</p>
+                          <p className="text-base font-bold text-[#1f1610]/60 leading-snug uppercase tracking-tight">{step.desc}</p>
                         </div>
                       </div>
                     ))}
-                    <div className="p-8 bg-[#1f1610] rounded-[2.5rem] text-center space-y-4">
-                      <p className="text-[10px] font-black uppercase text-primary tracking-[0.4em]">Ready to Execute?</p>
-                      <p className="text-white font-black uppercase italic text-xl">STAY GOLD, STRATEGIST.</p>
+                    <div className="p-10 bg-[#1f1610] rounded-[3rem] text-center space-y-4 shadow-2xl border-4 border-primary/20">
+                      <p className="text-[10px] font-black uppercase text-primary tracking-[0.5em]">Command Authenticated</p>
+                      <p className="text-white font-black uppercase italic text-2xl tracking-tighter">STAY GOLD, STRATEGIST.</p>
                     </div>
                   </div>
                 </ScrollArea>
