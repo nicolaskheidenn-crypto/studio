@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -59,16 +58,16 @@ const SYSTEM_BADGES: BadgeType[] = [
 ];
 
 const MONSTER_AVATARS = [
-  { name: 'Alien', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Alien' },
-  { name: 'Blob', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Blob' },
-  { name: 'Fang', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Fang' },
-  { name: 'Gloop', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Gloop' },
-  { name: 'Spike', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Spike' },
-  { name: 'Tentacle', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Tentacle' },
-  { name: 'Zorg', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Zorg' },
-  { name: 'Blink', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Blink' },
-  { name: 'Chomp', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Chomp' },
-  { name: 'Drip', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Drip' },
+  { name: 'Alien', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Alien&backgroundColor=transparent' },
+  { name: 'Blob', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blob&backgroundColor=transparent' },
+  { name: 'Fang', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Fang&backgroundColor=transparent' },
+  { name: 'Gloop', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Gloop&backgroundColor=transparent' },
+  { name: 'Spike', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Spike&backgroundColor=transparent' },
+  { name: 'Tentacle', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Tentacle&backgroundColor=transparent' },
+  { name: 'Zorg', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Zorg&backgroundColor=transparent' },
+  { name: 'Blink', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blink&backgroundColor=transparent' },
+  { name: 'Chomp', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Chomp&backgroundColor=transparent' },
+  { name: 'Drip', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Drip&backgroundColor=transparent' },
 ];
 
 export default function SettingsPage() {
@@ -270,12 +269,12 @@ export default function SettingsPage() {
                                       key={m.name}
                                       onClick={() => selectMonsterAvatar(m.url)}
                                       className={cn(
-                                        "aspect-square rounded-[2.5rem] bg-white border-[8px] p-2 transition-all hover:scale-105 active:scale-95 shadow-xl group overflow-hidden relative flex flex-col items-center justify-center",
+                                        "aspect-square rounded-[2.5rem] bg-white border-[8px] p-4 transition-all hover:scale-105 active:scale-95 shadow-xl group overflow-hidden relative flex flex-col items-center justify-center",
                                         avatar === m.url ? "border-primary shadow-[0_20px_40px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
                                       )}
                                      >
-                                        <div className="absolute top-4 left-6 text-[10px] font-black uppercase tracking-widest text-[#1f1610]/40 z-10">{m.name}</div>
-                                        <img src={m.url} className="w-full h-full object-contain" alt={m.name} />
+                                        <img src={m.url} className="w-full h-full object-contain mb-2" alt={m.name} />
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-[#1f1610] mt-1">{m.name}</div>
                                      </button>
                                    ))}
                                 </div>
@@ -369,7 +368,7 @@ export default function SettingsPage() {
                             {b.difficulty}
                          </div>
                          <h4 className="text-2xl md:text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter leading-none">{b.title}</h4>
-                         <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-[0.2em] leading-relaxed line-clamp-2">{b.description}</p>
+                         <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-[0.2em] masonry line-clamp-2">{b.description}</p>
                        </div>
                     </div>
                   )})}
