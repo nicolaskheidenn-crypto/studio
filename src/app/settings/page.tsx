@@ -59,16 +59,16 @@ const SYSTEM_BADGES: BadgeType[] = [
 ];
 
 const MONSTER_AVATARS = [
-  { name: 'Alien', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Alien' },
-  { name: 'Blob', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Blob' },
-  { name: 'Fang', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Fang' },
-  { name: 'Gloop', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Gloop' },
-  { name: 'Spike', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Spike' },
-  { name: 'Tentacle', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Tentacle' },
-  { name: 'Zorg', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Zorg' },
-  { name: 'Blink', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Blink' },
-  { name: 'Chomp', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Chomp' },
-  { name: 'Drip', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Drip' },
+  { name: 'Alien', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Alien' },
+  { name: 'Blob', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blob' },
+  { name: 'Fang', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Fang' },
+  { name: 'Gloop', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Gloop' },
+  { name: 'Spike', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Spike' },
+  { name: 'Tentacle', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Tentacle' },
+  { name: 'Zorg', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Zorg' },
+  { name: 'Blink', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blink' },
+  { name: 'Chomp', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Chomp' },
+  { name: 'Drip', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Drip' },
 ];
 
 export default function SettingsPage() {
