@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from '@/components/Navigation';
@@ -58,7 +59,7 @@ export default function DashboardPage() {
   }, [profiles, uid]);
   
   const { 
-    points = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = []
+    points = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = [], avatarUrl = ''
   } = profile;
 
   const {
@@ -167,6 +168,7 @@ export default function DashboardPage() {
       await addDoc(collection(db, 'activityWall'), {
         userId: uid,
         nickname: nickname,
+        avatarUrl: avatarUrl,
         description: postText,
         images: postImages,
         isPrivate: false,
@@ -196,6 +198,7 @@ export default function DashboardPage() {
           id: Math.random().toString(36).substr(2, 9),
           userId: uid,
           nickname: nickname,
+          avatarUrl: avatarUrl,
           text: text,
           timestamp: new Date().toISOString()
         })
@@ -231,6 +234,7 @@ export default function DashboardPage() {
         content: resContent,
         userId: uid,
         nickname: nickname,
+        avatarUrl: avatarUrl,
         timestamp: serverTimestamp()
       });
 
@@ -323,8 +327,12 @@ export default function DashboardPage() {
                   <Zap className="h-32 w-32 text-primary" />
                 </div>
                 <div className="flex gap-8 items-start">
-                  <div className="w-24 h-24 rounded-[2rem] bg-primary flex items-center justify-center font-black text-background text-3xl shadow-[0_20px_40px_rgba(255,215,0,0.3)] shrink-0">
-                    {nickname.slice(0,2).toUpperCase()}
+                  <div className="w-24 h-24 rounded-[2rem] bg-primary flex items-center justify-center font-black text-background text-3xl shadow-[0_20px_40px_rgba(255,215,0,0.3)] shrink-0 overflow-hidden border-4 border-primary/20">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
+                    ) : (
+                      nickname.slice(0,2).toUpperCase()
+                    )}
                   </div>
                   <div className="flex-1 space-y-6">
                     <Textarea 
@@ -395,8 +403,12 @@ export default function DashboardPage() {
                   <Card key={post.id} className="rounded-[4.5rem] border-[10px] border-primary/5 bg-card shadow-2xl overflow-hidden group hover:border-primary/10 transition-all duration-700">
                     <CardHeader className="p-12 pb-6">
                        <div className="flex items-center gap-8">
-                         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center font-black text-primary text-xl border-4 border-primary/10 shadow-inner">
-                            {post.nickname?.slice(0,2).toUpperCase()}
+                         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center font-black text-primary text-xl border-4 border-primary/10 shadow-inner overflow-hidden">
+                            {post.avatarUrl ? (
+                              <img src={post.avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
+                            ) : (
+                              post.nickname?.slice(0,2).toUpperCase()
+                            )}
                          </div>
                          <div className="flex-1">
                             <p className="font-black text-2xl uppercase text-foreground italic">{post.nickname}</p>
@@ -653,7 +665,14 @@ export default function DashboardPage() {
                                    <div className="space-y-1">
                                       <h4 className="text-3xl font-black text-foreground uppercase italic tracking-tight">{r.title}</h4>
                                       <div className="flex items-center gap-3">
-                                         <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1 rounded-full">@{r.nickname}</Badge>
+                                         <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1 rounded-full flex items-center gap-2 overflow-hidden">
+                                           {r.avatarUrl ? (
+                                              <img src={r.avatarUrl} className="w-4 h-4 rounded-full object-cover" alt="" />
+                                           ) : (
+                                              <User className="h-3 w-3" />
+                                           )}
+                                           @{r.nickname}
+                                         </Badge>
                                          <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">Shared: {r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : 'Live Sync'}</span>
                                       </div>
                                    </div>

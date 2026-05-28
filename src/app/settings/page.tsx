@@ -11,13 +11,14 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore } from "@/firebase";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { getAuth, updateProfile, updatePassword } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { doc, setDoc } from 'firebase/firestore';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -60,6 +61,7 @@ const SYSTEM_BADGES: BadgeType[] = [
 export default function SettingsPage() {
   const { user } = useUser();
   const uid = user?.uid;
+  const db = useFirestore();
   const auth = getAuth();
   
   const profiles = useUserStore(s => s.profiles);
@@ -74,7 +76,6 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState(profile.nickname);
   const [bio, setBio] = useState(profile.bio);
   const [avatar, setAvatar] = useState(profile.avatarUrl);
-  const [cover, setCover] = useState(profile.coverPhotoUrl);
   
   const [newPass, setNewPass] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);
@@ -89,7 +90,6 @@ export default function SettingsPage() {
       setDisplayName(profiles[uid].nickname);
       setBio(profiles[uid].bio);
       setAvatar(profiles[uid].avatarUrl);
-      setCover(profiles[uid].coverPhotoUrl);
     }
   }, [uid, profiles]);
 
@@ -126,8 +126,17 @@ export default function SettingsPage() {
     setIsUpdatingProfile(true);
     try {
       if (auth.currentUser) await updateProfile(auth.currentUser, { displayName });
-      updateStoreProfile(uid, { nickname: displayName, bio, avatarUrl: avatar, coverPhotoUrl: cover });
-      toast({ title: "Sovereign Profile Updated", description: "Your strategic identity has been synchronized." });
+      
+      // Update Firestore for global visibility
+      const userDocRef = doc(db, 'users', uid);
+      await setDoc(userDocRef, {
+        nickname: displayName,
+        bio: bio,
+        avatarUrl: avatar
+      }, { merge: true });
+
+      updateStoreProfile(uid, { nickname: displayName, bio, avatarUrl: avatar });
+      toast({ title: "Sovereign Profile Updated", description: "Your strategic identity has been synchronized globally." });
     } catch (e) {
       toast({ title: "Update Failed", variant: "destructive" });
     } finally {
@@ -217,21 +226,12 @@ export default function SettingsPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <div className="space-y-4">
-                          <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Avatar</Label>
-                          <div className="relative">
-                             <Input type="file" onChange={e => handleFile(e, setAvatar)} className="h-16 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-2xl px-6 pt-3.5 text-xs font-black uppercase" />
-                             <User className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1f1610]/20" />
-                          </div>
-                       </div>
-                       <div className="space-y-4">
-                          <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Cover</Label>
-                          <div className="relative">
-                            <Input type="file" onChange={e => handleFile(e, setCover)} className="h-16 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-2xl px-6 pt-3.5 text-xs font-black uppercase" />
-                            <Coffee className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1f1610]/20" />
-                          </div>
-                       </div>
+                    <div className="space-y-4">
+                        <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Strategic Avatar</Label>
+                        <div className="relative">
+                            <Input type="file" onChange={e => handleFile(e, setAvatar)} className="h-16 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-2xl px-6 pt-3.5 text-xs font-black uppercase" />
+                            <User className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1f1610]/20" />
+                        </div>
                     </div>
 
                     <Button 
@@ -348,7 +348,7 @@ export default function SettingsPage() {
                       <ul className="list-disc pl-8 space-y-4 font-bold">
                         <li><strong>Account Protocols</strong>: Strategic email, passkeys, and identity profiles.</li>
                         <li><strong>Temporal Data</strong>: Time Capsule entries and daily routine progress.</li>
-                        <li><strong>Visual Assets</strong>: Avatars, cover photos, and gallery uploads.</li>
+                        <li><strong>Visual Assets</strong>: Avatars and gallery uploads.</li>
                       </ul>
                     </div>
                     <div className="space-y-6">
