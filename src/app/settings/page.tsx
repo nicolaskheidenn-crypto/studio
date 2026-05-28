@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles, SmilePlus, Ghost } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore } from "@/firebase";
@@ -58,6 +58,19 @@ const SYSTEM_BADGES: BadgeType[] = [
   { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'Sovereign', iconType: 'consistency' },
 ];
 
+const MONSTER_AVATARS = [
+  { name: 'Alien', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Alien' },
+  { name: 'Blob', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blob' },
+  { name: 'Fang', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Fang' },
+  { name: 'Gloop', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Gloop' },
+  { name: 'Spike', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Spike' },
+  { name: 'Tentacle', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Tentacle' },
+  { name: 'Zorg', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Zorg' },
+  { name: 'Blink', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blink' },
+  { name: 'Chomp', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Chomp' },
+  { name: 'Drip', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Drip' },
+];
+
 export default function SettingsPage() {
   const { user } = useUser();
   const uid = user?.uid;
@@ -81,6 +94,7 @@ export default function SettingsPage() {
   const [showNewPass, setShowNewPass] = useState(false);
   const [isUpdatingPass, setIsUpdatingPass] = useState(false);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   // Celebration Modal State
   const [unlockedBadge, setUnlockedBadge] = useState<BadgeType | null>(null);
@@ -170,13 +184,10 @@ export default function SettingsPage() {
     }
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setter(reader.result as string);
-      reader.readAsDataURL(file);
-    }
+  const selectMonsterAvatar = (url: string) => {
+    setAvatar(url);
+    setIsAvatarModalOpen(false);
+    toast({ title: "Avatar Protocol Selected" });
   };
 
   return (
@@ -228,10 +239,46 @@ export default function SettingsPage() {
 
                     <div className="space-y-4">
                         <Label className="text-[#1f1610] font-black text-[11px] uppercase tracking-[0.3em]">Strategic Avatar</Label>
-                        <div className="relative">
-                            <Input type="file" onChange={e => handleFile(e, setAvatar)} className="h-16 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 text-[#1f1610] rounded-2xl px-6 pt-3.5 text-xs font-black uppercase" />
-                            <User className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-[#1f1610]/20" />
-                        </div>
+                        <Dialog open={isAvatarModalOpen} onOpenChange={setIsAvatarModalOpen}>
+                          <DialogTrigger asChild>
+                            <button className="w-full h-20 rounded-[1.5rem] bg-[#1f1610] border-4 border-primary/40 flex items-center justify-between px-10 hover:border-primary transition-all group">
+                               <div className="flex items-center gap-6">
+                                  {avatar ? (
+                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0">
+                                      <img src={avatar} className="w-full h-full object-cover" alt="Selected Avatar" />
+                                    </div>
+                                  ) : (
+                                    <SmilePlus className="h-10 w-10 text-primary/40" />
+                                  )}
+                                  <span className="text-xl font-black text-primary uppercase tracking-tighter italic">Choose your Avatar</span>
+                               </div>
+                               <Ghost className="h-8 w-8 text-primary/20 group-hover:text-primary transition-colors" />
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 max-w-4xl shadow-2xl">
+                             <DialogHeader className="text-center mb-10">
+                                <DialogTitle className="text-5xl font-black text-[#1f1610] uppercase tracking-tighter italic">Avatar Laboratory</DialogTitle>
+                                <p className="text-[10px] font-black uppercase text-primary tracking-[0.4em] mt-4">Select your unique monster identity protocol</p>
+                             </DialogHeader>
+                             <ScrollArea className="h-[450px] pr-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
+                                   {MONSTER_AVATARS.map((m) => (
+                                     <button 
+                                      key={m.name}
+                                      onClick={() => selectMonsterAvatar(m.url)}
+                                      className={cn(
+                                        "aspect-square rounded-[2rem] bg-white border-[6px] p-2 transition-all hover:scale-105 active:scale-95 shadow-xl group overflow-hidden",
+                                        avatar === m.url ? "border-primary shadow-[0_15px_30px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 grayscale hover:grayscale-0 hover:border-primary/40"
+                                      )}
+                                     >
+                                        <img src={m.url} className="w-full h-full object-contain" alt={m.name} />
+                                        <p className="mt-2 text-[8px] font-black uppercase tracking-widest text-[#1f1610] opacity-0 group-hover:opacity-100 transition-opacity">{m.name}</p>
+                                     </button>
+                                   ))}
+                                </div>
+                             </ScrollArea>
+                          </DialogContent>
+                        </Dialog>
                     </div>
 
                     <Button 
