@@ -615,43 +615,45 @@ export default function DashboardPage() {
         </ShadcnTabs>
       </main>
 
+      {/* Scaled Daily Sync Dialog for better Laptop visibility */}
       <Dialog open={showDaily} onOpenChange={setShowDaily}>
-        <DialogContent className="rounded-[5rem] border-[12px] border-primary/20 bg-card p-20 max-w-lg text-center shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
+        <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-card p-12 max-w-md text-center shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
           <DialogHeader>
-            <DialogTitle className="text-5xl font-black text-foreground uppercase tracking-tighter italic text-center">Daily Sync</DialogTitle>
+            <DialogTitle className="text-3xl font-black text-foreground uppercase tracking-tighter italic text-center">Daily Sync</DialogTitle>
           </DialogHeader>
-          <div className="space-y-12 mt-8">
-            <div className="w-40 h-40 bg-primary text-background rounded-[4rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-              <Award className="h-20 w-20" />
+          <div className="space-y-8 mt-6">
+            <div className="w-28 h-28 bg-primary text-background rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+              <Award className="h-14 w-14" />
             </div>
             <div className="space-y-4">
-              <p className="text-[11px] text-primary font-black uppercase tracking-[0.5em]">Sovereign Protocol Initiated</p>
+              <p className="text-[10px] text-primary font-black uppercase tracking-[0.5em]">Sovereign Protocol Initiated</p>
             </div>
-            <div className="p-10 bg-background/50 rounded-[3.5rem] border-4 border-primary/10 flex justify-around shadow-inner">
-               <div><p className="text-4xl font-black text-foreground">100</p><p className="text-[10px] font-black uppercase text-primary/40">Points</p></div>
-               <div className="w-px h-12 bg-primary/20" />
-               <div><p className="text-4xl font-black text-foreground">50</p><p className="text-[10px] font-black uppercase text-primary/40">XP</p></div>
+            <div className="p-8 bg-background/50 rounded-[2rem] border-4 border-primary/10 flex justify-around shadow-inner">
+               <div><p className="text-3xl font-black text-foreground">100</p><p className="text-[9px] font-black uppercase text-primary/40">Points</p></div>
+               <div className="w-px h-10 bg-primary/20" />
+               <div><p className="text-3xl font-black text-foreground">50</p><p className="text-[9px] font-black uppercase text-primary/40">XP</p></div>
             </div>
-            <Button onClick={handleClaimDaily} className="w-full h-24 rounded-full bg-primary text-background font-black text-3xl shadow-2xl hover:scale-105 hover:bg-white hover:text-primary transition-all uppercase tracking-tighter">CLAIM REWARD</Button>
+            <Button onClick={handleClaimDaily} className="w-full h-18 rounded-full bg-primary text-background font-black text-xl shadow-2xl hover:scale-105 hover:bg-white hover:text-primary transition-all uppercase tracking-tighter">CLAIM REWARD</Button>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Scaled Mastery Rewards Dialog for better Laptop visibility */}
       <Dialog open={showRewardModal} onOpenChange={setShowRewardModal}>
-        <DialogContent className="rounded-[5rem] border-[12px] border-primary/20 bg-card p-20 max-w-xl shadow-2xl">
+        <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-card p-12 max-w-xl shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-5xl font-black text-foreground uppercase tracking-tighter text-center italic">Mastery Rewards</DialogTitle>
+            <DialogTitle className="text-4xl font-black text-foreground uppercase tracking-tighter text-center italic">Mastery Rewards</DialogTitle>
           </DialogHeader>
-          <div className="space-y-8 mt-12">
+          <div className="space-y-6 mt-10">
             {[
               { lv: 5, reward: "Bronze Strategy Bundle" },
               { lv: 10, reward: "Elite Ebook Archive Access" },
               { lv: 25, reward: "Host Priority Chat Channel" },
               { lv: 50, reward: "NICO DIGITAL Sovereign Status" },
             ].map((r) => (
-              <div key={r.lv} className={cn("p-10 rounded-[3.5rem] border-4 flex items-center justify-between transition-all", level >= r.lv ? "bg-primary/10 border-primary" : "bg-white/5 border-white/10 opacity-40")}>
-                <div><p className="text-[11px] font-black text-primary uppercase mb-2 tracking-widest">Level {r.lv}</p><p className="text-2xl font-black text-foreground uppercase italic">{r.reward}</p></div>
-                <Award className={cn("h-12 w-12", level >= r.lv ? "text-primary" : "text-foreground/20")} />
+              <div key={r.lv} className={cn("p-8 rounded-[2.5rem] border-4 flex items-center justify-between transition-all", level >= r.lv ? "bg-primary/10 border-primary" : "bg-white/5 border-white/10 opacity-40")}>
+                <div><p className="text-[10px] font-black text-primary uppercase mb-1 tracking-widest">Level {r.lv}</p><p className="text-xl font-black text-foreground uppercase italic">{r.reward}</p></div>
+                <Award className={cn("h-10 w-10", level >= r.lv ? "text-primary" : "text-foreground/20")} />
               </div>
             ))}
           </div>
