@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { doc, setDoc } from 'firebase/firestore';
+import Image from "next/image";
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -58,16 +59,16 @@ const SYSTEM_BADGES: BadgeType[] = [
 ];
 
 const MONSTER_AVATARS = [
-  { name: 'Alien', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Alien&backgroundColor=transparent' },
-  { name: 'Blob', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blob&backgroundColor=transparent' },
-  { name: 'Fang', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Fang&backgroundColor=transparent' },
-  { name: 'Gloop', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Gloop&backgroundColor=transparent' },
-  { name: 'Spike', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Spike&backgroundColor=transparent' },
-  { name: 'Tentacle', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Tentacle&backgroundColor=transparent' },
-  { name: 'Zorg', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Zorg&backgroundColor=transparent' },
-  { name: 'Blink', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blink&backgroundColor=transparent' },
-  { name: 'Chomp', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Chomp&backgroundColor=transparent' },
-  { name: 'Drip', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Drip&backgroundColor=transparent' },
+  { name: 'Alien', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Alien' },
+  { name: 'Blob', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Blob' },
+  { name: 'Fang', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Fang' },
+  { name: 'Gloop', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Gloop' },
+  { name: 'Spike', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Spike' },
+  { name: 'Tentacle', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Tentacle' },
+  { name: 'Zorg', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Zorg' },
+  { name: 'Blink', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Blink' },
+  { name: 'Chomp', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Chomp' },
+  { name: 'Drip', url: 'https://api.dicebear.com/7.x/monsters/svg?seed=Drip' },
 ];
 
 export default function SettingsPage() {
@@ -243,8 +244,14 @@ export default function SettingsPage() {
                             <button className="w-full h-20 rounded-[1.5rem] bg-[#1f1610] border-4 border-primary/40 flex items-center justify-between px-10 hover:border-primary transition-all group">
                                <div className="flex items-center gap-6">
                                   {avatar ? (
-                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0">
-                                      <img src={avatar} className="w-full h-full object-cover" alt="Selected Avatar" />
+                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0 relative">
+                                      <Image 
+                                        src={avatar} 
+                                        fill
+                                        className="object-cover" 
+                                        alt="Selected Avatar"
+                                        unoptimized
+                                      />
                                     </div>
                                   ) : (
                                     <SmilePlus className="h-10 w-10 text-primary/40" />
@@ -254,16 +261,16 @@ export default function SettingsPage() {
                                <Ghost className="h-8 w-8 text-primary/20 group-hover:text-primary transition-colors" />
                             </button>
                           </DialogTrigger>
-                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-16 max-w-4xl shadow-2xl">
-                             <DialogHeader className="text-center mb-12 space-y-4">
-                                <DialogTitle className="text-6xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">
+                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 md:p-16 max-w-4xl shadow-2xl">
+                             <DialogHeader className="text-center mb-10 space-y-4">
+                                <DialogTitle className="text-5xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">
                                   AVATAR <span className="text-primary">LABORATORY</span>
                                 </DialogTitle>
                                 <p className="text-[10px] font-black uppercase text-[#1f1610] tracking-[0.4em] opacity-60">SELECT YOUR UNIQUE MONSTER IDENTITY PROTOCOL</p>
                                 <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
                              </DialogHeader>
                              <ScrollArea className="h-[500px] pr-4">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-10">
                                    {MONSTER_AVATARS.map((m) => (
                                      <button 
                                       key={m.name}
@@ -273,7 +280,15 @@ export default function SettingsPage() {
                                         avatar === m.url ? "border-primary shadow-[0_20px_40px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
                                       )}
                                      >
-                                        <img src={m.url} className="w-full h-full object-contain mb-2" alt={m.name} />
+                                        <div className="relative w-full h-full mb-2">
+                                          <Image 
+                                            src={m.url} 
+                                            fill
+                                            className="object-contain" 
+                                            alt={m.name}
+                                            unoptimized
+                                          />
+                                        </div>
                                         <div className="text-[10px] font-black uppercase tracking-widest text-[#1f1610] mt-1">{m.name}</div>
                                      </button>
                                    ))}
