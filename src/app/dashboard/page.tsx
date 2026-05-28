@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from '@/components/Navigation';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, Lock
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -71,7 +72,7 @@ export default function DashboardPage() {
   const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
 
-  const { data: sharedActivity = [] } = useCollection(activityQuery);
+  const { data: sharedActivity = [], loading: loadingActivity } = useCollection(activityQuery);
   const { data: newsPosts = [] } = useCollection(newsQuery);
   const { data: sharedResources = [] } = useCollection(resourcesQuery);
   const { data: shooppyProducts = [] } = useCollection(productsQuery);
@@ -81,6 +82,7 @@ export default function DashboardPage() {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [activeTab, setActiveTab] = useState('hub');
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Activity State
   const [postText, setPostText] = useState("");
@@ -120,6 +122,14 @@ export default function DashboardPage() {
     claimDaily(uid);
     setShowDaily(false);
     toast({ title: "Daily Sync Complete", description: "Strategic rewards added with growth multiplier." });
+  };
+
+  const handleManualSync = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setIsSyncing(false);
+      toast({ title: "Grid Synchronized", description: "Latest sovereign dispatches loaded." });
+    }, 800);
   };
 
   const handleAcquireAsset = (product: any) => {
@@ -283,46 +293,70 @@ export default function DashboardPage() {
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         <ShadcnTabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
-          <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
-            <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
-            <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
-            <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
-            <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
-          </ShadcnList>
+          <div className="flex items-center justify-between">
+            <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
+              <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
+              <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
+              <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
+              <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
+            </ShadcnList>
+
+            <Button 
+              variant="ghost" 
+              className="rounded-full h-12 px-6 font-black uppercase text-[10px] tracking-widest gap-3 text-primary border-4 border-primary/10 hover:bg-primary/5 active:scale-90"
+              onClick={handleManualSync}
+              disabled={isSyncing}
+            >
+              <RefreshCcw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+              Sync Grid
+            </Button>
+          </div>
 
           <ShadcnContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
-              <Card className="rounded-[3.5rem] border-4 border-primary/10 shadow-2xl p-10 bg-card/40">
-                <div className="flex gap-6">
-                  <div className="w-16 h-16 rounded-3xl bg-primary flex items-center justify-center font-black text-background text-xl shadow-xl">
+              {/* Sovereign Win Dispatcher Card */}
+              <Card className="rounded-[4rem] border-[8px] border-primary/5 shadow-2xl p-12 bg-card/40 space-y-10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5">
+                  <Zap className="h-32 w-32 text-primary" />
+                </div>
+                <div className="flex gap-8 items-start">
+                  <div className="w-24 h-24 rounded-[2rem] bg-primary flex items-center justify-center font-black text-background text-3xl shadow-[0_20px_40px_rgba(255,215,0,0.3)] shrink-0">
                     {nickname.slice(0,2).toUpperCase()}
                   </div>
-                  <Textarea 
-                    placeholder="Document your Sovereign Win..." 
-                    value={postText}
-                    onChange={(e) => setPostText(e.target.value)}
-                    className="flex-1 bg-background/50 border-2 border-primary/10 rounded-[2.5rem] p-8 text-lg font-bold min-h-[160px] text-foreground placeholder:text-foreground/30"
-                  />
+                  <div className="flex-1 space-y-6">
+                    <Textarea 
+                      placeholder="Document your Sovereign Win..." 
+                      value={postText}
+                      onChange={(e) => setPostText(e.target.value)}
+                      className="w-full bg-background/50 border-4 border-primary/10 rounded-[3rem] p-10 text-xl font-bold min-h-[200px] text-foreground placeholder:text-foreground/20 focus:border-primary transition-all shadow-inner leading-relaxed"
+                    />
+                  </div>
                 </div>
+
                 {postImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-4 pl-20 mt-6">
+                  <div className="grid grid-cols-3 gap-6 pl-32">
                     {postImages.map((img, i) => (
-                      <div key={i} className="relative aspect-square rounded-3xl overflow-hidden group border-2 border-primary/20">
+                      <div key={i} className="relative aspect-square rounded-[2rem] overflow-hidden group border-4 border-primary/20 shadow-xl">
                         <img src={img} className="w-full h-full object-cover" />
-                        <button onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-4 w-4" /></button>
+                        <button onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-5 w-5" /></button>
                       </div>
                     ))}
                   </div>
                 )}
-                <div className="flex justify-between items-center pl-20 mt-8">
-                   <Button variant="ghost" className="text-primary hover:text-primary/70 rounded-full font-black text-[11px] uppercase tracking-widest" onClick={() => fileInputRef.current?.click()}>
-                    <Plus className="h-6 w-6 mr-3" /> Gallery (1-6)
+
+                <div className="flex justify-between items-center pl-32 mt-4">
+                   <Button 
+                    variant="ghost" 
+                    className="text-primary hover:text-primary/70 rounded-full font-black text-[12px] uppercase tracking-[0.2em] gap-4" 
+                    onClick={() => fileInputRef.current?.click()}
+                   >
+                    <Plus className="h-8 w-8" /> GALLERY (1-6)
                    </Button>
                    <input type="file" min={1} max={6} ref={fileInputRef} hidden multiple accept="image/*" onChange={handleFileChange} />
                    <Button 
                     onClick={handleDispatchWin} 
                     disabled={isPosting || !postText.trim()}
-                    className="bg-primary text-background rounded-full px-14 h-16 font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all disabled:opacity-50"
+                    className="bg-primary text-background rounded-full px-20 h-20 font-black uppercase text-lg shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-20 tracking-tighter"
                    >
                     {isPosting ? 'Dispatching...' : 'Dispatch Win'}
                    </Button>
@@ -330,6 +364,14 @@ export default function DashboardPage() {
               </Card>
 
               <div className="space-y-12">
+                {/* Manual Sync Loading State */}
+                {isSyncing && (
+                  <div className="p-20 text-center space-y-6 animate-pulse">
+                    <RefreshCw className="h-16 w-16 text-primary mx-auto animate-spin" />
+                    <p className="text-xl font-black text-primary/40 uppercase tracking-[0.4em]">Synchronizing Sovereignty...</p>
+                  </div>
+                )}
+
                 {newsPosts.map((news: any) => (
                   <Card key={news.id} className="rounded-[4rem] border-4 border-primary/20 bg-primary/5 overflow-hidden shadow-2xl">
                     <CardHeader className="p-10 pb-6">
@@ -347,62 +389,72 @@ export default function DashboardPage() {
                 ))}
 
                 {sharedActivity.map((post: any) => (
-                  <Card key={post.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden">
-                    <CardHeader className="p-10 pb-6">
-                       <div className="flex items-center gap-5">
-                         <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center font-black text-primary text-sm border-2 border-primary/20">{post.nickname?.slice(0,2).toUpperCase()}</div>
+                  <Card key={post.id} className="rounded-[4.5rem] border-[10px] border-primary/5 bg-card shadow-2xl overflow-hidden group hover:border-primary/10 transition-all duration-700">
+                    <CardHeader className="p-12 pb-6">
+                       <div className="flex items-center gap-8">
+                         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center font-black text-primary text-xl border-4 border-primary/10 shadow-inner">
+                            {post.nickname?.slice(0,2).toUpperCase()}
+                         </div>
                          <div className="flex-1">
-                            <p className="font-black text-xl uppercase text-foreground">{post.nickname}</p>
-                            <p className="text-[10px] font-black uppercase text-primary/60 tracking-widest">
-                              {post.timestamp?.toDate ? post.timestamp.toDate().toLocaleString() : 'Recent Session'}
+                            <p className="font-black text-2xl uppercase text-foreground italic">{post.nickname}</p>
+                            <p className="text-[10px] font-black uppercase text-primary/40 tracking-[0.2em] mt-1">
+                              {post.timestamp?.toDate ? post.timestamp.toDate().toLocaleString() : 'Live Sync active'}
                             </p>
                          </div>
                        </div>
                     </CardHeader>
-                    <CardContent className="p-10 pt-0 space-y-8">
-                       <p className="text-2xl font-black text-foreground leading-tight tracking-tight uppercase italic whitespace-pre-wrap">{post.description}</p>
+                    <CardContent className="p-12 pt-0 space-y-10">
+                       <p className="text-3xl font-black text-foreground leading-tight tracking-tight uppercase italic whitespace-pre-wrap">{post.description}</p>
+                       
                        {post.images?.length > 0 && (
-                         <div className={cn("grid gap-4", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
-                           {post.images.map((img: string, i: number) => <img key={i} src={img} className="w-full h-96 object-cover rounded-[3rem] shadow-lg border-2 border-primary/10" alt="Activity" />)}
+                         <div className={cn("grid gap-6", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
+                           {post.images.map((img: string, i: number) => (
+                             <img 
+                               key={i} 
+                               src={img} 
+                               className="w-full h-[450px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/10 hover:scale-[1.02] transition-transform duration-700" 
+                               alt="Activity" 
+                             />
+                           ))}
                          </div>
                        )}
                        
-                       <div className="flex gap-8 pt-8 border-t-2 border-primary/10">
+                       <div className="flex gap-10 pt-10 border-t-4 border-primary/5">
                           <Button 
                             variant="ghost" 
-                            className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary transition-all"
+                            className="text-[11px] font-black uppercase tracking-[0.3em] text-primary hover:text-primary transition-all p-0"
                             onClick={() => handleHeartPost(post.id)}
                           >
-                            <Heart className="h-6 w-6 mr-3 fill-primary" /> 
-                            {post.hearts || 0} Heart
+                            <Heart className="h-7 w-7 mr-4 fill-primary" /> 
+                            {post.hearts || 0} RECOGNITION
                           </Button>
-                          <Button variant="ghost" className="text-[11px] font-black uppercase tracking-widest text-primary/40 hover:text-primary">
-                            <MessageSquare className="h-6 w-6 mr-3" /> 
-                            {post.comments?.length || 0} Insight
+                          <Button variant="ghost" className="text-[11px] font-black uppercase tracking-[0.3em] text-primary/30 hover:text-primary transition-all p-0">
+                            <MessageSquare className="h-7 w-7 mr-4" /> 
+                            {post.comments?.length || 0} INSIGHTS
                           </Button>
                        </div>
 
-                       <div className="space-y-6 pt-6 bg-background/20 rounded-[2.5rem] p-6">
-                          <div className="flex gap-4">
+                       <div className="space-y-6 pt-10 bg-primary/5 rounded-[3.5rem] p-10 shadow-inner">
+                          <div className="flex gap-6">
                              <Input 
-                               placeholder="Add a strategic insight..." 
-                               className="h-14 rounded-2xl bg-background/50 border-primary/10 text-sm font-black"
+                               placeholder="Record strategic insight..." 
+                               className="h-16 rounded-[2rem] bg-background/50 border-4 border-primary/10 text-base font-black px-8 focus:border-primary shadow-inner"
                                value={commentInputs[post.id] || ""}
                                onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
                                onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
                              />
-                             <Button onClick={() => handleAddComment(post.id)} className="h-14 w-14 rounded-2xl bg-primary text-background"><Send className="h-6 w-6" /></Button>
+                             <Button onClick={() => handleAddComment(post.id)} className="h-16 w-16 rounded-full bg-primary text-background shadow-xl hover:scale-110 transition-transform"><Send className="h-6 w-6" /></Button>
                           </div>
                           
-                          <div className="space-y-4">
+                          <div className="space-y-6">
                              {post.comments?.map((comment: any) => (
-                               <div key={comment.id} className="p-6 bg-background/40 rounded-3xl border-2 border-primary/5 flex justify-between items-start group">
+                               <div key={comment.id} className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 flex justify-between items-start group shadow-sm">
                                   <div className="flex-1">
-                                     <div className="flex items-center gap-3 mb-1">
-                                        <p className="font-black text-xs uppercase text-primary">@{comment.nickname}</p>
-                                        <span className="text-[10px] text-white/20 font-black">{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                                     <div className="flex items-center gap-4 mb-2">
+                                        <p className="font-black text-xs uppercase text-primary bg-primary/10 px-4 py-1 rounded-full">@{comment.nickname}</p>
+                                        <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{new Date(comment.timestamp).toLocaleTimeString()}</span>
                                      </div>
-                                     <p className="text-base font-bold text-foreground/80">{comment.text}</p>
+                                     <p className="text-lg font-bold text-foreground/80 leading-relaxed italic">{comment.text}</p>
                                   </div>
                                </div>
                              ))}
@@ -429,7 +481,6 @@ export default function DashboardPage() {
                  </div>
               </Card>
 
-              {/* Protocol Acquisition - Points Shop */}
               <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
                  <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Zap className="h-6 w-6 text-primary" /> Acquire Protocols</h3>
                  <div className="space-y-6">
@@ -459,7 +510,6 @@ export default function DashboardPage() {
                  </div>
               </Card>
 
-              {/* Root Archive - Owned Assets */}
               <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
                  <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Star className="h-6 w-6 text-primary" /> Root Archive</h3>
                  <div className="space-y-6">
@@ -483,7 +533,6 @@ export default function DashboardPage() {
             </div>
           </ShadcnContent>
           
-          {/* Shooppy Tab - Redirects to External Store */}
           <ShadcnContent value="shooppy" className="space-y-16">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Shooppy Marketplace</h3>
@@ -615,7 +664,6 @@ export default function DashboardPage() {
         </ShadcnTabs>
       </main>
 
-      {/* Scaled Daily Sync Dialog for better Laptop visibility */}
       <Dialog open={showDaily} onOpenChange={setShowDaily}>
         <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-card p-12 max-w-md text-center shadow-[0_50px_100px_rgba(0,0,0,0.6)]">
           <DialogHeader>
@@ -638,7 +686,6 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Scaled Mastery Rewards Dialog for better Laptop visibility */}
       <Dialog open={showRewardModal} onOpenChange={setShowRewardModal}>
         <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-card p-12 max-w-xl shadow-2xl">
           <DialogHeader>
