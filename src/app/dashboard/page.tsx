@@ -218,7 +218,10 @@ export default function DashboardPage() {
   };
 
   const handleAddResource = async () => {
-    if (!resTitle || !resContent || !uid) return;
+    if (!resTitle || !resContent || !uid) {
+       toast({ title: "Incomplete Protocol", description: "Title and content are required.", variant: "destructive" });
+       return;
+    }
     
     try {
       await addDoc(collection(db, 'resources'), {
@@ -235,7 +238,7 @@ export default function DashboardPage() {
       else if (resType === 'T&Triks') incrementTrick(uid);
       
       setResTitle(""); setResContent("");
-      toast({ title: "Strategic Resource Shared", description: "Gains boosted by growth multiplier." });
+      toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
     } catch (e) {
       toast({ title: "Share Failed", variant: "destructive" });
     }
@@ -568,77 +571,126 @@ export default function DashboardPage() {
           </ShadcnContent>
 
           <ShadcnContent value="resources" className="space-y-12">
-             <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl space-y-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                   <div className="space-y-10">
-                      <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Library Labs</h3>
-                      <p className="text-xl font-bold text-foreground/70">Inject strategic knowledge into the collective sovereign vault.</p>
-                      <div className="space-y-6">
-                         <div className="space-y-3">
-                            <Label>Resource Title</Label>
-                            <Input placeholder="Resource Title" value={resTitle} onChange={e => setResTitle(e.target.value)} className="h-16 rounded-2xl font-black text-xl" />
-                         </div>
-                         <div className="space-y-3">
-                            <Label>Laboratory</Label>
-                            <select className="w-full h-16 bg-background/50 border-2 border-primary/10 rounded-2xl px-8 font-black uppercase text-primary text-sm" value={resType} onChange={e => setResType(e.target.value as any)}>
-                                <option value="AI_Prompt">AI Prompt Lab</option>
-                                <option value="T&Triks">T&Triks Archive</option>
-                            </select>
-                         </div>
-                         <div className="space-y-3">
-                            <Label>Strategic Content</Label>
-                            <Textarea placeholder="Share your prompts or execution tips..." value={resContent} onChange={e => setResContent(e.target.value)} className="min-h-[140px] bg-background/50 border-2 border-primary/10 rounded-[2.5rem] p-8 text-lg font-bold" />
-                         </div>
-                         <Button onClick={handleAddResource} className="w-full h-20 rounded-full bg-primary text-background font-black uppercase text-lg shadow-2xl">Share Knowledge</Button>
-                      </div>
-                   </div>
-                   
-                   <div className="space-y-10">
-                      <ShadcnTabs defaultValue="ai" className="w-full">
-                         <ShadcnList className="bg-primary/5 p-2 rounded-full w-full mb-10 border-2 border-primary/10">
-                            <ShadcnTrigger value="ai" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">AI Prompts</ShadcnTrigger>
-                            <ShadcnTrigger value="triks" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">T&Triks</ShadcnTrigger>
-                            <ShadcnTrigger value="webin" className="rounded-full flex-1 text-[11px] font-black uppercase h-12">WeBin</ShadcnTrigger>
-                         </ShadcnList>
-                         
-                         <ShadcnContent value="ai" className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
-                            {sharedResources.filter((r: any) => r.type === 'AI_Prompt').map((r: any) => (
-                              <div key={r.id} className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 space-y-4">
-                                 <h4 className="font-black text-foreground uppercase text-lg italic">{r.title}</h4>
-                                 <p className="text-[11px] text-primary font-black uppercase tracking-widest">By @{r.nickname}</p>
-                                 <div className="p-4 bg-background/50 rounded-2xl border-2 border-primary/10 text-sm font-bold text-foreground/80 italic leading-relaxed">
-                                    {r.content}
-                                 </div>
-                                 <Button variant="outline" className="h-10 rounded-full text-[10px] uppercase font-black px-8 border-primary/20 text-primary hover:bg-primary hover:text-background" onClick={() => { navigator.clipboard.writeText(r.content); toast({ title: "Prompt Copied" }); }}>Copy Lab Data</Button>
-                              </div>
-                            ))}
-                         </ShadcnContent>
-                         
-                         <ShadcnContent value="triks" className="space-y-6 max-h-[600px] overflow-y-auto pr-4 scrollbar-hide">
-                            {sharedResources.filter((r: any) => r.type === 'T&Triks').map((r: any) => (
-                              <div key={r.id} className="p-8 bg-primary/5 rounded-[3rem] border-4 border-primary/10 space-y-4">
-                                 <h4 className="font-black text-foreground uppercase text-lg italic">{r.title}</h4>
-                                 <p className="text-[11px] text-primary font-black uppercase tracking-widest">By @{r.nickname}</p>
-                                 <p className="text-base font-bold text-foreground/70 leading-relaxed whitespace-pre-wrap">{r.content}</p>
-                              </div>
-                            ))}
-                         </ShadcnContent>
-
-                         <ShadcnContent value="webin" className="space-y-6">
-                            {sharedResources.filter((r: any) => r.type === 'WeBin').map((r: any) => (
-                              <div key={r.id} className="p-10 bg-primary/10 rounded-[3rem] border-4 border-primary/20 flex justify-between items-center group">
-                                 <div className="space-y-2">
-                                   <h4 className="font-black text-foreground uppercase text-xl italic">{r.title}</h4>
-                                   <p className="text-sm font-bold text-foreground/60">Sovereign Knowledge Session</p>
-                                 </div>
-                                 <Button className="rounded-full h-14 px-10 font-black uppercase text-xs shadow-xl active:scale-95" asChild><a href={r.content} target="_blank">Watch Now</a></Button>
-                              </div>
-                            ))}
-                         </ShadcnContent>
-                      </ShadcnTabs>
-                   </div>
+             <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                   <h3 className="text-7xl font-headline font-black text-foreground uppercase italic tracking-tighter">LIBRARY LABS</h3>
+                   <p className="text-lg font-bold text-foreground/60">Inject strategic knowledge into the collective sovereign vault.</p>
                 </div>
-             </Card>
+                
+                <ShadcnTabs defaultValue="AI_Prompt" className="w-fit" onValueChange={(v) => setResType(v as any)}>
+                   <ShadcnList className="bg-card p-1.5 rounded-full border-4 border-primary/10 flex gap-2">
+                      <ShadcnTrigger value="AI_Prompt" className="rounded-full px-8 h-10 text-[10px] font-black uppercase tracking-widest">AI PROMPTS</ShadcnTrigger>
+                      <ShadcnTrigger value="T&Triks" className="rounded-full px-8 h-10 text-[10px] font-black uppercase tracking-widest">T&TRIKS</ShadcnTrigger>
+                      <ShadcnTrigger value="WeBin" className="rounded-full px-8 h-10 text-[10px] font-black uppercase tracking-widest">WEBIN</ShadcnTrigger>
+                   </ShadcnList>
+                </ShadcnTabs>
+             </div>
+
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                {/* Knowledge Injection Form */}
+                <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card p-12 shadow-2xl space-y-10">
+                   <div className="space-y-8">
+                      <div className="space-y-3">
+                         <Label className="text-primary font-black uppercase tracking-widest text-[10px]">RESOURCE TITLE</Label>
+                         <Input 
+                            placeholder="Resource Title" 
+                            value={resTitle} 
+                            onChange={e => setResTitle(e.target.value)} 
+                            className="h-18 rounded-2xl bg-background/50 border-4 border-primary/10 text-xl font-black px-8 focus:border-primary shadow-inner" 
+                         />
+                      </div>
+                      
+                      <div className="space-y-3">
+                         <Label className="text-primary font-black uppercase tracking-widest text-[10px]">LABORATORY</Label>
+                         <select 
+                            className="w-full h-18 bg-background/50 border-4 border-primary/10 rounded-2xl px-8 font-black uppercase text-foreground text-sm focus:border-primary" 
+                            value={resType} 
+                            onChange={e => setResType(e.target.value as any)}
+                         >
+                            <option value="AI_Prompt">AI PROMPT LAB</option>
+                            <option value="T&Triks">T&TRIKS ARCHIVE</option>
+                            <option value="WeBin">WEBIN PORTAL</option>
+                         </select>
+                      </div>
+
+                      <div className="space-y-3">
+                         <Label className="text-primary font-black uppercase tracking-widest text-[10px]">STRATEGIC CONTENT</Label>
+                         <Textarea 
+                            placeholder={resType === 'WeBin' ? 'Enter video URL or link...' : 'Share your prompts or execution tips...'} 
+                            value={resContent} 
+                            onChange={e => setResContent(e.target.value)} 
+                            className="min-h-[220px] bg-background/50 border-4 border-primary/10 rounded-[3rem] p-10 text-lg font-bold shadow-inner leading-relaxed" 
+                         />
+                      </div>
+
+                      <Button 
+                        onClick={handleAddResource} 
+                        className="w-full h-24 rounded-full bg-primary text-background font-black uppercase text-2xl shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all tracking-tighter"
+                      >
+                        SHARE KNOWLEDGE
+                      </Button>
+                   </div>
+                </Card>
+
+                {/* Shared Vault Display */}
+                <div className="space-y-8">
+                   <div className="flex items-center gap-4 px-4">
+                      <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Collective Strategist Vault: {resType.replace('_', ' ')}</p>
+                   </div>
+
+                   <ScrollArea className="h-[750px] pr-6">
+                      <div className="space-y-8">
+                         {sharedResources.filter(r => r.type === resType).length === 0 ? (
+                           <div className="p-20 border-4 border-dashed border-primary/10 rounded-[4rem] text-center bg-card/40 space-y-6">
+                              <BookOpen className="h-16 w-16 mx-auto text-primary/10" />
+                              <p className="text-xl font-black uppercase tracking-widest text-primary/20 italic">Archive Empty.<br/>Awaiting Injection.</p>
+                           </div>
+                         ) : (
+                           sharedResources.filter(r => r.type === resType).map((r: any) => (
+                             <Card key={r.id} className="rounded-[3.5rem] border-4 border-primary/10 bg-card shadow-2xl p-10 space-y-6 group hover:border-primary/30 transition-all">
+                                <div className="flex justify-between items-start">
+                                   <div className="space-y-1">
+                                      <h4 className="text-3xl font-black text-foreground uppercase italic tracking-tight">{r.title}</h4>
+                                      <div className="flex items-center gap-3">
+                                         <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1 rounded-full">@{r.nickname}</Badge>
+                                         <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">Shared: {r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : 'Live Sync'}</span>
+                                      </div>
+                                   </div>
+                                   <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center border-2 border-primary/10">
+                                      <Zap className="h-5 w-5 text-primary/40" />
+                                   </div>
+                                </div>
+
+                                <div className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/5 text-lg font-bold text-foreground/80 italic leading-relaxed shadow-inner whitespace-pre-wrap">
+                                   {r.content}
+                                </div>
+
+                                {r.type === 'AI_Prompt' && (
+                                  <Button 
+                                    variant="ghost" 
+                                    className="w-full h-14 rounded-full border-2 border-primary/10 text-primary font-black uppercase text-[10px] tracking-widest hover:bg-primary hover:text-background transition-all"
+                                    onClick={() => { navigator.clipboard.writeText(r.content); toast({ title: "Prompt Copied" }); }}
+                                  >
+                                    Copy Lab Data
+                                  </Button>
+                                )}
+
+                                {r.type === 'WeBin' && (
+                                  <Button 
+                                    className="w-full h-14 rounded-full bg-primary text-background font-black uppercase text-[10px] tracking-widest shadow-xl"
+                                    onClick={() => window.open(r.content, '_blank')}
+                                  >
+                                    Access Portal
+                                  </Button>
+                                )}
+                             </Card>
+                           ))
+                         )}
+                      </div>
+                   </ScrollArea>
+                </div>
+             </div>
           </ShadcnContent>
 
           <ShadcnContent value="faq" className="max-w-4xl mx-auto space-y-12">
