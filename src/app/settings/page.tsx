@@ -272,7 +272,7 @@ export default function SettingsPage() {
                                       onClick={() => selectAvatarProtocol(m.url)}
                                       className={cn(
                                         "aspect-[4/5] rounded-[3rem] bg-white border-[10px] p-6 transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.1)] group overflow-hidden relative flex flex-col items-center justify-between",
-                                        avatar === m.url ? "border-primary shadow-[0_30px_60_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
+                                        avatar === m.url ? "border-primary shadow-[0_30px_60px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
                                       )}
                                      >
                                         <div className="w-full h-full flex items-center justify-center relative">
