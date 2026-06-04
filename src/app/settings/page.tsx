@@ -59,16 +59,16 @@ const SYSTEM_BADGES: BadgeType[] = [
 ];
 
 const STRATEGIST_AVATARS = [
-  { name: 'Apex', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Aidan&backgroundColor=b6e3f4' },
-  { name: 'Siren', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya&backgroundColor=ffd5dc' },
-  { name: 'Vanguard', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Caleb&backgroundColor=c0aede' },
-  { name: 'Nova', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Destiny&backgroundColor=ffdfbf' },
-  { name: 'Titan', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Ethan&backgroundColor=d1d4f9' },
-  { name: 'Oracle', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Felicity&backgroundColor=ffd5dc' },
-  { name: 'Ronin', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Gabriel&backgroundColor=b6e3f4' },
-  { name: 'Luna', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Hazel&backgroundColor=ffdfbf' },
-  { name: 'Cipher', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Isabella&backgroundColor=c0aede' },
-  { name: 'Ghost', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jaxon&backgroundColor=d1d4f9' },
+  { name: 'Apex', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Aidan&backgroundColor=b6e3f4' },
+  { name: 'Siren', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Amaya&backgroundColor=ffd5dc' },
+  { name: 'Vanguard', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Caleb&backgroundColor=c0aede' },
+  { name: 'Nova', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Destiny&backgroundColor=ffdfbf' },
+  { name: 'Titan', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Ethan&backgroundColor=d1d4f9' },
+  { name: 'Oracle', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Felicity&backgroundColor=ffd5dc' },
+  { name: 'Ronin', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Gabriel&backgroundColor=b6e3f4' },
+  { name: 'Luna', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Hazel&backgroundColor=ffdfbf' },
+  { name: 'Cipher', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Isabella&backgroundColor=c0aede' },
+  { name: 'Ghost', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Jaxon&backgroundColor=d1d4f9' },
 ];
 
 export default function SettingsPage() {
