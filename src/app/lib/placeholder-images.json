@@ -12,6 +12,12 @@
       "description": "Abstract design representing collaboration.",
       "imageUrl": "https://picsum.photos/seed/webcraft-collab/800/400",
       "imageHint": "abstract collaboration"
+    },
+    {
+      "id": "tactical-map-bg",
+      "description": "Tactical strategic map background with parchment texture and grid lines.",
+      "imageUrl": "https://picsum.photos/seed/tactical-map/2000/1000",
+      "imageHint": "tactical map"
     }
   ]
 }

@@ -14,7 +14,7 @@ import {
   Flame, Zap, Target, Coffee, BarChart3, ChevronRight, Gift, Download, Map as MapIcon, Sparkles,
   Unlock
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,11 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
+// Configuration for scattered positioning
+const NODE_GAP = 220;
+const MAP_HEIGHT = 500;
+const VERTICAL_SCATTER = [0, 80, -80, 40, -40, 100, -100, 60, -60];
+
 export default function TaskDoPage() {
   const { user } = useUser();
   const uid = user?.uid;
@@ -73,6 +78,7 @@ export default function TaskDoPage() {
   const [showAward, setShowAward] = useState(false);
   const [activeReward, setActiveReward] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -108,9 +114,33 @@ export default function TaskDoPage() {
 
   const growthMultiplier = (1 + level / 10).toFixed(1);
 
-  if (!isMounted) return null;
-
   const ALL_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  // Generate scattered coordinates for the tracing line
+  const nodePositions = useMemo(() => {
+    return ALL_DAYS.map((d, i) => ({
+      day: d,
+      x: i * NODE_GAP + 150,
+      y: (MAP_HEIGHT / 2) + VERTICAL_SCATTER[i % VERTICAL_SCATTER.length]
+    }));
+  }, []);
+
+  // Generate SVG Path for the "Trace"
+  const tracePath = useMemo(() => {
+    if (nodePositions.length === 0) return "";
+    return nodePositions.reduce((acc, pos, i) => {
+      if (i === 0) return `M ${pos.x} ${pos.y}`;
+      // Use Bezier curve for organic feel
+      const prev = nodePositions[i-1];
+      const cp1x = prev.x + (pos.x - prev.x) / 2;
+      const cp1y = prev.y;
+      const cp2x = prev.x + (pos.x - prev.x) / 2;
+      const cp2y = pos.y;
+      return `${acc} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${pos.x} ${pos.y}`;
+    }, "");
+  }, [nodePositions]);
+
+  if (!isMounted) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
@@ -128,13 +158,54 @@ export default function TaskDoPage() {
            </h1>
         </header>
 
-        {/* Sideward-Scrolling Tactical Map */}
-        <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card/60 backdrop-blur-2xl shadow-[0_50px_100px_rgba(0,0,0,0.6)] p-1 relative overflow-hidden">
-           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.05),transparent)] pointer-events-none" />
+        {/* Scattered Sideward-Scrolling Tactical Map */}
+        <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card/60 backdrop-blur-2xl shadow-[0_50px_100px_rgba(0,0,0,0.6)] p-1 relative overflow-hidden h-[600px]">
+           <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/tactical-map/2000/1000')] bg-cover bg-center opacity-10 pointer-events-none grayscale" />
+           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/60 pointer-events-none" />
            
-           <ScrollArea className="w-full whitespace-nowrap">
-             <div className="flex items-center gap-20 px-24 py-32 min-w-max relative">
-                {ALL_DAYS.map((d) => {
+           <ScrollArea className="w-full h-full">
+             <div className="min-w-max h-full relative px-[200px]" ref={scrollRef}>
+                {/* SVG Trace Layer */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: (ALL_DAYS.length * NODE_GAP) + 400 }}>
+                  <defs>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                      <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  {/* Background Track */}
+                  <path 
+                    d={tracePath} 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.03)" 
+                    strokeWidth="12" 
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Active Trace Line */}
+                  <path 
+                    d={tracePath} 
+                    fill="none" 
+                    stroke="url(#traceGradient)" 
+                    strokeWidth="6" 
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="animate-[dash_120s_linear_infinite]"
+                    strokeDasharray="20, 20"
+                    filter="url(#glow)"
+                  />
+                  <linearGradient id="traceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.4" />
+                  </linearGradient>
+                </svg>
+
+                {/* Day Nodes */}
+                {nodePositions.map((pos, i) => {
+                  const d = pos.day;
                   const isActive = currentTaskDay === d;
                   const isPast = currentTaskDay > d;
                   const isLocked = currentTaskDay < d;
@@ -144,16 +215,12 @@ export default function TaskDoPage() {
                   const isClaimed = claimedRewardWeeks.includes(weekNum);
 
                   return (
-                    <div key={d} className="inline-flex flex-col items-center gap-8 relative">
-                      {/* Connection Thread */}
-                      {d < 30 && (
-                        <div className={cn(
-                          "absolute top-12 left-[100%] w-20 h-1.5 -translate-y-1/2 transition-all duration-1000",
-                          isPast ? "bg-primary shadow-[0_0_20px_rgba(255,215,0,0.6)]" : "bg-white/5"
-                        )} />
-                      )}
-                      
-                      <div className="relative">
+                    <div 
+                      key={d} 
+                      className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-1000"
+                      style={{ left: pos.x, top: pos.y }}
+                    >
+                      <div className="relative group">
                         <button
                           onClick={() => {
                             if (isWeekEnd && isPast && reward && !isClaimed) {
@@ -161,38 +228,38 @@ export default function TaskDoPage() {
                             }
                           }}
                           className={cn(
-                            "relative w-24 h-24 rounded-3xl flex items-center justify-center transition-all duration-700 border-[6px] shadow-2xl transform",
-                            isActive ? "bg-primary border-white text-[#1f1610] scale-125 z-20 animate-pulse shadow-[0_0_40px_rgba(255,215,0,0.5)]" :
+                            "relative w-20 h-20 rounded-[1.8rem] flex items-center justify-center transition-all duration-700 border-[5px] shadow-2xl z-20",
+                            isActive ? "bg-primary border-white text-[#1f1610] scale-125 animate-pulse shadow-[0_0_40px_rgba(255,215,0,0.5)]" :
                             isPast ? "bg-[#1f1610] border-primary text-primary" :
                             "bg-white/5 border-white/5 text-white/10 cursor-default",
                             isWeekEnd && isPast && !isClaimed && "animate-bounce ring-8 ring-primary/30"
                           )}
                         >
                           {isWeekEnd ? (
-                            isClaimed ? <ShieldCheck className="h-12 w-12 text-primary" /> : 
-                            isPast ? <Gift className="h-12 w-12 text-primary animate-pulse" /> : <Lock className="h-10 w-10 opacity-20" />
+                            isClaimed ? <ShieldCheck className="h-10 w-10 text-primary" /> : 
+                            isPast ? <Gift className="h-10 w-10 text-primary animate-pulse" /> : <Lock className="h-8 w-8 opacity-20" />
                           ) : (
-                            isPast ? <ShieldCheck className="h-12 w-12" /> : <span className="font-black text-3xl italic">{d}</span>
+                            isPast ? <ShieldCheck className="h-10 w-10" /> : <span className="font-black text-2xl italic">{d}</span>
                           )}
                           
                           {isActive && (
-                            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white text-[#1f1610] px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl border-2 border-primary whitespace-nowrap">
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-[#1f1610] px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-2xl border-2 border-primary whitespace-nowrap">
                               ACTIVE HUB
                             </div>
                           )}
                         </button>
-                      </div>
-                      
-                      <div className="text-center space-y-1">
-                        <span className={cn(
-                          "text-[10px] font-black uppercase tracking-widest block",
-                          isActive ? "text-primary" : isPast ? "text-primary/40" : "text-white/10"
-                        )}>
-                          {isWeekEnd ? `WEEK 0${weekNum}` : `HUB ${d}`}
-                        </span>
-                        {isWeekEnd && isClaimed && (
-                          <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">SECURED</span>
-                        )}
+                        
+                        {/* Dot shadow on map */}
+                        <div className="absolute inset-0 bg-black/40 blur-xl rounded-full -z-10 scale-150 translate-y-4" />
+
+                        <div className="absolute top-24 left-1/2 -translate-x-1/2 text-center space-y-1 min-w-[100px]">
+                          <span className={cn(
+                            "text-[9px] font-black uppercase tracking-widest block",
+                            isActive ? "text-primary" : isPast ? "text-primary/40" : "text-white/10"
+                          )}>
+                            {isWeekEnd ? `WEEK 0${weekNum}` : `HUB ${d}`}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -316,7 +383,6 @@ export default function TaskDoPage() {
         </div>
       </main>
 
-      {/* Milestone Reward Dialog */}
       <Dialog open={!!activeReward} onOpenChange={() => setActiveReward(null)}>
         <DialogContent className="rounded-[5rem] border-[15px] border-primary/20 bg-mocha-cream p-24 max-w-2xl text-center shadow-[0_50px_150px_rgba(255,215,0,0.4)] overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)] pointer-events-none" />
@@ -347,6 +413,14 @@ export default function TaskDoPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <style jsx global>{`
+        @keyframes dash {
+          to {
+            stroke-dashoffset: -2000;
+          }
+        }
+      `}</style>
     </div>
   );
 }
