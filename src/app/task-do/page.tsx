@@ -157,19 +157,18 @@ export default function TaskDoPage() {
           <div className="absolute -inset-4 bg-primary/10 blur-2xl opacity-20 rounded-[6rem]" />
           <Card className="rounded-[4.5rem] border-[12px] border-primary/5 bg-[#0a140a] shadow-[0_60px_120px_rgba(0,0,0,0.9)] relative overflow-hidden h-[750px]">
             
-            {/* Topological Map Background */}
+            {/* Tactical Map Background (Lush Landscape) */}
             <div 
               className="absolute inset-0 bg-cover bg-center" 
               style={{ 
                 backgroundImage: `url('${mapBg}')`,
                 width: (ALL_DAYS.length * NODE_GAP) + 1600,
-                opacity: 0.3,
-                mixBlendMode: 'luminosity'
+                opacity: 0.4
               }} 
               data-ai-hint="topological landscape"
             />
             <div 
-              className="absolute inset-0 bg-gradient-to-r from-[#0a140a] via-transparent to-[#0a140a]" 
+              className="absolute inset-0 bg-gradient-to-r from-[#0a140a]/80 via-transparent to-[#0a140a]/80" 
               style={{ width: (ALL_DAYS.length * NODE_GAP) + 1600 }}
             />
             
@@ -188,7 +187,7 @@ export default function TaskDoPage() {
                     <path 
                       d={tracePath} 
                       fill="none" 
-                      stroke="rgba(255,215,0,0.1)" 
+                      stroke="rgba(255,215,0,0.15)" 
                       strokeWidth="24" 
                       strokeLinecap="round"
                     />
@@ -199,7 +198,7 @@ export default function TaskDoPage() {
                       strokeWidth="6" 
                       strokeLinecap="round"
                       strokeDasharray="20, 40"
-                      className="opacity-40 animate-pulse"
+                      className="opacity-60 animate-pulse"
                       filter="url(#glow-line)"
                     />
                   </svg>
@@ -222,7 +221,7 @@ export default function TaskDoPage() {
                         <div className="relative flex flex-col items-center">
                           {isActive && (
                             <div className="mb-8 animate-in slide-in-from-bottom-4 fade-in duration-700">
-                              <div className="bg-white text-black font-black uppercase text-[10px] tracking-[0.3em] px-8 py-2.5 rounded-full shadow-[0_15px_30px_rgba(255,255,255,0.4)] border-2 border-primary/20">
+                              <div className="bg-white text-black font-black uppercase text-[10px] tracking-[0.3em] px-8 py-2.5 rounded-full shadow-[0_15px_30px_rgba(255,255,255,0.8)] border-4 border-primary/20">
                                 ACTIVE HUB
                               </div>
                             </div>
@@ -235,27 +234,27 @@ export default function TaskDoPage() {
                               }
                             }}
                             className={cn(
-                              "w-40 h-40 rounded-[3rem] flex items-center justify-center transition-all duration-700 border-[10px] text-6xl font-black italic shadow-2xl relative",
+                              "w-44 h-44 rounded-[3.5rem] flex items-center justify-center transition-all duration-700 border-[12px] text-7xl font-black italic shadow-2xl relative",
                               isActive 
-                                ? "bg-primary border-white text-black scale-110 shadow-[0_0_100px_rgba(255,215,0,0.8)]" 
+                                ? "bg-primary border-white text-black scale-110 shadow-[0_0_100px_rgba(255,215,0,0.9)]" 
                                 : isPast 
-                                  ? "bg-primary/10 border-primary/30 text-primary opacity-60" 
-                                  : "bg-white/5 border-white/10 text-white/5"
+                                  ? "bg-primary/20 border-primary/40 text-primary opacity-80" 
+                                  : "bg-[#1f1610]/40 border-white/10 text-white/5"
                             )}
                           >
                             {isWeekEnd && isPast && !isClaimed ? (
-                               <Gift className="h-16 w-16 animate-bounce text-white" />
+                               <Gift className="h-20 w-20 animate-bounce text-white" />
                             ) : (
                                <span className="leading-none">{d}</span>
                             )}
                             
-                            {isActive && <div className="absolute inset-3 rounded-[2.2rem] border-4 border-white/30 animate-pulse" />}
+                            {isActive && <div className="absolute inset-4 rounded-[2.5rem] border-4 border-white/40 animate-pulse" />}
                           </button>
                           
                           <div className="mt-6">
                             <span className={cn(
-                              "text-[11px] font-black uppercase tracking-[0.4em] italic",
-                              isActive ? "text-primary drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" : "text-white/10"
+                              "text-[12px] font-black uppercase tracking-[0.5em] italic",
+                              isActive ? "text-primary drop-shadow-[0_0_15px_rgba(255,215,0,0.8)]" : "text-white/20"
                             )}>
                               HUB {d}
                             </span>

@@ -1,3 +1,22 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "Clean modern workspace representing creativity and building.",
+      "imageUrl": "https://picsum.photos/seed/mocha-strategy/1200/800",
+      "imageHint": "modern workspace"
+    },
+    {
+      "id": "tactical-map-bg",
+      "description": "Lush topological map landscape with green grass and blue ocean features.",
+      "imageUrl": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2500",
+      "imageHint": "topological landscape"
+    },
+    {
+      "id": "content-image-1",
+      "description": "Abstract design representing collaboration.",
+      "imageUrl": "https://picsum.photos/seed/webcraft-collab/800/400",
+      "imageHint": "abstract collaboration"
+    }
+  ]
 }
