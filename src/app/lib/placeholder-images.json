@@ -15,9 +15,9 @@
     },
     {
       "id": "tactical-map-bg",
-      "description": "Tactical strategic map background with parchment texture and grid lines.",
-      "imageUrl": "https://picsum.photos/seed/tactical-map/2000/1000",
-      "imageHint": "tactical map"
+      "description": "Tactical strategic map background with grass and ocean topographical features.",
+      "imageUrl": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2500",
+      "imageHint": "topological map landscape"
     }
   ]
 }
