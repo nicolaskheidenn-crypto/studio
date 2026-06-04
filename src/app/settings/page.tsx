@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -57,17 +58,17 @@ const SYSTEM_BADGES: BadgeType[] = [
   { id: 'sb-streak-30', title: 'MONTHLY EXECUTION', description: 'MAINTAINED A 30-DAY CONSISTENCY STREAK.', difficulty: 'Sovereign', iconType: 'consistency' },
 ];
 
-const MONSTER_AVATARS = [
-  { name: 'Alien', url: 'https://robohash.org/Alien.png?set=set2' },
-  { name: 'Blob', url: 'https://robohash.org/Blob.png?set=set2' },
-  { name: 'Fang', url: 'https://robohash.org/Fang.png?set=set2' },
-  { name: 'Gloop', url: 'https://robohash.org/Gloop.png?set=set2' },
-  { name: 'Spike', url: 'https://robohash.org/Spike.png?set=set2' },
-  { name: 'Tentacle', url: 'https://robohash.org/Tentacle.png?set=set2' },
-  { name: 'Zorg', url: 'https://robohash.org/Zorg.png?set=set2' },
-  { name: 'Blink', url: 'https://robohash.org/Blink.png?set=set2' },
-  { name: 'Chomp', url: 'https://robohash.org/Chomp.png?set=set2' },
-  { name: 'Drip', url: 'https://robohash.org/Drip.png?set=set2' },
+const STRATEGIST_AVATARS = [
+  { name: 'Apex', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Aidan&backgroundColor=fdfaf6' },
+  { name: 'Siren', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Amaya&backgroundColor=fdfaf6' },
+  { name: 'Vanguard', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Caleb&backgroundColor=fdfaf6' },
+  { name: 'Nova', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Destiny&backgroundColor=fdfaf6' },
+  { name: 'Titan', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Ethan&backgroundColor=fdfaf6' },
+  { name: 'Oracle', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Felicity&backgroundColor=fdfaf6' },
+  { name: 'Ronin', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Gabriel&backgroundColor=fdfaf6' },
+  { name: 'Luna', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Hazel&backgroundColor=fdfaf6' },
+  { name: 'Cipher', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Isabella&backgroundColor=fdfaf6' },
+  { name: 'Ghost', url: 'https://api.dicebear.com/9.x/lorelei/svg?seed=Jaxon&backgroundColor=fdfaf6' },
 ];
 
 export default function SettingsPage() {
@@ -180,10 +181,10 @@ export default function SettingsPage() {
     }
   };
 
-  const selectMonsterAvatar = (url: string) => {
+  const selectAvatarProtocol = (url: string) => {
     setAvatar(url);
     setIsAvatarModalOpen(false);
-    toast({ title: "Avatar Protocol Selected" });
+    toast({ title: "Identity Protocol Authorized" });
   };
 
   return (
@@ -240,7 +241,7 @@ export default function SettingsPage() {
                             <button className="w-full h-20 rounded-[1.5rem] bg-[#1f1610] border-4 border-primary/40 flex items-center justify-between px-10 hover:border-primary transition-all group">
                                <div className="flex items-center gap-6">
                                   {avatar ? (
-                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0 p-1">
+                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0 p-1 shadow-lg">
                                       <img 
                                         src={avatar} 
                                         className="w-full h-full object-contain" 
@@ -255,34 +256,34 @@ export default function SettingsPage() {
                                <Ghost className="h-8 w-8 text-primary/20 group-hover:text-primary transition-colors" />
                             </button>
                           </DialogTrigger>
-                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 md:p-16 max-w-4xl shadow-2xl">
-                             <DialogHeader className="text-center mb-10 space-y-4">
+                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 md:p-16 max-w-4xl shadow-2xl overflow-hidden">
+                             <DialogHeader className="text-center mb-8 space-y-4">
                                 <DialogTitle className="text-5xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">
                                   AVATAR <span className="text-primary">LABORATORY</span>
                                 </DialogTitle>
-                                <p className="text-[10px] font-black uppercase text-[#1f1610] tracking-[0.4em] opacity-60">SELECT YOUR UNIQUE MONSTER IDENTITY PROTOCOL</p>
-                                <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
+                                <p className="text-[10px] font-black uppercase text-[#1f1610] tracking-[0.4em] opacity-60">SELECT YOUR UNIQUE STRATEGIST IDENTITY PROTOCOL</p>
+                                <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
                              </DialogHeader>
-                             <ScrollArea className="h-[500px] pr-4">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-10 p-4">
-                                   {MONSTER_AVATARS.map((m) => (
+                             <ScrollArea className="h-[550px] pr-6">
+                                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 p-4">
+                                   {STRATEGIST_AVATARS.map((m) => (
                                      <button 
                                       key={m.name}
-                                      onClick={() => selectMonsterAvatar(m.url)}
+                                      onClick={() => selectAvatarProtocol(m.url)}
                                       className={cn(
-                                        "aspect-square rounded-[2.5rem] bg-white border-[8px] p-6 transition-all hover:scale-105 active:scale-95 shadow-xl group overflow-hidden relative flex flex-col items-center justify-between",
-                                        avatar === m.url ? "border-primary shadow-[0_20px_40px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
+                                        "aspect-[4/5] rounded-[3rem] bg-white border-[10px] p-6 transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.1)] group overflow-hidden relative flex flex-col items-center justify-between",
+                                        avatar === m.url ? "border-primary shadow-[0_30px_60px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
                                       )}
                                      >
-                                        <div className="w-full h-24 flex items-center justify-center mb-4">
+                                        <div className="w-full h-full flex items-center justify-center relative">
                                           <img 
                                             src={m.url} 
-                                            className="w-full h-full object-contain" 
+                                            className="w-full h-full object-contain scale-110" 
                                             alt={m.name}
                                             loading="lazy"
                                           />
                                         </div>
-                                        <div className="text-[9px] font-black uppercase tracking-widest text-[#1f1610] bg-primary/10 px-4 py-1.5 rounded-full w-full text-center">
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-[#1f1610] bg-primary/10 px-6 py-2 rounded-full w-full text-center mt-4 border-2 border-[#1f1610]/5">
                                           {m.name}
                                         </div>
                                      </button>
@@ -429,7 +430,7 @@ export default function SettingsPage() {
 
       <Dialog open={!!unlockedBadge} onOpenChange={() => setUnlockedBadge(null)}>
         <DialogContent className="rounded-[5rem] border-[15px] border-primary/20 bg-mocha-cream p-24 max-w-2xl text-center shadow-[0_50px_150px_rgba(255,215,0,0.4)] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.1),transparent)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)] pointer-events-none" />
           <div className="relative z-10 space-y-12">
             <div className="w-48 h-48 bg-primary text-background rounded-[4rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce border-[10px] border-white/40">
               <Award className="h-24 w-24" />
