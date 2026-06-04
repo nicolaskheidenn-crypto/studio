@@ -58,16 +58,16 @@ const SYSTEM_BADGES: BadgeType[] = [
 ];
 
 const MONSTER_AVATARS = [
-  { name: 'Alien', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Alien&backgroundColor=transparent' },
-  { name: 'Blob', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blob&backgroundColor=transparent' },
-  { name: 'Fang', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Fang&backgroundColor=transparent' },
-  { name: 'Gloop', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Gloop&backgroundColor=transparent' },
-  { name: 'Spike', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Spike&backgroundColor=transparent' },
-  { name: 'Tentacle', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Tentacle&backgroundColor=transparent' },
-  { name: 'Zorg', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Zorg&backgroundColor=transparent' },
-  { name: 'Blink', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Blink&backgroundColor=transparent' },
-  { name: 'Chomp', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Chomp&backgroundColor=transparent' },
-  { name: 'Drip', url: 'https://api.dicebear.com/9.x/monsters/svg?seed=Drip&backgroundColor=transparent' },
+  { name: 'Alien', url: 'https://robohash.org/Alien.png?set=set2' },
+  { name: 'Blob', url: 'https://robohash.org/Blob.png?set=set2' },
+  { name: 'Fang', url: 'https://robohash.org/Fang.png?set=set2' },
+  { name: 'Gloop', url: 'https://robohash.org/Gloop.png?set=set2' },
+  { name: 'Spike', url: 'https://robohash.org/Spike.png?set=set2' },
+  { name: 'Tentacle', url: 'https://robohash.org/Tentacle.png?set=set2' },
+  { name: 'Zorg', url: 'https://robohash.org/Zorg.png?set=set2' },
+  { name: 'Blink', url: 'https://robohash.org/Blink.png?set=set2' },
+  { name: 'Chomp', url: 'https://robohash.org/Chomp.png?set=set2' },
+  { name: 'Drip', url: 'https://robohash.org/Drip.png?set=set2' },
 ];
 
 export default function SettingsPage() {
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                             <button className="w-full h-20 rounded-[1.5rem] bg-[#1f1610] border-4 border-primary/40 flex items-center justify-between px-10 hover:border-primary transition-all group">
                                <div className="flex items-center gap-6">
                                   {avatar ? (
-                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0">
+                                    <div className="w-12 h-12 rounded-xl bg-white border-2 border-primary/20 overflow-hidden shrink-0 p-1">
                                       <img 
                                         src={avatar} 
                                         className="w-full h-full object-contain" 
@@ -264,17 +264,17 @@ export default function SettingsPage() {
                                 <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
                              </DialogHeader>
                              <ScrollArea className="h-[500px] pr-4">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-10">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-10 p-4">
                                    {MONSTER_AVATARS.map((m) => (
                                      <button 
                                       key={m.name}
                                       onClick={() => selectMonsterAvatar(m.url)}
                                       className={cn(
-                                        "aspect-square rounded-[2.5rem] bg-white border-[8px] p-4 transition-all hover:scale-105 active:scale-95 shadow-xl group overflow-hidden relative flex flex-col items-center justify-center",
+                                        "aspect-square rounded-[2.5rem] bg-white border-[8px] p-6 transition-all hover:scale-105 active:scale-95 shadow-xl group overflow-hidden relative flex flex-col items-center justify-between",
                                         avatar === m.url ? "border-primary shadow-[0_20px_40px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
                                       )}
                                      >
-                                        <div className="w-full h-full mb-3 flex items-center justify-center">
+                                        <div className="w-full h-24 flex items-center justify-center mb-4">
                                           <img 
                                             src={m.url} 
                                             className="w-full h-full object-contain" 
@@ -282,7 +282,9 @@ export default function SettingsPage() {
                                             loading="lazy"
                                           />
                                         </div>
-                                        <div className="text-[9px] font-black uppercase tracking-widest text-[#1f1610]/60 bg-[#1f1610]/5 px-3 py-1 rounded-full">{m.name}</div>
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-[#1f1610] bg-primary/10 px-4 py-1.5 rounded-full w-full text-center">
+                                          {m.name}
+                                        </div>
                                      </button>
                                    ))}
                                 </div>
