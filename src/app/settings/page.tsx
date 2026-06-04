@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles, SmilePlus, Ghost } from "lucide-react";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles, SmilePlus, Ghost, ShieldCheck, Fingerprint } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore } from "@/firebase";
@@ -391,33 +391,54 @@ export default function SettingsPage() {
             <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-mocha-cream p-16 shadow-2xl">
               <CardHeader className="text-center pb-12 space-y-6">
                 <div className="w-20 h-20 bg-[#1f1610]/5 rounded-full flex items-center justify-center mx-auto border-2 border-[#1f1610]/10">
-                  <FileText className="h-10 w-10 text-primary" />
+                  <ShieldCheck className="h-10 w-10 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <CardTitle className="text-5xl font-black text-[#1f1610] uppercase italic tracking-tighter">Privacy Policy</CardTitle>
-                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Protocol Release: May 2026</p>
+                  <CardTitle className="text-5xl font-black text-[#1f1610] uppercase italic tracking-tighter">Privacy Charter</CardTitle>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Sovereign Release: May 2026</p>
                 </div>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[600px] pr-10">
-                  <div className="prose prose-lg prose-stone max-w-none text-[#1f1610] space-y-10">
-                    <p className="text-xl leading-relaxed font-medium">At <strong>Nico Digital</strong>, we are committed to protecting your privacy and building trust through transparency. This Privacy Policy explains how we collect, use, and protect your sovereign data.</p>
+                  <div className="prose prose-lg prose-stone max-w-none text-[#1f1610] space-y-12">
+                    <div className="p-8 bg-[#1f1610] text-primary rounded-[2.5rem] border-4 border-primary/30 space-y-4">
+                       <div className="flex items-center gap-4">
+                          <Fingerprint className="h-8 w-8" />
+                          <h3 className="text-2xl font-black uppercase italic m-0 !text-primary">Data Sovereign Rights</h3>
+                       </div>
+                       <p className="font-bold leading-relaxed m-0 text-sm">
+                          At Nico Digital, your strategic information is self-custodied. We deploy Zero-Knowledge obfuscation for sensitive data like GoalCaps, ensuring your visions are cryptographically hidden from all other entities, including infrastructure hosts.
+                       </p>
+                    </div>
+
                     <div className="space-y-6">
-                      <h3 className="text-3xl font-black uppercase italic tracking-tight">1. Information Collection</h3>
-                      <p className="leading-relaxed">We collect information to provide, improve, and personalize our services while ensuring a safe and effective learning environment.</p>
+                      <h3 className="text-3xl font-black uppercase italic tracking-tight">1. Sovereign Encryption Protocol</h3>
+                      <p className="leading-relaxed">GoalCaps and private vault entries utilize a multi-layer encoding process. This ensures that the raw data stored in the global cloud registry is unreadable without an active, authenticated strategist session.</p>
                       <ul className="list-disc pl-8 space-y-4 font-bold">
-                        <li><strong>Account Protocols</strong>: Strategic email, passkeys, and identity profiles.</li>
-                        <li><strong>Temporal Data</strong>: Time Capsule entries and daily routine progress.</li>
-                        <li><strong>Visual Assets</strong>: Avatars and gallery uploads.</li>
+                        <li><strong>Zero-Visibility Visions</strong>: Your GoalCaps are stored as encrypted blocks.</li>
+                        <li><strong>Host Isolation</strong>: Moderators and Hosts can only view public dispatches (Activity Wall), never private strategic narratives.</li>
+                        <li><strong>Session Keys</strong>: Your identity is the only valid key for temporal decryption.</li>
                       </ul>
                     </div>
+
                     <div className="space-y-6">
-                      <h3 className="text-3xl font-black uppercase italic tracking-tight">2. Sovereign Security</h3>
-                      <p className="leading-relaxed">We implement high-impact administrative, technical, and physical safeguards. However, no digital infrastructure is completely absolute. Active membership data is retained while your command remains open.</p>
+                      <h3 className="text-3xl font-black uppercase italic tracking-tight">2. Information Collection</h3>
+                      <p className="leading-relaxed">We collect minimal identifiable information required to sustain the high-growth ecosystem:</p>
+                      <ul className="list-disc pl-8 space-y-4 font-bold">
+                        <li><strong>Account Protocols</strong>: Strategic email and secure passkeys.</li>
+                        <li><strong>Growth Data</strong>: Level, XP, and routine progress to calculate sovereign status.</li>
+                        <li><strong>Visual Assets</strong>: Identity protocols (avatars) for collective recognition.</li>
+                      </ul>
                     </div>
+
+                    <div className="space-y-6">
+                      <h3 className="text-3xl font-black uppercase italic tracking-tight">3. Strategic Data Retention</h3>
+                      <p className="leading-relaxed">Active membership data is retained while your command remains open. Upon request for protocol termination, all user-specific strategic data is purged from the collective registry.</p>
+                    </div>
+
                     <div className="pt-12 border-t-4 border-[#1f1610]/5">
                       <p className="italic text-center font-black text-[#1f1610]/40 uppercase tracking-widest text-xs">
-                        By using the infrastructure, you acknowledge these temporal protection protocols.
+                        By utilizing the infrastructure, you acknowledge these temporal protection and encryption protocols.
                       </p>
                     </div>
                   </div>

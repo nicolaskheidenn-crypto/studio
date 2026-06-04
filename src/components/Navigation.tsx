@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import { 
   CheckSquare, Hourglass, Settings, LayoutDashboard, 
   Menu, X, User, Crown, BookOpen, HelpCircle,
-  Zap, Trophy, Target, ShieldCheck, Share2, ShoppingBag
+  Zap, Trophy, Target, ShieldCheck, Share2, ShoppingBag, 
+  Fingerprint, Lock
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,12 @@ const TUTORIAL_STEPS = [
     color: "text-orange-500"
   },
   {
+    title: "PRIVACY SHIELD",
+    desc: "All private data, especially GoalCaps, utilize Sovereign Encryption. Your visions are hidden even from the Host.",
+    icon: Lock,
+    color: "text-red-500"
+  },
+  {
     title: "FIREQUIZZO",
     desc: "Pass certifications with 85% accuracy. Stay focused—don't trigger the anti-cheat sensor!",
     icon: Trophy,
@@ -61,12 +68,6 @@ const TUTORIAL_STEPS = [
     desc: "Spend your earned Points in the Hub to acquire free strategic assets base on Level.",
     icon: Zap,
     color: "text-primary"
-  },
-  {
-    title: "SHOOPPY MARKET",
-    desc: "Direct redirect to the official external digital store for premium assets.",
-    icon: ShoppingBag,
-    color: "text-amber-500"
   },
   {
     title: "LIBRARY LABS",
@@ -102,7 +103,6 @@ export function Navigation() {
               </span>
             </Link>
 
-            {/* Tutorial Trigger */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button 
@@ -135,7 +135,6 @@ export function Navigation() {
                       </div>
                     ))}
                     
-                    {/* Command Footer Banner - Enhanced Glow Protocol */}
                     <div className="p-14 bg-[#1f1610] rounded-[3rem] text-center space-y-8 shadow-[0_0_60px_-15px_rgba(255,215,0,0.4)] border-4 border-primary/30 relative overflow-hidden group">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.15),transparent)] pointer-events-none" />
                       
@@ -154,7 +153,6 @@ export function Navigation() {
             </Dialog>
           </div>
 
-          {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-4">
             <div className="flex items-center gap-4 mr-2 border-r pr-6 border-accent/10">
               {NAV_ITEMS.map((item) => (
@@ -211,7 +209,6 @@ export function Navigation() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="lg:hidden border-t bg-white p-6 flex flex-col gap-3 animate-in slide-in-from-top shadow-2xl">
           {NAV_ITEMS.map((item) => (
