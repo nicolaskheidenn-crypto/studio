@@ -59,16 +59,16 @@ const SYSTEM_BADGES: BadgeType[] = [
 ];
 
 const STRATEGIST_AVATARS = [
-  { name: 'Apex', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Aidan&backgroundColor=b6e3f4' },
-  { name: 'Siren', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya&backgroundColor=ffd5dc' },
-  { name: 'Vanguard', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Caleb&backgroundColor=c0aede' },
-  { name: 'Nova', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Destiny&backgroundColor=ffdfbf' },
-  { name: 'Titan', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Ethan&backgroundColor=d1d4f9' },
-  { name: 'Oracle', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Felicity&backgroundColor=ffd5dc' },
-  { name: 'Ronin', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Gabriel&backgroundColor=b6e3f4' },
-  { name: 'Luna', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Hazel&backgroundColor=ffdfbf' },
-  { name: 'Cipher', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Isabella&backgroundColor=c0aede' },
-  { name: 'Ghost', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jaxon&backgroundColor=d1d4f9' },
+  { name: 'Apex', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Aidan&backgroundColor=3b82f6&scale=110' },
+  { name: 'Siren', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Amaya&backgroundColor=ec4899&scale=110' },
+  { name: 'Vanguard', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Caleb&backgroundColor=8b5cf6&scale=110' },
+  { name: 'Nova', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Destiny&backgroundColor=f59e0b&scale=110' },
+  { name: 'Titan', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Ethan&backgroundColor=06b6d4&scale=110' },
+  { name: 'Oracle', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Felicity&backgroundColor=ef4444&scale=110' },
+  { name: 'Ronin', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Gabriel&backgroundColor=10b981&scale=110' },
+  { name: 'Luna', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Hazel&backgroundColor=f97316&scale=110' },
+  { name: 'Cipher', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Isabella&backgroundColor=6366f1&scale=110' },
+  { name: 'Ghost', url: 'https://api.dicebear.com/9.x/adventurer/svg?seed=Jaxon&backgroundColor=475569&scale=110' },
 ];
 
 export default function SettingsPage() {
@@ -256,34 +256,34 @@ export default function SettingsPage() {
                                <Ghost className="h-8 w-8 text-primary/20 group-hover:text-primary transition-colors" />
                             </button>
                           </DialogTrigger>
-                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 md:p-16 max-w-4xl shadow-2xl overflow-hidden">
-                             <DialogHeader className="text-center mb-8 space-y-4">
-                                <DialogTitle className="text-5xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">
+                          <DialogContent className="rounded-[4rem] border-[12px] border-primary/20 bg-mocha-cream p-12 md:p-16 max-w-5xl shadow-2xl overflow-hidden">
+                             <DialogHeader className="text-center mb-12 space-y-6">
+                                <DialogTitle className="text-6xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">
                                   AVATAR <span className="text-primary">LABORATORY</span>
                                 </DialogTitle>
-                                <p className="text-[10px] font-black uppercase text-[#1f1610] tracking-[0.4em] opacity-60">SELECT YOUR UNIQUE STRATEGIST IDENTITY PROTOCOL</p>
-                                <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
+                                <p className="text-[10px] font-black uppercase text-[#1f1610] tracking-[0.6em] opacity-80">SELECT YOUR UNIQUE STRATEGIST IDENTITY PROTOCOL</p>
+                                <div className="h-2 w-32 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(255,215,0,0.4)]" />
                              </DialogHeader>
-                             <ScrollArea className="h-[550px] pr-6">
-                                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 p-4">
+                             <ScrollArea className="h-[600px] pr-6">
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-10 p-6">
                                    {STRATEGIST_AVATARS.map((m) => (
                                      <button 
                                       key={m.name}
                                       onClick={() => selectAvatarProtocol(m.url)}
                                       className={cn(
-                                        "aspect-[4/5] rounded-[3rem] bg-white border-[10px] p-6 transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.1)] group overflow-hidden relative flex flex-col items-center justify-between",
-                                        avatar === m.url ? "border-primary shadow-[0_30px_60px_rgba(255,215,0,0.3)]" : "border-[#1f1610]/5 hover:border-primary/40"
+                                        "aspect-[3/4] rounded-[3.5rem] bg-white border-[12px] transition-all hover:scale-[1.03] active:scale-95 shadow-[0_30px_60px_rgba(0,0,0,0.15)] group overflow-hidden relative flex flex-col items-center justify-between p-6",
+                                        avatar === m.url ? "border-primary shadow-[0_40px_80px_rgba(255,215,0,0.4)]" : "border-[#1f1610]/5 hover:border-primary/40"
                                       )}
                                      >
-                                        <div className="w-full h-full flex items-center justify-center relative">
+                                        <div className="w-full h-full flex items-center justify-center relative rounded-[2rem] overflow-hidden">
                                           <img 
                                             src={m.url} 
-                                            className="w-full h-full object-contain scale-110" 
+                                            className="w-full h-full object-cover scale-110 group-hover:scale-125 transition-transform duration-700" 
                                             alt={m.name}
                                             loading="lazy"
                                           />
                                         </div>
-                                        <div className="text-[10px] font-black uppercase tracking-widest text-[#1f1610] bg-primary/10 px-6 py-2 rounded-full w-full text-center mt-4 border-2 border-[#1f1610]/5">
+                                        <div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#1f1610] bg-primary/10 px-8 py-3 rounded-full w-full text-center mt-6 border-2 border-primary/20 shadow-sm">
                                           {m.name}
                                         </div>
                                      </button>
