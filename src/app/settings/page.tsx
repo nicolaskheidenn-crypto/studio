@@ -36,6 +36,7 @@ const DEFAULT_PROFILE: UserProfile = {
   capsules: [],
   unlockedBadgeIds: [],
   purchasedProductIds: [],
+  claimedRewardWeeks: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
