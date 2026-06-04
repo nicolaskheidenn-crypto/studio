@@ -7,11 +7,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Trophy, ArrowRight, Lock, Award, ShieldCheck, 
-  Flame, Zap, Target, Coffee, BarChart3, ChevronRight, Gift, Download, Map as MapIcon, Sparkles
+  Flame, Zap, Target, Coffee, BarChart3, ChevronRight, Gift, Download, Map as MapIcon, Sparkles,
+  Unlock
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -70,7 +71,6 @@ export default function TaskDoPage() {
   const { toggleTask, unlockNextDay, claimWeeklyReward } = useUserStore();
 
   const [showAward, setShowAward] = useState(false);
-  const [showFinalAward, setShowFinalAward] = useState(false);
   const [activeReward, setActiveReward] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -83,23 +83,19 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     if (isDayComplete && isMounted && uid) {
-      if (currentTaskDay === 30) {
-        setShowFinalAward(true);
-      } else {
-        setShowAward(true);
-      }
+      setShowAward(true);
     } else {
       setShowAward(false);
     }
-  }, [isDayComplete, currentTaskDay, isMounted, uid]);
+  }, [isDayComplete, isMounted, uid]);
 
   const handleNextDay = () => {
     if (!uid) return;
     unlockNextDay(uid);
     setShowAward(false);
     toast({
-      title: `Day ${currentTaskDay + 1} Protocol Initiated`,
-      description: "Previous routines have been archived for sovereignty.",
+      title: `Hub ${currentTaskDay + 1} Protocol Initiated`,
+      description: "Synchronizing latest daily objectives.",
     });
   };
 
@@ -107,7 +103,7 @@ export default function TaskDoPage() {
     if (!uid) return;
     claimWeeklyReward(uid, reward.week);
     setActiveReward(reward);
-    toast({ title: "Treasure Protocol Secured", description: "Reward archived in your personal vault." });
+    toast({ title: "Treasure Secured", description: "Protocol asset archived in vault." });
   };
 
   const growthMultiplier = (1 + level / 10).toFixed(1);
@@ -132,61 +128,78 @@ export default function TaskDoPage() {
            </h1>
         </header>
 
-        {/* Tactical Map Progression */}
-        <Card className="rounded-[4rem] border-[12px] border-primary/10 bg-card/60 backdrop-blur-2xl shadow-[0_50px_100px_rgba(0,0,0,0.6)] p-12 md:p-20 relative overflow-hidden">
+        {/* Sideward-Scrolling Tactical Map */}
+        <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card/60 backdrop-blur-2xl shadow-[0_50px_100px_rgba(0,0,0,0.6)] p-1 relative overflow-hidden">
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.05),transparent)] pointer-events-none" />
            
-           <div className="grid grid-cols-5 md:grid-cols-10 gap-x-8 gap-y-16 relative z-10">
-              {ALL_DAYS.map((d) => {
-                const isActive = currentTaskDay === d;
-                const isPast = currentTaskDay > d;
-                const isLocked = currentTaskDay < d;
-                const isWeekEnd = d % 7 === 0;
-                const weekNum = d / 7;
-                const reward = globalRewards.find(r => r.week === weekNum);
-                const isClaimed = claimedRewardWeeks.includes(weekNum);
+           <ScrollArea className="w-full whitespace-nowrap">
+             <div className="flex items-center gap-20 px-24 py-32 min-w-max relative">
+                {ALL_DAYS.map((d) => {
+                  const isActive = currentTaskDay === d;
+                  const isPast = currentTaskDay > d;
+                  const isLocked = currentTaskDay < d;
+                  const isWeekEnd = d % 7 === 0;
+                  const weekNum = d / 7;
+                  const reward = globalRewards.find(r => r.week === weekNum);
+                  const isClaimed = claimedRewardWeeks.includes(weekNum);
 
-                return (
-                  <div key={d} className="flex flex-col items-center gap-4 relative group">
-                    {/* Visual Connection Line */}
-                    {d % 10 !== 0 && d < 30 && (
-                      <div className={cn(
-                        "absolute top-8 left-full w-full h-1 -translate-x-4 transition-all duration-1000",
-                        isPast ? "bg-primary shadow-[0_0_15px_rgba(255,215,0,0.5)]" : "bg-white/5"
-                      )} />
-                    )}
-                    
-                    <button
-                      disabled={isLocked && !isWeekEnd}
-                      onClick={() => isWeekEnd && isPast && reward && handleClaimTreasure(reward)}
-                      className={cn(
-                        "relative w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center transition-all duration-700 border-4 shadow-2xl transform active:scale-90",
-                        isActive ? "bg-primary border-[#1f1610] text-[#1f1610] scale-125 z-20 animate-pulse" :
-                        isPast ? "bg-[#1f1610] border-primary text-primary" :
-                        "bg-white/5 border-white/5 text-white/20",
-                        isWeekEnd && isPast && !isClaimed && "animate-bounce cursor-pointer ring-8 ring-primary/20"
-                      )}
-                    >
-                      {isWeekEnd ? (
-                        isClaimed ? <ShieldCheck className="h-10 w-10 text-primary" /> : 
-                        isPast ? <Gift className="h-10 w-10 text-primary" /> : <Lock className="h-8 w-8" />
-                      ) : (
-                        isPast ? <ShieldCheck className="h-10 w-10" /> : <span className="font-black text-2xl italic">{d}</span>
+                  return (
+                    <div key={d} className="inline-flex flex-col items-center gap-8 relative">
+                      {/* Connection Thread */}
+                      {d < 30 && (
+                        <div className={cn(
+                          "absolute top-12 left-[100%] w-20 h-1.5 -translate-y-1/2 transition-all duration-1000",
+                          isPast ? "bg-primary shadow-[0_0_20px_rgba(255,215,0,0.6)]" : "bg-white/5"
+                        )} />
                       )}
                       
-                      {isActive && <div className="absolute -top-12 bg-[#fdfaf6] text-[#1f1610] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap shadow-xl border-2 border-primary">CURRENT HUB</div>}
-                    </button>
-                    
-                    <span className={cn(
-                      "text-[10px] font-black uppercase tracking-widest",
-                      isActive ? "text-primary" : isPast ? "text-primary/40" : "text-white/10"
-                    )}>
-                      {isWeekEnd ? `WEEK 0${weekNum}` : `HUB ${d}`}
-                    </span>
-                  </div>
-                );
-              })}
-           </div>
+                      <div className="relative">
+                        <button
+                          onClick={() => {
+                            if (isWeekEnd && isPast && reward && !isClaimed) {
+                              handleClaimTreasure(reward);
+                            }
+                          }}
+                          className={cn(
+                            "relative w-24 h-24 rounded-3xl flex items-center justify-center transition-all duration-700 border-[6px] shadow-2xl transform",
+                            isActive ? "bg-primary border-white text-[#1f1610] scale-125 z-20 animate-pulse shadow-[0_0_40px_rgba(255,215,0,0.5)]" :
+                            isPast ? "bg-[#1f1610] border-primary text-primary" :
+                            "bg-white/5 border-white/5 text-white/10 cursor-default",
+                            isWeekEnd && isPast && !isClaimed && "animate-bounce ring-8 ring-primary/30"
+                          )}
+                        >
+                          {isWeekEnd ? (
+                            isClaimed ? <ShieldCheck className="h-12 w-12 text-primary" /> : 
+                            isPast ? <Gift className="h-12 w-12 text-primary animate-pulse" /> : <Lock className="h-10 w-10 opacity-20" />
+                          ) : (
+                            isPast ? <ShieldCheck className="h-12 w-12" /> : <span className="font-black text-3xl italic">{d}</span>
+                          )}
+                          
+                          {isActive && (
+                            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white text-[#1f1610] px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl border-2 border-primary whitespace-nowrap">
+                              ACTIVE HUB
+                            </div>
+                          )}
+                        </button>
+                      </div>
+                      
+                      <div className="text-center space-y-1">
+                        <span className={cn(
+                          "text-[10px] font-black uppercase tracking-widest block",
+                          isActive ? "text-primary" : isPast ? "text-primary/40" : "text-white/10"
+                        )}>
+                          {isWeekEnd ? `WEEK 0${weekNum}` : `HUB ${d}`}
+                        </span>
+                        {isWeekEnd && isClaimed && (
+                          <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">SECURED</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+             </div>
+             <ScrollBar orientation="horizontal" className="bg-white/5 h-3 rounded-full" />
+           </ScrollArea>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
@@ -241,14 +254,14 @@ export default function TaskDoPage() {
               <div className="flex items-center justify-between px-10">
                  <h2 className="text-5xl font-black text-white tracking-tighter uppercase italic">HUB {currentTaskDay} PROTOCOL</h2>
                  <Badge className="bg-primary text-[#1f1610] h-12 px-10 text-xs font-black rounded-full uppercase tracking-widest shadow-[0_15px_30px_rgba(255,215,0,0.3)] border-4 border-[#1f1610]/20">
-                    {completedTaskIds?.filter(id => dayTasks.some(t => t.id === id)).length || 0} / {dayTasks.length} ARCHIVED
+                    {completedTaskIds?.filter(id => dayTasks.some(t => t.id === id)).length || 0} / {dayTasks.length} CONQUERED
                  </Badge>
               </div>
 
               {dayTasks.length === 0 ? (
                 <div className="text-center p-32 bg-card/20 rounded-[5rem] border-[10px] border-dashed border-primary/10 shadow-inner flex flex-col items-center justify-center space-y-10">
                   <Lock className="h-32 w-32 text-primary/10" />
-                  <p className="text-4xl text-white/20 font-black uppercase tracking-tighter italic max-w-md">Waiting for Host Deployment...</p>
+                  <p className="text-4xl text-white/20 font-black uppercase tracking-tighter italic max-w-md">Awaiting Hub Deployment...</p>
                 </div>
               ) : (
                 <div className="space-y-8">
@@ -268,7 +281,7 @@ export default function TaskDoPage() {
                         <CardContent className="p-12 flex items-center gap-10">
                           <Checkbox 
                             checked={isComplete} 
-                            className="h-12 w-12 rounded-2xl border-[6px] border-primary data-[state=checked]:bg-primary shadow-inner transition-transform group-active:scale-90" 
+                            className="h-14 w-14 rounded-2xl border-[6px] border-primary data-[state=checked]:bg-primary shadow-inner transition-transform group-active:scale-90" 
                           />
                           <div className="flex-1 space-y-2">
                             <p className={cn("text-4xl font-black text-white uppercase tracking-tight leading-none", isComplete && "line-through opacity-20")}>
@@ -287,9 +300,9 @@ export default function TaskDoPage() {
                 <div className="p-20 rounded-[5rem] bg-primary text-[#1f1610] text-center animate-in zoom-in duration-1000 shadow-[0_80px_160px_rgba(255,215,0,0.5)] relative border-[15px] border-[#1f1610]/10 overflow-hidden">
                   <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12"><Sparkles className="h-32 w-32" /></div>
                   <Trophy className="h-32 w-32 mx-auto mb-10 animate-bounce" />
-                  <h2 className="text-8xl font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">Hub Mastered!</h2>
+                  <h2 className="text-8xl font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">Hub Conquered!</h2>
                   <p className="text-3xl font-black uppercase tracking-widest opacity-80 mb-16 leading-relaxed italic">
-                    Protocol consistency complete. <br/>Synchronizing next hub...
+                    Protocol consistency verified. <br/>Advancing to next root...
                   </p>
                   <Button 
                     className="rounded-full font-black text-4xl px-24 h-28 bg-[#1f1610] text-primary hover:bg-white hover:text-[#1f1610] transition-all active:scale-95 shadow-2xl uppercase tracking-tighter" 

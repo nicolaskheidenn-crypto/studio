@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, 
@@ -19,9 +19,9 @@ import {
   Plus, Coins, ListChecks, Gift,
   ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon,
   Database, Download, RefreshCcw, ShieldCheck, AlertOctagon, Loader2,
-  Users, Zap, Activity, Filter, Search, MoreVertical
+  Users, Zap, Activity
 } from "lucide-react";
-import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, getDocs, setDoc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";

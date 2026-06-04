@@ -16,6 +16,7 @@ export default function PublicPage() {
   const params = useParams();
   const [page, setPage] = useState<Page | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [readingTime, setReadingTime] = useState(1);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -23,6 +24,8 @@ export default function PublicPage() {
       const found = pages.find(p => p.slug === params.slug);
       if (found) {
         setPage(found);
+        const words = found.content.split(/\s+/).length;
+        setReadingTime(Math.ceil(words / 200));
       }
     }
   }, [isLoaded, pages, params.slug]);
@@ -50,8 +53,6 @@ export default function PublicPage() {
       </div>
     </div>
   );
-
-  const readingTime = Math.ceil(page.content.split(/\s+/).length / 200);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
