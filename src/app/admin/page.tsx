@@ -445,7 +445,7 @@ export default function AdminPage() {
                       <Label className="text-[#1f1610]">Treasure Link/File URL</Label>
                       <div className="relative">
                         <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
-                        <Input placeholder="https://..." value={rewardFile} onChange={e => setRewardWeekFile(e.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" />
+                        <Input placeholder="https://..." value={rewardFile} onChange={rewardFile => setRewardWeekFile(rewardFile.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" />
                       </div>
                     </div>
                     <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">Inject Treasure Reward</Button>
