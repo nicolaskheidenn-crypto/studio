@@ -47,9 +47,9 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-const NODE_GAP = 350;
-const MAP_HEIGHT = 700;
-const VERTICAL_SCATTER = [0, 180, -180, 100, -100, 220, -220, 140, -140];
+const NODE_GAP = 400;
+const MAP_HEIGHT = 650;
+const VERTICAL_SCATTER = [0, 160, -160, 90, -90, 200, -200, 120, -120];
 
 export default function TaskDoPage() {
   const { user } = useUser();
@@ -120,7 +120,7 @@ export default function TaskDoPage() {
   const nodePositions = useMemo(() => {
     return ALL_DAYS.map((d, i) => ({
       day: d,
-      x: i * NODE_GAP + 300,
+      x: i * NODE_GAP + 400,
       y: (MAP_HEIGHT / 2) + VERTICAL_SCATTER[i % VERTICAL_SCATTER.length]
     }));
   }, []);
@@ -144,39 +144,41 @@ export default function TaskDoPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-[1440px] relative z-10 space-y-16">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 max-w-[1600px] relative z-10 space-y-12">
         
         <header className="text-center space-y-4">
-           <h1 className="text-7xl md:text-8xl font-headline font-black text-white tracking-tighter uppercase italic leading-none select-none">
+           <h1 className="text-6xl md:text-8xl font-headline font-black text-white tracking-tighter uppercase italic leading-none select-none">
              TASK<span className="text-primary">DO</span>
            </h1>
+           <p className="text-primary/40 text-[10px] font-black uppercase tracking-[1em]">Tactical Infrastructure Map</p>
         </header>
 
-        <div className="relative group">
-          <div className="absolute -inset-2 bg-primary/20 blur-xl opacity-20 group-hover:opacity-40 transition-opacity rounded-[5rem]" />
-          <Card className="rounded-[5rem] border-[16px] border-primary/20 bg-[#0a140a] shadow-[0_60px_120px_rgba(0,0,0,0.8)] relative overflow-hidden h-[750px]">
+        <div className="relative group p-4 border-8 border-primary/20 rounded-[5rem] bg-[#1f1610]">
+          <div className="absolute -inset-4 bg-primary/10 blur-2xl opacity-20 rounded-[6rem]" />
+          <Card className="rounded-[4.5rem] border-[12px] border-primary/5 bg-[#0a140a] shadow-[0_60px_120px_rgba(0,0,0,0.9)] relative overflow-hidden h-[750px]">
             
+            {/* Topological Map Background */}
             <div 
               className="absolute inset-0 bg-cover bg-center" 
               style={{ 
                 backgroundImage: `url('${mapBg}')`,
-                width: (ALL_DAYS.length * NODE_GAP) + 1200,
-                opacity: 0.25,
+                width: (ALL_DAYS.length * NODE_GAP) + 1600,
+                opacity: 0.3,
                 mixBlendMode: 'luminosity'
               }} 
-              data-ai-hint="topological grass landscape"
+              data-ai-hint="topological landscape"
             />
             <div 
               className="absolute inset-0 bg-gradient-to-r from-[#0a140a] via-transparent to-[#0a140a]" 
-              style={{ width: (ALL_DAYS.length * NODE_GAP) + 1200 }}
+              style={{ width: (ALL_DAYS.length * NODE_GAP) + 1600 }}
             />
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: (ALL_DAYS.length * NODE_GAP) + 1200 }}>
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: (ALL_DAYS.length * NODE_GAP) + 1600 }}>
                     <defs>
-                      <filter id="glow">
-                        <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+                      <filter id="glow-line">
+                        <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
                         <feMerge>
                           <feMergeNode in="coloredBlur"/>
                           <feMergeNode in="SourceGraphic"/>
@@ -194,11 +196,11 @@ export default function TaskDoPage() {
                       d={tracePath} 
                       fill="none" 
                       stroke="var(--primary)" 
-                      strokeWidth="4" 
+                      strokeWidth="6" 
                       strokeLinecap="round"
-                      strokeDasharray="15, 30"
-                      className="opacity-60"
-                      filter="url(#glow)"
+                      strokeDasharray="20, 40"
+                      className="opacity-40 animate-pulse"
+                      filter="url(#glow-line)"
                     />
                   </svg>
 
@@ -206,7 +208,6 @@ export default function TaskDoPage() {
                     const d = pos.day;
                     const isActive = currentTaskDay === d;
                     const isPast = currentTaskDay > d;
-                    const isLocked = currentTaskDay < d;
                     const isWeekEnd = d % 7 === 0;
                     const weekNum = d / 7;
                     const reward = globalRewards.find(r => r.week === weekNum);
@@ -221,7 +222,7 @@ export default function TaskDoPage() {
                         <div className="relative flex flex-col items-center">
                           {isActive && (
                             <div className="mb-8 animate-in slide-in-from-bottom-4 fade-in duration-700">
-                              <div className="bg-white text-black font-black uppercase text-[11px] tracking-[0.2em] px-10 py-3 rounded-full shadow-[0_20px_40px_rgba(255,255,255,0.3)] border-4 border-primary/20">
+                              <div className="bg-white text-black font-black uppercase text-[10px] tracking-[0.3em] px-8 py-2.5 rounded-full shadow-[0_15px_30px_rgba(255,255,255,0.4)] border-2 border-primary/20">
                                 ACTIVE HUB
                               </div>
                             </div>
@@ -234,23 +235,27 @@ export default function TaskDoPage() {
                               }
                             }}
                             className={cn(
-                              "w-44 h-44 rounded-[3.5rem] flex items-center justify-center transition-all duration-700 border-[12px] text-7xl font-black italic shadow-2xl relative",
+                              "w-40 h-40 rounded-[3rem] flex items-center justify-center transition-all duration-700 border-[10px] text-6xl font-black italic shadow-2xl relative",
                               isActive 
-                                ? "bg-primary border-white text-black scale-115 shadow-[0_0_100px_rgba(255,215,0,0.9)]" 
+                                ? "bg-primary border-white text-black scale-110 shadow-[0_0_100px_rgba(255,215,0,0.8)]" 
                                 : isPast 
-                                  ? "bg-primary/20 border-primary/40 text-primary" 
+                                  ? "bg-primary/10 border-primary/30 text-primary opacity-60" 
                                   : "bg-white/5 border-white/10 text-white/5"
                             )}
                           >
-                            {isWeekEnd && isPast && !isClaimed ? <Gift className="h-20 w-20 animate-bounce text-white" /> : d}
+                            {isWeekEnd && isPast && !isClaimed ? (
+                               <Gift className="h-16 w-16 animate-bounce text-white" />
+                            ) : (
+                               <span className="leading-none">{d}</span>
+                            )}
                             
-                            {isActive && <div className="absolute inset-3 rounded-[2.5rem] border-4 border-white/40 animate-pulse" />}
+                            {isActive && <div className="absolute inset-3 rounded-[2.2rem] border-4 border-white/30 animate-pulse" />}
                           </button>
                           
                           <div className="mt-6">
                             <span className={cn(
-                              "text-sm font-black uppercase tracking-[0.4em] italic",
-                              isActive ? "text-primary drop-shadow-[0_0_15px_rgba(255,215,0,0.6)]" : "text-white/10"
+                              "text-[11px] font-black uppercase tracking-[0.4em] italic",
+                              isActive ? "text-primary drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" : "text-white/10"
                             )}>
                               HUB {d}
                             </span>
@@ -260,7 +265,7 @@ export default function TaskDoPage() {
                     );
                   })}
               </div>
-              <ScrollBar orientation="horizontal" className="bg-white/5 h-5 rounded-full" />
+              <ScrollBar orientation="horizontal" className="bg-white/5 h-4 rounded-full" />
             </ScrollArea>
           </Card>
         </div>
@@ -269,76 +274,76 @@ export default function TaskDoPage() {
            <div className="space-y-10 lg:sticky lg:top-32">
               <Card className="rounded-[4rem] border-8 border-primary/10 bg-card/80 backdrop-blur-3xl p-10 shadow-2xl space-y-10">
                  <div className="flex items-center gap-8">
-                    <div className="w-24 h-24 bg-primary/10 rounded-[2rem] flex items-center justify-center border-4 border-primary/20 shadow-inner">
-                      <BarChart3 className="h-12 w-12 text-primary" />
+                    <div className="w-20 h-20 bg-primary/10 rounded-[1.5rem] flex items-center justify-center border-4 border-primary/20 shadow-inner">
+                      <BarChart3 className="h-10 w-10 text-primary" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter">Empire Grid</h3>
-                      <p className="text-[11px] font-black uppercase text-primary/40 tracking-[0.5em]">Operational Intel</p>
+                      <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Command Intel</h3>
+                      <p className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Operational Status</p>
                     </div>
                  </div>
                  
                  <div className="space-y-6">
                     <div className="flex justify-between items-end">
-                       <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Mastery Sync</span>
-                       <span className="text-4xl font-black text-white italic">{xp}%</span>
+                       <span className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Mastery Sync</span>
+                       <span className="text-3xl font-black text-white italic">{xp}%</span>
                     </div>
-                    <div className="h-5 bg-white/5 rounded-full border-4 border-white/10 overflow-hidden shadow-inner">
-                       <div className="h-full bg-primary shadow-[0_0_30px_rgba(255,215,0,0.6)] transition-all duration-1000" style={{ width: `${xp}%` }} />
+                    <div className="h-4 bg-white/5 rounded-full border-2 border-white/10 overflow-hidden shadow-inner">
+                       <div className="h-full bg-primary shadow-[0_0_20px_rgba(255,215,0,0.5)] transition-all duration-1000" style={{ width: `${xp}%` }} />
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-10 pt-10 border-t-4 border-primary/5">
+                 <div className="grid grid-cols-2 gap-8 pt-10 border-t-2 border-primary/5">
                     <div className="space-y-2">
-                       <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Points Vault</p>
-                       <p className="text-5xl font-black text-white flex items-center gap-4"><Zap className="h-8 w-8 fill-primary text-primary" /> {points}</p>
+                       <p className="text-[9px] font-black text-primary/40 uppercase tracking-widest">Points Vault</p>
+                       <p className="text-4xl font-black text-white flex items-center gap-3"><Zap className="h-6 w-6 fill-primary text-primary" /> {points}</p>
                     </div>
                     <div className="space-y-2 text-right">
-                       <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Streak</p>
-                       <p className="text-5xl font-black text-orange-500 italic flex items-center justify-end gap-4"><Flame className="h-8 w-8 fill-orange-500" /> {streak}</p>
+                       <p className="text-[9px] font-black text-primary/40 uppercase tracking-widest">Streak</p>
+                       <p className="text-4xl font-black text-orange-500 italic flex items-center justify-end gap-3"><Flame className="h-6 w-6 fill-orange-500" /> {streak}</p>
                     </div>
                  </div>
               </Card>
            </div>
 
            <div className="lg:col-span-2 space-y-10">
-              <div className="flex items-center justify-between px-12">
-                 <h2 className="text-6xl font-black text-white tracking-tighter uppercase italic">HUB {currentTaskDay} PROTOCOL</h2>
-                 <Badge className="bg-primary text-black h-14 px-12 text-sm font-black rounded-full uppercase tracking-widest shadow-2xl border-4 border-black/20">
+              <div className="flex items-center justify-between px-10">
+                 <h2 className="text-5xl font-black text-white tracking-tighter uppercase italic">HUB {currentTaskDay} PROTOCOL</h2>
+                 <Badge className="bg-primary text-black h-12 px-8 text-[11px] font-black rounded-full uppercase tracking-widest shadow-xl border-4 border-black/10">
                     {completedTaskIds?.filter(id => dayTasks.some(t => t.id === id)).length || 0} / {dayTasks.length} CONQUERED
                  </Badge>
               </div>
 
               {dayTasks.length === 0 ? (
-                <div className="text-center p-36 bg-card/20 rounded-[6rem] border-[12px] border-dashed border-primary/10 shadow-inner flex flex-col items-center justify-center space-y-12">
-                  <Lock className="h-40 w-40 text-primary/10" />
-                  <p className="text-5xl text-white/20 font-black uppercase tracking-tighter italic">Awaiting Protocol Injection...</p>
+                <div className="text-center p-32 bg-card/20 rounded-[5rem] border-[10px] border-dashed border-primary/10 shadow-inner flex flex-col items-center justify-center space-y-10">
+                  <Lock className="h-32 w-32 text-primary/10" />
+                  <p className="text-4xl text-white/20 font-black uppercase tracking-tighter italic leading-none">Awaiting Protocol Injection...</p>
                 </div>
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-6">
                   {dayTasks.map((task) => {
                     const isComplete = (completedTaskIds || []).includes(task.id);
                     return (
                       <Card 
                         key={task.id} 
                         className={cn(
-                          "relative overflow-hidden border-8 transition-all duration-700 cursor-pointer group rounded-[4.5rem] transform hover:scale-[1.02] active:scale-95",
+                          "relative overflow-hidden border-[6px] transition-all duration-700 cursor-pointer group rounded-[3.5rem] transform hover:scale-[1.02] active:scale-95",
                           isComplete 
-                            ? "border-primary/40 bg-primary/10 opacity-60" 
-                            : "border-primary/10 bg-card shadow-2xl hover:border-primary/60"
+                            ? "border-primary/30 bg-primary/5 opacity-50 shadow-none" 
+                            : "border-primary/10 bg-card shadow-2xl hover:border-primary/50"
                         )}
                         onClick={() => uid && toggleTask(uid, task.id)}
                       >
-                        <CardContent className="p-14 flex items-center gap-12">
+                        <CardContent className="p-10 flex items-center gap-10">
                           <Checkbox 
                             checked={isComplete} 
-                            className="h-20 w-20 rounded-[1.5rem] border-[10px] border-primary data-[state=checked]:bg-primary shadow-inner transition-all group-active:scale-90" 
+                            className="h-16 w-16 rounded-[1.2rem] border-[8px] border-primary data-[state=checked]:bg-primary shadow-inner transition-all group-active:scale-90" 
                           />
-                          <div className="flex-1 space-y-4">
-                            <p className={cn("text-5xl font-black text-white uppercase tracking-tight leading-none italic", isComplete && "line-through opacity-20")}>
+                          <div className="flex-1 space-y-3">
+                            <p className={cn("text-4xl font-black text-white uppercase tracking-tight leading-none italic", isComplete && "line-through opacity-20")}>
                               {task.title}
                             </p>
-                            <p className="text-xl text-primary/60 font-black uppercase tracking-[0.4em] italic">{task.description}</p>
+                            <p className="text-lg text-primary/60 font-black uppercase tracking-[0.3em] italic">{task.description}</p>
                           </div>
                         </CardContent>
                       </Card>
@@ -348,18 +353,18 @@ export default function TaskDoPage() {
               )}
 
               {showAward && (
-                <div className="p-24 rounded-[6rem] bg-primary text-black text-center animate-in zoom-in duration-1000 shadow-[0_100px_200px_rgba(255,215,0,0.6)] relative border-[24px] border-black/10 overflow-hidden">
-                  <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12"><Sparkles className="h-64 w-64" /></div>
-                  <Trophy className="h-56 w-56 mx-auto mb-12 animate-bounce" />
-                  <h2 className="text-9xl font-headline font-black mb-10 uppercase tracking-tighter italic leading-none">Hub Conquered!</h2>
-                  <p className="text-4xl font-black uppercase tracking-widest opacity-80 mb-20 leading-relaxed italic">
+                <div className="p-20 rounded-[5rem] bg-primary text-black text-center animate-in zoom-in duration-700 shadow-[0_80px_160px_rgba(255,215,0,0.5)] relative border-[20px] border-black/5 overflow-hidden">
+                  <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12"><Sparkles className="h-56 w-56" /></div>
+                  <Trophy className="h-48 w-48 mx-auto mb-10 animate-bounce" />
+                  <h2 className="text-8xl font-headline font-black mb-8 uppercase tracking-tighter italic leading-none">Hub Conquered!</h2>
+                  <p className="text-3xl font-black uppercase tracking-widest opacity-80 mb-16 leading-relaxed italic">
                     Protocol consistency verified. <br/>Advancing to next root...
                   </p>
                   <Button 
-                    className="rounded-full font-black text-5xl px-32 h-40 bg-black text-primary hover:bg-white hover:text-black transition-all active:scale-95 shadow-2xl uppercase tracking-tighter border-8 border-primary/20" 
+                    className="rounded-full font-black text-4xl px-24 h-32 bg-black text-primary hover:bg-white hover:text-black transition-all active:scale-95 shadow-2xl uppercase tracking-tighter border-8 border-primary/10" 
                     onClick={handleNextDay}
                   >
-                    DEPLOY NEXT HUB <ArrowRight className="ml-12 h-20 w-20" />
+                    DEPLOY NEXT HUB <ArrowRight className="ml-10 h-16 w-16" />
                   </Button>
                 </div>
               )}
@@ -368,30 +373,30 @@ export default function TaskDoPage() {
       </main>
 
       <Dialog open={!!activeReward} onOpenChange={() => setActiveReward(null)}>
-        <DialogContent className="rounded-[6rem] border-[24px] border-primary/20 bg-mocha-cream p-24 max-w-4xl text-center shadow-[0_80px_200px_rgba(255,215,0,0.6)] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.3),transparent)] pointer-events-none" />
-          <div className="relative z-10 space-y-20">
-            <div className="w-72 h-72 bg-black text-primary rounded-[6rem] flex items-center justify-center mx-auto shadow-2xl border-[16px] border-primary/20">
-              <Gift className="h-48 w-48 animate-pulse" />
+        <DialogContent className="rounded-[5rem] border-[20px] border-primary/20 bg-mocha-cream p-20 max-w-3xl text-center shadow-[0_80px_200px_rgba(255,215,0,0.6)] overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.25),transparent)] pointer-events-none" />
+          <div className="relative z-10 space-y-16">
+            <div className="w-64 h-64 bg-black text-primary rounded-[5rem] flex items-center justify-center mx-auto shadow-2xl border-[14px] border-primary/20">
+              <Gift className="h-40 w-48 animate-pulse" />
             </div>
-            <div className="space-y-8">
-              <h2 className="text-8xl md:text-9xl font-headline font-black text-black uppercase tracking-tighter italic leading-none">
+            <div className="space-y-6">
+              <h2 className="text-7xl md:text-8xl font-headline font-black text-black uppercase tracking-tighter italic leading-none">
                 TREASURE SECURED
               </h2>
-              <div className="h-4 w-64 bg-primary mx-auto rounded-full shadow-lg" />
-              <p className="text-5xl font-black text-black uppercase italic tracking-tight">
+              <div className="h-3 w-48 bg-primary mx-auto rounded-full shadow-lg" />
+              <p className="text-4xl font-black text-black uppercase italic tracking-tight">
                 {activeReward?.title}
               </p>
             </div>
-            <p className="text-2xl font-bold text-black/60 uppercase tracking-[0.4em] max-w-2xl mx-auto leading-relaxed italic">
+            <p className="text-xl font-bold text-black/60 uppercase tracking-[0.3em] max-w-xl mx-auto leading-relaxed italic">
               {activeReward?.description}
             </p>
             <Button 
               asChild
-              className="w-full h-32 rounded-full bg-black text-primary font-black text-5xl shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-tighter gap-10 border-8 border-primary/10"
+              className="w-full h-28 rounded-full bg-black text-primary font-black text-4xl shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-tighter gap-8 border-4 border-primary/10"
             >
               <a href={activeReward?.fileUrl} target="_blank" download>
-                <Download className="h-16 w-16" /> DOWNLOAD ASSET
+                <Download className="h-14 w-14" /> DOWNLOAD ASSET
               </a>
             </Button>
           </div>
