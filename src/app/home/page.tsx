@@ -6,11 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Coffee, Sparkles, Target, Zap, ArrowRight, Hourglass, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function HomePage() {
   const router = useRouter();
+  
+  const heroImage = useMemo(() => 
+    PlaceHolderImages.find(img => img.id === 'hero-image')?.imageUrl || "https://picsum.photos/seed/mocha-strategy/800/600",
+  []);
 
   useEffect(() => {
     const hasAccess = sessionStorage.getItem("fireproof_access_granted");
@@ -56,12 +61,13 @@ export default function HomePage() {
                 <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
                 <div className="relative bg-card border-4 border-primary/10 rounded-[2.5rem] p-4 shadow-2xl overflow-hidden">
                   <Image 
-                    src="https://picsum.photos/seed/mocha-strategy/800/600" 
+                    src={heroImage} 
                     width={800} 
                     height={600} 
                     alt="Digital Strategy" 
                     className="rounded-[2rem] object-cover"
                     data-ai-hint="mocha coffee workspace"
+                    priority
                   />
                   <div className="absolute bottom-8 left-8 right-8 bg-background/90 backdrop-blur-md p-6 rounded-2xl border shadow-lg animate-in slide-in-from-bottom-10 border-primary/20">
                     <div className="flex items-center gap-4">

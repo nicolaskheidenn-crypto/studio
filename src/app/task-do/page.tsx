@@ -19,6 +19,7 @@ import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore, useCollection } from "@/firebase";
 import { collection, query, orderBy } from 'firebase/firestore';
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -46,7 +47,6 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-// Map configuration for high-impact scattered UI
 const NODE_GAP = 350;
 const MAP_HEIGHT = 700;
 const VERTICAL_SCATTER = [0, 180, -180, 100, -100, 220, -220, 140, -140];
@@ -78,6 +78,10 @@ export default function TaskDoPage() {
   const [activeReward, setActiveReward] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const mapBg = useMemo(() => 
+    PlaceHolderImages.find(img => img.id === 'tactical-map-bg')?.imageUrl || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2500",
+  []);
 
   useEffect(() => {
     setIsMounted(true);
@@ -148,16 +152,14 @@ export default function TaskDoPage() {
            </h1>
         </header>
 
-        {/* Tactical Map Container */}
         <div className="relative group">
           <div className="absolute -inset-2 bg-primary/20 blur-xl opacity-20 group-hover:opacity-40 transition-opacity rounded-[5rem]" />
           <Card className="rounded-[5rem] border-[16px] border-primary/20 bg-[#0a140a] shadow-[0_60px_120px_rgba(0,0,0,0.8)] relative overflow-hidden h-[750px]">
             
-            {/* Lush Topological Background (Grass & Oceans) */}
             <div 
               className="absolute inset-0 bg-cover bg-center" 
               style={{ 
-                backgroundImage: 'url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2500")',
+                backgroundImage: `url('${mapBg}')`,
                 width: (ALL_DAYS.length * NODE_GAP) + 1200,
                 opacity: 0.25,
                 mixBlendMode: 'luminosity'
@@ -171,7 +173,6 @@ export default function TaskDoPage() {
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
-                  {/* Sovereign Trace Line (Glowing Path) */}
                   <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: (ALL_DAYS.length * NODE_GAP) + 1200 }}>
                     <defs>
                       <filter id="glow">
@@ -201,7 +202,6 @@ export default function TaskDoPage() {
                     />
                   </svg>
 
-                  {/* Hub Nodes (Matches Screenshot Style Exactly) */}
                   {nodePositions.map((pos, i) => {
                     const d = pos.day;
                     const isActive = currentTaskDay === d;
@@ -244,7 +244,6 @@ export default function TaskDoPage() {
                           >
                             {isWeekEnd && isPast && !isClaimed ? <Gift className="h-20 w-20 animate-bounce text-white" /> : d}
                             
-                            {/* Inner Visual Depth for active node */}
                             {isActive && <div className="absolute inset-3 rounded-[2.5rem] border-4 border-white/40 animate-pulse" />}
                           </button>
                           
@@ -266,7 +265,6 @@ export default function TaskDoPage() {
           </Card>
         </div>
 
-        {/* Tactical Command Console */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
            <div className="space-y-10 lg:sticky lg:top-32">
               <Card className="rounded-[4rem] border-8 border-primary/10 bg-card/80 backdrop-blur-3xl p-10 shadow-2xl space-y-10">

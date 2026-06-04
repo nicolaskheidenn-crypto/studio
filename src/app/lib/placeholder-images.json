@@ -4,20 +4,20 @@
     {
       "id": "hero-image",
       "description": "Clean modern workspace representing creativity and building.",
-      "imageUrl": "https://picsum.photos/seed/webcraft-hero/1200/600",
+      "imageUrl": "https://picsum.photos/seed/mocha-strategy/1200/800",
       "imageHint": "modern workspace"
-    },
-    {
-      "id": "content-image-1",
-      "description": "Abstract design representing collaboration.",
-      "imageUrl": "https://picsum.photos/seed/webcraft-collab/800/400",
-      "imageHint": "abstract collaboration"
     },
     {
       "id": "tactical-map-bg",
       "description": "Tactical strategic map background with grass and ocean topographical features.",
       "imageUrl": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2500",
       "imageHint": "topological map landscape"
+    },
+    {
+      "id": "content-image-1",
+      "description": "Abstract design representing collaboration.",
+      "imageUrl": "https://picsum.photos/seed/webcraft-collab/800/400",
+      "imageHint": "abstract collaboration"
     }
   ]
 }
