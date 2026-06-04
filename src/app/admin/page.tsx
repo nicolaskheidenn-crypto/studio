@@ -16,14 +16,12 @@ import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, 
   Newspaper, ShoppingBag, MessageSquare, 
-  Plus, Coins, ListChecks,
+  Plus, Coins, ListChecks, Gift,
   ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon,
   Database, Download, RefreshCcw, ShieldCheck, AlertOctagon, Loader2,
   Users, Zap, Activity, Filter, Search, MoreVertical
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, getDocs, setDoc } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 import { cn } from "@/lib/utils";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
@@ -55,6 +53,7 @@ export default function AdminPage() {
   const tasksQuery = useMemo(() => query(collection(db, 'tasks'), orderBy('day', 'asc')), [db]);
   const quizzesQuery = useMemo(() => query(collection(db, 'quizzes'), orderBy('createdAt', 'desc')), [db]);
   const usersQuery = useMemo(() => collection(db, 'users'), [db]);
+  const rewardsQuery = useMemo(() => query(collection(db, 'rewards'), orderBy('week', 'asc')), [db]);
 
   const { data: shooppyProducts = [] } = useCollection(productsQuery);
   const { data: newsPosts = [] } = useCollection(newsQuery);
@@ -64,6 +63,7 @@ export default function AdminPage() {
   const { data: globalTasks = [] } = useCollection(tasksQuery);
   const { data: globalQuizzes = [] } = useCollection(quizzesQuery);
   const { data: totalUsers = [] } = useCollection(usersQuery);
+  const { data: globalRewards = [] } = useCollection(rewardsQuery);
 
   // Form States
   const [prodTitle, setProdTitle] = useState("");
@@ -92,6 +92,11 @@ export default function AdminPage() {
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
 
+  const [rewardWeek, setRewardWeek] = useState(1);
+  const [rewardTitle, setRewardWeekTitle] = useState("");
+  const [rewardDesc, setRewardWeekDesc] = useState("");
+  const [rewardFile, setRewardWeekFile] = useState("");
+
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminKey === ADMIN_SECRET_KEY) {
@@ -105,7 +110,7 @@ export default function AdminPage() {
   const handleExportBackup = async () => {
     setIsBackingUp(true);
     try {
-      const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users'];
+      const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
       const backupData: any = {};
       for (const collName of collections) {
         const collRef = collection(db, collName);
@@ -167,6 +172,19 @@ export default function AdminPage() {
     addDoc(collection(db, 'shooppyProducts'), data);
     setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
     toast({ title: "Strategic Asset Deployed" });
+  };
+
+  const handleSaveReward = () => {
+    const data = {
+      week: rewardWeek,
+      title: rewardTitle,
+      description: rewardDesc,
+      fileUrl: rewardFile,
+      timestamp: serverTimestamp()
+    };
+    addDoc(collection(db, 'rewards'), data);
+    setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
+    toast({ title: "Weekly Treasure Injected" });
   };
 
   const handleDispatchBroadcast = () => {
@@ -302,10 +320,10 @@ export default function AdminPage() {
             <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-primary/20 flex-shrink-0">
               {[
                 { val: "assets", icon: ShoppingBag, label: "Assets", count: shooppyProducts.length },
+                { val: "rewards", icon: Gift, label: "Rewards", count: globalRewards.length },
                 { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
                 { val: "tasks", icon: ListChecks, label: "Tasks", count: globalTasks.length },
                 { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
-                { val: "moderation", icon: ShieldAlert, label: "Ops", count: activityWallData.length + sharedResources.length },
                 { val: "maintenance", icon: Database, label: "Backup", count: 0 },
                 { val: "system", icon: HelpCircle, label: "System", count: faqs.length }
               ].map((tab) => (
@@ -399,6 +417,64 @@ export default function AdminPage() {
                 </ScrollArea>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="rewards" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+               <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
+                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Gift className="h-8 w-8 text-primary" /> Treasure Injector</CardTitle>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Target Milestone Week</Label>
+                      <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-sm text-[#1f1610]" value={rewardWeek} onChange={e => setRewardWeek(Number(e.target.value))}>
+                        <option value={1}>Week 1 (Day 7)</option>
+                        <option value={2}>Week 2 (Day 14)</option>
+                        <option value={3}>Week 3 (Day 21)</option>
+                        <option value={4}>Week 4 (Day 28)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Treasure Title</Label>
+                      <Input placeholder="Exclusive Strategy Kit" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Treasure Description</Label>
+                      <Textarea placeholder="What's inside the chest..." value={rewardDesc} onChange={e => setRewardWeekDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Treasure Link/File URL</Label>
+                      <div className="relative">
+                        <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
+                        <Input placeholder="https://..." value={rewardFile} onChange={e => setRewardWeekFile(e.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" />
+                      </div>
+                    </div>
+                    <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">Inject Treasure Reward</Button>
+                  </div>
+               </Card>
+
+               <div className="space-y-8">
+                  <div className="flex items-center justify-between px-6">
+                    <h3 className="text-2xl font-black uppercase text-foreground italic">Deployed Treasures</h3>
+                    <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Roadmap Milestones</span>
+                  </div>
+                  <ScrollArea className="h-[650px] pr-6">
+                    <div className="space-y-6">
+                      {globalRewards.map((r: any) => (
+                        <div key={r.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
+                          <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic shrink-0">W{r.week}</div>
+                            <div>
+                              <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{r.title}</h4>
+                              <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">Milestone Treasure</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('rewards', r.id)}><Trash2 className="h-5 w-5" /></Button>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+               </div>
+             </div>
           </TabsContent>
 
           <TabsContent value="quizzo" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -519,50 +595,6 @@ export default function AdminPage() {
                    </div>
                 ))}
              </div>
-          </TabsContent>
-
-          <TabsContent value="moderation" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl flex flex-col h-[700px]">
-                 <div className="flex items-center justify-between mb-8">
-                   <CardTitle className="text-2xl font-black uppercase text-[#1f1610]">Sovereign Win Feed</CardTitle>
-                   <Badge className="bg-[#1f1610] text-primary rounded-full px-4">{activityWallData.length}</Badge>
-                 </div>
-                 <ScrollArea className="flex-1 pr-4">
-                   <div className="space-y-6">
-                     {activityWallData.map((p: any) => (
-                       <div key={p.id} className="p-6 bg-white/50 rounded-[2.5rem] border-2 border-[#1f1610]/5 flex justify-between items-center group">
-                         <div className="flex-1 min-w-0 mr-4">
-                           <p className="font-black text-[#1f1610] uppercase text-xs truncate">@{p.nickname}</p>
-                           <p className="text-[10px] font-bold text-[#1f1610]/40 mt-1 truncate">{p.description}</p>
-                         </div>
-                         <Button variant="ghost" size="icon" className="text-red-500 rounded-full shrink-0" onClick={() => handleDeleteDoc('activityWall', p.id)}><Trash2 className="h-5 w-5" /></Button>
-                       </div>
-                     ))}
-                   </div>
-                 </ScrollArea>
-              </Card>
-
-              <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl flex flex-col h-[700px]">
-                 <div className="flex items-center justify-between mb-8">
-                   <CardTitle className="text-2xl font-black uppercase text-[#1f1610]">Strategic Vault</CardTitle>
-                   <Badge className="bg-[#1f1610] text-primary rounded-full px-4">{sharedResources.length}</Badge>
-                 </div>
-                 <ScrollArea className="flex-1 pr-4">
-                   <div className="space-y-6">
-                     {sharedResources.map((r: any) => (
-                       <div key={r.id} className="p-6 bg-white/50 rounded-[2.5rem] border-2 border-[#1f1610]/5 flex justify-between items-center group">
-                         <div className="flex-1 min-w-0 mr-4">
-                           <p className="font-black text-[#1f1610] uppercase text-xs truncate">{r.title}</p>
-                           <p className="text-[10px] font-bold text-[#1f1610]/40 mt-1 uppercase truncate">By @{r.nickname}</p>
-                         </div>
-                         <Button variant="ghost" size="icon" className="text-red-500 rounded-full shrink-0" onClick={() => handleDeleteDoc('resources', r.id)}><Trash2 className="h-5 w-5" /></Button>
-                       </div>
-                     ))}
-                   </div>
-                 </ScrollArea>
-              </Card>
-            </div>
           </TabsContent>
 
           <TabsContent value="maintenance" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">

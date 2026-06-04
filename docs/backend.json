@@ -26,8 +26,23 @@
         "points": { "type": "number" },
         "xp": { "type": "number" },
         "level": { "type": "number" },
-        "streak": { "type": "number" }
+        "streak": { "type": "number" },
+        "claimedRewardWeeks": { "type": "array", "items": { "type": "number" } }
       }
+    },
+    "Reward": {
+      "title": "Weekly Treasure",
+      "description": "A reward given for completing a full week of tasks.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "week": { "type": "number" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["week", "title", "fileUrl"]
     },
     "Resource": {
       "title": "Strategic Resource",
@@ -111,6 +126,7 @@
     "/shooppyProducts/{productId}": { "schema": "ShooppyProduct", "description": "Global digital marketplace assets." },
     "/newsPosts/{postId}": { "schema": "object", "description": "Global broadcast messages." },
     "/faqs/{faqId}": { "schema": "object", "description": "Global FAQs." },
-    "/quizzes/{quizId}": { "schema": "Quiz", "description": "Global strategic quizzes." }
+    "/quizzes/{quizId}": { "schema": "Quiz", "description": "Global strategic quizzes." },
+    "/rewards/{rewardId}": { "schema": "Reward", "description": "Global weekly treasure rewards." }
   }
 }

@@ -95,49 +95,13 @@ export interface Badge {
   iconType?: 'quiz' | 'veteran' | 'consistency' | 'explorer' | 'prompt' | 'trick' | 'custom';
 }
 
-export interface PostComment {
+export interface Reward {
   id: string;
-  userId: string;
-  nickname: string;
-  text: string;
-  timestamp: string;
-}
-
-export interface ActivityPost {
-  id: string;
-  userId: string;
-  nickname: string;
-  description: string;
-  images: string[];
-  isPrivate: boolean;
-  timestamp: string;
-  hearts: number;
-  comments: PostComment[];
-}
-
-export interface Resource {
-  id: string;
-  type: 'AI_Prompt' | 'T&Triks' | 'WeBin';
+  week: number;
   title: string;
   description: string;
-  content: string;
-  nickname: string;
-  userId: string;
-}
-
-export interface BroadCastMessage {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
+  fileUrl: string;
   timestamp: string;
-}
-
-export interface GoalCapsule {
-  id: string;
-  message: string;
-  unlockDate: string;
-  createdAt: string;
 }
 
 interface AdminStore {
@@ -202,9 +166,10 @@ export interface UserProfile {
   createdAt: string;
   currentTaskDay: number;
   completedTaskIds: string[];
-  capsules: GoalCapsule[];
+  capsules: any[];
   unlockedBadgeIds: string[];
   purchasedProductIds: string[];
+  claimedRewardWeeks: number[];
   stats: UserStats;
 }
 
@@ -224,6 +189,7 @@ const DEFAULT_PROFILE: UserProfile = {
   capsules: [],
   unlockedBadgeIds: [],
   purchasedProductIds: [],
+  claimedRewardWeeks: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
@@ -241,9 +207,10 @@ interface UserProgressStore {
   addPoints: (uid: string, amount: number) => void;
   toggleTask: (uid: string, id: string) => void;
   claimDaily: (uid: string) => void;
-  addCapsule: (uid: string, cap: GoalCapsule) => void;
+  addCapsule: (uid: string, cap: any) => void;
   resetUserStats: (uid: string) => void;
   unlockNextDay: (uid: string) => void;
+  claimWeeklyReward: (uid: string, week: number) => void;
   updateSpecificUser: (uid: string, data: Partial<{ points: number; xp: number; level: number; streak: number; currentTaskDay: number }>) => void;
   trackVisit: (uid: string, feature: string) => void;
   incrementPrompt: (uid: string) => void;
@@ -338,6 +305,17 @@ export const useUserStore = create<UserProgressStore>()(
         get().updateProfile(uid, { currentTaskDay: Math.min(current.currentTaskDay + 1, 30) });
       },
 
+      claimWeeklyReward: (uid, week) => {
+        const profiles = get().profiles;
+        const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
+        const claimed = current.claimedRewardWeeks || [];
+        if (!claimed.includes(week)) {
+          get().updateProfile(uid, { claimedRewardWeeks: [...claimed, week] });
+          get().addXP(uid, 100);
+          get().addPoints(uid, 200);
+        }
+      },
+
       addCapsule: (uid, cap) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
@@ -382,6 +360,7 @@ export const useUserStore = create<UserProgressStore>()(
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
+        get().addPoints(uid, 10);
         get().updateProfile(uid, { stats: { ...stats, quizzesPassed: (stats.quizzesPassed || 0) + 1 } });
       },
 
@@ -403,6 +382,6 @@ export const useUserStore = create<UserProgressStore>()(
         }
       }
     }),
-    { name: 'fireproof-user-v17' }
+    { name: 'fireproof-user-v18' }
   )
 );
