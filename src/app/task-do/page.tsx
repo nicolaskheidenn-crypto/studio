@@ -46,10 +46,10 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-// Configuration for scattered positioning to match the provided reference
+// Map configuration for high-impact scattered UI
 const NODE_GAP = 300;
-const MAP_HEIGHT = 600;
-const VERTICAL_SCATTER = [0, 120, -120, 60, -60, 150, -150, 90, -90];
+const MAP_HEIGHT = 650;
+const VERTICAL_SCATTER = [0, 150, -150, 80, -80, 180, -180, 100, -100];
 
 export default function TaskDoPage() {
   const { user } = useUser();
@@ -111,8 +111,6 @@ export default function TaskDoPage() {
     toast({ title: "Treasure Secured", description: "Protocol asset archived in vault." });
   };
 
-  const growthMultiplier = (1 + level / 10).toFixed(1);
-
   const ALL_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
 
   const nodePositions = useMemo(() => {
@@ -150,27 +148,27 @@ export default function TaskDoPage() {
            </h1>
         </header>
 
-        {/* Horizontal Scattered Map Container */}
+        {/* Scattered Map Grid (Matches Reference Image) */}
         <div className="relative group">
-          <div className="absolute -inset-4 bg-primary/5 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
-          <Card className="rounded-[4rem] border-[12px] border-primary/20 bg-[#0a0a0a] shadow-[0_50px_100px_rgba(0,0,0,0.8)] relative overflow-hidden h-[650px]">
-            {/* Dark Atmospheric Background (Matches Reference) */}
+          <div className="absolute -inset-1 bg-primary/20 blur opacity-20 group-hover:opacity-40 transition-opacity" />
+          <Card className="rounded-[4rem] border-[12px] border-primary/20 bg-[#020202] shadow-[0_50px_100px_rgba(0,0,0,0.9)] relative overflow-hidden h-[700px]">
+            {/* Dark Atmospheric Background Overlay */}
             <div 
-              className="absolute inset-0 bg-cover bg-center grayscale opacity-30 mix-blend-overlay pointer-events-none" 
+              className="absolute inset-0 bg-cover bg-center grayscale opacity-10 pointer-events-none" 
               style={{ 
-                backgroundImage: 'url("https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=2000")',
+                backgroundImage: 'url("https://images.unsplash.com/photo-1449156001935-d287057576ba?auto=format&fit=crop&q=80&w=2000")',
                 width: (ALL_DAYS.length * NODE_GAP) + 1000
               }} 
+              data-ai-hint="dark urban city night"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-[#0a0a0a] opacity-80 pointer-events-none" />
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[400px]" ref={scrollRef}>
-                  {/* SVG Trace Line */}
+                  {/* Sovereign Trace Line (Glowing Path) */}
                   <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: (ALL_DAYS.length * NODE_GAP) + 800 }}>
                     <defs>
                       <filter id="glow">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
                         <feMerge>
                           <feMergeNode in="coloredBlur"/>
                           <feMergeNode in="SourceGraphic"/>
@@ -181,27 +179,22 @@ export default function TaskDoPage() {
                       d={tracePath} 
                       fill="none" 
                       stroke="rgba(255,215,0,0.05)" 
-                      strokeWidth="20" 
+                      strokeWidth="15" 
                       strokeLinecap="round"
                     />
                     <path 
                       d={tracePath} 
                       fill="none" 
-                      stroke="url(#traceGradient)" 
-                      strokeWidth="4" 
+                      stroke="var(--primary)" 
+                      strokeWidth="2" 
                       strokeLinecap="round"
-                      strokeDasharray="15, 25"
-                      className="animate-[dash_120s_linear_infinite]"
+                      strokeDasharray="10, 20"
+                      className="opacity-40"
                       filter="url(#glow)"
                     />
-                    <linearGradient id="traceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.6" />
-                      <stop offset="50%" stopColor="var(--primary)" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.6" />
-                    </linearGradient>
                   </svg>
 
-                  {/* Day Nodes (Matching Screenshot Style) */}
+                  {/* Hub Nodes (Matches Screenshot Style Exactly) */}
                   {nodePositions.map((pos, i) => {
                     const d = pos.day;
                     const isActive = currentTaskDay === d;
@@ -221,9 +214,9 @@ export default function TaskDoPage() {
                         <div className="relative flex flex-col items-center">
                           {isActive && (
                             <div className="mb-6 animate-in slide-in-from-bottom-2 fade-in duration-500">
-                              <Badge className="bg-white text-black font-black uppercase text-[10px] tracking-widest px-6 py-2 rounded-full shadow-2xl border-4 border-primary">
+                              <div className="bg-white text-black font-black uppercase text-[10px] tracking-widest px-8 py-2.5 rounded-full shadow-2xl">
                                 ACTIVE HUB
-                              </Badge>
+                              </div>
                             </div>
                           )}
 
@@ -234,21 +227,24 @@ export default function TaskDoPage() {
                               }
                             }}
                             className={cn(
-                              "w-32 h-32 rounded-[2.5rem] flex items-center justify-center transition-all duration-700 border-[8px] text-5xl font-black italic shadow-2xl",
+                              "w-36 h-36 rounded-[2.5rem] flex items-center justify-center transition-all duration-700 border-[10px] text-6xl font-black italic shadow-2xl relative",
                               isActive 
-                                ? "bg-primary border-white text-black scale-110 shadow-[0_0_60px_rgba(255,215,0,0.6)]" 
+                                ? "bg-primary border-white text-black scale-110 shadow-[0_0_80px_rgba(255,215,0,0.8)]" 
                                 : isPast 
                                   ? "bg-primary/20 border-primary/40 text-primary" 
-                                  : "bg-white/5 border-white/10 text-white/20 hover:bg-white/10"
+                                  : "bg-white/5 border-white/10 text-white/10"
                             )}
                           >
-                            {isWeekEnd && isPast && !isClaimed ? <Gift className="h-14 w-14 animate-bounce" /> : d}
+                            {isWeekEnd && isPast && !isClaimed ? <Gift className="h-16 w-16 animate-bounce" /> : d}
+                            
+                            {/* Inner Highlight for active node */}
+                            {isActive && <div className="absolute inset-0 rounded-[2rem] border-4 border-white/20" />}
                           </button>
                           
                           <div className="mt-4">
                             <span className={cn(
-                              "text-[10px] font-black uppercase tracking-widest italic",
-                              isActive ? "text-primary" : "text-white/20"
+                              "text-[11px] font-black uppercase tracking-widest italic",
+                              isActive ? "text-primary shadow-[0_0_10px_rgba(255,215,0,0.4)]" : "text-white/10"
                             )}>
                               HUB {d}
                             </span>
@@ -266,7 +262,7 @@ export default function TaskDoPage() {
         {/* Tactical Command Bottom Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
            <div className="space-y-10 lg:sticky lg:top-32">
-              <Card className="rounded-[3.5rem] border-8 border-primary/10 bg-card/60 backdrop-blur-xl p-10 shadow-2xl space-y-8">
+              <Card className="rounded-[4rem] border-8 border-primary/10 bg-card/60 backdrop-blur-xl p-10 shadow-2xl space-y-8">
                  <div className="flex items-center gap-6">
                     <div className="w-20 h-20 bg-primary/10 rounded-[1.5rem] flex items-center justify-center border-2 border-primary/20">
                       <BarChart3 className="h-10 w-10 text-primary" />
@@ -382,7 +378,7 @@ export default function TaskDoPage() {
                 {activeReward?.title}
               </p>
             </div>
-            <p className="text-xl font-bold text-black/60 uppercase tracking-[0.3em] max-w-lg mx-auto leading-relaxed italic">
+            <p className="text-xl font-bold text-black/60 uppercase tracking-[0.3em] max-lg mx-auto leading-relaxed italic">
               {activeReward?.description}
             </p>
             <Button 
@@ -396,14 +392,6 @@ export default function TaskDoPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <style jsx global>{`
-        @keyframes dash {
-          to {
-            stroke-dashoffset: -2000;
-          }
-        }
-      `}</style>
     </div>
   );
 }
