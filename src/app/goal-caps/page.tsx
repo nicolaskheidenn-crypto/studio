@@ -71,9 +71,11 @@ export default function GoalCapsPage() {
   const [message, setMessage] = useState("");
   const [unlockDate, setUnlockDate] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    setCurrentDate(new Date());
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -108,7 +110,7 @@ export default function GoalCapsPage() {
     });
   };
 
-  if (!isMounted) return null;
+  if (!isMounted || !currentDate) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
@@ -239,7 +241,7 @@ export default function GoalCapsPage() {
                 ) : (
                   [...capsules].reverse().map((cap) => {
                     const unlockDateObj = new Date(cap.unlockDate);
-                    const isLocked = unlockDateObj > new Date();
+                    const isLocked = unlockDateObj > currentDate;
 
                     return (
                       <Card 

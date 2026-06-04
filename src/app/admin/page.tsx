@@ -355,8 +355,7 @@ export default function AdminPage() {
                           {prodPlacement === 'Hub' ? <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" /> : <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />}
                           <Input 
                             placeholder={prodPlacement === 'Hub' ? "Upload asset..." : "https://..."} 
-                            value={prodPlacement === 'Marketplace' ? prodFile : ""}
-                            readOnly={prodPlacement === 'Hub'}
+                            value={prodFile}
                             onChange={e => setProdFile(e.target.value)}
                             className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" 
                           />
