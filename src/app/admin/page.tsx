@@ -8,15 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, 
   Newspaper, ShoppingBag, MessageSquare, 
   Plus, Coins, ListChecks,
-  ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon
+  ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon,
+  Database, Download, RefreshCcw, ShieldCheck, AlertOctagon, Loader2
 } from "lucide-react";
-import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, getDocs, setDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
@@ -36,6 +37,9 @@ export default function AdminPage() {
   const db = useFirestore();
   const [adminKey, setAdminKey] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const restoreRef = useRef<HTMLInputElement>(null);
   
   // Shared Collections
   const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
@@ -58,7 +62,7 @@ export default function AdminPage() {
   const [prodTitle, setProdTitle] = useState("");
   const [prodDesc, setProdDesc] = useState("");
   const [prodImg, setProdImg] = useState("");
-  const [prodFile, setProdFile] = useState(""); // URL or Base64
+  const [prodFile, setProdFile] = useState(""); 
   const [prodType, setProdType] = useState<'Bundle' | 'Template' | 'eBook'>('eBook');
   const [prodPlacement, setProdPlacement] = useState<'Hub' | 'Marketplace'>('Marketplace');
   const [prodLevel, setProdLevel] = useState(1);
@@ -93,6 +97,62 @@ export default function AdminPage() {
     } else {
       toast({ title: "Invalid Protocol Key", variant: "destructive" });
     }
+  };
+
+  const handleExportBackup = async () => {
+    setIsBackingUp(true);
+    try {
+      const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users'];
+      const backupData: any = {};
+
+      for (const collName of collections) {
+        const collRef = collection(db, collName);
+        const snapshot = await getDocs(collRef);
+        backupData[collName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SOVEREIGN_ARCHIVE_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Master Backup Generated", description: "All strategic protocols archived for business continuity." });
+    } catch (e) {
+      toast({ title: "Backup Failure", variant: "destructive" });
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handleRestoreBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsRestoring(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        toast({ title: "Restoration Initiated", description: "Re-establishing sovereign infrastructure..." });
+        
+        for (const collName in data) {
+          const items = data[collName];
+          for (const item of items) {
+            const { id, ...rest } = item;
+            await setDoc(doc(db, collName, id), rest, { merge: true });
+          }
+        }
+        toast({ title: "Continuity Protocol Successful", description: "Grid fully re-established from legacy data." });
+      } catch (err) {
+        toast({ title: "Restoration Breach", variant: "destructive" });
+      } finally {
+        setIsRestoring(false);
+        if (restoreRef.current) restoreRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleAssetFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,15 +318,6 @@ export default function AdminPage() {
     toast({ title: "Data Purged" });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProdImg(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
-
   if (user?.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] p-6 text-center">
@@ -311,6 +362,7 @@ export default function AdminPage() {
             <TabsTrigger value="tasks" className="rounded-full px-10 h-14 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Tasks</TabsTrigger>
             <TabsTrigger value="broadcast" className="rounded-full px-10 h-14 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Broadcast</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-10 h-14 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Moderation</TabsTrigger>
+            <TabsTrigger value="maintenance" className="rounded-full px-10 h-14 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Maintenance</TabsTrigger>
             <TabsTrigger value="system" className="rounded-full px-10 h-14 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">System</TabsTrigger>
           </TabsList>
 
@@ -604,6 +656,56 @@ export default function AdminPage() {
                  </div>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="maintenance" className="space-y-12">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <Card className="rounded-[4rem] border-[10px] border-[#FFD700]/10 bg-mocha-cream p-12 shadow-2xl space-y-10 relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-8 opacity-5">
+                      <Database className="h-32 w-32 text-[#1f1610]" />
+                   </div>
+                   <div className="space-y-4">
+                      <CardTitle className="text-4xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Download className="h-10 w-10 text-[#FFD700]" /> Backup Hub</CardTitle>
+                      <p className="text-sm font-bold text-[#1f1610]/60 leading-relaxed">Execute a master protocol archive. This includes all strategist profiles, assets, news, and shared knowledge to ensure absolute business continuity.</p>
+                   </div>
+                   <Button 
+                    onClick={handleExportBackup} 
+                    disabled={isBackingUp}
+                    className="w-full h-24 rounded-full bg-[#1f1610] text-[#FFD700] font-black text-2xl uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all gap-4"
+                   >
+                     {isBackingUp ? <Loader2 className="h-8 w-8 animate-spin" /> : <Database className="h-8 w-8" />}
+                     GENERATE MASTER ARCHIVE
+                   </Button>
+                </Card>
+
+                <Card className="rounded-[4rem] border-[10px] border-primary/20 bg-[#1f1610] p-12 shadow-2xl space-y-10 relative overflow-hidden border-dashed">
+                   <div className="space-y-4">
+                      <CardTitle className="text-4xl font-black uppercase flex items-center gap-5 italic text-[#FFD700]"><RefreshCcw className="h-10 w-10" /> Recovery Protocol</CardTitle>
+                      <p className="text-sm font-bold text-[#fdfaf6]/40 leading-relaxed uppercase tracking-widest">DANGER: Injecting legacy data will synchronize existing records with archive values. Ensure file integrity before execution.</p>
+                   </div>
+                   <div className="space-y-6">
+                      <input 
+                        type="file" 
+                        accept=".json" 
+                        ref={restoreRef}
+                        onChange={handleRestoreBackup} 
+                        className="hidden" 
+                      />
+                      <Button 
+                        onClick={() => restoreRef.current?.click()}
+                        disabled={isRestoring}
+                        className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] font-black text-2xl uppercase shadow-2xl hover:bg-white transition-all gap-4"
+                      >
+                        {isRestoring ? <Loader2 className="h-8 w-8 animate-spin" /> : <ShieldCheck className="h-8 w-8" />}
+                        INJECT LEGACY ARCHIVE
+                      </Button>
+                      <div className="flex items-center gap-4 px-6 text-red-500/60 font-black uppercase text-[10px] tracking-[0.3em]">
+                        <AlertOctagon className="h-4 w-4" />
+                        Awaiting Recovery Token Initialization
+                      </div>
+                   </div>
+                </Card>
+             </div>
           </TabsContent>
 
           <TabsContent value="system" className="space-y-12">
