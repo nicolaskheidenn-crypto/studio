@@ -85,7 +85,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Initialize shining dots only on client to avoid hydration mismatch
+    // Initialize plexus shining dots only on client to avoid hydration mismatch
     const dots = Array.from({ length: 60 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -476,4 +476,3 @@ export default function TaskDoPage() {
     </div>
   );
 }
-

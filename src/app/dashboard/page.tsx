@@ -180,14 +180,13 @@ export default function DashboardPage() {
       comments: []
     };
     
-    // Non-blocking mutation pattern
+    // Non-blocking mutation protocol
     addDoc(collection(db, 'activityWall'), data)
       .then(() => {
         addPoints(uid, 20);
         setPostText("");
         setPostImages([]);
         toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
-        setIsPosting(false);
       })
       .catch(async (error) => {
         const permissionError = new FirestorePermissionError({
@@ -196,7 +195,10 @@ export default function DashboardPage() {
           requestResourceData: data,
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
-        setIsPosting(false); // Stop loading on error
+      })
+      .finally(() => {
+        // ALWAYS clear loading state
+        setIsPosting(false);
       });
   };
 
