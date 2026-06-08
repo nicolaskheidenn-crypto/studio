@@ -21,7 +21,7 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const NODE_GAP = 550; 
-const MAP_HEIGHT = 450; // Optimized for laptop
+const MAP_HEIGHT = 450; 
 const VERTICAL_SCATTER = [0, 80, -60, 100, -80, 120, -100, 50, -60];
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -87,7 +87,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // MAXIMUM DENSITY ORGANIZED PLEXUS: 1200 dots to fill all vacant spaces
+    // MAXIMUM DENSITY ORGANIZED PLEXUS: 1200 dots to fill vacant spaces
     const dots = Array.from({ length: 1200 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -99,7 +99,6 @@ export default function TaskDoPage() {
     setShiningDots(dots);
   }, [totalMapWidth]);
 
-  // Interconnected structured mesh with longer connection distance for occupancy
   const plexusLines = useMemo(() => {
     if (shiningDots.length === 0) return [];
     const lines = [];
@@ -207,7 +206,6 @@ export default function TaskDoPage() {
         <div className="relative group p-1 border-2 border-primary/20 rounded-[3.5rem] bg-[#0d120d] shadow-2xl overflow-hidden">
           <Card className="rounded-[3.2rem] border-[6px] border-primary/5 bg-[#0a140a] relative overflow-hidden h-[450px]">
             
-            {/* Topological Background */}
             <div 
               className="absolute inset-0 bg-cover bg-center" 
               style={{ 
@@ -221,7 +219,6 @@ export default function TaskDoPage() {
               style={{ width: totalMapWidth }}
             />
 
-            {/* Organized Neural Plexus SVG Layer - Filling all spaces */}
             <svg className="absolute inset-0 pointer-events-none" style={{ width: totalMapWidth, height: '100%' }}>
                {plexusLines.map(line => (
                  <line 
@@ -263,10 +260,8 @@ export default function TaskDoPage() {
                       </filter>
                     </defs>
                     
-                    {/* Base Roadmap Trace */}
                     <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.06)" strokeWidth="8" strokeLinecap="round" />
 
-                    {/* Sovereign Glitter Trace */}
                     <path 
                       d={completedTracePath} 
                       fill="none" 
@@ -303,16 +298,14 @@ export default function TaskDoPage() {
                         style={{ left: pos.x, top: pos.y }}
                       >
                         <div className="relative flex flex-col items-center">
-                          {/* Top Badge: ACTIVE HUB (Match Reference) */}
                           {isActive && (
                             <div className="mb-6 animate-in slide-in-from-bottom-4 fade-in duration-700">
-                              <div className="bg-[#fdfaf6] text-[#1f1610] font-black uppercase text-[10px] tracking-[0.3em] px-8 py-2 rounded-full shadow-[0_0_60px_rgba(255,255,255,0.8)] border-2 border-primary/30">
-                                ACTIVE HUB
+                              <div className="bg-[#fdfaf6] text-[#1f1610] font-black uppercase text-[10px] tracking-[0.3em] px-8 py-2 rounded-full shadow-[0_0_60px_rgba(255,255,255,0.8)] border-2 border-primary/30 flex items-center justify-center">
+                                <span className="leading-none">ACTIVE HUB</span>
                               </div>
                             </div>
                           )}
 
-                          {/* Hub Bubble (Scaled for Laptop but keeping Aesthetic) */}
                           <button
                             onClick={() => {
                               if (isWeekEnd && isPast && reward && !isClaimed) {
@@ -332,7 +325,7 @@ export default function TaskDoPage() {
                                <Gift className="h-14 w-14 animate-bounce text-white" />
                             ) : (
                                <span className={cn(
-                                 "leading-none drop-shadow-2xl select-none",
+                                 "leading-[0] drop-shadow-2xl select-none flex items-center justify-center",
                                  isActive ? "text-7xl font-black" : "text-5xl font-bold opacity-30"
                                )}>{d}</span>
                             )}
@@ -340,17 +333,10 @@ export default function TaskDoPage() {
                             {isActive && <div className="absolute inset-1.5 rounded-[1.8rem] border-[3px] border-white/40 animate-pulse" />}
                           </button>
                           
-                          {/* Bottom Tactical Labels */}
-                          <div className="mt-8 flex flex-col items-center gap-1.5">
-                            <div className="bg-[#1f1610] px-4 py-1 rounded-full border border-primary/40 shadow-xl">
-                               <span className="text-[8px] font-black uppercase tracking-[0.4em] text-primary italic">HUB</span>
+                          <div className="mt-8 flex flex-col items-center justify-center">
+                            <div className="bg-[#1f1610] px-4 py-1 rounded-full border border-primary/40 shadow-xl flex items-center justify-center">
+                               <span className="text-[8px] font-black uppercase tracking-[0.4em] text-primary italic leading-none">HUB</span>
                             </div>
-                            <span className={cn(
-                              "text-3xl font-black uppercase tracking-tighter italic transition-all duration-700 drop-shadow-2xl",
-                              isActive ? "text-primary scale-110" : "text-white/20"
-                            )}>
-                              {d}
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -362,7 +348,6 @@ export default function TaskDoPage() {
           </Card>
         </div>
 
-        {/* Task Console Header & Progress */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
            <div className="space-y-6">
               <Card className="rounded-[2.5rem] border-2 border-primary/10 bg-card/80 backdrop-blur-3xl p-8 shadow-2xl space-y-8">
@@ -399,7 +384,6 @@ export default function TaskDoPage() {
               </Card>
            </div>
 
-           {/* Daily Protocol Console */}
            <div className="lg:col-span-2 space-y-5">
               <div className="flex items-center justify-between px-6">
                  <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase italic">HUB {currentTaskDay} PROTOCOL</h2>
@@ -446,7 +430,6 @@ export default function TaskDoPage() {
                 </div>
               )}
 
-              {/* Hub Conquered Screen */}
               {showAward && (
                 <div className="p-12 rounded-[3.5rem] bg-primary text-[#1f1610] text-center animate-in zoom-in duration-700 shadow-[0_40px_80px_rgba(255,215,0,0.5)] relative border-[12px] border-white/20 overflow-hidden mt-8">
                   <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12"><Sparkles className="h-40 w-40" /></div>
@@ -467,7 +450,6 @@ export default function TaskDoPage() {
         </div>
       </main>
 
-      {/* Weekly Milestone Reward Modal */}
       <Dialog open={!!activeReward} onOpenChange={() => setActiveReward(null)}>
         <DialogContent className="rounded-[4rem] border-[15px] border-primary/20 bg-[#fdfaf6] p-12 max-w-2xl text-center shadow-[0_100px_120px_rgba(0,0,0,0.6)] overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.2),transparent)] pointer-events-none" />
@@ -515,3 +497,4 @@ export default function TaskDoPage() {
     </div>
   );
 }
+
