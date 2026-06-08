@@ -175,7 +175,7 @@ export default function AdminPage() {
       placement: prodPlacement,
       requiredLevel: prodLevel,
       price: prodPrice,
-      sortOrder: shooppyProducts.length
+      sortOrder: editingProduct ? editingProduct.sortOrder : shooppyProducts.length
     };
     
     if (editingProduct) {
@@ -198,8 +198,11 @@ export default function AdminPage() {
     const current = shooppyProducts[idx];
     const target = shooppyProducts[targetIdx];
 
-    await updateDoc(doc(db, 'shooppyProducts', current.id), { sortOrder: target.sortOrder || targetIdx });
-    await updateDoc(doc(db, 'shooppyProducts', target.id), { sortOrder: current.sortOrder || idx });
+    const currentOrder = current.sortOrder ?? idx;
+    const targetOrder = target.sortOrder ?? targetIdx;
+
+    await updateDoc(doc(db, 'shooppyProducts', current.id), { sortOrder: targetOrder });
+    await updateDoc(doc(db, 'shooppyProducts', target.id), { sortOrder: currentOrder });
     toast({ title: "Inventory Reorganized" });
   };
 
@@ -211,7 +214,7 @@ export default function AdminPage() {
       nickname: 'Host',
       userId: user?.uid || 'host-id',
       timestamp: serverTimestamp(),
-      sortOrder: webins.length
+      sortOrder: editingWebin ? editingWebin.sortOrder : webins.length
     };
 
     if (editingWebin) {
@@ -234,8 +237,11 @@ export default function AdminPage() {
     const current = webins[idx];
     const target = webins[targetIdx];
 
-    await updateDoc(doc(db, 'resources', current.id), { sortOrder: target.sortOrder || targetIdx });
-    await updateDoc(doc(db, 'resources', target.id), { sortOrder: current.sortOrder || idx });
+    const currentOrder = current.sortOrder ?? idx;
+    const targetOrder = target.sortOrder ?? targetIdx;
+
+    await updateDoc(doc(db, 'resources', current.id), { sortOrder: targetOrder });
+    await updateDoc(doc(db, 'resources', target.id), { sortOrder: currentOrder });
     toast({ title: "Portal Grid Reordered" });
   };
 
@@ -685,7 +691,7 @@ export default function AdminPage() {
             </div>
           </TabsContent>
 
-          {/* Webin Tab */}
+          {/* Webin Tab - MOVED AFTER SHOOPPY */}
           <TabsContent value="webin" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
