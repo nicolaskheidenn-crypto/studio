@@ -10,8 +10,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Trophy, ArrowRight, Lock, ShieldCheck, 
-  Flame, Zap, BarChart3, Gift, Download, Sparkles,
-  Unlock
+  Flame, Zap, BarChart3, Gift, Download, Sparkles
 } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -20,6 +19,10 @@ import { cn } from "@/lib/utils";
 import { useUser, useFirestore, useCollection } from "@/firebase";
 import { collection, query, orderBy } from 'firebase/firestore';
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+
+const NODE_GAP = 400;
+const MAP_HEIGHT = 650;
+const VERTICAL_SCATTER = [0, 160, -160, 90, -90, 200, -200, 120, -120];
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -47,10 +50,6 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-const NODE_GAP = 400;
-const MAP_HEIGHT = 650;
-const VERTICAL_SCATTER = [0, 160, -160, 90, -90, 200, -200, 120, -120];
-
 export default function TaskDoPage() {
   const { user } = useUser();
   const uid = user?.uid;
@@ -69,7 +68,7 @@ export default function TaskDoPage() {
   }, [profiles, uid]);
   
   const { 
-    completedTaskIds = [], currentTaskDay = 1, level = 1, points = 0, streak = 0, xp = 0, claimedRewardWeeks = []
+    completedTaskIds = [], currentTaskDay = 1, points = 0, streak = 0, xp = 0, claimedRewardWeeks = []
   } = profile;
   
   const { toggleTask, unlockNextDay, claimWeeklyReward } = useUserStore();
@@ -123,7 +122,7 @@ export default function TaskDoPage() {
       x: i * NODE_GAP + 400,
       y: (MAP_HEIGHT / 2) + VERTICAL_SCATTER[i % VERTICAL_SCATTER.length]
     }));
-  }, []);
+  }, [ALL_DAYS]);
 
   const tracePath = useMemo(() => {
     if (nodePositions.length === 0) return "";
@@ -139,6 +138,8 @@ export default function TaskDoPage() {
   }, [nodePositions]);
 
   if (!isMounted) return null;
+
+  const totalMapWidth = (ALL_DAYS.length * NODE_GAP) + 1600;
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
@@ -162,19 +163,19 @@ export default function TaskDoPage() {
               className="absolute inset-0 bg-cover bg-center" 
               style={{ 
                 backgroundImage: `url('${mapBg}')`,
-                width: (ALL_DAYS.length * NODE_GAP) + 1600,
-                opacity: 0.4
+                width: totalMapWidth,
+                opacity: 0.6
               }} 
               data-ai-hint="topological landscape"
             />
             <div 
               className="absolute inset-0 bg-gradient-to-r from-[#0a140a]/80 via-transparent to-[#0a140a]/80" 
-              style={{ width: (ALL_DAYS.length * NODE_GAP) + 1600 }}
+              style={{ width: totalMapWidth }}
             />
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: (ALL_DAYS.length * NODE_GAP) + 1600 }}>
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: totalMapWidth }}>
                     <defs>
                       <filter id="glow-line">
                         <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
@@ -203,7 +204,7 @@ export default function TaskDoPage() {
                     />
                   </svg>
 
-                  {nodePositions.map((pos, i) => {
+                  {nodePositions.map((pos) => {
                     const d = pos.day;
                     const isActive = currentTaskDay === d;
                     const isPast = currentTaskDay > d;

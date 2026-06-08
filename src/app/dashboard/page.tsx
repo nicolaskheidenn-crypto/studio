@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -21,6 +21,8 @@ import { toast } from '@/hooks/use-toast';
 import { useUserStore, UserProfile } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -38,6 +40,7 @@ const DEFAULT_PROFILE: UserProfile = {
   capsules: [],
   unlockedBadgeIds: [],
   purchasedProductIds: [],
+  claimedRewardWeeks: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
@@ -73,7 +76,7 @@ export default function DashboardPage() {
   const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
 
-  const { data: sharedActivity = [], loading: loadingActivity } = useCollection(activityQuery);
+  const { data: sharedActivity = [] } = useCollection(activityQuery);
   const { data: newsPosts = [] } = useCollection(newsQuery);
   const { data: sharedResources = [] } = useCollection(resourcesQuery);
   const { data: shooppyProducts = [] } = useCollection(productsQuery);
@@ -161,91 +164,118 @@ export default function DashboardPage() {
     });
   };
 
-  const handleDispatchWin = async () => {
+  const handleDispatchWin = () => {
     if (!postText.trim() || !uid) return;
     setIsPosting(true);
-    try {
-      await addDoc(collection(db, 'activityWall'), {
-        userId: uid,
-        nickname: nickname,
-        avatarUrl: avatarUrl,
-        description: postText,
-        images: postImages,
-        isPrivate: false,
-        timestamp: serverTimestamp(),
-        hearts: 0,
-        comments: []
+
+    const data = {
+      userId: uid,
+      nickname: nickname,
+      avatarUrl: avatarUrl,
+      description: postText,
+      images: postImages,
+      isPrivate: false,
+      timestamp: serverTimestamp(),
+      hearts: 0,
+      comments: []
+    };
+    
+    // Non-blocking mutation pattern
+    addDoc(collection(db, 'activityWall'), data)
+      .then(() => {
+        addPoints(uid, 20);
+        setPostText("");
+        setPostImages([]);
+        toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
+        setIsPosting(false);
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'activityWall',
+          operation: 'create',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        setIsPosting(false); // Stop loading on error
       });
-      addPoints(uid, 20);
-      setPostText("");
-      setPostImages([]);
-      toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
-    } catch (e) {
-      toast({ title: "Dispatch Failed", variant: "destructive" });
-    } finally {
-      setIsPosting(false);
-    }
   };
 
-  const handleAddComment = async (postId: string) => {
+  const handleAddComment = (postId: string) => {
     const text = commentInputs[postId];
     if (!text?.trim() || !uid) return;
     
     const postRef = doc(db, 'activityWall', postId);
-    try {
-      await updateDoc(postRef, {
-        comments: arrayUnion({
-          id: Math.random().toString(36).substr(2, 9),
-          userId: uid,
-          nickname: nickname,
-          avatarUrl: avatarUrl,
-          text: text,
-          timestamp: new Date().toISOString()
-        })
+    const commentData = {
+      id: Math.random().toString(36).substr(2, 9),
+      userId: uid,
+      nickname: nickname,
+      avatarUrl: avatarUrl,
+      text: text,
+      timestamp: new Date().toISOString()
+    };
+
+    updateDoc(postRef, {
+      comments: arrayUnion(commentData)
+    })
+      .then(() => {
+        setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+        toast({ title: "Insight Recorded" });
+      })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: postRef.path,
+          operation: 'update',
+          requestResourceData: { comments: commentData },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
       });
-      setCommentInputs(prev => ({ ...prev, [postId]: "" }));
-      toast({ title: "Insight Recorded" });
-    } catch (e) {
-      toast({ title: "Comment Failed", variant: "destructive" });
-    }
   };
 
-  const handleHeartPost = async (postId: string) => {
+  const handleHeartPost = (postId: string) => {
     const postRef = doc(db, 'activityWall', postId);
-    try {
-      await updateDoc(postRef, { hearts: increment(1) });
-      toast({ title: "Sovereign Recognition Sent" });
-    } catch (e) {
-      toast({ title: "Action Denied", variant: "destructive" });
-    }
+    updateDoc(postRef, { hearts: increment(1) })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: postRef.path,
+          operation: 'update',
+          requestResourceData: { hearts: 'increment' },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
-  const handleAddResource = async () => {
+  const handleAddResource = () => {
     if (!resTitle || !resContent || !uid) {
        toast({ title: "Incomplete Protocol", description: "Title and content are required.", variant: "destructive" });
        return;
     }
     
-    try {
-      await addDoc(collection(db, 'resources'), {
-        title: resTitle,
-        description: "",
-        type: resType,
-        content: resContent,
-        userId: uid,
-        nickname: nickname,
-        avatarUrl: avatarUrl,
-        timestamp: serverTimestamp()
-      });
+    const data = {
+      title: resTitle,
+      description: "",
+      type: resType,
+      content: resContent,
+      userId: uid,
+      nickname: nickname,
+      avatarUrl: avatarUrl,
+      timestamp: serverTimestamp()
+    };
 
-      if (resType === 'AI_Prompt') incrementPrompt(uid);
-      else if (resType === 'T&Triks') incrementTrick(uid);
-      
-      setResTitle(""); setResContent("");
-      toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
-    } catch (e) {
-      toast({ title: "Share Failed", variant: "destructive" });
-    }
+    addDoc(collection(db, 'resources'), data)
+      .then(() => {
+        if (resType === 'AI_Prompt') incrementPrompt(uid);
+        else if (resType === 'T&Triks') incrementTrick(uid);
+        setResTitle(""); setResContent("");
+        toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
+      })
+      .catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: 'resources',
+          operation: 'create',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   const availableInHub = shooppyProducts.filter(p => p.placement === 'Hub' && !purchasedProductIds.includes(p.id));
