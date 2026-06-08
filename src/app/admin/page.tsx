@@ -20,9 +20,9 @@ import {
   Plus, Coins, ListChecks, Gift,
   ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon,
   Database, Download, RefreshCcw, ShieldCheck, AlertOctagon, Loader2,
-  Users, Zap, Activity, Edit3, Save, X
+  Users, Zap, Activity, Edit3, Save, X, ArrowUp, ArrowDown, Video
 } from "lucide-react";
-import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy, updateDoc, where } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
@@ -46,11 +46,11 @@ export default function AdminPage() {
   const restoreRef = useRef<HTMLInputElement>(null);
   
   // Collections
-  const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
+  const productsQuery = useMemo(() => query(collection(db, 'shooppyProducts'), orderBy('sortOrder', 'asc')), [db]);
   const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
   const activityQuery = useMemo(() => query(collection(db, 'activityWall'), orderBy('timestamp', 'desc')), [db]);
-  const resourcesQuery = useMemo(() => query(collection(db, 'resources'), orderBy('timestamp', 'desc')), [db]);
+  const webinQuery = useMemo(() => query(collection(db, 'resources'), where('type', '==', 'WeBin'), orderBy('sortOrder', 'asc')), [db]);
   const tasksQuery = useMemo(() => query(collection(db, 'tasks'), orderBy('day', 'asc')), [db]);
   const quizzesQuery = useMemo(() => query(collection(db, 'quizzes'), orderBy('createdAt', 'desc')), [db]);
   const usersQuery = useMemo(() => collection(db, 'users'), [db]);
@@ -60,7 +60,7 @@ export default function AdminPage() {
   const { data: newsPosts = [] } = useCollection(newsQuery);
   const { data: faqs = [] } = useCollection(faqsQuery);
   const { data: activityWallData = [] } = useCollection(activityQuery);
-  const { data: sharedResources = [] } = useCollection(resourcesQuery);
+  const { data: webins = [] } = useCollection(webinQuery);
   const { data: globalTasks = [] } = useCollection(tasksQuery);
   const { data: globalQuizzes = [] } = useCollection(quizzesQuery);
   const { data: totalUsers = [] } = useCollection(usersQuery);
@@ -75,6 +75,11 @@ export default function AdminPage() {
   const [prodPlacement, setProdPlacement] = useState<'Hub' | 'Marketplace'>('Marketplace');
   const [prodLevel, setProdLevel] = useState(1);
   const [prodPrice, setProdPrice] = useState(0);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+
+  const [webinTitle, setWebinTitle] = useState("");
+  const [webinContent, setWebinContent] = useState("");
+  const [editingWebin, setEditingWebin] = useState<any>(null);
 
   const [newsTitle, setNewsTitle] = useState("");
   const [newsContent, setNewsContent] = useState("");
@@ -160,7 +165,7 @@ export default function AdminPage() {
     reader.readAsText(file);
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     const data = {
       title: prodTitle,
       description: prodDesc,
@@ -169,11 +174,69 @@ export default function AdminPage() {
       type: prodType,
       placement: prodPlacement,
       requiredLevel: prodLevel,
-      price: prodPrice
+      price: prodPrice,
+      sortOrder: shooppyProducts.length
     };
-    addDoc(collection(db, 'shooppyProducts'), data);
+    
+    if (editingProduct) {
+      await updateDoc(doc(db, 'shooppyProducts', editingProduct.id), data);
+      setEditingProduct(null);
+    } else {
+      await addDoc(collection(db, 'shooppyProducts'), data);
+    }
+    
     setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
-    toast({ title: "Strategic Asset Deployed" });
+    toast({ title: editingProduct ? "Protocol Updated" : "Strategic Asset Deployed" });
+  };
+
+  const handleMoveProduct = async (id: string, direction: 'up' | 'down') => {
+    const idx = shooppyProducts.findIndex(p => p.id === id);
+    if (idx === -1) return;
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= shooppyProducts.length) return;
+
+    const current = shooppyProducts[idx];
+    const target = shooppyProducts[targetIdx];
+
+    await updateDoc(doc(db, 'shooppyProducts', current.id), { sortOrder: target.sortOrder || targetIdx });
+    await updateDoc(doc(db, 'shooppyProducts', target.id), { sortOrder: current.sortOrder || idx });
+    toast({ title: "Inventory Reorganized" });
+  };
+
+  const handleSaveWebin = async () => {
+    const data = {
+      title: webinTitle,
+      content: webinContent,
+      type: 'WeBin',
+      nickname: 'Host',
+      userId: user?.uid || 'host-id',
+      timestamp: serverTimestamp(),
+      sortOrder: webins.length
+    };
+
+    if (editingWebin) {
+      await updateDoc(doc(db, 'resources', editingWebin.id), { title: webinTitle, content: webinContent });
+      setEditingWebin(null);
+    } else {
+      await addDoc(collection(db, 'resources'), data);
+    }
+
+    setWebinTitle(""); setWebinContent("");
+    toast({ title: editingWebin ? "Webin Synchronized" : "Webin Portal Deployed" });
+  };
+
+  const handleMoveWebin = async (id: string, direction: 'up' | 'down') => {
+    const idx = webins.findIndex(w => w.id === id);
+    if (idx === -1) return;
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= webins.length) return;
+
+    const current = webins[idx];
+    const target = webins[targetIdx];
+
+    await updateDoc(doc(db, 'resources', current.id), { sortOrder: target.sortOrder || targetIdx });
+    await updateDoc(doc(db, 'resources', target.id), { sortOrder: current.sortOrder || idx });
+    toast({ title: "Portal Grid Reordered" });
   };
 
   const handleSaveReward = () => {
@@ -236,7 +299,6 @@ export default function AdminPage() {
     toast({ title: "Quiz Protocol Deployed" });
   };
 
-  // Task Command Center Logic
   const handleAddDraftTaskSlot = () => {
     setBulkDraftTasks([...bulkDraftTasks, { id: Math.random().toString(36).substr(2, 9), title: "", description: "" }]);
   };
@@ -293,6 +355,24 @@ export default function AdminPage() {
     toast({ title: "Data Purged" });
   };
 
+  const startEditProduct = (p: any) => {
+    setEditingProduct(p);
+    setProdTitle(p.title);
+    setProdDesc(p.description);
+    setProdImg(p.imageUrl);
+    setProdFile(p.fileUrl || "");
+    setProdType(p.type);
+    setProdPlacement(p.placement);
+    setProdLevel(p.requiredLevel || 1);
+    setProdPrice(p.price);
+  };
+
+  const startEditWebin = (w: any) => {
+    setEditingWebin(w);
+    setWebinTitle(w.title);
+    setWebinContent(w.content);
+  };
+
   if (user?.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] p-6 text-center">
@@ -322,7 +402,6 @@ export default function AdminPage() {
     );
   }
 
-  // Group tasks by day for organized management
   const tasksByDay = globalTasks.reduce((acc: any, task: any) => {
     const day = task.day;
     if (!acc[day]) acc[day] = [];
@@ -334,7 +413,6 @@ export default function AdminPage() {
     <div className="min-h-screen flex flex-col bg-[#1f1610]">
       <Navigation />
       
-      {/* Command Intelligence Stats */}
       <div className="bg-primary/5 border-b-4 border-primary/10 py-10">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -346,10 +424,10 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-primary font-black uppercase tracking-widest text-[10px] mb-2">Shared Resources</span>
+              <span className="text-primary font-black uppercase tracking-widest text-[10px] mb-2">Webin Portals</span>
               <div className="flex items-center gap-4">
-                <Activity className="h-8 w-8 text-primary" />
-                <span className="text-4xl font-black text-foreground italic tracking-tighter">{sharedResources.length}</span>
+                <Video className="h-8 w-8 text-primary" />
+                <span className="text-4xl font-black text-foreground italic tracking-tighter">{webins.length}</span>
               </div>
             </div>
             <div className="flex flex-col">
@@ -376,7 +454,8 @@ export default function AdminPage() {
             <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-primary/20 flex-shrink-0">
               {[
                 { val: "tasks", icon: ListChecks, label: "Routines", count: globalTasks.length },
-                { val: "assets", icon: ShoppingBag, label: "Assets", count: shooppyProducts.length },
+                { val: "assets", icon: ShoppingBag, label: "Shooppy", count: shooppyProducts.length },
+                { val: "webin", icon: Video, label: "Webin", count: webins.length },
                 { val: "rewards", icon: Gift, label: "Rewards", count: globalRewards.length },
                 { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
                 { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
@@ -510,11 +589,11 @@ export default function AdminPage() {
              </div>
           </TabsContent>
 
-          {/* Asset Injector Tab */}
+          {/* Shooppy Tab */}
           <TabsContent value="assets" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Plus className="h-8 w-8 text-primary" /> Asset Injector</CardTitle>
+                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Plus className="h-8 w-8 text-primary" /> {editingProduct ? 'Edit Asset' : 'Asset Injector'}</CardTitle>
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -565,7 +644,12 @@ export default function AdminPage() {
                         <Input type="number" min={0} value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" />
                       </div>
                     </div>
-                    <Button onClick={handleSaveProduct} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">Deploy Asset Protocol</Button>
+                    <div className="flex gap-4">
+                      {editingProduct && <Button variant="ghost" onClick={() => { setEditingProduct(null); setProdTitle(""); setProdDesc(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]">Cancel</Button>}
+                      <Button onClick={handleSaveProduct} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">
+                        {editingProduct ? 'Sync Protocol' : 'Deploy Asset'}
+                      </Button>
+                    </div>
                   </div>
               </Card>
 
@@ -576,7 +660,7 @@ export default function AdminPage() {
                 </div>
                 <ScrollArea className="h-[650px] pr-6">
                   <div className="space-y-6">
-                    {shooppyProducts.map((p: any) => (
+                    {shooppyProducts.map((p: any, idx: number) => (
                       <div key={p.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
                         <div className="flex items-center gap-6">
                           <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic shrink-0">{p.type.slice(0,1)}</div>
@@ -585,13 +669,75 @@ export default function AdminPage() {
                             <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">{p.placement} • LV {p.requiredLevel} • {p.price} PTS</p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('shooppyProducts', p.id)}><Trash2 className="h-5 w-5" /></Button>
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-1 mr-4">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'up')} disabled={idx === 0}><ArrowUp className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'down')} disabled={idx === shooppyProducts.length - 1}><ArrowDown className="h-4 w-4" /></Button>
+                          </div>
+                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditProduct(p)}><Edit3 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('shooppyProducts', p.id)}><Trash2 className="h-5 w-5" /></Button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </ScrollArea>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Webin Tab */}
+          <TabsContent value="webin" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+               <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
+                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Video className="h-8 w-8 text-primary" /> {editingWebin ? 'Edit Portal' : 'Webin Injector'}</CardTitle>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Portal Title</Label>
+                      <Input placeholder="Strategy Masterclass" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Video / Portal URL</Label>
+                      <Input placeholder="https://..." value={webinContent} onChange={e => setWebinContent(e.target.value)} className="h-16 font-bold text-sm rounded-2xl bg-white text-[#1f1610]" />
+                    </div>
+                    <div className="flex gap-4">
+                       {editingWebin && <Button variant="ghost" onClick={() => { setEditingWebin(null); setWebinTitle(""); setWebinContent(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]">Cancel</Button>}
+                       <Button onClick={handleSaveWebin} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl">
+                         {editingWebin ? 'Sync Portal' : 'Inject Portal'}
+                       </Button>
+                    </div>
+                  </div>
+               </Card>
+
+               <div className="space-y-8">
+                  <div className="flex items-center justify-between px-6">
+                    <h3 className="text-2xl font-black uppercase text-foreground italic">Webin Portals</h3>
+                    <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Active Links</span>
+                  </div>
+                  <ScrollArea className="h-[650px] pr-6">
+                    <div className="space-y-6">
+                      {webins.map((w: any, idx: number) => (
+                        <div key={w.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
+                          <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic shrink-0">W</div>
+                            <div>
+                              <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{w.title}</h4>
+                              <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest truncate max-w-[200px]">{w.content}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col gap-1 mr-4">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'up')} disabled={idx === 0}><ArrowUp className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'down')} disabled={idx === webins.length - 1}><ArrowDown className="h-4 w-4" /></Button>
+                            </div>
+                            <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditWebin(w)}><Edit3 className="h-5 w-5" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('resources', w.id)}><Trash2 className="h-5 w-5" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+               </div>
+             </div>
           </TabsContent>
 
           {/* Reward Tab */}
@@ -621,7 +767,7 @@ export default function AdminPage() {
                       <Label className="text-[#1f1610]">Treasure Link/File URL</Label>
                       <div className="relative">
                         <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
-                        <Input placeholder="https://..." value={rewardFile} onChange={rewardFile => setRewardWeekFile(rewardFile.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" />
+                        <Input placeholder="https://..." value={rewardFile} onChange={e => setRewardWeekFile(e.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" />
                       </div>
                     </div>
                     <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">Inject Treasure Reward</Button>
@@ -671,7 +817,7 @@ export default function AdminPage() {
                     <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-4 border-[#1f1610]/10 space-y-8">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <span className="w-12 h-12 bg-[#1f1610] text-primary rounded-xl flex items-center justify-center font-black text-2xl italic">{currentQIdx + 1}</span>
+                          <span className="w-12 h-12 bg-[#1f1610] text-primary rounded-xl flex items-center justify-center font-black text-2xl italic leading-none">{currentQIdx + 1}</span>
                           <span className="text-[10px] font-black uppercase text-[#1f1610] tracking-widest">Constructing Question</span>
                         </div>
                         <Button type="button" variant="ghost" size="icon" className="text-red-500 rounded-full h-10 w-10" onClick={() => {
@@ -810,7 +956,7 @@ export default function AdminPage() {
       <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
          <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-mocha-cream p-12 max-w-xl shadow-2xl">
             <DialogHeader>
-               <DialogTitle className="text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter">Edit Protocol</DialogTitle>
+               <DialogTitle className="text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter text-center">Edit Protocol</DialogTitle>
             </DialogHeader>
             <div className="space-y-8 mt-6">
                <div className="grid grid-cols-4 gap-6">
@@ -820,7 +966,7 @@ export default function AdminPage() {
                         type="number" 
                         value={editingTask?.day || 1} 
                         onChange={e => setEditingTask({ ...editingTask, day: e.target.value })} 
-                        className="h-16 text-center font-black text-2xl bg-white text-[#1f1610] rounded-xl"
+                        className="h-16 text-center font-black text-2xl bg-white text-[#1f1610] rounded-xl flex items-center justify-center leading-none"
                      />
                   </div>
                   <div className="col-span-3 space-y-2">
@@ -828,7 +974,7 @@ export default function AdminPage() {
                      <Input 
                         value={editingTask?.title || ""} 
                         onChange={e => setEditingTask({ ...editingTask, title: e.target.value })} 
-                        className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl"
+                        className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl flex items-center px-6 leading-none"
                      />
                   </div>
                </div>
@@ -837,7 +983,7 @@ export default function AdminPage() {
                   <Textarea 
                      value={editingTask?.description || ""} 
                      onChange={e => setEditingTask({ ...editingTask, description: e.target.value })} 
-                     className="min-h-[120px] bg-white text-[#1f1610] font-bold rounded-2xl p-6"
+                     className="min-h-[120px] bg-white text-[#1f1610] font-bold rounded-2xl p-6 leading-relaxed"
                   />
                </div>
             </div>
@@ -850,4 +996,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

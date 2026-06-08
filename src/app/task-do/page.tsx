@@ -87,7 +87,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // MAXIMUM DENSITY ORGANIZED PLEXUS: 1200 dots to fill vacant spaces
+    // MAXIMUM DENSITY ORGANIZED PLEXUS: 1200 dots to fill vacant spaces (80% coverage)
     const dots = Array.from({ length: 1200 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -299,9 +299,9 @@ export default function TaskDoPage() {
                       >
                         <div className="relative flex flex-col items-center">
                           {isActive && (
-                            <div className="mb-6 animate-in slide-in-from-bottom-4 fade-in duration-700">
-                              <div className="bg-[#fdfaf6] text-[#1f1610] font-black uppercase text-[10px] tracking-[0.3em] px-8 py-2 rounded-full shadow-[0_0_60px_rgba(255,255,255,0.8)] border-2 border-primary/30 flex items-center justify-center">
-                                <span className="leading-none">ACTIVE HUB</span>
+                            <div className="mb-8 animate-in slide-in-from-bottom-4 fade-in duration-700">
+                              <div className="bg-[#fdfaf6] text-[#1f1610] font-black uppercase text-[10px] tracking-[0.3em] px-10 py-3 rounded-full shadow-[0_0_120px_rgba(255,255,255,0.9)] border-4 border-primary/30 flex items-center justify-center leading-none">
+                                ACTIVE HUB
                               </div>
                             </div>
                           )}
@@ -313,9 +313,9 @@ export default function TaskDoPage() {
                               }
                             }}
                             className={cn(
-                              "rounded-[2.2rem] flex items-center justify-center transition-all duration-700 border-[8px] font-black italic shadow-2xl relative group overflow-hidden",
+                              "rounded-[2.8rem] flex items-center justify-center transition-all duration-700 border-[10px] font-black italic shadow-2xl relative group overflow-hidden",
                               isActive 
-                                ? "w-36 h-36 bg-primary border-[#fdfaf6] text-[#1f1610] scale-110 shadow-[0_0_120px_rgba(255,215,0,0.8)]" 
+                                ? "w-36 h-36 bg-primary border-[#fdfaf6] text-[#1f1610] scale-110 shadow-[0_0_150px_rgba(255,215,0,0.9)]" 
                                 : isPast 
                                   ? "w-28 h-28 bg-primary/25 border-primary/50 text-primary" 
                                   : "w-28 h-28 bg-white/5 border-white/10 text-white/10"
@@ -330,12 +330,12 @@ export default function TaskDoPage() {
                                )}>{d}</span>
                             )}
                             
-                            {isActive && <div className="absolute inset-1.5 rounded-[1.8rem] border-[3px] border-white/40 animate-pulse" />}
+                            {isActive && <div className="absolute inset-2 rounded-[2.2rem] border-[4px] border-white/40 animate-pulse" />}
                           </button>
                           
                           <div className="mt-8 flex flex-col items-center justify-center">
-                            <div className="bg-[#1f1610] px-4 py-1 rounded-full border border-primary/40 shadow-xl flex items-center justify-center">
-                               <span className="text-[8px] font-black uppercase tracking-[0.4em] text-primary italic leading-none">HUB</span>
+                            <div className="bg-primary px-6 py-2 rounded-full border-4 border-[#1f1610]/10 shadow-xl flex items-center justify-center leading-none">
+                               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#1f1610] italic">HUB</span>
                             </div>
                           </div>
                         </div>
@@ -497,4 +497,3 @@ export default function TaskDoPage() {
     </div>
   );
 }
-
