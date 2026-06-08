@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useUser, useFirestore, useCollection } from "@/firebase";
 import { useState, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -19,9 +20,9 @@ import {
   Plus, Coins, ListChecks, Gift,
   ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon,
   Database, Download, RefreshCcw, ShieldCheck, AlertOctagon, Loader2,
-  Users, Zap, Activity
+  Users, Zap, Activity, Edit3, Save, X
 } from "lucide-react";
-import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy, updateDoc } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
@@ -88,9 +89,10 @@ export default function AdminPage() {
   ]);
   const [currentQIdx, setCurrentQIdx] = useState(0);
 
+  // Task Management States
   const [taskDay, setTaskDay] = useState(1);
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
+  const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: '1', title: "", description: "" }]);
+  const [editingTask, setEditingTask] = useState<any>(null);
 
   const [rewardWeek, setRewardWeek] = useState(1);
   const [rewardTitle, setRewardWeekTitle] = useState("");
@@ -234,10 +236,56 @@ export default function AdminPage() {
     toast({ title: "Quiz Protocol Deployed" });
   };
 
-  const handleSaveTask = () => {
-    addDoc(collection(db, 'tasks'), { day: taskDay, title: taskTitle, description: taskDesc });
-    setTaskTitle(""); setTaskDesc("");
-    toast({ title: "Daily Protocol Updated" });
+  // Task Command Center Logic
+  const handleAddDraftTaskSlot = () => {
+    setBulkDraftTasks([...bulkDraftTasks, { id: Math.random().toString(36).substr(2, 9), title: "", description: "" }]);
+  };
+
+  const handleRemoveDraftTaskSlot = (id: string) => {
+    if (bulkDraftTasks.length <= 1) return;
+    setBulkDraftTasks(bulkDraftTasks.filter(t => t.id !== id));
+  };
+
+  const handleUpdateDraftTask = (id: string, field: 'title' | 'description', value: string) => {
+    setBulkDraftTasks(bulkDraftTasks.map(t => t.id === id ? { ...t, [field]: value } : t));
+  };
+
+  const handleSaveBulkTasks = async () => {
+    const tasksToSave = bulkDraftTasks.filter(t => t.title.trim() !== "");
+    if (tasksToSave.length === 0) {
+      toast({ title: "Injection Error", description: "Empty protocols cannot be deployed.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      for (const task of tasksToSave) {
+        await addDoc(collection(db, 'tasks'), {
+          day: taskDay,
+          title: task.title,
+          description: task.description,
+          createdAt: serverTimestamp()
+        });
+      }
+      setBulkDraftTasks([{ id: '1', title: "", description: "" }]);
+      toast({ title: "Sovereign Routines Deployed", description: `${tasksToSave.length} protocols injected into Hub ${taskDay}.` });
+    } catch (e) {
+      toast({ title: "Injection Failure", variant: "destructive" });
+    }
+  };
+
+  const handleUpdateExistingTask = async () => {
+    if (!editingTask) return;
+    try {
+      await updateDoc(doc(db, 'tasks', editingTask.id), {
+        day: Number(editingTask.day),
+        title: editingTask.title,
+        description: editingTask.description
+      });
+      setEditingTask(null);
+      toast({ title: "Protocol Synchronized" });
+    } catch (e) {
+      toast({ title: "Sync Breach", variant: "destructive" });
+    }
   };
 
   const handleDeleteDoc = (coll: string, id: string) => {
@@ -273,6 +321,14 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  // Group tasks by day for organized management
+  const tasksByDay = globalTasks.reduce((acc: any, task: any) => {
+    const day = task.day;
+    if (!acc[day]) acc[day] = [];
+    acc[day].push(task);
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1f1610]">
@@ -315,14 +371,14 @@ export default function AdminPage() {
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-16 max-w-6xl">
-        <Tabs defaultValue="assets" className="space-y-12">
+        <Tabs defaultValue="tasks" className="space-y-12">
           <div className="flex items-center justify-between overflow-x-auto pb-4 scrollbar-hide">
             <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-primary/20 flex-shrink-0">
               {[
+                { val: "tasks", icon: ListChecks, label: "Routines", count: globalTasks.length },
                 { val: "assets", icon: ShoppingBag, label: "Assets", count: shooppyProducts.length },
                 { val: "rewards", icon: Gift, label: "Rewards", count: globalRewards.length },
                 { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
-                { val: "tasks", icon: ListChecks, label: "Tasks", count: globalTasks.length },
                 { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
                 { val: "maintenance", icon: Database, label: "Backup", count: 0 },
                 { val: "system", icon: HelpCircle, label: "System", count: faqs.length }
@@ -336,6 +392,125 @@ export default function AdminPage() {
             </TabsList>
           </div>
 
+          <TabsContent value="tasks" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
+             <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl space-y-12">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]">
+                    <ListChecks className="h-10 w-10 text-primary" /> DAILY ROUTINE INJECTOR
+                  </CardTitle>
+                  <div className="flex items-center gap-6">
+                    <Label className="text-[#1f1610] text-xs">TARGET HUB DAY</Label>
+                    <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" />
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  {bulkDraftTasks.map((task, idx) => (
+                    <div key={task.id} className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 space-y-6 relative group/slot animate-in zoom-in-95">
+                       <div className="flex items-center justify-between mb-4">
+                          <Badge className="bg-[#1f1610] text-primary h-8 px-6 font-black uppercase text-[9px] rounded-full">Protocol Slot 0{idx + 1}</Badge>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-red-500 opacity-0 group-hover/slot:opacity-100 transition-opacity" 
+                            onClick={() => handleRemoveDraftTaskSlot(task.id)}
+                            disabled={bulkDraftTasks.length <= 1}
+                          >
+                            <X className="h-5 w-5" />
+                          </Button>
+                       </div>
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          <div className="md:col-span-1 space-y-2">
+                             <Label className="text-[#1f1610] text-[9px]">ROUTINE HEADLINE</Label>
+                             <Input 
+                                placeholder="Morning protocol..." 
+                                value={task.title} 
+                                onChange={e => handleUpdateDraftTask(task.id, 'title', e.target.value)} 
+                                className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl" 
+                             />
+                          </div>
+                          <div className="md:col-span-2 space-y-2">
+                             <Label className="text-[#1f1610] text-[9px]">OPERATIONAL INSTRUCTIONS</Label>
+                             <Input 
+                                placeholder="Step-by-step..." 
+                                value={task.description} 
+                                onChange={e => handleUpdateDraftTask(task.id, 'description', e.target.value)} 
+                                className="h-16 bg-white text-[#1f1610] font-bold text-sm rounded-xl" 
+                             />
+                          </div>
+                       </div>
+                    </div>
+                  ))}
+
+                  <div className="flex gap-6">
+                    <Button 
+                      onClick={handleAddDraftTaskSlot} 
+                      variant="outline" 
+                      className="flex-1 h-20 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black text-lg uppercase tracking-widest gap-4 hover:bg-[#1f1610] hover:text-primary transition-all"
+                    >
+                      <Plus className="h-6 w-6" /> ADD PROTOCOL SLOT
+                    </Button>
+                    <Button 
+                      onClick={handleSaveBulkTasks} 
+                      className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-lg uppercase shadow-2xl tracking-tighter hover:scale-105 active:scale-95 transition-transform"
+                    >
+                      INJECT {bulkDraftTasks.length} PROTOCOLS
+                    </Button>
+                  </div>
+                </div>
+             </Card>
+
+             <div className="space-y-10">
+                <div className="flex items-center justify-between px-8">
+                   <h3 className="text-3xl font-black uppercase text-foreground italic">Master Infrastructure List</h3>
+                   <span className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Active Grid Protocols</span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-12">
+                   {Object.entries(tasksByDay).sort(([a], [b]) => Number(a) - Number(b)).map(([day, dayTasks]: [string, any]) => (
+                     <div key={day} className="space-y-6">
+                        <div className="flex items-center gap-4">
+                           <div className="w-16 h-16 bg-primary text-[#1f1610] rounded-[1.2rem] flex items-center justify-center font-black text-2xl italic shadow-xl">D{day}</div>
+                           <div className="h-1 flex-1 bg-primary/10 rounded-full" />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                           {dayTasks.map((t: any) => (
+                             <Card key={t.id} className="p-8 bg-mocha-cream rounded-[2.5rem] border-4 border-primary/10 flex flex-col justify-between group shadow-lg hover:border-primary/40 transition-all">
+                                <div className="space-y-4">
+                                   <div className="flex justify-between items-start">
+                                      <h4 className="font-black text-[#1f1610] uppercase text-xl italic leading-tight line-clamp-2">{t.title}</h4>
+                                   </div>
+                                   <p className="text-xs font-bold text-[#1f1610]/60 line-clamp-3 uppercase tracking-tight">{t.description}</p>
+                                </div>
+                                <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t-2 border-[#1f1610]/5">
+                                   <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="rounded-full hover:bg-[#1f1610] hover:text-primary text-[#1f1610]/40"
+                                      onClick={() => setEditingTask(t)}
+                                   >
+                                      <Edit3 className="h-5 w-5" />
+                                   </Button>
+                                   <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="rounded-full hover:bg-red-500 hover:text-white text-red-500/40"
+                                      onClick={() => handleDeleteDoc('tasks', t.id)}
+                                   >
+                                      <Trash2 className="h-5 w-5" />
+                                   </Button>
+                                </div>
+                             </Card>
+                           ))}
+                        </div>
+                     </div>
+                   ))}
+                </div>
+             </div>
+          </TabsContent>
+
+          {/* Asset Injector Tab */}
           <TabsContent value="assets" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
@@ -419,6 +594,7 @@ export default function AdminPage() {
             </div>
           </TabsContent>
 
+          {/* Reward Tab */}
           <TabsContent value="rewards" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
@@ -477,6 +653,7 @@ export default function AdminPage() {
              </div>
           </TabsContent>
 
+          {/* Quiz Tab */}
           <TabsContent value="quizzo" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                 <div className="flex items-center justify-between">
@@ -564,39 +741,7 @@ export default function AdminPage() {
              </Card>
           </TabsContent>
 
-          <TabsContent value="tasks" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-             <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><ListChecks className="h-8 w-8 text-primary" /> Daily Routine Injector</CardTitle>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                   <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Target Day</Label>
-                      <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="h-16 font-black text-center text-3xl bg-white text-[#1f1610]" />
-                   </div>
-                   <div className="md:col-span-3 space-y-2">
-                      <Label className="text-[#1f1610]">Routine Headline</Label>
-                      <Input placeholder="Morning protocol..." value={taskTitle} onChange={e => setTaskTitle(e.target.value)} className="h-16 bg-white text-[#1f1610] font-black text-xl" />
-                   </div>
-                   <div className="md:col-span-4 space-y-2">
-                      <Label className="text-[#1f1610]">Operational Instructions</Label>
-                      <Textarea placeholder="Step-by-step..." value={taskDesc} onChange={e => setTaskDesc(e.target.value)} className="min-h-[100px] bg-white text-[#1f1610] rounded-[2rem] p-6" />
-                   </div>
-                   <Button onClick={handleSaveTask} className="md:col-span-4 w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl">Inject Daily Task</Button>
-                </div>
-             </Card>
-
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {globalTasks.map((t: any) => (
-                   <div key={t.id} className="p-6 bg-mocha-cream rounded-[2.5rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
-                      <div className="flex items-center gap-4">
-                         <div className="w-12 h-12 bg-[#1f1610] text-primary rounded-xl flex items-center justify-center font-black text-sm italic shrink-0">D{t.day}</div>
-                         <h4 className="font-black text-[#1f1610] uppercase text-sm italic truncate max-w-[150px]">{t.title}</h4>
-                      </div>
-                      <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('tasks', t.id)}><Trash2 className="h-4 w-4" /></Button>
-                   </div>
-                ))}
-             </div>
-          </TabsContent>
-
+          {/* Backup Tab */}
           <TabsContent value="maintenance" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
@@ -628,6 +773,7 @@ export default function AdminPage() {
              </div>
           </TabsContent>
 
+          {/* FAQ Tab */}
           <TabsContent value="system" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 <Card className="rounded-[4rem] lg:col-span-1 border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl space-y-8">
@@ -659,6 +805,49 @@ export default function AdminPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Task Edit Dialog */}
+      <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
+         <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-mocha-cream p-12 max-w-xl shadow-2xl">
+            <DialogHeader>
+               <DialogTitle className="text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter">Edit Protocol</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-8 mt-6">
+               <div className="grid grid-cols-4 gap-6">
+                  <div className="space-y-2">
+                     <Label className="text-[#1f1610] text-[9px]">HUB DAY</Label>
+                     <Input 
+                        type="number" 
+                        value={editingTask?.day || 1} 
+                        onChange={e => setEditingTask({ ...editingTask, day: e.target.value })} 
+                        className="h-16 text-center font-black text-2xl bg-white text-[#1f1610] rounded-xl"
+                     />
+                  </div>
+                  <div className="col-span-3 space-y-2">
+                     <Label className="text-[#1f1610] text-[9px]">HEADLINE</Label>
+                     <Input 
+                        value={editingTask?.title || ""} 
+                        onChange={e => setEditingTask({ ...editingTask, title: e.target.value })} 
+                        className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl"
+                     />
+                  </div>
+               </div>
+               <div className="space-y-2">
+                  <Label className="text-[#1f1610] text-[9px]">INSTRUCTIONS</Label>
+                  <Textarea 
+                     value={editingTask?.description || ""} 
+                     onChange={e => setEditingTask({ ...editingTask, description: e.target.value })} 
+                     className="min-h-[120px] bg-white text-[#1f1610] font-bold rounded-2xl p-6"
+                  />
+               </div>
+            </div>
+            <DialogFooter className="mt-10 gap-4">
+               <Button variant="ghost" className="rounded-full h-14 font-black uppercase text-xs" onClick={() => setEditingTask(null)}>Cancel</Button>
+               <Button className="rounded-full h-14 px-10 bg-[#1f1610] text-primary font-black uppercase text-sm" onClick={handleUpdateExistingTask}>Synchronize Changes</Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
