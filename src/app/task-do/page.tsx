@@ -20,9 +20,9 @@ import { useUser, useFirestore, useCollection } from "@/firebase";
 import { collection, query, orderBy } from 'firebase/firestore';
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
-const NODE_GAP = 350; 
+const NODE_GAP = 380; 
 const MAP_HEIGHT = 450; 
-const VERTICAL_SCATTER = [0, 80, -80, 50, -50, 100, -100, 60, -60];
+const VERTICAL_SCATTER = [0, 90, -70, 60, -90, 110, -110, 50, -60];
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Succemazing',
@@ -83,34 +83,35 @@ export default function TaskDoPage() {
     PlaceHolderImages.find(img => img.id === 'tactical-map-bg')?.imageUrl || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2500",
   []);
 
-  const totalMapWidth = (30 * NODE_GAP) + 1200;
+  const totalMapWidth = (30 * NODE_GAP) + 1600;
 
   useEffect(() => {
     setIsMounted(true);
-    // Initialize high-density neural plexus particles
-    const dots = Array.from({ length: 220 }).map((_, i) => ({
+    // Initialize HIGH-DENSITY neural plexus particles (450+ dots for full coverage)
+    const dots = Array.from({ length: 450 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
       left: Math.random() * totalMapWidth, 
-      delay: Math.random() * 8,
+      delay: Math.random() * 10,
       size: Math.random() * 3 + 1,
-      duration: 3 + Math.random() * 5
+      duration: 4 + Math.random() * 6
     }));
     setShiningDots(dots);
   }, [totalMapWidth]);
 
-  // Calculate high-density plexus lines
+  // Calculate HIGH-DENSITY plexus lines
   const plexusLines = useMemo(() => {
     if (shiningDots.length === 0) return [];
     const lines = [];
-    const maxDist = 300; // Expanded connection range
+    const maxDist = 450; // Deep connection range
     for (let i = 0; i < shiningDots.length; i++) {
-      for (let j = i + 1; j < Math.min(i + 25, shiningDots.length); j++) {
+      // Search more neighbors for a dense web
+      for (let j = i + 1; j < Math.min(i + 35, shiningDots.length); j++) {
         const d1 = shiningDots[i];
         const d2 = shiningDots[j];
         const dist = Math.sqrt(Math.pow(d1.left - d2.left, 2) + Math.pow((d1.top / 100 * MAP_HEIGHT) - (d2.top / 100 * MAP_HEIGHT), 2));
         if (dist < maxDist) {
-          lines.push({ id: `${i}-${j}`, x1: d1.left, y1: `${d1.top}%`, x2: d2.left, y2: `${d2.top}%`, opacity: (1 - (dist / maxDist)) * 0.4 });
+          lines.push({ id: `${i}-${j}`, x1: d1.left, y1: `${d1.top}%`, x2: d2.left, y2: `${d2.top}%`, opacity: (1 - (dist / maxDist)) * 0.35 });
         }
       }
     }
@@ -150,7 +151,7 @@ export default function TaskDoPage() {
   const nodePositions = useMemo(() => {
     return ALL_DAYS.map((d, i) => ({
       day: d,
-      x: i * NODE_GAP + 250,
+      x: i * NODE_GAP + 350,
       y: (MAP_HEIGHT / 2) + VERTICAL_SCATTER[i % VERTICAL_SCATTER.length]
     }));
   }, [ALL_DAYS]);
@@ -206,7 +207,7 @@ export default function TaskDoPage() {
               style={{ 
                 backgroundImage: `url('${mapBg}')`,
                 width: totalMapWidth,
-                opacity: 0.25
+                opacity: 0.2
               }} 
             />
             <div 
@@ -214,14 +215,14 @@ export default function TaskDoPage() {
               style={{ width: totalMapWidth }}
             />
 
-            {/* High-Density Neural Plexus Layer */}
+            {/* HIGH-DENSITY Neural Plexus Layer */}
             <svg className="absolute inset-0 pointer-events-none" style={{ width: totalMapWidth, height: '100%' }}>
                {plexusLines.map(line => (
                  <line 
                    key={line.id} 
                    x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} 
-                   stroke="rgba(255,215,0,0.4)" 
-                   strokeWidth="0.5" 
+                   stroke="rgba(255,215,0,0.5)" 
+                   strokeWidth="0.8" 
                    style={{ opacity: line.opacity }}
                  />
                ))}
@@ -234,7 +235,7 @@ export default function TaskDoPage() {
                    fill="white"
                    className="animate-twinkle"
                    style={{ 
-                     opacity: 0.3,
+                     opacity: 0.4,
                      animationDelay: `${dot.delay}s`,
                      animationDuration: `${dot.duration}s`
                    }}
@@ -247,7 +248,7 @@ export default function TaskDoPage() {
                   <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: totalMapWidth }}>
                     <defs>
                       <filter id="glitter-glow">
-                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
                         <feMerge>
                           <feMergeNode in="coloredBlur"/>
                           <feMergeNode in="SourceGraphic"/>
@@ -255,25 +256,25 @@ export default function TaskDoPage() {
                       </filter>
                     </defs>
                     
-                    <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.08)" strokeWidth="6" strokeLinecap="round" />
+                    <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.06)" strokeWidth="8" strokeLinecap="round" />
 
                     <path 
                       d={completedTracePath} 
                       fill="none" 
                       stroke="var(--primary)" 
-                      strokeWidth="4" 
+                      strokeWidth="5" 
                       strokeLinecap="round"
                       filter="url(#glitter-glow)"
-                      className="opacity-80"
+                      className="opacity-90"
                     />
                     <path 
                       d={completedTracePath} 
                       fill="none" 
                       stroke="white" 
-                      strokeWidth="1.5" 
+                      strokeWidth="2" 
                       strokeLinecap="round"
-                      strokeDasharray="15, 30"
-                      className="animate-[glitter-flow_1.2s_linear_infinite]"
+                      strokeDasharray="20, 40"
+                      className="animate-[glitter-flow_1s_linear_infinite]"
                     />
                   </svg>
 
@@ -295,7 +296,7 @@ export default function TaskDoPage() {
                         <div className="relative flex flex-col items-center">
                           {isActive && (
                             <div className="mb-4 animate-in slide-in-from-bottom-2 fade-in duration-500">
-                              <Badge className="bg-white text-[#1f1610] font-black uppercase text-[8px] tracking-[0.2em] px-3 py-1 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.6)] border-2 border-primary/20">
+                              <Badge className="bg-white text-[#1f1610] font-black uppercase text-[10px] tracking-[0.2em] px-5 py-2 rounded-full shadow-[0_0_40px_rgba(255,255,255,0.8)] border-4 border-primary/20">
                                 ACTIVE HUB
                               </Badge>
                             </div>
@@ -308,29 +309,29 @@ export default function TaskDoPage() {
                               }
                             }}
                             className={cn(
-                              "rounded-[1.4rem] flex items-center justify-center transition-all duration-500 border-[6px] text-3xl font-black italic shadow-2xl relative group",
+                              "rounded-[1.8rem] flex items-center justify-center transition-all duration-500 border-[8px] text-4xl font-black italic shadow-2xl relative group",
                               isActive 
-                                ? "w-28 h-28 bg-primary border-white text-[#1f1610] scale-110 shadow-[0_0_120px_rgba(255,215,0,0.9)]" 
+                                ? "w-32 h-32 bg-primary border-white text-[#1f1610] scale-110 shadow-[0_0_120px_rgba(255,215,0,0.9)]" 
                                 : isPast 
-                                  ? "w-20 h-20 bg-primary/20 border-primary/40 text-primary" 
-                                  : "w-20 h-20 bg-white/5 border-white/10 text-white/40"
+                                  ? "w-24 h-24 bg-primary/20 border-primary/40 text-primary" 
+                                  : "w-24 h-24 bg-white/5 border-white/10 text-white/40"
                             )}
                           >
                             {isWeekEnd && isPast && !isClaimed ? (
-                               <Gift className="h-10 w-10 animate-bounce text-white" />
+                               <Gift className="h-12 w-12 animate-bounce text-white" />
                             ) : (
                                <span className="leading-none drop-shadow-lg">{d}</span>
                             )}
                             
-                            {isActive && <div className="absolute inset-1 rounded-[1.1rem] border-4 border-white/40 animate-pulse" />}
+                            {isActive && <div className="absolute inset-1 rounded-[1.4rem] border-4 border-white/40 animate-pulse" />}
                           </button>
                           
-                          <div className="mt-4">
+                          <div className="mt-6">
                             <span className={cn(
-                              "text-sm font-black uppercase tracking-[0.4em] italic px-4 py-1 rounded-full transition-all duration-500",
+                              "text-xs font-black uppercase tracking-[0.4em] italic px-6 py-2 rounded-full transition-all duration-500 shadow-lg border-2",
                               isActive 
-                                ? "text-[#1f1610] bg-primary shadow-[0_0_20px_rgba(255,215,0,0.5)] scale-110" 
-                                : "text-primary/60 border border-primary/10"
+                                ? "text-[#1f1610] bg-primary border-primary shadow-[0_0_30px_rgba(255,215,0,0.6)] scale-110" 
+                                : "text-primary/60 border-primary/10 bg-black/40"
                             )}>
                               HUB {d}
                             </span>
@@ -480,12 +481,12 @@ export default function TaskDoPage() {
 
       <style jsx global>{`
         @keyframes glitter-flow {
-          from { stroke-dashoffset: 90; }
+          from { stroke-dashoffset: 60; }
           to { stroke-dashoffset: 0; }
         }
         @keyframes twinkle {
           0%, 100% { opacity: 0.1; transform: scale(0.8); }
-          50% { opacity: 0.8; transform: scale(1.6); }
+          50% { opacity: 0.9; transform: scale(1.4); }
         }
         .animate-twinkle {
           animation: twinkle linear infinite;
