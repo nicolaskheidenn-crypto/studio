@@ -87,7 +87,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // MAXIMUM DENSITY: 1200+ dots for 80% coverage
+    // MAXIMUM DENSITY: 1200 dots for 80% background coverage
     const dots = Array.from({ length: 1200 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -103,9 +103,9 @@ export default function TaskDoPage() {
   const plexusLines = useMemo(() => {
     if (shiningDots.length === 0) return [];
     const lines = [];
-    const maxDist = 550; // Vast reach
+    const maxDist = 550; // Vast reach for dense coverage
     for (let i = 0; i < shiningDots.length; i++) {
-      // High-intensity neighbor search (scan up to 50 neighbors for deep mesh)
+      // Deep neighbor search for complex mesh
       for (let j = i + 1; j < Math.min(i + 55, shiningDots.length); j++) {
         const d1 = shiningDots[i];
         const d2 = shiningDots[j];
@@ -198,10 +198,10 @@ export default function TaskDoPage() {
            <p className="text-primary/40 text-[8px] font-black uppercase tracking-[0.8em]">Neural Infrastructure Grid</p>
         </header>
 
-        <div className="relative group p-1 border-4 border-primary/20 rounded-[3rem] bg-[#0d120d] shadow-2xl overflow-hidden">
-          <Card className="rounded-[2.5rem] border-[8px] border-primary/5 bg-[#0a140a] relative overflow-hidden h-[450px]">
+        <div className="relative group p-1 border-4 border-primary/20 rounded-[3.5rem] bg-[#0d120d] shadow-2xl overflow-hidden">
+          <Card className="rounded-[3rem] border-[8px] border-primary/5 bg-[#0a140a] relative overflow-hidden h-[450px]">
             
-            {/* High-Impact Terrain Layer */}
+            {/* Topological Background */}
             <div 
               className="absolute inset-0 bg-cover bg-center" 
               style={{ 
@@ -215,7 +215,7 @@ export default function TaskDoPage() {
               style={{ width: totalMapWidth }}
             />
 
-            {/* MAXIMUM-DENSITY PLEXUS WEB (80% Coverage) */}
+            {/* Neural Plexus SVG Layer (80% Coverage) */}
             <svg className="absolute inset-0 pointer-events-none" style={{ width: totalMapWidth, height: '100%' }}>
                {plexusLines.map(line => (
                  <line 
@@ -256,8 +256,10 @@ export default function TaskDoPage() {
                       </filter>
                     </defs>
                     
+                    {/* Base Roadmap Trace */}
                     <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.08)" strokeWidth="8" strokeLinecap="round" />
 
+                    {/* Sovereign Glitter Trace (Conquered Path) */}
                     <path 
                       d={completedTracePath} 
                       fill="none" 
@@ -294,6 +296,7 @@ export default function TaskDoPage() {
                         style={{ left: pos.x, top: pos.y }}
                       >
                         <div className="relative flex flex-col items-center">
+                          {/* Top Badge: ACTIVE HUB (Reference Match) */}
                           {isActive && (
                             <div className="mb-4 animate-in slide-in-from-bottom-2 fade-in duration-500">
                               <Badge className="bg-white text-[#1f1610] font-black uppercase text-[10px] tracking-[0.2em] px-5 py-2 rounded-full shadow-[0_0_60px_rgba(255,255,255,0.9)] border-4 border-primary/20">
@@ -302,6 +305,7 @@ export default function TaskDoPage() {
                             </div>
                           )}
 
+                          {/* Hub Bubble (Reference Match) */}
                           <button
                             onClick={() => {
                               if (isWeekEnd && isPast && reward && !isClaimed) {
@@ -309,24 +313,27 @@ export default function TaskDoPage() {
                               }
                             }}
                             className={cn(
-                              "rounded-[1.8rem] flex items-center justify-center transition-all duration-500 border-[8px] text-4xl font-black italic shadow-2xl relative group",
+                              "rounded-[1.8rem] flex items-center justify-center transition-all duration-500 border-[8px] font-black italic shadow-2xl relative group overflow-hidden",
                               isActive 
                                 ? "w-32 h-32 bg-primary border-white text-[#1f1610] scale-110 shadow-[0_0_120px_rgba(255,215,0,0.9)]" 
                                 : isPast 
                                   ? "w-24 h-24 bg-primary/20 border-primary/40 text-primary" 
-                                  : "w-24 h-24 bg-white/5 border-white/10 text-white/40"
+                                  : "w-24 h-24 bg-white/5 border-white/10 text-white/20"
                             )}
                           >
                             {isWeekEnd && isPast && !isClaimed ? (
                                <Gift className="h-12 w-12 animate-bounce text-white" />
                             ) : (
-                               <span className="leading-none drop-shadow-lg">{d}</span>
+                               <span className={cn(
+                                 "leading-none drop-shadow-lg",
+                                 isActive ? "text-6xl" : "text-5xl"
+                               )}>{d}</span>
                             )}
                             
                             {isActive && <div className="absolute inset-1 rounded-[1.4rem] border-4 border-white/40 animate-pulse" />}
                           </button>
                           
-                          {/* HARDENED TACTICAL LABELS */}
+                          {/* Bottom Tactical Labels (Reference Match) */}
                           <div className="mt-6 flex flex-col items-center gap-1">
                             <div className="bg-[#1f1610] px-3 py-1 rounded-sm border border-primary/30 shadow-md">
                                <span className="text-[7px] font-black uppercase tracking-[0.3em] text-primary italic">HUB</span>
@@ -348,6 +355,7 @@ export default function TaskDoPage() {
           </Card>
         </div>
 
+        {/* Task Console Header & Progress */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
            <div className="space-y-4">
               <Card className="rounded-[2.5rem] border-4 border-primary/10 bg-card/80 backdrop-blur-3xl p-8 shadow-2xl space-y-8">
@@ -384,6 +392,7 @@ export default function TaskDoPage() {
               </Card>
            </div>
 
+           {/* Daily Protocol Console */}
            <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between px-6">
                  <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase italic">HUB {currentTaskDay} PROTOCOL</h2>
@@ -430,6 +439,7 @@ export default function TaskDoPage() {
                 </div>
               )}
 
+              {/* Hub Conquered celebration Screen */}
               {showAward && (
                 <div className="p-12 rounded-[3.5rem] bg-primary text-[#1f1610] text-center animate-in zoom-in duration-500 shadow-[0_40px_80px_rgba(255,215,0,0.5)] relative border-[12px] border-white/20 overflow-hidden mt-6">
                   <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12"><Sparkles className="h-32 w-32" /></div>
@@ -450,6 +460,7 @@ export default function TaskDoPage() {
         </div>
       </main>
 
+      {/* Weekly Milestone Reward Modal */}
       <Dialog open={!!activeReward} onOpenChange={() => setActiveReward(null)}>
         <DialogContent className="rounded-[4rem] border-[15px] border-primary/20 bg-mocha-cream p-12 max-w-2xl text-center shadow-[0_100px_100px_rgba(0,0,0,0.6)] overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.2),transparent)] pointer-events-none" />
