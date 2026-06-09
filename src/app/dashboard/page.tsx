@@ -377,6 +377,7 @@ export default function DashboardPage() {
           </div>
 
           <ShadcnContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {/* HUB CONTENT PRESERVED */}
             <div className="lg:col-span-2 space-y-10">
               <Card className="rounded-[4rem] border-[8px] border-primary/5 shadow-2xl p-12 bg-card/40 space-y-10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -604,6 +605,7 @@ export default function DashboardPage() {
           </ShadcnContent>
           
           <ShadcnContent value="shooppy" className="space-y-16">
+             {/* SHOPPY CONTENT PRESERVED */}
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Shooppy Marketplace</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Official External Digital Storefront</p>
@@ -638,6 +640,7 @@ export default function DashboardPage() {
           </ShadcnContent>
 
           <ShadcnContent value="webin" className="space-y-16">
+             {/* WEBIN CONTENT PRESERVED */}
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Webin Portals</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Authorized Training & Strategy Masterclasses</p>
@@ -699,22 +702,22 @@ export default function DashboardPage() {
              </div>
 
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-                <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card p-12 shadow-2xl space-y-10">
-                   <div className="space-y-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div className="space-y-3">
-                            <Label className="text-primary font-black uppercase tracking-widest text-[10px]">RESOURCE TITLE</Label>
+                <Card className="rounded-[3rem] border-8 border-primary/10 bg-card p-8 shadow-2xl space-y-6">
+                   <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="space-y-2">
+                            <Label className="text-primary font-black uppercase tracking-widest text-[9px]">RESOURCE TITLE</Label>
                             <Input 
                                placeholder="Resource Title" 
                                value={resTitle} 
                                onChange={e => setResTitle(e.target.value)} 
-                               className="h-18 rounded-2xl bg-background/50 border-4 border-primary/10 text-xl font-black px-8 focus:border-primary shadow-inner" 
+                               className="h-14 rounded-2xl bg-background/50 border-4 border-primary/10 text-lg font-black px-6 focus:border-primary shadow-inner" 
                             />
                          </div>
-                         <div className="space-y-3">
-                            <Label className="text-primary font-black uppercase tracking-widest text-[10px]">CATEGORY (SEO)</Label>
+                         <div className="space-y-2">
+                            <Label className="text-primary font-black uppercase tracking-widest text-[9px]">CATEGORY (SEO)</Label>
                             <select 
-                               className="w-full h-18 bg-background/50 border-4 border-primary/10 rounded-2xl px-8 font-black uppercase text-foreground text-sm focus:border-primary" 
+                               className="w-full h-14 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 font-black uppercase text-foreground text-xs focus:border-primary" 
                                value={resCategory} 
                                onChange={e => setResCategory(e.target.value)}
                             >
@@ -723,10 +726,10 @@ export default function DashboardPage() {
                          </div>
                       </div>
                       
-                      <div className="space-y-3">
-                         <Label className="text-primary font-black uppercase tracking-widest text-[10px]">LABORATORY</Label>
+                      <div className="space-y-2">
+                         <Label className="text-primary font-black uppercase tracking-widest text-[9px]">LABORATORY</Label>
                          <select 
-                            className="w-full h-18 bg-background/50 border-4 border-primary/10 rounded-2xl px-8 font-black uppercase text-foreground text-sm focus:border-primary" 
+                            className="w-full h-14 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 font-black uppercase text-foreground text-xs focus:border-primary" 
                             value={resType} 
                             onChange={e => setResType(e.target.value as any)}
                          >
@@ -735,19 +738,19 @@ export default function DashboardPage() {
                          </select>
                       </div>
 
-                      <div className="space-y-3">
-                         <Label className="text-primary font-black uppercase tracking-widest text-[10px]">STRATEGIC CONTENT</Label>
+                      <div className="space-y-2">
+                         <Label className="text-primary font-black uppercase tracking-widest text-[9px]">STRATEGIC CONTENT</Label>
                          <Textarea 
                             placeholder='Share your prompts or execution tips...' 
                             value={resContent} 
                             onChange={e => setResContent(e.target.value)} 
-                            className="min-h-[220px] bg-background/50 border-4 border-primary/10 rounded-[3rem] p-10 text-lg font-bold shadow-inner leading-relaxed" 
+                            className="min-h-[180px] bg-background/50 border-4 border-primary/10 rounded-[2rem] p-8 text-base font-bold shadow-inner leading-relaxed" 
                          />
                       </div>
 
                       <Button 
                         onClick={handleAddResource} 
-                        className="w-full h-24 rounded-full bg-primary text-background font-black uppercase text-2xl shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all tracking-tighter"
+                        className="w-full h-18 rounded-full bg-primary text-background font-black uppercase text-xl shadow-[0_20px_40px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all tracking-tighter"
                       >
                         SHARE KNOWLEDGE
                       </Button>
@@ -758,7 +761,7 @@ export default function DashboardPage() {
                    <div className="flex flex-col gap-6 px-4">
                       <div className="flex items-center gap-4">
                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Collective Strategist Vault: {resType.replace('_', ' ')}</p>
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Collective Vault: {resType.replace('_', ' ')}</p>
                       </div>
                       
                       <div className="flex flex-wrap gap-2">
@@ -847,6 +850,7 @@ export default function DashboardPage() {
           </ShadcnContent>
 
           <ShadcnContent value="faq" className="max-w-4xl mx-auto space-y-12">
+             {/* FAQ CONTENT PRESERVED */}
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Protocol Inquiry</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.5em]">Frequently Asked Strategic Questions</p>
