@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Lock, ArrowRight, Loader2, Coffee, Key } from 'lucide-react';
+import { Lock, ArrowRight, Loader2, Coffee, Key, ShieldCheck } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useUser } from '@/firebase';
 
@@ -121,16 +121,32 @@ export default function EntryGate() {
                <div className="absolute inset-0 bg-primary/20 blur-2xl group-hover:blur-3xl transition-all rounded-full" />
                <Key className="h-24 w-24 text-[#FFD700] relative z-10 animate-pulse" />
             </div>
-            <div className="space-y-6">
-              <h2 className="text-6xl md:text-7xl font-headline font-black tracking-tighter text-[#1f1610] uppercase italic leading-none animate-sovereign-glitch">
-                VERIFY HOST
-              </h2>
-              <div className="flex items-center justify-center gap-4">
-                <div className="h-px w-10 bg-[#1f1610]/20" />
+            
+            <div className="space-y-6 relative">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <ShieldCheck className="h-4 w-4 text-[#1f1610] opacity-30" />
+                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#1f1610]/40">Authorization Portal</span>
+              </div>
+              
+              {/* Redesigned "Verify Host" Header with Cinematic Glitch */}
+              <div className="relative inline-block">
+                <h2 className="text-6xl md:text-7xl font-headline font-black tracking-tighter text-[#1f1610] uppercase italic leading-none relative z-10 animate-sovereign-glitch">
+                  VERIFY HOST
+                </h2>
+                <h2 className="text-6xl md:text-7xl font-headline font-black tracking-tighter text-primary uppercase italic leading-none absolute inset-0 opacity-40 blur-[1px] animate-glitch-layer-1 pointer-events-none">
+                  VERIFY HOST
+                </h2>
+                <h2 className="text-6xl md:text-7xl font-headline font-black tracking-tighter text-white uppercase italic leading-none absolute inset-0 opacity-40 blur-[1px] animate-glitch-layer-2 pointer-events-none">
+                  VERIFY HOST
+                </h2>
+              </div>
+
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <div className="h-px w-12 bg-primary" />
                 <p className="text-[#1f1610] text-[10px] font-black leading-relaxed uppercase tracking-[0.6em] opacity-80">
-                  ENTER PROTOCOL KEY
+                  SECURE PROTOCOL
                 </p>
-                <div className="h-px w-10 bg-[#1f1610]/20" />
+                <div className="h-px w-12 bg-primary" />
               </div>
             </div>
           </div>
@@ -159,21 +175,47 @@ export default function EntryGate() {
         </div>
 
         <p className="text-center text-[10px] text-[#FFD700]/30 font-black uppercase tracking-[0.8em]">
-          NICO DIGITAL ROOT SECURITY · VER: 2.0.4
+          NICO DIGITAL ROOT SECURITY · VER: 2.0.5
         </p>
       </div>
 
       <style jsx global>{`
         @keyframes sovereign-glitch {
-          0% { transform: translate(0); text-shadow: none; }
-          20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #FFD700; }
-          40% { transform: translate(2px, -2px); text-shadow: -2px 0 #fff; }
-          60% { transform: translate(-2px, -2px); text-shadow: 2px 0 #FFD700; }
-          80% { transform: translate(2px, 2px); text-shadow: -2px 0 #fff; }
-          100% { transform: translate(0); text-shadow: none; }
+          0% { transform: translate(0); }
+          2% { transform: translate(-2px, 1px); }
+          4% { transform: translate(2px, -1px); }
+          6% { transform: translate(0); }
+          100% { transform: translate(0); }
         }
+        
+        @keyframes glitch-layer-1 {
+          0% { transform: translate(0); clip-path: inset(40% 0 61% 0); }
+          20% { transform: translate(-3px, 2px); clip-path: inset(92% 0 1% 0); }
+          40% { transform: translate(3px, -2px); clip-path: inset(10% 0 88% 0); }
+          60% { transform: translate(-3px, -2px); clip-path: inset(53% 0 21% 0); }
+          80% { transform: translate(3px, 2px); clip-path: inset(80% 0 5% 0); }
+          100% { transform: translate(0); clip-path: inset(40% 0 61% 0); }
+        }
+
+        @keyframes glitch-layer-2 {
+          0% { transform: translate(0); clip-path: inset(25% 0 58% 0); }
+          20% { transform: translate(3px, -2px); clip-path: inset(86% 0 11% 0); }
+          40% { transform: translate(-3px, 2px); clip-path: inset(15% 0 73% 0); }
+          60% { transform: translate(3px, 2px); clip-path: inset(48% 0 34% 0); }
+          80% { transform: translate(-3px, -2px); clip-path: inset(62% 0 35% 0); }
+          100% { transform: translate(0); clip-path: inset(25% 0 58% 0); }
+        }
+
         .animate-sovereign-glitch {
-          animation: sovereign-glitch 4s infinite linear alternate-reverse;
+          animation: sovereign-glitch 5s infinite;
+        }
+        
+        .animate-glitch-layer-1 {
+          animation: glitch-layer-1 4s infinite linear alternate-reverse;
+        }
+        
+        .animate-glitch-layer-2 {
+          animation: glitch-layer-2 4s infinite linear alternate;
         }
       `}</style>
     </div>
