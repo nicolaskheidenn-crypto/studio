@@ -25,7 +25,7 @@ const MAP_HEIGHT = 450;
 const VERTICAL_SCATTER = [0, 80, -60, 100, -80, 120, -100, 50, -60];
 
 const DEFAULT_PROFILE: UserProfile = {
-  nickname: 'Succemazing',
+  nickname: 'Strategist',
   bio: '',
   avatarUrl: '',
   coverPhotoUrl: '',

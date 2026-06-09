@@ -113,6 +113,12 @@ export default function DashboardPage() {
   const [selectedPostForInsights, setSelectedPostForInsights] = useState<any>(null);
   const [insightInput, setInsightInput] = useState("");
 
+  // Live tracking for the dialog to show updates immediately
+  const currentLivePost = useMemo(() => {
+    if (!selectedPostForInsights) return null;
+    return sharedActivity.find((p: any) => p.id === selectedPostForInsights.id);
+  }, [sharedActivity, selectedPostForInsights]);
+
   const [resTitle, setResTitle] = useState("");
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
   const [resCategory, setResCategory] = useState("General");
@@ -331,7 +337,7 @@ export default function DashboardPage() {
             <div className="flex flex-col">
               <div className="flex items-center justify-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
-                <span className="font-black text-3xl tracking-tighter text-foreground –none">{streak}</span>
+                <span className="font-black text-3xl tracking-tighter text-foreground leading-none">{streak}</span>
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary text-center">Current Streak</span>
             </div>
@@ -924,13 +930,13 @@ export default function DashboardPage() {
              
              <ScrollArea className="flex-1 pr-4">
                 <div className="space-y-6">
-                   {selectedPostForInsights?.comments?.length === 0 ? (
+                   {!currentLivePost || currentLivePost.comments?.length === 0 ? (
                      <div className="py-20 text-center space-y-4 opacity-20">
                         <MessageSquare className="h-12 w-12 mx-auto" />
                         <p className="text-xs font-black uppercase tracking-widest">No insights recorded yet.</p>
                      </div>
                    ) : (
-                     [...(selectedPostForInsights?.comments || [])].reverse().map((comment: any) => (
+                     [...(currentLivePost.comments || [])].reverse().map((comment: any) => (
                        <div key={comment.id} className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 flex justify-between items-start group shadow-sm animate-in fade-in slide-in-from-bottom-4">
                           <div className="flex items-center gap-4 mr-6">
                             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10">
@@ -944,7 +950,7 @@ export default function DashboardPage() {
                           <div className="flex-1">
                              <div className="flex items-center gap-4 mb-2">
                                 <p className="font-black text-xs uppercase text-primary bg-primary/10 px-4 py-1 rounded-full">@{comment.nickname || 'Strategist'}</p>
-                                <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                                <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{comment.timestamp ? new Date(comment.timestamp).toLocaleTimeString() : 'Recent'}</span>
                              </div>
                              <p className="text-lg font-bold text-foreground/80 leading-relaxed italic">{comment.text}</p>
                           </div>

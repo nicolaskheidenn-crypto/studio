@@ -43,7 +43,7 @@ export default function HomePage() {
                   Fail-Proof Your <span className="text-primary">Strategy</span> With a Touch of <span className="text-primary italic">Gold</span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                  Welcome, Succemazing. Join our community of high-earning strategists. We provide the tools, you bring the ambition.
+                  Welcome, Strategist. Join our community of high-earning strategists. We provide the tools, you bring the ambition.
                 </p>
                 <div className="flex flex-wrap items-center gap-4">
                   <Button size="lg" className="rounded-full px-12 py-8 text-2xl shadow-2xl shadow-primary/20 bg-primary hover:bg-white text-[#1f1610] font-black uppercase tracking-tighter" asChild>
