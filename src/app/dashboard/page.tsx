@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video, Tag, Filter, Search
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -50,10 +50,17 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-/**
- * YouTube ID Parser
- * Extract ID for thumbnail fetching.
- */
+const RESOURCE_CATEGORIES = [
+  "Marketing",
+  "Sales",
+  "Website",
+  "Copywriting",
+  "Strategy",
+  "Social Media",
+  "Automation",
+  "General"
+];
+
 function getYoutubeId(url: string) {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
@@ -79,7 +86,6 @@ export default function DashboardPage() {
     claimDaily, addPoints, trackVisit, incrementPrompt, incrementTrick, buyProduct
   } = useUserStore();
   
-  // Firestore Collections (Global)
   const activityQuery = useMemo(() => query(collection(db, 'activityWall'), orderBy('timestamp', 'desc')), [db]);
   const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
   const resourcesQuery = useMemo(() => query(collection(db, 'resources'), orderBy('timestamp', 'desc')), [db]);
@@ -98,17 +104,17 @@ export default function DashboardPage() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Activity State
   const [postText, setPostText] = useState("");
   const [postImages, setPostImages] = useState<string[]>([]);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Resource State
   const [resTitle, setResTitle] = useState("");
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
+  const [resCategory, setResCategory] = useState("General");
   const [resContent, setResContent] = useState("");
+  const [resourceFilter, setResourceFilter] = useState("All");
 
   useEffect(() => {
     setIsHydrated(true);
@@ -264,6 +270,7 @@ export default function DashboardPage() {
       title: resTitle,
       description: "",
       type: resType,
+      category: resCategory,
       content: resContent,
       userId: uid,
       nickname: nickname,
@@ -275,7 +282,7 @@ export default function DashboardPage() {
       .then(() => {
         if (resType === 'AI_Prompt') incrementPrompt(uid);
         else if (resType === 'T&Triks') incrementTrick(uid);
-        setResTitle(""); setResContent("");
+        setResTitle(""); setResContent(""); setResCategory("General");
         toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
       })
       .catch(async () => {
@@ -287,6 +294,14 @@ export default function DashboardPage() {
         errorEmitter.emit('permission-error', permissionError);
       });
   };
+
+  const filteredResources = useMemo(() => {
+    let base = sharedResources.filter(r => r.type === resType);
+    if (resourceFilter !== "All") {
+      base = base.filter(r => r.category === resourceFilter);
+    }
+    return base;
+  }, [sharedResources, resType, resourceFilter]);
 
   const availableInHub = shooppyProducts.filter(p => p.placement === 'Hub' && !purchasedProductIds.includes(p.id));
   const ownedAssets = shooppyProducts.filter(p => purchasedProductIds.includes(p.id));
@@ -686,14 +701,26 @@ export default function DashboardPage() {
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
                 <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card p-12 shadow-2xl space-y-10">
                    <div className="space-y-8">
-                      <div className="space-y-3">
-                         <Label className="text-primary font-black uppercase tracking-widest text-[10px]">RESOURCE TITLE</Label>
-                         <Input 
-                            placeholder="Resource Title" 
-                            value={resTitle} 
-                            onChange={e => setResTitle(e.target.value)} 
-                            className="h-18 rounded-2xl bg-background/50 border-4 border-primary/10 text-xl font-black px-8 focus:border-primary shadow-inner" 
-                         />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="space-y-3">
+                            <Label className="text-primary font-black uppercase tracking-widest text-[10px]">RESOURCE TITLE</Label>
+                            <Input 
+                               placeholder="Resource Title" 
+                               value={resTitle} 
+                               onChange={e => setResTitle(e.target.value)} 
+                               className="h-18 rounded-2xl bg-background/50 border-4 border-primary/10 text-xl font-black px-8 focus:border-primary shadow-inner" 
+                            />
+                         </div>
+                         <div className="space-y-3">
+                            <Label className="text-primary font-black uppercase tracking-widest text-[10px]">CATEGORY (SEO)</Label>
+                            <select 
+                               className="w-full h-18 bg-background/50 border-4 border-primary/10 rounded-2xl px-8 font-black uppercase text-foreground text-sm focus:border-primary" 
+                               value={resCategory} 
+                               onChange={e => setResCategory(e.target.value)}
+                            >
+                               {RESOURCE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat.toUpperCase()}</option>)}
+                            </select>
+                         </div>
                       </div>
                       
                       <div className="space-y-3">
@@ -728,23 +755,58 @@ export default function DashboardPage() {
                 </Card>
 
                 <div className="space-y-8">
-                   <div className="flex items-center gap-4 px-4">
-                      <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Collective Strategist Vault: {resType.replace('_', ' ')}</p>
+                   <div className="flex flex-col gap-6 px-4">
+                      <div className="flex items-center gap-4">
+                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Collective Strategist Vault: {resType.replace('_', ' ')}</p>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                         <Button 
+                           variant="ghost" 
+                           onClick={() => setResourceFilter("All")}
+                           className={cn(
+                             "h-10 px-6 rounded-full font-black uppercase text-[10px] tracking-widest border-2 transition-all",
+                             resourceFilter === "All" ? "bg-primary text-background border-primary" : "border-primary/10 text-primary/40 hover:border-primary/40"
+                           )}
+                         >
+                           ALL PROTOCOLS
+                         </Button>
+                         {RESOURCE_CATEGORIES.map(cat => (
+                           <Button 
+                             key={cat}
+                             variant="ghost" 
+                             onClick={() => setResourceFilter(cat)}
+                             className={cn(
+                               "h-10 px-6 rounded-full font-black uppercase text-[10px] tracking-widest border-2 transition-all",
+                               resourceFilter === cat ? "bg-primary text-background border-primary" : "border-primary/10 text-primary/40 hover:border-primary/40"
+                             )}
+                           >
+                             {cat.toUpperCase()}
+                           </Button>
+                         ))}
+                      </div>
                    </div>
 
                    <ScrollArea className="h-[750px] pr-6">
                       <div className="space-y-8">
-                         {sharedResources.filter(r => r.type === resType).length === 0 ? (
+                         {filteredResources.length === 0 ? (
                            <div className="p-20 border-4 border-dashed border-primary/10 rounded-[4rem] text-center bg-card/40 space-y-6">
                               <BookOpen className="h-16 w-16 mx-auto text-primary/10" />
                               <p className="text-xl font-black uppercase tracking-widest text-primary/20 italic">Archive Empty.<br/>Awaiting Injection.</p>
                            </div>
                          ) : (
-                           sharedResources.filter(r => r.type === resType).map((r: any) => (
+                           filteredResources.map((r: any) => (
                              <Card key={r.id} className="rounded-[3.5rem] border-4 border-primary/10 bg-card shadow-2xl p-10 space-y-6 group hover:border-primary/30 transition-all">
                                 <div className="flex justify-between items-start">
-                                   <div className="space-y-1">
+                                   <div className="space-y-3">
+                                      <div className="flex items-center gap-3">
+                                         <Badge className="bg-primary text-background border-none text-[8px] font-black uppercase px-4 py-1 rounded-full flex items-center gap-2">
+                                           <Tag className="h-2.5 w-2.5" />
+                                           {r.category || 'GENERAL'}
+                                         </Badge>
+                                         <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">Shared: {r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : 'Live Sync'}</span>
+                                      </div>
                                       <h4 className="text-3xl font-black text-foreground uppercase italic tracking-tight">{r.title}</h4>
                                       <div className="flex items-center gap-3">
                                          <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1 rounded-full flex items-center gap-2 overflow-hidden">
@@ -755,7 +817,6 @@ export default function DashboardPage() {
                                            )}
                                            @{r.nickname}
                                          </Badge>
-                                         <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">Shared: {r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : 'Live Sync'}</span>
                                       </div>
                                    </div>
                                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center border-2 border-primary/10">

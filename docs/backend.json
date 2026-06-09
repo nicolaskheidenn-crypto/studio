@@ -51,6 +51,7 @@
       "properties": {
         "id": { "type": "string" },
         "type": { "type": "string", "enum": ["AI_Prompt", "T&Triks", "WeBin"] },
+        "category": { "type": "string", "enum": ["Marketing", "Sales", "Website", "Copywriting", "Strategy", "General"] },
         "title": { "type": "string" },
         "description": { "type": "string" },
         "content": { "type": "string" },
