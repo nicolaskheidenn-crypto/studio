@@ -89,13 +89,12 @@ export default function EntryGate() {
           </div>
 
           <div className="pt-12">
-            <Button
-              size="lg"
-              className="rounded-full px-20 h-24 md:h-32 text-3xl md:text-5xl font-black bg-[#fdfaf6] text-[#1f1610] hover:bg-[#FFD700] hover:text-[#1f1610] transition-all transform hover:scale-110 shadow-[0_40px_80px_rgba(0,0,0,0.8)] active:scale-95 mx-auto uppercase group border-8 border-[#FFD700]/20"
+            <button
+              className="rounded-full px-20 h-24 md:h-32 text-3xl md:text-5xl font-black bg-[#fdfaf6] text-[#1f1610] hover:bg-[#FFD700] hover:text-[#1f1610] transition-all transform hover:scale-110 shadow-[0_40px_80px_rgba(0,0,0,0.8)] active:scale-95 mx-auto uppercase group border-8 border-[#FFD700]/20 flex items-center justify-center"
               onClick={handleProceed}
             >
               ARE YOU READY? <ArrowRight className="ml-8 h-12 w-12 text-[#1f1610] group-hover:translate-x-4 transition-transform" />
-            </Button>
+            </button>
           </div>
 
           <p className="text-[12px] text-[#FFD700]/40 uppercase tracking-[1em] font-black pt-20">
@@ -116,46 +115,67 @@ export default function EntryGate() {
       </div>
 
       <div className="w-full max-w-xl space-y-12 animate-in slide-in-from-bottom-20 duration-1000 relative z-10">
-        <div className="bg-mocha-cream p-12 md:p-20 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-8 border-[#FFD700]/20 space-y-12 text-center">
-          <div className="space-y-8">
-            <div className="w-fit mx-auto">
-               <Key className="h-20 w-20 text-[#FFD700]" />
+        <div className="bg-mocha-cream p-12 md:p-20 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-8 border-[#FFD700]/20 space-y-14 text-center">
+          <div className="space-y-10">
+            <div className="w-fit mx-auto relative group">
+               <div className="absolute inset-0 bg-primary/20 blur-2xl group-hover:blur-3xl transition-all rounded-full" />
+               <Key className="h-24 w-24 text-[#FFD700] relative z-10 animate-pulse" />
             </div>
-            <div className="space-y-4">
-              <h2 className="text-5xl font-headline font-black tracking-tight text-[#1f1610] uppercase italic">VERIFY HOST</h2>
-              <p className="text-[#FFD700] text-sm font-black px-6 leading-relaxed uppercase tracking-[0.5em]">
-                ENTER PROTOCOL KEY
-              </p>
+            <div className="space-y-6">
+              <h2 className="text-6xl md:text-7xl font-headline font-black tracking-tighter text-[#1f1610] uppercase italic leading-none animate-sovereign-glitch">
+                VERIFY HOST
+              </h2>
+              <div className="flex items-center justify-center gap-4">
+                <div className="h-px w-10 bg-[#1f1610]/20" />
+                <p className="text-[#1f1610] text-[10px] font-black leading-relaxed uppercase tracking-[0.6em] opacity-80">
+                  ENTER PROTOCOL KEY
+                </p>
+                <div className="h-px w-10 bg-[#1f1610]/20" />
+              </div>
             </div>
           </div>
 
           <form onSubmit={verifyKey} className="space-y-10">
             <div className="space-y-6">
-              <Label className="text-[#1f1610]/60 font-black text-xs">PROTOCOL KEY</Label>
+              <Label className="text-[#1f1610] font-black text-[10px] tracking-[0.4em] uppercase">PROTOCOL KEY</Label>
               <Input
                 type="text"
                 placeholder="Protocol Key"
-                className="bg-[#3d332d] border-4 border-[#FFD700]/30 h-24 text-center text-3xl font-mono tracking-[0.2em] rounded-[2.5rem] focus:border-[#FFD700] text-white shadow-inner font-black placeholder:text-white/20"
+                className="bg-[#3d332d] border-4 border-[#FFD700]/40 h-24 text-center text-3xl font-mono tracking-[0.2em] rounded-[2.5rem] focus:border-[#FFD700] text-white shadow-2xl font-black placeholder:text-white/10"
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
                 required
                 autoFocus
               />
             </div>
-            <Button
+            <button
               type="submit"
-              className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] transition-all active:scale-95 font-black text-3xl shadow-[0_30px_60px_rgba(255,215,0,0.2)] uppercase tracking-tighter"
+              className="w-full h-24 rounded-full bg-[#FFD700] text-[#1f1610] hover:bg-[#1f1610] hover:text-[#FFD700] transition-all active:scale-95 font-black text-3xl shadow-[0_30px_60px_rgba(255,215,0,0.3)] uppercase tracking-tighter border-4 border-transparent hover:border-[#FFD700]/20 flex items-center justify-center"
               disabled={isVerifying}
             >
               {isVerifying ? <Loader2 className="animate-spin h-10 w-10 text-[#1f1610]" /> : <span className="text-[#1f1610]">AUTHENTICATE</span>}
-            </Button>
+            </button>
           </form>
         </div>
 
         <p className="text-center text-[10px] text-[#FFD700]/30 font-black uppercase tracking-[0.8em]">
-          NICO DIGITAL ROOT SECURITY
+          NICO DIGITAL ROOT SECURITY · VER: 2.0.4
         </p>
       </div>
+
+      <style jsx global>{`
+        @keyframes sovereign-glitch {
+          0% { transform: translate(0); text-shadow: none; }
+          20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #FFD700; }
+          40% { transform: translate(2px, -2px); text-shadow: -2px 0 #fff; }
+          60% { transform: translate(-2px, -2px); text-shadow: 2px 0 #FFD700; }
+          80% { transform: translate(2px, 2px); text-shadow: -2px 0 #fff; }
+          100% { transform: translate(0); text-shadow: none; }
+        }
+        .animate-sovereign-glitch {
+          animation: sovereign-glitch 4s infinite linear alternate-reverse;
+        }
+      `}</style>
     </div>
   );
 }
