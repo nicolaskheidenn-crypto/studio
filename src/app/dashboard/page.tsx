@@ -79,7 +79,7 @@ export default function DashboardPage() {
   }, [profiles, uid]);
   
   const { 
-    points = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = [], avatarUrl = ''
+    points = 0, level = 1, streak = 0, nickname = 'Succemazing', lastLogin = null, purchasedProductIds = [], avatarUrl = ''
   } = profile;
 
   const {
@@ -377,7 +377,6 @@ export default function DashboardPage() {
           </div>
 
           <ShadcnContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            {/* HUB CONTENT PRESERVED */}
             <div className="lg:col-span-2 space-y-10">
               <Card className="rounded-[4rem] border-[8px] border-primary/5 shadow-2xl p-12 bg-card/40 space-y-10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -497,7 +496,7 @@ export default function DashboardPage() {
                             onClick={() => handleHeartPost(post.id)}
                           >
                             <Heart className="h-7 w-7 mr-4 fill-primary" /> 
-                            {post.hearts || 0} RECOGNITION
+                            {post.hearts || 0} SUCCEMAZING
                           </Button>
                           <Button variant="ghost" className="text-[11px] font-black uppercase tracking-[0.3em] text-primary/30 hover:text-primary transition-all p-0">
                             <MessageSquare className="h-7 w-7 mr-4" /> 
@@ -508,8 +507,8 @@ export default function DashboardPage() {
                        <div className="space-y-6 pt-10 bg-primary/5 rounded-[3.5rem] p-10 shadow-inner">
                           <div className="flex gap-6">
                              <Input 
-                               placeholder="Record strategic insight..." 
-                               className="h-16 rounded-[2rem] bg-background/50 border-4 border-primary/10 text-base font-black px-8 focus:border-primary shadow-inner"
+                               placeholder="RECORD INSIGHT..." 
+                               className="h-16 rounded-[2rem] bg-background/50 border-4 border-primary/10 text-base font-black px-8 focus:border-primary shadow-inner uppercase tracking-widest"
                                value={commentInputs[post.id] || ""}
                                onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
                                onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
@@ -517,19 +516,30 @@ export default function DashboardPage() {
                              <Button onClick={() => handleAddComment(post.id)} className="h-16 w-16 rounded-full bg-primary text-background shadow-xl hover:scale-110 transition-transform"><Send className="h-6 w-6" /></Button>
                           </div>
                           
-                          <div className="space-y-6">
-                             {post.comments?.map((comment: any) => (
-                               <div key={comment.id} className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 flex justify-between items-start group shadow-sm">
-                                  <div className="flex-1">
-                                     <div className="flex items-center gap-4 mb-2">
-                                        <p className="font-black text-xs uppercase text-primary bg-primary/10 px-4 py-1 rounded-full">@{comment.nickname}</p>
-                                        <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{new Date(comment.timestamp).toLocaleTimeString()}</span>
-                                     </div>
-                                     <p className="text-lg font-bold text-foreground/80 leading-relaxed italic">{comment.text}</p>
-                                  </div>
-                               </div>
-                             ))}
-                          </div>
+                          <ScrollArea className="max-h-[500px]">
+                            <div className="space-y-6 pr-4">
+                               {post.comments?.map((comment: any) => (
+                                 <div key={comment.id} className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 flex justify-between items-start group shadow-sm animate-in fade-in slide-in-from-left-4">
+                                    <div className="flex items-center gap-4 mr-6">
+                                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10">
+                                         {comment.avatarUrl ? (
+                                           <img src={comment.avatarUrl} className="w-full h-full object-cover" alt="" />
+                                         ) : (
+                                           <User className="h-5 w-5 text-primary" />
+                                         )}
+                                      </div>
+                                    </div>
+                                    <div className="flex-1">
+                                       <div className="flex items-center gap-4 mb-2">
+                                          <p className="font-black text-xs uppercase text-primary bg-primary/10 px-4 py-1 rounded-full">@{comment.nickname || 'Strategist'}</p>
+                                          <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                                       </div>
+                                       <p className="text-lg font-bold text-foreground/80 leading-relaxed italic">{comment.text}</p>
+                                    </div>
+                                 </div>
+                               ))}
+                            </div>
+                          </ScrollArea>
                        </div>
                     </CardContent>
                   </Card>
@@ -605,7 +615,6 @@ export default function DashboardPage() {
           </ShadcnContent>
           
           <ShadcnContent value="shooppy" className="space-y-16">
-             {/* SHOPPY CONTENT PRESERVED */}
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Shooppy Marketplace</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Official External Digital Storefront</p>
@@ -640,7 +649,6 @@ export default function DashboardPage() {
           </ShadcnContent>
 
           <ShadcnContent value="webin" className="space-y-16">
-             {/* WEBIN CONTENT PRESERVED */}
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Webin Portals</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Authorized Training & Strategy Masterclasses</p>
@@ -818,7 +826,7 @@ export default function DashboardPage() {
                                            ) : (
                                               <User className="h-3 w-3" />
                                            )}
-                                           @{r.nickname}
+                                           @{r.nickname || 'Strategist'}
                                          </Badge>
                                       </div>
                                    </div>
@@ -850,7 +858,6 @@ export default function DashboardPage() {
           </ShadcnContent>
 
           <ShadcnContent value="faq" className="max-w-4xl mx-auto space-y-12">
-             {/* FAQ CONTENT PRESERVED */}
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Protocol Inquiry</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.5em]">Frequently Asked Strategic Questions</p>
