@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -50,6 +50,16 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
+/**
+ * YouTube ID Parser
+ * Extract ID for thumbnail fetching.
+ */
+function getYoutubeId(url: string) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
 export default function DashboardPage() {
   const { user } = useUser();
   const uid = user?.uid;
@@ -73,7 +83,7 @@ export default function DashboardPage() {
   const activityQuery = useMemo(() => query(collection(db, 'activityWall'), orderBy('timestamp', 'desc')), [db]);
   const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
   const resourcesQuery = useMemo(() => query(collection(db, 'resources'), orderBy('timestamp', 'desc')), [db]);
-  const productsQuery = useMemo(() => collection(db, 'shooppyProducts'), [db]);
+  const productsQuery = useMemo(() => query(collection(db, 'shooppyProducts'), orderBy('sortOrder', 'asc')), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
 
   const { data: sharedActivity = [] } = useCollection(activityQuery);
@@ -97,7 +107,7 @@ export default function DashboardPage() {
 
   // Resource State
   const [resTitle, setResTitle] = useState("");
-  const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'| 'WeBin'>('AI_Prompt');
+  const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
   const [resContent, setResContent] = useState("");
 
   useEffect(() => {
@@ -180,7 +190,6 @@ export default function DashboardPage() {
       comments: []
     };
     
-    // Non-blocking mutation protocol
     addDoc(collection(db, 'activityWall'), data)
       .then(() => {
         addPoints(uid, 20);
@@ -197,7 +206,6 @@ export default function DashboardPage() {
         errorEmitter.emit('permission-error', permissionError);
       })
       .finally(() => {
-        // ALWAYS clear loading state
         setIsPosting(false);
       });
   };
@@ -283,6 +291,7 @@ export default function DashboardPage() {
   const availableInHub = shooppyProducts.filter(p => p.placement === 'Hub' && !purchasedProductIds.includes(p.id));
   const ownedAssets = shooppyProducts.filter(p => purchasedProductIds.includes(p.id));
   const marketplaceAssets = shooppyProducts.filter(p => p.placement === 'Marketplace');
+  const webinResources = sharedResources.filter(r => r.type === 'WeBin');
 
   if (!isHydrated) return null;
 
@@ -296,18 +305,18 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-10">
             <div className="flex flex-col">
-              <div className="flex items-center gap-3 text-primary">
+              <div className="flex items-center justify-center gap-3 text-primary">
                 <Zap className="h-7 w-7 fill-primary" />
-                <span className="font-black text-3xl tracking-tighter text-foreground">{points}</span>
+                <span className="font-black text-3xl tracking-tighter text-foreground leading-none">{points}</span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Points Vault</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary text-center">Points Vault</span>
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-3 text-orange-500">
+              <div className="flex items-center justify-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
-                <span className="font-black text-3xl tracking-tighter text-foreground">{streak}</span>
+                <span className="font-black text-3xl tracking-tighter text-foreground leading-none">{streak}</span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Current Streak</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary text-center">Current Streak</span>
             </div>
           </div>
           
@@ -336,6 +345,7 @@ export default function DashboardPage() {
             <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
               <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
               <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
+              <ShadcnTrigger value="webin" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> Webin</ShadcnTrigger>
               <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
               <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
             </ShadcnList>
@@ -353,7 +363,6 @@ export default function DashboardPage() {
 
           <ShadcnContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
-              {/* Sovereign Win Dispatcher Card */}
               <Card className="rounded-[4rem] border-[8px] border-primary/5 shadow-2xl p-12 bg-card/40 space-y-10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
                   <Zap className="h-32 w-32 text-primary" />
@@ -407,7 +416,6 @@ export default function DashboardPage() {
               </Card>
 
               <div className="space-y-12">
-                {/* Manual Sync Loading State */}
                 {isSyncing && (
                   <div className="p-20 text-center space-y-6 animate-pulse">
                     <RefreshCw className="h-16 w-16 text-primary mx-auto animate-spin" />
@@ -614,6 +622,52 @@ export default function DashboardPage() {
              )}
           </ShadcnContent>
 
+          <ShadcnContent value="webin" className="space-y-16">
+             <div className="text-center space-y-3">
+                <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Webin Portals</h3>
+                <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Authorized Training & Strategy Masterclasses</p>
+             </div>
+             
+             {webinResources.length === 0 ? (
+               <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20">
+                 <Video className="h-20 w-20 mx-auto text-primary/20 mb-6" />
+                 <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No masterclass portals active.</p>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                  {webinResources.map((w: any) => {
+                    const videoId = getYoutubeId(w.content);
+                    const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+                    return (
+                      <Card key={w.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
+                        <a href={w.content} target="_blank" rel="noopener noreferrer" className="block relative group">
+                          <div className="h-64 relative overflow-hidden bg-black flex items-center justify-center">
+                             {thumbUrl ? (
+                               <img src={thumbUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60 group-hover:opacity-100" alt={w.title} />
+                             ) : (
+                               <Video className="h-16 w-16 text-primary/20" />
+                             )}
+                             <div className="absolute inset-0 flex items-center justify-center">
+                               <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.6)] group-hover:scale-125 transition-transform duration-500 border-4 border-white/20">
+                                  <Youtube className="h-10 w-10 fill-white text-white" />
+                               </div>
+                             </div>
+                          </div>
+                        </a>
+                        <div className="p-10 space-y-6">
+                           <h4 className="text-3xl font-black text-foreground uppercase tracking-tight italic leading-tight line-clamp-2">{w.title}</h4>
+                           <div className="flex items-center gap-3">
+                              <Badge className="bg-primary/10 text-primary border-none text-[10px] font-black uppercase px-4 py-1 rounded-full">@{w.nickname}</Badge>
+                              <span className="text-[10px] font-black text-foreground/30 uppercase tracking-widest">Portal ID: {w.id.slice(0,6)}</span>
+                           </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+               </div>
+             )}
+          </ShadcnContent>
+
           <ShadcnContent value="resources" className="space-y-12">
              <div className="flex items-center justify-between">
                 <div className="space-y-2">
@@ -625,13 +679,11 @@ export default function DashboardPage() {
                    <ShadcnList className="bg-card p-1.5 rounded-full border-4 border-primary/10 flex gap-2">
                       <ShadcnTrigger value="AI_Prompt" className="rounded-full px-8 h-10 text-[10px] font-black uppercase tracking-widest">AI PROMPTS</ShadcnTrigger>
                       <ShadcnTrigger value="T&Triks" className="rounded-full px-8 h-10 text-[10px] font-black uppercase tracking-widest">T&TRIKS</ShadcnTrigger>
-                      <ShadcnTrigger value="WeBin" className="rounded-full px-8 h-10 text-[10px] font-black uppercase tracking-widest">WEBIN</ShadcnTrigger>
                    </ShadcnList>
                 </ShadcnTabs>
              </div>
 
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-                {/* Knowledge Injection Form */}
                 <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-card p-12 shadow-2xl space-y-10">
                    <div className="space-y-8">
                       <div className="space-y-3">
@@ -653,14 +705,13 @@ export default function DashboardPage() {
                          >
                             <option value="AI_Prompt">AI PROMPT LAB</option>
                             <option value="T&Triks">T&TRIKS ARCHIVE</option>
-                            <option value="WeBin">WEBIN PORTAL</option>
                          </select>
                       </div>
 
                       <div className="space-y-3">
                          <Label className="text-primary font-black uppercase tracking-widest text-[10px]">STRATEGIC CONTENT</Label>
                          <Textarea 
-                            placeholder={resType === 'WeBin' ? 'Enter video URL or link...' : 'Share your prompts or execution tips...'} 
+                            placeholder='Share your prompts or execution tips...' 
                             value={resContent} 
                             onChange={e => setResContent(e.target.value)} 
                             className="min-h-[220px] bg-background/50 border-4 border-primary/10 rounded-[3rem] p-10 text-lg font-bold shadow-inner leading-relaxed" 
@@ -676,7 +727,6 @@ export default function DashboardPage() {
                    </div>
                 </Card>
 
-                {/* Shared Vault Display */}
                 <div className="space-y-8">
                    <div className="flex items-center gap-4 px-4">
                       <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -726,15 +776,6 @@ export default function DashboardPage() {
                                     Copy Lab Data
                                   </Button>
                                 )}
-
-                                {r.type === 'WeBin' && (
-                                  <Button 
-                                    className="w-full h-14 rounded-full bg-primary text-background font-black uppercase text-[10px] tracking-widest shadow-xl"
-                                    onClick={() => window.open(r.content, '_blank')}
-                                  >
-                                    Access Portal
-                                  </Button>
-                                )}
                              </Card>
                            ))
                          )}
@@ -780,9 +821,15 @@ export default function DashboardPage() {
               <p className="text-[10px] text-primary font-black uppercase tracking-[0.5em]">Sovereign Protocol Initiated</p>
             </div>
             <div className="p-8 bg-background/50 rounded-[2rem] border-4 border-primary/10 flex justify-around shadow-inner">
-               <div><p className="text-3xl font-black text-foreground">100</p><p className="text-[9px] font-black uppercase text-primary/40">Points</p></div>
+               <div className="flex flex-col items-center">
+                 <p className="text-3xl font-black text-foreground">100</p>
+                 <p className="text-[9px] font-black uppercase text-primary/40 leading-none">Points</p>
+               </div>
                <div className="w-px h-10 bg-primary/20" />
-               <div><p className="text-3xl font-black text-foreground">50</p><p className="text-[9px] font-black uppercase text-primary/40">XP</p></div>
+               <div className="flex flex-col items-center">
+                 <p className="text-3xl font-black text-foreground">50</p>
+                 <p className="text-[9px] font-black uppercase text-primary/40 leading-none">XP</p>
+               </div>
             </div>
             <Button onClick={handleClaimDaily} className="w-full h-18 rounded-full bg-primary text-background font-black text-xl shadow-2xl hover:scale-105 hover:bg-white hover:text-primary transition-all uppercase tracking-tighter">CLAIM REWARD</Button>
           </div>
