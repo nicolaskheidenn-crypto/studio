@@ -174,7 +174,7 @@ export interface UserProfile {
 }
 
 const DEFAULT_PROFILE: UserProfile = {
-  nickname: 'Succemazing',
+  nickname: 'Strategist',
   bio: '',
   avatarUrl: '',
   coverPhotoUrl: '',

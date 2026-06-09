@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { doc, setDoc } from 'firebase/firestore';
 
 const DEFAULT_PROFILE: UserProfile = {
-  nickname: 'Succemazing',
+  nickname: 'Strategist',
   bio: '',
   avatarUrl: '',
   coverPhotoUrl: '',

@@ -25,7 +25,7 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 const DEFAULT_PROFILE: UserProfile = {
-  nickname: 'Succemazing',
+  nickname: 'Strategist',
   bio: '',
   avatarUrl: '',
   coverPhotoUrl: '',
@@ -79,7 +79,7 @@ export default function DashboardPage() {
   }, [profiles, uid]);
   
   const { 
-    points = 0, level = 1, streak = 0, nickname = 'Succemazing', lastLogin = null, purchasedProductIds = [], avatarUrl = ''
+    points = 0, level = 1, streak = 0, nickname = 'Strategist', lastLogin = null, purchasedProductIds = [], avatarUrl = ''
   } = profile;
 
   const {
@@ -106,9 +106,12 @@ export default function DashboardPage() {
 
   const [postText, setPostText] = useState("");
   const [postImages, setPostImages] = useState<string[]>([]);
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Insights (Comments) Pop-up State
+  const [selectedPostForInsights, setSelectedPostForInsights] = useState<any>(null);
+  const [insightInput, setInsightInput] = useState("");
 
   const [resTitle, setResTitle] = useState("");
   const [resType, setResType] = useState<'AI_Prompt' | 'T&Triks'>('AI_Prompt');
@@ -217,8 +220,7 @@ export default function DashboardPage() {
   };
 
   const handleAddComment = (postId: string) => {
-    const text = commentInputs[postId];
-    if (!text?.trim() || !uid) return;
+    if (!insightInput?.trim() || !uid) return;
     
     const postRef = doc(db, 'activityWall', postId);
     const commentData = {
@@ -226,7 +228,7 @@ export default function DashboardPage() {
       userId: uid,
       nickname: nickname,
       avatarUrl: avatarUrl,
-      text: text,
+      text: insightInput,
       timestamp: new Date().toISOString()
     };
 
@@ -234,7 +236,7 @@ export default function DashboardPage() {
       comments: arrayUnion(commentData)
     })
       .then(() => {
-        setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+        setInsightInput("");
         toast({ title: "Insight Recorded" });
       })
       .catch(async () => {
@@ -329,7 +331,7 @@ export default function DashboardPage() {
             <div className="flex flex-col">
               <div className="flex items-center justify-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
-                <span className="font-black text-3xl tracking-tighter text-foreground leading-none">{streak}</span>
+                <span className="font-black text-3xl tracking-tighter text-foreground –none">{streak}</span>
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary text-center">Current Streak</span>
             </div>
@@ -482,64 +484,30 @@ export default function DashboardPage() {
                              <img 
                                key={i} 
                                src={img} 
-                               className="w-full h-[450px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/10 hover:scale-[1.02] transition-transform duration-700" 
+                               className="w-full h-[450px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/20 hover:scale-[1.02] transition-transform duration-700" 
                                alt="Activity" 
                              />
                            ))}
                          </div>
                        )}
                        
-                       <div className="flex gap-10 pt-10 border-t-4 border-primary/5">
+                       <div className="flex items-center gap-10 pt-10 border-t-4 border-primary/5">
                           <Button 
                             variant="ghost" 
-                            className="text-[11px] font-black uppercase tracking-[0.3em] text-primary hover:text-primary transition-all p-0"
+                            className="text-[11px] font-black uppercase tracking-[0.3em] text-primary hover:text-primary transition-all p-0 h-10"
                             onClick={() => handleHeartPost(post.id)}
                           >
-                            <Heart className="h-7 w-7 mr-4 fill-primary" /> 
+                            <Heart className="h-5 w-5 mr-3 fill-primary" /> 
                             {post.hearts || 0} SUCCEMAZING
                           </Button>
-                          <Button variant="ghost" className="text-[11px] font-black uppercase tracking-[0.3em] text-primary/30 hover:text-primary transition-all p-0">
-                            <MessageSquare className="h-7 w-7 mr-4" /> 
+                          <Button 
+                            variant="ghost" 
+                            className="text-[11px] font-black uppercase tracking-[0.3em] text-primary/30 hover:text-primary transition-all p-0 h-10"
+                            onClick={() => setSelectedPostForInsights(post)}
+                          >
+                            <MessageSquare className="h-5 w-5 mr-3" /> 
                             {post.comments?.length || 0} INSIGHTS
                           </Button>
-                       </div>
-
-                       <div className="space-y-6 pt-10 bg-primary/5 rounded-[3.5rem] p-10 shadow-inner">
-                          <div className="flex gap-6">
-                             <Input 
-                               placeholder="RECORD INSIGHT..." 
-                               className="h-16 rounded-[2rem] bg-background/50 border-4 border-primary/10 text-base font-black px-8 focus:border-primary shadow-inner uppercase tracking-widest"
-                               value={commentInputs[post.id] || ""}
-                               onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                               onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
-                             />
-                             <Button onClick={() => handleAddComment(post.id)} className="h-16 w-16 rounded-full bg-primary text-background shadow-xl hover:scale-110 transition-transform"><Send className="h-6 w-6" /></Button>
-                          </div>
-                          
-                          <ScrollArea className="max-h-[500px]">
-                            <div className="space-y-6 pr-4">
-                               {post.comments?.map((comment: any) => (
-                                 <div key={comment.id} className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 flex justify-between items-start group shadow-sm animate-in fade-in slide-in-from-left-4">
-                                    <div className="flex items-center gap-4 mr-6">
-                                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10">
-                                         {comment.avatarUrl ? (
-                                           <img src={comment.avatarUrl} className="w-full h-full object-cover" alt="" />
-                                         ) : (
-                                           <User className="h-5 w-5 text-primary" />
-                                         )}
-                                      </div>
-                                    </div>
-                                    <div className="flex-1">
-                                       <div className="flex items-center gap-4 mb-2">
-                                          <p className="font-black text-xs uppercase text-primary bg-primary/10 px-4 py-1 rounded-full">@{comment.nickname || 'Strategist'}</p>
-                                          <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{new Date(comment.timestamp).toLocaleTimeString()}</span>
-                                       </div>
-                                       <p className="text-lg font-bold text-foreground/80 leading-relaxed italic">{comment.text}</p>
-                                    </div>
-                                 </div>
-                               ))}
-                            </div>
-                          </ScrollArea>
                        </div>
                     </CardContent>
                   </Card>
@@ -925,6 +893,66 @@ export default function DashboardPage() {
                 <Award className={cn("h-10 w-10", level >= r.lv ? "text-primary" : "text-foreground/20")} />
               </div>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Insights Portal (Comments Pop-up) */}
+      <Dialog open={!!selectedPostForInsights} onOpenChange={() => setSelectedPostForInsights(null)}>
+        <DialogContent className="rounded-[4rem] border-[10px] border-primary/20 bg-card p-10 max-w-2xl shadow-2xl flex flex-col h-[80vh]">
+          <DialogHeader className="mb-6">
+             <DialogTitle className="text-4xl font-black text-foreground uppercase italic tracking-tighter text-center">Insights Portal</DialogTitle>
+             <p className="text-[10px] text-center font-black uppercase text-primary/40 tracking-[0.4em] mt-2">Public Strategic Discussion</p>
+          </DialogHeader>
+          
+          <div className="flex-1 flex flex-col space-y-8 min-h-0">
+             <div className="flex gap-4">
+                <Input 
+                   placeholder="RECORD INSIGHT..." 
+                   className="h-16 rounded-[2rem] bg-background/50 border-4 border-primary/10 text-base font-black px-8 focus:border-primary shadow-inner uppercase tracking-widest"
+                   value={insightInput}
+                   onChange={(e) => setInsightInput(e.target.value)}
+                   onKeyDown={(e) => e.key === 'Enter' && handleAddComment(selectedPostForInsights.id)}
+                />
+                <Button 
+                   onClick={() => handleAddComment(selectedPostForInsights.id)} 
+                   className="h-16 w-16 rounded-full bg-primary text-background shadow-xl hover:scale-110 transition-transform shrink-0"
+                >
+                   <Send className="h-6 w-6" />
+                </Button>
+             </div>
+             
+             <ScrollArea className="flex-1 pr-4">
+                <div className="space-y-6">
+                   {selectedPostForInsights?.comments?.length === 0 ? (
+                     <div className="py-20 text-center space-y-4 opacity-20">
+                        <MessageSquare className="h-12 w-12 mx-auto" />
+                        <p className="text-xs font-black uppercase tracking-widest">No insights recorded yet.</p>
+                     </div>
+                   ) : (
+                     [...(selectedPostForInsights?.comments || [])].reverse().map((comment: any) => (
+                       <div key={comment.id} className="p-8 bg-background/40 rounded-[2.5rem] border-2 border-primary/10 flex justify-between items-start group shadow-sm animate-in fade-in slide-in-from-bottom-4">
+                          <div className="flex items-center gap-4 mr-6">
+                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10">
+                               {comment.avatarUrl ? (
+                                 <img src={comment.avatarUrl} className="w-full h-full object-cover" alt="" />
+                               ) : (
+                                 <User className="h-5 w-5 text-primary" />
+                               )}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                             <div className="flex items-center gap-4 mb-2">
+                                <p className="font-black text-xs uppercase text-primary bg-primary/10 px-4 py-1 rounded-full">@{comment.nickname || 'Strategist'}</p>
+                                <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                             </div>
+                             <p className="text-lg font-bold text-foreground/80 leading-relaxed italic">{comment.text}</p>
+                          </div>
+                       </div>
+                     ))
+                   )}
+                </div>
+             </ScrollArea>
           </div>
         </DialogContent>
       </Dialog>
