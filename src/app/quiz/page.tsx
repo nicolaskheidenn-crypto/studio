@@ -178,14 +178,14 @@ export default function QuizPage() {
                     <circle cx="80" cy="80" r="70" fill="transparent" stroke="currentColor" strokeWidth="12" strokeDasharray="439.8" strokeDashoffset={439.8 - (439.8 * profile.xp) / 100} className="text-primary shadow-[0_0_20px_rgba(255,215,0,0.6)] transition-all duration-1000" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl font-black text-foreground italic tracking-tighter">Lv.{profile.level}</span>
+                    <span className="text-5xl font-black text-foreground italic tracking-tighter leading-none">Lv.{profile.level}</span>
                   </div>
                 </div>
 
                 <div className="space-y-6 pt-6 border-t-2 border-primary/10">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">SOVEREIGN PROOFS</span>
-                    <span className="text-2xl font-black text-foreground italic">{profile.stats?.quizzesPassed || 0}</span>
+                    <span className="text-2xl font-black text-foreground italic leading-none">{profile.stats?.quizzesPassed || 0}</span>
                   </div>
                   <div className="flex justify-between items-start pt-2">
                     <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest mt-1">RANK STATUS</span>
@@ -205,14 +205,14 @@ export default function QuizPage() {
             </div>
 
             <div className="lg:col-span-2 space-y-12">
-              <header className="text-center space-y-6">
-                <div className="relative inline-block">
-                  <h1 className="text-8xl md:text-9xl font-headline font-black tracking-tighter uppercase italic leading-none select-none">
-                    <span className="text-white">FIRE</span><span className="text-primary">QUIZZO</span>
-                  </h1>
+              <header className="flex flex-col md:flex-row items-end md:items-center justify-center gap-6 md:gap-10 mb-20 animate-in fade-in slide-in-from-top-4 duration-700">
+                <h1 className="text-7xl md:text-[10rem] font-headline font-black tracking-tighter uppercase italic leading-none select-none flex">
+                  <span className="text-white">FIRE</span><span className="text-primary">QUIZZO</span>
+                </h1>
+                <div className="text-left space-y-0.5 pb-2 md:pb-4 border-l-4 border-primary/20 pl-6 h-fit">
+                  <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic leading-[0.8] tracking-tighter">SECURITY<br/>BRIEFING</h3>
+                  <p className="text-[8px] md:text-[10px] font-black uppercase text-primary tracking-[0.3em] mt-2">PROTOCOL INSTRUCTIONS</p>
                 </div>
-                <div className="h-1.5 w-48 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(255,215,0,0.4)]" />
-                <p className="text-primary/40 text-[10px] font-black uppercase tracking-[0.8em] max-w-sm mx-auto text-center leading-relaxed">GLOBAL MASTERY CERTIFICATION PROTOCOL</p>
               </header>
               
               <div className="grid grid-cols-1 gap-10 px-4">
@@ -256,11 +256,6 @@ export default function QuizPage() {
             </div>
 
             <div className="hidden lg:flex flex-col gap-10">
-              <div className="px-6 space-y-2">
-                <h3 className="text-3xl font-black text-foreground uppercase italic tracking-tighter">SECURITY BRIEFING</h3>
-                <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest">PROTOCOL INSTRUCTIONS</p>
-              </div>
-
               <Card className="rounded-[3.5rem] border-4 border-primary/10 bg-card/40 p-10 shadow-2xl space-y-10 animate-in slide-in-from-right-10 duration-700">
                  <div className="flex items-center gap-4 text-primary">
                    <ShieldCheck className="h-7 w-7" />
@@ -303,7 +298,7 @@ export default function QuizPage() {
         <div className="relative z-10 space-y-8">
           {hasPassed ? <Trophy className="h-32 w-32 mx-auto mb-8 animate-bounce drop-shadow-2xl" /> : <XCircle className="h-32 w-32 mx-auto mb-8 animate-pulse drop-shadow-2xl" />}
           <h1 className="text-6xl md:text-8xl font-headline font-black mb-4 tracking-tighter uppercase italic leading-none">{hasPassed ? "MASTERY" : "RETAKE"}</h1>
-          <p className="text-4xl md:text-5xl font-black mb-8 tracking-tighter italic">SCORE: {score} / {shuffledQuestions.length}</p>
+          <p className="text-4xl md:text-5xl font-black mb-8 tracking-tighter italic leading-none">SCORE: {score} / {shuffledQuestions.length}</p>
           <p className="text-lg md:text-xl font-black uppercase tracking-[0.3em] opacity-80 mb-16 max-w-3xl leading-relaxed mx-auto italic">
             {hasPassed 
               ? "STRATEGIC FILTRATION COMPLETE. SOVEREIGN CERTIFICATION HAS BEEN INJECTED INTO YOUR PROFILE VAULT." 
@@ -370,7 +365,7 @@ export default function QuizPage() {
             <Button variant="ghost" className="text-primary hover:text-primary/60 rounded-full h-12 md:h-16 px-8 md:px-12 font-black uppercase text-[11px] tracking-[0.3em] border-4 border-primary/20 shadow-xl" onClick={() => setActiveQuiz(null)}>
               <ArrowLeft className="mr-4 h-5 w-5" /> EXIT PROTOCOL
             </Button>
-            <div className="text-2xl md:text-4xl font-black bg-mocha-cream text-[#1f1610] px-10 py-4 rounded-[2rem] shadow-2xl border-8 border-primary/20 italic tracking-tighter">
+            <div className="text-2xl md:text-4xl font-black bg-mocha-cream text-[#1f1610] px-10 py-4 rounded-[2rem] shadow-2xl border-8 border-primary/20 italic tracking-tighter leading-none">
               {currentIdx + 1} <span className="text-[#1f1610]/20 mx-4">/</span> {shuffledQuestions.length}
             </div>
           </div>
@@ -390,7 +385,7 @@ export default function QuizPage() {
                       key={i} 
                       onClick={() => setUserAnswer(opt)}
                       className={cn(
-                        "p-8 md:p-10 text-left border-[6px] md:border-[8px] rounded-[3rem] text-xl md:text-2xl font-black transition-all active:scale-95 flex items-center gap-8 uppercase tracking-tight shadow-xl",
+                        "p-8 md:p-10 text-left border-[6px] md:border-[8px] rounded-[3rem] text-xl md:text-2xl font-black transition-all active:scale-95 flex items-center gap-8 uppercase tracking-tight shadow-xl leading-none",
                         userAnswer === opt 
                           ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-[0_20px_40px_rgba(0,0,0,0.3)] scale-[1.02]" 
                           : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50"
@@ -412,7 +407,7 @@ export default function QuizPage() {
                       key={opt}
                       onClick={() => setUserAnswer(opt)}
                       className={cn(
-                        "p-16 md:p-24 text-center border-[8px] md:border-[12px] rounded-[4rem] text-4xl md:text-5xl font-black transition-all active:scale-95 uppercase italic shadow-2xl",
+                        "p-16 md:p-24 text-center border-[8px] md:border-[12px] rounded-[4rem] text-4xl md:text-5xl font-black transition-all active:scale-95 uppercase italic shadow-2xl leading-none",
                         userAnswer === opt 
                           ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-2xl scale-[1.03]" 
                           : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50"
@@ -428,7 +423,7 @@ export default function QuizPage() {
                 <div className="space-y-10">
                   <Input 
                     placeholder="ENTER PROTOCOL CODE..." 
-                    className="h-24 md:h-32 rounded-[2.5rem] text-4xl md:text-6xl text-center font-black bg-white border-[10px] md:border-[15px] border-[#1f1610]/5 text-[#1f1610] focus:border-primary shadow-inner placeholder:text-[#1f1610]/10 tracking-widest" 
+                    className="h-24 md:h-32 rounded-[2.5rem] text-4xl md:text-6xl text-center font-black bg-white border-[10px] md:border-[15px] border-[#1f1610]/5 text-[#1f1610] focus:border-primary shadow-inner placeholder:text-[#1f1610]/10 tracking-widest leading-none" 
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && userAnswer && handleNext()}
@@ -439,7 +434,7 @@ export default function QuizPage() {
             </div>
 
             <Button 
-              className="w-full mt-20 md:mt-24 h-20 md:h-28 rounded-full font-black text-2xl md:text-4xl bg-primary text-[#1f1610] hover:bg-[#1f1610] hover:text-primary transition-all shadow-[0_30px_60px_rgba(255,215,0,0.4)] active:scale-95 disabled:opacity-20 uppercase tracking-tighter border-[10px] border-white/20" 
+              className="w-full mt-20 md:mt-24 h-20 md:h-28 rounded-full font-black text-2xl md:text-4xl bg-primary text-[#1f1610] hover:bg-[#1f1610] hover:text-primary transition-all shadow-[0_30px_60px_rgba(255,215,0,0.4)] active:scale-95 disabled:opacity-20 uppercase tracking-tighter border-[10px] border-white/20 leading-none" 
               onClick={handleNext} 
               disabled={!userAnswer}
             >
