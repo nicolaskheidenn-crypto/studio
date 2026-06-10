@@ -12,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -321,7 +321,7 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
+      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
       <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3.5] animate-pulse duration-[8000ms]">
         <Coffee className="w-[500px] h-[500px] text-primary" />
       </div>
@@ -357,10 +357,7 @@ export default function DashboardPage() {
             </div>
           </div>
           
-          <button 
-            onClick={() => setShowRewardModal(true)}
-            className="flex items-center gap-6 group hover:scale-105 transition-all"
-          >
+          <div className="flex items-center gap-6">
             <div className="text-right hidden sm:block">
                <p className="font-black text-sm uppercase text-foreground">{nickname}</p>
                <p className="text-[10px] font-black uppercase text-primary">Master Strategist</p>
@@ -372,7 +369,7 @@ export default function DashboardPage() {
               </svg>
               <div className="absolute inset-0 flex items-center justify-center text-sm font-black text-foreground">Lv.{level}</div>
             </div>
-          </button>
+          </div>
         </div>
       </div>
 
@@ -382,7 +379,7 @@ export default function DashboardPage() {
             <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
               <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
               <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
-              <ShadcnTrigger value="webin" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> Wedio</ShadcnTrigger>
+              <ShadcnTrigger value="wedio" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> Wedio</ShadcnTrigger>
               <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
               <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
             </ShadcnList>
@@ -529,7 +526,7 @@ export default function DashboardPage() {
                             {post.comments?.length || 0} INSIGHTS
                           </Button>
                        </div>
-                    </CardHeader>
+                    </CardContent>
                   </Card>
                 ))}
               </div>
@@ -639,7 +636,7 @@ export default function DashboardPage() {
              )}
           </ShadcnContent>
 
-          <ShadcnContent value="webin" className="space-y-16">
+          <ShadcnContent value="wedio" className="space-y-16">
              <div className="text-center space-y-3">
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Wedio Portals</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Authorized Training & Strategy Masterclasses</p>

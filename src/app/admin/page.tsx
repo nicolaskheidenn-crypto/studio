@@ -460,7 +460,7 @@ export default function AdminPage() {
               {[
                 { val: "tasks", icon: ListChecks, label: "Routines", count: globalTasks.length },
                 { val: "assets", icon: ShoppingBag, label: "Shooppy", count: shooppyProducts.length },
-                { val: "webin", icon: Video, label: "Wedio", count: webins.length },
+                { val: "wedio", icon: Video, label: "Wedio", count: webins.length },
                 { val: "rewards", icon: Gift, label: "Rewards", count: globalRewards.length },
                 { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
                 { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
@@ -691,7 +691,7 @@ export default function AdminPage() {
           </TabsContent>
 
           {/* Wedio Tab */}
-          <TabsContent value="webin" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <TabsContent value="wedio" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                   <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Video className="h-8 w-8 text-primary" /> {editingWebin ? 'Edit Portal' : 'Wedio Injector'}</CardTitle>
