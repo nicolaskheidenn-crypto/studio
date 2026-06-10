@@ -563,7 +563,7 @@ export default function AdminPage() {
                              <Card key={t.id} className="p-8 bg-mocha-cream rounded-[2.5rem] border-4 border-primary/10 flex flex-col justify-between group shadow-lg hover:border-primary/40 transition-all">
                                 <div className="space-y-4">
                                    <div className="flex justify-between items-start">
-                                      <h4 className="font-black text-[#1f1610] uppercase text-xl italic leading-tight line-clamp-2">{t.title}</h4>
+                                      <h4 className="font-black text-[#1f1610] uppercase italic text-xl leading-tight line-clamp-2">{t.title}</h4>
                                    </div>
                                    <p className="text-xs font-bold text-[#1f1610]/60 line-clamp-3 uppercase tracking-tight">{t.description}</p>
                                 </div>

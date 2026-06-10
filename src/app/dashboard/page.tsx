@@ -321,21 +321,21 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - REDUCED SIZE */}
-      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.5] animate-pulse duration-[8000ms]">
-        <Coffee className="w-[300px] h-[300px] text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - REFINED SCALE */}
+      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1] animate-pulse duration-[8000ms]">
+        <Coffee className="w-[200px] h-[200px] text-primary" />
       </div>
-      <div className="absolute bottom-[20%] left-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.2] animate-pulse duration-[10000ms]">
-        <Zap className="w-[350px] h-[350px] text-primary" />
+      <div className="absolute bottom-[20%] left-[-2%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1] animate-pulse duration-[10000ms]">
+        <Zap className="w-[220px] h-[220px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[-10%] opacity-[0.02] pointer-events-none scale-[1.1]">
-        <ShieldCheck className="w-[400px] h-[400px] text-primary" />
+      <div className="absolute top-[40%] right-[-5%] opacity-[0.02] pointer-events-none scale-[1]">
+        <ShieldCheck className="w-[250px] h-[250px] text-primary" />
       </div>
-      <div className="absolute bottom-[-10%] right-[20%] opacity-[0.02] pointer-events-none rotate-45 scale-[1.5]">
-        <Award className="w-[250px] h-[250px] text-primary" />
+      <div className="absolute bottom-[5%] right-[15%] opacity-[0.02] pointer-events-none rotate-45 scale-[1.2]">
+        <Award className="w-[180px] h-[180px] text-primary" />
       </div>
-      <div className="absolute top-[-10%] left-[10%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[1.4]">
-        <Shield className="w-[250px] h-[250px] text-primary" />
+      <div className="absolute top-[-5%] left-[5%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[1.1]">
+        <Shield className="w-[180px] h-[180px] text-primary" />
       </div>
 
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
@@ -533,23 +533,29 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-10">
-              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-12 text-center space-y-10 shadow-2xl">
-                 <div className="w-28 h-28 bg-primary text-background rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl">
+              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-12 text-center space-y-10 shadow-2xl relative overflow-hidden">
+                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+                    <Trophy className="w-64 h-64 absolute -top-10 -right-10 text-primary rotate-12" />
+                 </div>
+                 <div className="w-28 h-28 bg-primary text-background rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl relative z-10">
                    <Trophy className="h-14 w-14" />
                  </div>
-                 <div className="space-y-3">
+                 <div className="space-y-3 relative z-10">
                    <h3 className="text-4xl font-black uppercase tracking-tighter text-foreground italic">Sovereign Proof</h3>
                    <p className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Protocol Consistency Level</p>
                  </div>
-                 <div className="p-10 bg-primary/5 rounded-[3rem] border-2 border-primary/10">
+                 <div className="p-10 bg-primary/5 rounded-[3rem] border-2 border-primary/10 relative z-10">
                    <p className="text-5xl font-black text-primary italic tracking-tighter">x{growthMultiplier}</p>
                    <p className="text-[10px] font-black uppercase text-primary mt-4 tracking-widest">Growth Multiplier</p>
                  </div>
               </Card>
 
-              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
-                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Zap className="h-6 w-6 text-primary" /> Acquire Protocols</h3>
-                 <div className="space-y-6">
+              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8 relative overflow-hidden">
+                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+                    <Zap className="w-64 h-64 absolute -bottom-10 -left-10 text-primary -rotate-45" />
+                 </div>
+                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4 relative z-10"><Zap className="h-6 w-6 text-primary" /> Acquire Protocols</h3>
+                 <div className="space-y-6 relative z-10">
                     {availableInHub.length === 0 ? (
                       <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">No protocols currently deployable.</p>
                     ) : (
@@ -576,9 +582,12 @@ export default function DashboardPage() {
                  </div>
               </Card>
 
-              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8">
-                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4"><Star className="h-6 w-6 text-primary" /> Root Archive</h3>
-                 <div className="space-y-6">
+              <Card className="rounded-[3.5rem] border-4 border-primary/20 bg-card/40 p-10 shadow-2xl space-y-8 relative overflow-hidden">
+                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+                    <Star className="w-64 h-64 absolute top-1/2 -right-20 text-primary" />
+                 </div>
+                 <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-4 relative z-10"><Star className="h-6 w-6 text-primary" /> Root Archive</h3>
+                 <div className="space-y-6 relative z-10">
                     {ownedAssets.length === 0 ? (
                       <p className="text-[10px] font-black uppercase text-foreground/30 text-center tracking-widest">Archive empty. Acquire protocols to expand.</p>
                     ) : (
@@ -607,8 +616,8 @@ export default function DashboardPage() {
              
              {marketplaceAssets.length === 0 ? (
                <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20 relative overflow-hidden">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[2] pointer-events-none">
-                    <ShoppingBag className="w-96 h-96 text-primary" />
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[1.5] pointer-events-none">
+                    <ShoppingBag className="w-80 h-80 text-primary" />
                  </div>
                  <ShoppingBag className="h-20 w-20 mx-auto text-primary/20 mb-6" />
                  <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No storefront assets deployed yet.</p>
@@ -644,8 +653,8 @@ export default function DashboardPage() {
              
              {webinResources.length === 0 ? (
                <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20 relative overflow-hidden">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[2] pointer-events-none">
-                    <Video className="w-96 h-96 text-primary" />
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[1.5] pointer-events-none">
+                    <Video className="w-80 h-80 text-primary" />
                  </div>
                  <Video className="h-20 w-20 mx-auto text-primary/20 mb-6" />
                  <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No masterclass portals active.</p>
@@ -701,8 +710,11 @@ export default function DashboardPage() {
              </div>
 
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-                <Card className="rounded-[3rem] border-8 border-primary/10 bg-card p-8 shadow-2xl space-y-6">
-                   <div className="space-y-6">
+                <Card className="rounded-[3rem] border-8 border-primary/10 bg-card p-8 shadow-2xl space-y-6 relative overflow-hidden">
+                   <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+                      <BookOpen className="w-64 h-64 absolute -top-10 -right-10 text-primary" />
+                   </div>
+                   <div className="space-y-6 relative z-10">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div className="space-y-2">
                             <Label className="text-primary font-black uppercase tracking-widest text-[9px]">RESOURCE TITLE</Label>
@@ -793,9 +805,12 @@ export default function DashboardPage() {
                    <ScrollArea className="h-[750px] pr-6">
                       <div className="space-y-8">
                          {filteredResources.length === 0 ? (
-                           <div className="p-20 border-4 border-dashed border-primary/10 rounded-[4rem] text-center bg-card/40 space-y-6">
-                              <BookOpen className="h-16 w-16 mx-auto text-primary/10" />
-                              <p className="text-xl font-black uppercase tracking-widest text-primary/20 italic">Archive Empty.<br/>Awaiting Injection.</p>
+                           <div className="p-20 border-4 border-dashed border-primary/10 rounded-[4rem] text-center bg-card/40 space-y-6 relative overflow-hidden">
+                              <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+                                <BookOpen className="w-64 h-64 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
+                              </div>
+                              <BookOpen className="h-16 w-16 mx-auto text-primary/10 relative z-10" />
+                              <p className="text-xl font-black uppercase tracking-widest text-primary/20 italic relative z-10">Archive Empty.<br/>Awaiting Injection.</p>
                            </div>
                          ) : (
                            filteredResources.map((r: any) => (
@@ -853,8 +868,11 @@ export default function DashboardPage() {
                 <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Protocol Inquiry</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.5em]">Frequently Asked Strategic Questions</p>
              </div>
-             <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl">
-                <Accordion type="single" collapsible className="w-full space-y-6">
+             <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl relative overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+                   <HelpCircle className="w-96 h-96 absolute -bottom-20 -right-20 text-primary" />
+                </div>
+                <Accordion type="single" collapsible className="w-full space-y-6 relative z-10">
                   {faqs.map((f: any) => (
                     <AccordionItem key={f.id} value={f.id} className="border-none bg-background/50 rounded-[3rem] px-12 transition-all data-[state=open]:shadow-2xl overflow-hidden">
                       <AccordionTrigger className="text-lg font-black text-foreground uppercase tracking-widest hover:no-underline py-10 [&>svg]:h-6 [&>svg]:w-6 [&>svg]:text-primary">
