@@ -377,21 +377,21 @@ export default function DashboardPage() {
         <ShadcnTabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
           <div className="flex items-center justify-between">
             <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
-              <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
-              <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
-              <ShadcnTrigger value="wedio" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> Wedio</ShadcnTrigger>
-              <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
+              <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> HUB</ShadcnTrigger>
+              <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> SHOOPPY</ShadcnTrigger>
+              <ShadcnTrigger value="wedio" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> WEDIO</ShadcnTrigger>
+              <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> LIBRARY</ShadcnTrigger>
               <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
             </ShadcnList>
 
             <Button 
               variant="ghost" 
-              className="rounded-full h-12 px-6 font-black uppercase text-[10px] tracking-widest gap-3 text-primary border-4 border-primary/10 hover:bg-primary/5 active:scale-90"
+              className="rounded-full h-12 px-6 font-black uppercase text-[10px] tracking-widest gap-3 text-primary border-4 border-primary/20 hover:bg-primary/5 active:scale-90"
               onClick={handleManualSync}
               disabled={isSyncing}
             >
               <RefreshCcw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
-              Sync Grid
+              SYNC GRID
             </Button>
           </div>
 
@@ -863,10 +863,10 @@ export default function DashboardPage() {
              </div>
           </ShadcnContent>
 
-          <ShadcnContent value="faq" className="max-w-4xl mx-auto space-y-12">
+          <ShadcnContent value="faq" className="max-w-6xl mx-auto space-y-12">
              <div className="text-center space-y-3">
-                <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Protocol Inquiry</h3>
-                <p className="text-[11px] font-black uppercase text-primary tracking-[0.5em]">Frequently Asked Strategic Questions</p>
+                <h3 className="text-7xl font-headline font-black text-foreground uppercase tracking-tighter italic">PROTOCOL INQUIRY</h3>
+                <p className="text-[11px] font-black uppercase text-primary tracking-[0.5em]">FREQUENTLY ASKED STRATEGIC QUESTIONS</p>
              </div>
              <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl relative overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
