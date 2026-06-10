@@ -156,10 +156,10 @@ export default function QuizPage() {
         <Navigation />
         
         <div className="absolute top-[15%] left-[5%] opacity-5 -rotate-12 pointer-events-none">
-          <Coffee className="w-64 h-64 text-primary" />
+          <Coffee className="w-48 h-48 text-primary" />
         </div>
         <div className="absolute bottom-[10%] right-[5%] opacity-5 rotate-12 pointer-events-none">
-          <ShieldAlert className="w-48 h-48 text-primary" />
+          <ShieldAlert className="w-32 h-32 text-primary" />
         </div>
 
         <main className="flex-1 container mx-auto px-4 py-12 max-w-7xl relative z-10">
@@ -205,13 +205,13 @@ export default function QuizPage() {
             </div>
 
             <div className="lg:col-span-2 space-y-12">
-              <header className="flex flex-col md:flex-row items-end md:items-center justify-center gap-6 md:gap-10 mb-20 animate-in fade-in slide-in-from-top-4 duration-700">
-                <h1 className="text-7xl md:text-[10rem] font-headline font-black tracking-tighter uppercase italic leading-none select-none flex">
+              <header className="flex items-center justify-center gap-6 md:gap-10 mb-20 animate-in fade-in slide-in-from-top-4 duration-700">
+                <h1 className="text-5xl md:text-[5.5rem] font-headline font-black tracking-tighter uppercase italic leading-none select-none flex">
                   <span className="text-white">FIRE</span><span className="text-primary">QUIZZO</span>
                 </h1>
-                <div className="text-left space-y-0.5 pb-2 md:pb-4 border-l-4 border-primary/20 pl-6 h-fit">
-                  <h3 className="text-2xl md:text-4xl font-black text-white uppercase italic leading-[0.8] tracking-tighter">SECURITY<br/>BRIEFING</h3>
-                  <p className="text-[8px] md:text-[10px] font-black uppercase text-primary tracking-[0.3em] mt-2">PROTOCOL INSTRUCTIONS</p>
+                <div className="text-left space-y-0 pb-2 border-l-4 border-primary/20 pl-6 h-fit">
+                  <h3 className="text-xl md:text-3xl font-black text-white uppercase italic leading-[0.85] tracking-tighter">SECURITY<br/>BRIEFING</h3>
+                  <p className="text-[8px] md:text-[9px] font-black uppercase text-primary tracking-[0.3em] mt-2">PROTOCOL INSTRUCTIONS</p>
                 </div>
               </header>
               
