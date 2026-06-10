@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video, Tag, Filter, Search
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -109,11 +109,9 @@ export default function DashboardPage() {
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Insights (Comments) Pop-up State
   const [selectedPostForInsights, setSelectedPostForInsights] = useState<any>(null);
   const [insightInput, setInsightInput] = useState("");
 
-  // Live tracking for the dialog to show updates immediately
   const currentLivePost = useMemo(() => {
     if (!selectedPostForInsights) return null;
     return sharedActivity.find((p: any) => p.id === selectedPostForInsights.id);
@@ -321,9 +319,20 @@ export default function DashboardPage() {
   const growthMultiplier = (1 + level / 10).toFixed(1);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
+      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
+      <div className="absolute top-[10%] right-[5%] opacity-5 pointer-events-none rotate-12 scale-150">
+        <Coffee className="w-96 h-96 text-primary" />
+      </div>
+      <div className="absolute bottom-[20%] left-[-5%] opacity-5 pointer-events-none -rotate-12 scale-[2]">
+        <Zap className="w-80 h-80 text-primary" />
+      </div>
+      <div className="absolute top-[40%] right-[10%] opacity-5 pointer-events-none scale-125">
+        <ShieldCheck className="w-64 h-64 text-primary" />
+      </div>
+
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-10">
@@ -362,7 +371,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl relative z-10">
         <ShadcnTabs value={activeTab} onValueChange={setActiveTab} className="space-y-10">
           <div className="flex items-center justify-between">
             <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
@@ -903,7 +912,6 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Insights Portal (Comments Pop-up) */}
       <Dialog open={!!selectedPostForInsights} onOpenChange={() => setSelectedPostForInsights(null)}>
         <DialogContent className="rounded-[4rem] border-[10px] border-primary/20 bg-card p-10 max-w-2xl shadow-2xl flex flex-col h-[80vh]">
           <DialogHeader className="mb-6">

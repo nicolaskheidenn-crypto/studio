@@ -100,7 +100,6 @@ export default function SettingsPage() {
 
   const [unlockedBadge, setUnlockedBadge] = useState<BadgeType | null>(null);
 
-  // Optimized Initialization to prevent lag
   useEffect(() => {
     if (uid && profiles[uid] && !isInitialized) {
       setDisplayName(profiles[uid].nickname);
@@ -195,11 +194,15 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      <div className="absolute top-[10%] right-[5%] opacity-10 -rotate-12 pointer-events-none">
-        <Coffee className="w-64 h-64 text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
+      <div className="absolute top-[10%] left-[-5%] opacity-5 pointer-events-none rotate-12 scale-[1.8]">
+        <User className="w-96 h-96 text-primary" />
       </div>
-      <div className="absolute bottom-[10%] left-[5%] opacity-5 rotate-12 pointer-events-none">
-        <Coffee className="w-80 h-80 text-primary" />
+      <div className="absolute bottom-[10%] right-[-5%] opacity-5 pointer-events-none -rotate-12 scale-[2]">
+        <ShieldCheck className="w-80 h-80 text-primary" />
+      </div>
+      <div className="absolute top-[40%] right-[5%] opacity-5 pointer-events-none scale-150">
+        <Coffee className="w-64 h-64 text-primary" />
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
