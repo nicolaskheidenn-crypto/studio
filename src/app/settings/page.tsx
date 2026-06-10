@@ -87,9 +87,10 @@ export default function SettingsPage() {
   const { updateProfile: updateStoreProfile, unlockBadge } = useUserStore();
   const { badges: adminBadges } = useAdminStore();
 
-  const [displayName, setDisplayName] = useState(profile.nickname);
-  const [bio, setBio] = useState(profile.bio);
-  const [avatar, setAvatar] = useState(profile.avatarUrl);
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [isInitialized, setIsInitialized] = useState(false);
   
   const [newPass, setNewPass] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);
@@ -99,18 +100,20 @@ export default function SettingsPage() {
 
   const [unlockedBadge, setUnlockedBadge] = useState<BadgeType | null>(null);
 
+  // Optimized Initialization to prevent lag
   useEffect(() => {
-    if (uid && profiles[uid]) {
+    if (uid && profiles[uid] && !isInitialized) {
       setDisplayName(profiles[uid].nickname);
-      setBio(profiles[uid].bio);
-      setAvatar(profiles[uid].avatarUrl);
+      setBio(profiles[uid].bio || "");
+      setAvatar(profiles[uid].avatarUrl || "");
+      setIsInitialized(true);
     }
-  }, [uid, profiles]);
+  }, [uid, profiles, isInitialized]);
 
   const allBadges = useMemo(() => [...SYSTEM_BADGES, ...adminBadges], [adminBadges]);
 
   useEffect(() => {
-    if (!uid) return;
+    if (!uid || !isInitialized) return;
 
     const handleUnlock = (badgeId: string) => {
       const badge = allBadges.find(b => b.id === badgeId);
@@ -132,7 +135,7 @@ export default function SettingsPage() {
     if (profile.level >= 30) handleUnlock('sb-level-30');
     if (profile.streak >= 30) handleUnlock('sb-streak-30');
 
-  }, [uid, profile, unlockBadge, allBadges]);
+  }, [uid, profile, unlockBadge, allBadges, isInitialized]);
 
   const handleUpdateProfile = async () => {
     if (!uid) return;
