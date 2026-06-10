@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePages } from "@/lib/store";
@@ -59,9 +58,9 @@ export default function PublicPage() {
       <Navigation />
       
       <main className="flex-1 relative overflow-hidden">
-        {/* Background Atmosphere */}
+        {/* Background Atmosphere - REDUCED SIZE */}
         <div className="absolute top-[10%] right-[-10%] opacity-5 pointer-events-none rotate-12">
-          <Coffee className="h-[600px] w-[600px] text-primary" />
+          <Coffee className="h-[350px] w-[350px] text-primary" />
         </div>
 
         <article className="container mx-auto px-4 md:px-6 py-16 md:py-24 max-w-4xl relative z-10">

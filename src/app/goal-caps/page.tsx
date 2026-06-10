@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -116,8 +115,9 @@ export default function GoalCapsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      <div className="absolute top-[20%] left-[-10%] opacity-5 pointer-events-none scale-150 rotate-12">
-        <Hourglass className="h-[500px] w-[500px] text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - REDUCED SIZE */}
+      <div className="absolute top-[20%] left-[-10%] opacity-5 pointer-events-none scale-100 rotate-12">
+        <Hourglass className="h-[300px] w-[300px] text-primary" />
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-16 max-w-[1400px] relative z-10">

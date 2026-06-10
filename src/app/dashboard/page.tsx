@@ -12,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield, RefreshCw
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -321,21 +321,21 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
-      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3.5] animate-pulse duration-[8000ms]">
-        <Coffee className="w-[500px] h-[500px] text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - REDUCED SIZE */}
+      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.5] animate-pulse duration-[8000ms]">
+        <Coffee className="w-[300px] h-[300px] text-primary" />
       </div>
-      <div className="absolute bottom-[20%] left-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[3] animate-pulse duration-[10000ms]">
-        <Zap className="w-[600px] h-[600px] text-primary" />
+      <div className="absolute bottom-[20%] left-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.2] animate-pulse duration-[10000ms]">
+        <Zap className="w-[350px] h-[350px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[-10%] opacity-[0.02] pointer-events-none scale-[2.5]">
-        <ShieldCheck className="w-[700px] h-[700px] text-primary" />
+      <div className="absolute top-[40%] right-[-10%] opacity-[0.02] pointer-events-none scale-[1.1]">
+        <ShieldCheck className="w-[400px] h-[400px] text-primary" />
       </div>
-      <div className="absolute bottom-[-10%] right-[20%] opacity-[0.02] pointer-events-none rotate-45 scale-[3.5]">
-        <Award className="w-[400px] h-[400px] text-primary" />
+      <div className="absolute bottom-[-10%] right-[20%] opacity-[0.02] pointer-events-none rotate-45 scale-[1.5]">
+        <Award className="w-[250px] h-[250px] text-primary" />
       </div>
-      <div className="absolute top-[-10%] left-[10%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[3]">
-        <Shield className="w-[400px] h-[400px] text-primary" />
+      <div className="absolute top-[-10%] left-[10%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[1.4]">
+        <Shield className="w-[250px] h-[250px] text-primary" />
       </div>
 
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
@@ -607,7 +607,7 @@ export default function DashboardPage() {
              
              {marketplaceAssets.length === 0 ? (
                <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20 relative overflow-hidden">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[4] pointer-events-none">
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[2] pointer-events-none">
                     <ShoppingBag className="w-96 h-96 text-primary" />
                  </div>
                  <ShoppingBag className="h-20 w-20 mx-auto text-primary/20 mb-6" />
@@ -644,7 +644,7 @@ export default function DashboardPage() {
              
              {webinResources.length === 0 ? (
                <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20 relative overflow-hidden">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[4] pointer-events-none">
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[2] pointer-events-none">
                     <Video className="w-96 h-96 text-primary" />
                  </div>
                  <Video className="h-20 w-20 mx-auto text-primary/20 mb-6" />

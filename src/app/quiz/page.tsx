@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -150,11 +149,12 @@ export default function QuizPage() {
       <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
         <Navigation />
         
+        {/* ATMOSPHERIC BACKGROUND DESIGNS - REDUCED SIZE */}
         <div className="absolute top-[15%] left-[5%] opacity-5 -rotate-12 pointer-events-none">
-          <Coffee className="w-96 h-96 text-primary" />
+          <Coffee className="w-64 h-64 text-primary" />
         </div>
         <div className="absolute bottom-[10%] right-[5%] opacity-5 rotate-12 pointer-events-none">
-          <ShieldAlert className="w-80 h-80 text-primary" />
+          <ShieldAlert className="w-48 h-48 text-primary" />
         </div>
 
         <main className="flex-1 container mx-auto px-4 py-12 max-w-7xl relative z-10">

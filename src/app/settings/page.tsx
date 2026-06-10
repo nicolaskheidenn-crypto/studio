@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -194,24 +193,24 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
-      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3.5] animate-pulse">
-        <User className="w-[500px] h-[500px] text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - REDUCED SIZE */}
+      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.5] animate-pulse">
+        <User className="w-[300px] h-[300px] text-primary" />
       </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[3.5] animate-pulse">
-        <ShieldCheck className="w-[600px] h-[600px] text-primary" />
+      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.5] animate-pulse">
+        <ShieldCheck className="w-[350px] h-[350px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[10%] opacity-[0.03] pointer-events-none scale-[2.8]">
-        <Coffee className="w-[400px] h-[400px] text-primary" />
+      <div className="absolute top-[40%] right-[10%] opacity-[0.03] pointer-events-none scale-[1.3]">
+        <Coffee className="w-[250px] h-[250px] text-primary" />
       </div>
-      <div className="absolute top-[60%] left-[20%] opacity-[0.02] pointer-events-none -rotate-45 scale-[2.5]">
-        <Fingerprint className="w-[300px] h-[300px] text-primary" />
+      <div className="absolute top-[60%] left-[20%] opacity-[0.02] pointer-events-none -rotate-45 scale-[1.2]">
+        <Fingerprint className="w-[200px] h-[200px] text-primary" />
       </div>
-      <div className="absolute bottom-[-5%] left-[5%] opacity-[0.02] pointer-events-none scale-[3.2]">
-        <Target className="w-[400px] h-[400px] text-primary" />
+      <div className="absolute bottom-[-5%] left-[5%] opacity-[0.02] pointer-events-none scale-[1.4]">
+        <Target className="w-[250px] h-[250px] text-primary" />
       </div>
-      <div className="absolute top-[15%] right-[15%] opacity-[0.02] pointer-events-none scale-[3]">
-        <Zap className="w-[400px] h-[400px] text-primary" />
+      <div className="absolute top-[15%] right-[15%] opacity-[0.02] pointer-events-none scale-[1.3]">
+        <Zap className="w-[250px] h-[250px] text-primary" />
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
