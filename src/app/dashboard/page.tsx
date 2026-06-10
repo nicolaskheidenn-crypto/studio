@@ -322,15 +322,18 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
-      <div className="absolute top-[10%] right-[5%] opacity-5 pointer-events-none rotate-12 scale-150">
-        <Coffee className="w-96 h-96 text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
+      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3]">
+        <Coffee className="w-[500px] h-[500px] text-primary" />
       </div>
-      <div className="absolute bottom-[20%] left-[-5%] opacity-5 pointer-events-none -rotate-12 scale-[2]">
-        <Zap className="w-80 h-80 text-primary" />
+      <div className="absolute bottom-[20%] left-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[2.5]">
+        <Zap className="w-[600px] h-[600px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[10%] opacity-5 pointer-events-none scale-125">
-        <ShieldCheck className="w-64 h-64 text-primary" />
+      <div className="absolute top-[40%] right-[-10%] opacity-[0.02] pointer-events-none scale-[2]">
+        <ShieldCheck className="w-[700px] h-[700px] text-primary" />
+      </div>
+      <div className="absolute bottom-[-10%] right-[20%] opacity-[0.02] pointer-events-none rotate-45 scale-[3]">
+        <Award className="w-[400px] h-[400px] text-primary" />
       </div>
 
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">

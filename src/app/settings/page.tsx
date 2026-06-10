@@ -194,15 +194,18 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
-      <div className="absolute top-[10%] left-[-5%] opacity-5 pointer-events-none rotate-12 scale-[1.8]">
-        <User className="w-96 h-96 text-primary" />
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
+      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3]">
+        <User className="w-[500px] h-[500px] text-primary" />
       </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-5 pointer-events-none -rotate-12 scale-[2]">
-        <ShieldCheck className="w-80 h-80 text-primary" />
+      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[3]">
+        <ShieldCheck className="w-[600px] h-[600px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[5%] opacity-5 pointer-events-none scale-150">
-        <Coffee className="w-64 h-64 text-primary" />
+      <div className="absolute top-[40%] right-[10%] opacity-[0.03] pointer-events-none scale-[2.5]">
+        <Coffee className="w-[400px] h-[400px] text-primary" />
+      </div>
+      <div className="absolute top-[60%] left-[20%] opacity-[0.02] pointer-events-none -rotate-45 scale-[2.2]">
+        <Fingerprint className="w-[300px] h-[300px] text-primary" />
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
