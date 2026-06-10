@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from '@/components/Navigation';
@@ -383,7 +382,7 @@ export default function DashboardPage() {
             <ShadcnList className="bg-card p-2 rounded-full w-fit shadow-2xl border-4 border-primary/10 overflow-x-auto scrollbar-hide">
               <ShadcnTrigger value="hub" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><LayoutDashboard className="h-4 w-4" /> Hub</ShadcnTrigger>
               <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> Shooppy</ShadcnTrigger>
-              <ShadcnTrigger value="webin" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> Webin</ShadcnTrigger>
+              <ShadcnTrigger value="webin" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> Wedio</ShadcnTrigger>
               <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> Library</ShadcnTrigger>
               <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
             </ShadcnList>
@@ -530,7 +529,7 @@ export default function DashboardPage() {
                             {post.comments?.length || 0} INSIGHTS
                           </Button>
                        </div>
-                    </CardContent>
+                    </CardHeader>
                   </Card>
                 ))}
               </div>
@@ -642,7 +641,7 @@ export default function DashboardPage() {
 
           <ShadcnContent value="webin" className="space-y-16">
              <div className="text-center space-y-3">
-                <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Webin Portals</h3>
+                <h3 className="text-6xl font-black text-foreground uppercase tracking-tighter italic">Wedio Portals</h3>
                 <p className="text-[11px] font-black uppercase text-primary tracking-[0.6em]">Authorized Training & Strategy Masterclasses</p>
              </div>
              

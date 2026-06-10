@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -225,7 +224,7 @@ export default function AdminPage() {
     }
 
     setWebinTitle(""); setWebinContent("");
-    toast({ title: editingWebin ? "Webin Synchronized" : "Webin Portal Deployed" });
+    toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
   };
 
   const handleMoveWebin = async (id: string, direction: 'up' | 'down') => {
@@ -430,7 +429,7 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-primary font-black uppercase tracking-widest text-[10px] mb-2">Webin Portals</span>
+              <span className="text-primary font-black uppercase tracking-widest text-[10px] mb-2">Wedio Portals</span>
               <div className="flex items-center gap-4">
                 <Video className="h-8 w-8 text-primary" />
                 <span className="text-4xl font-black text-foreground italic tracking-tighter">{webins.length}</span>
@@ -461,7 +460,7 @@ export default function AdminPage() {
               {[
                 { val: "tasks", icon: ListChecks, label: "Routines", count: globalTasks.length },
                 { val: "assets", icon: ShoppingBag, label: "Shooppy", count: shooppyProducts.length },
-                { val: "webin", icon: Video, label: "Webin", count: webins.length },
+                { val: "webin", icon: Video, label: "Wedio", count: webins.length },
                 { val: "rewards", icon: Gift, label: "Rewards", count: globalRewards.length },
                 { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
                 { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
@@ -691,11 +690,11 @@ export default function AdminPage() {
             </div>
           </TabsContent>
 
-          {/* Webin Tab - MOVED AFTER SHOOPPY */}
+          {/* Wedio Tab */}
           <TabsContent value="webin" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Video className="h-8 w-8 text-primary" /> {editingWebin ? 'Edit Portal' : 'Webin Injector'}</CardTitle>
+                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Video className="h-8 w-8 text-primary" /> {editingWebin ? 'Edit Portal' : 'Wedio Injector'}</CardTitle>
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Portal Title</Label>
@@ -716,7 +715,7 @@ export default function AdminPage() {
 
                <div className="space-y-8">
                   <div className="flex items-center justify-between px-6">
-                    <h3 className="text-2xl font-black uppercase text-foreground italic">Webin Portals</h3>
+                    <h3 className="text-2xl font-black uppercase text-foreground italic">Wedio Portals</h3>
                     <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Active Links</span>
                   </div>
                   <ScrollArea className="h-[650px] pr-6">
