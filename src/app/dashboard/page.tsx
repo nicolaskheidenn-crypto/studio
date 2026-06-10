@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCw, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -323,17 +323,20 @@ export default function DashboardPage() {
       <Navigation />
       
       {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
-      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3]">
+      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3.5] animate-pulse duration-[8000ms]">
         <Coffee className="w-[500px] h-[500px] text-primary" />
       </div>
-      <div className="absolute bottom-[20%] left-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[2.5]">
+      <div className="absolute bottom-[20%] left-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[3] animate-pulse duration-[10000ms]">
         <Zap className="w-[600px] h-[600px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[-10%] opacity-[0.02] pointer-events-none scale-[2]">
+      <div className="absolute top-[40%] right-[-10%] opacity-[0.02] pointer-events-none scale-[2.5]">
         <ShieldCheck className="w-[700px] h-[700px] text-primary" />
       </div>
-      <div className="absolute bottom-[-10%] right-[20%] opacity-[0.02] pointer-events-none rotate-45 scale-[3]">
+      <div className="absolute bottom-[-10%] right-[20%] opacity-[0.02] pointer-events-none rotate-45 scale-[3.5]">
         <Award className="w-[400px] h-[400px] text-primary" />
+      </div>
+      <div className="absolute top-[-10%] left-[10%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[3]">
+        <Shield className="w-[400px] h-[400px] text-primary" />
       </div>
 
       <div className="bg-card/80 border-b-4 border-primary/20 backdrop-blur-md sticky top-16 z-40">
@@ -607,7 +610,10 @@ export default function DashboardPage() {
              </div>
              
              {marketplaceAssets.length === 0 ? (
-               <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20">
+               <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20 relative overflow-hidden">
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[4] pointer-events-none">
+                    <ShoppingBag className="w-96 h-96 text-primary" />
+                 </div>
                  <ShoppingBag className="h-20 w-20 mx-auto text-primary/20 mb-6" />
                  <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No storefront assets deployed yet.</p>
                </div>
@@ -641,7 +647,10 @@ export default function DashboardPage() {
              </div>
              
              {webinResources.length === 0 ? (
-               <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20">
+               <div className="py-20 text-center bg-card/40 rounded-[4rem] border-4 border-dashed border-primary/20 relative overflow-hidden">
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] scale-[4] pointer-events-none">
+                    <Video className="w-96 h-96 text-primary" />
+                 </div>
                  <Video className="h-20 w-20 mx-auto text-primary/20 mb-6" />
                  <p className="text-2xl font-black text-foreground/40 uppercase tracking-tighter italic">No masterclass portals active.</p>
                </div>

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles, SmilePlus, Ghost, ShieldCheck, Fingerprint } from "lucide-react";
+import { Shield, Lock, Award, Trophy, Coffee, FileText, Eye, EyeOff, Loader2, CheckCircle2, User, Sparkles, SmilePlus, Ghost, ShieldCheck, Fingerprint, Target, Zap } from "lucide-react";
 import { useUserStore, useAdminStore, UserProfile, Badge as BadgeType } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore } from "@/firebase";
@@ -195,17 +195,23 @@ export default function SettingsPage() {
       <Navigation />
       
       {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
-      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3]">
+      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[3.5] animate-pulse">
         <User className="w-[500px] h-[500px] text-primary" />
       </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[3]">
+      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[3.5] animate-pulse">
         <ShieldCheck className="w-[600px] h-[600px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[10%] opacity-[0.03] pointer-events-none scale-[2.5]">
+      <div className="absolute top-[40%] right-[10%] opacity-[0.03] pointer-events-none scale-[2.8]">
         <Coffee className="w-[400px] h-[400px] text-primary" />
       </div>
-      <div className="absolute top-[60%] left-[20%] opacity-[0.02] pointer-events-none -rotate-45 scale-[2.2]">
+      <div className="absolute top-[60%] left-[20%] opacity-[0.02] pointer-events-none -rotate-45 scale-[2.5]">
         <Fingerprint className="w-[300px] h-[300px] text-primary" />
+      </div>
+      <div className="absolute bottom-[-5%] left-[5%] opacity-[0.02] pointer-events-none scale-[3.2]">
+        <Target className="w-[400px] h-[400px] text-primary" />
+      </div>
+      <div className="absolute top-[15%] right-[15%] opacity-[0.02] pointer-events-none scale-[3]">
+        <Zap className="w-[400px] h-[400px] text-primary" />
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
@@ -475,7 +481,7 @@ export default function SettingsPage() {
                 YOU'VE UNLOCKED: <span className="text-primary bg-[#1f1610] px-4 py-1 rounded-lg">{unlockedBadge?.title}</span>
               </p>
             </div>
-            <p className="text-lg font-bold text-[#1f1610]/60 uppercase tracking-[0.2em] max-w-sm mx-auto">
+            <p className="text-lg font-bold text-[#1f1610]/60 uppercase tracking-[0.2em] max-sm mx-auto">
               Your sovereign achievement has been archived in the Achievement Vault.
             </p>
             <Button 

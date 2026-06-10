@@ -10,7 +10,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Trophy, ArrowRight, Lock, ShieldCheck, 
-  Flame, Zap, BarChart3, Gift, Download, Sparkles
+  Flame, Zap, BarChart3, Gift, Download, Sparkles, Target, Coffee
 } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -194,6 +194,17 @@ export default function TaskDoPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - ENHANCED 50%+ COVERAGE */}
+      <div className="absolute top-[10%] left-[-10%] opacity-[0.03] pointer-events-none scale-[4] rotate-12">
+        <Target className="w-[500px] h-[500px] text-primary" />
+      </div>
+      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none scale-[3.5] -rotate-45">
+        <Zap className="w-[600px] h-[600px] text-primary" />
+      </div>
+      <div className="absolute top-[50%] right-[10%] opacity-[0.02] pointer-events-none scale-[2.5]">
+        <Coffee className="w-[400px] h-[400px] text-primary" />
+      </div>
+
       <main className="flex-1 container mx-auto px-4 py-6 max-w-[1600px] relative z-10 space-y-10">
         
         <header className="text-center space-y-1">
