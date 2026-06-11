@@ -162,7 +162,7 @@ export default function AdminPage() {
     reader.onload = async (event) => {
       try {
         const fullData = JSON.parse(event.target?.result as string);
-        const data = fullData.payload || fullData; // Handle legacy and new formats
+        const data = fullData.payload || fullData; 
         
         for (const collName in data) {
           const items = data[collName];
@@ -190,9 +190,9 @@ export default function AdminPage() {
       fileUrl: prodFile, 
       type: prodType,
       placement: prodPlacement,
-      requiredLevel: prodLevel,
-      price: prodPrice,
-      sortOrder: editingProduct ? editingProduct.sortOrder : shooppyProducts.length
+      requiredLevel: Number(prodLevel),
+      price: Number(prodPrice),
+      sortOrder: editingProduct ? Number(editingProduct.sortOrder) : shooppyProducts.length
     };
     
     if (editingProduct) {
@@ -215,8 +215,8 @@ export default function AdminPage() {
     const current = shooppyProducts[idx];
     const target = shooppyProducts[targetIdx];
 
-    const currentOrder = current.sortOrder ?? idx;
-    const targetOrder = target.sortOrder ?? targetIdx;
+    const currentOrder = Number(current.sortOrder ?? idx);
+    const targetOrder = Number(target.sortOrder ?? targetIdx);
 
     await updateDoc(doc(db, 'shooppyProducts', current.id), { sortOrder: targetOrder });
     await updateDoc(doc(db, 'shooppyProducts', target.id), { sortOrder: currentOrder });
@@ -231,7 +231,7 @@ export default function AdminPage() {
       nickname: 'Host',
       userId: user?.uid || 'host-id',
       timestamp: serverTimestamp(),
-      sortOrder: editingWebin ? editingWebin.sortOrder : webins.length
+      sortOrder: editingWebin ? Number(editingWebin.sortOrder) : webins.length
     };
 
     if (editingWebin) {
@@ -254,8 +254,8 @@ export default function AdminPage() {
     const current = webins[idx];
     const target = webins[targetIdx];
 
-    const currentOrder = current.sortOrder ?? idx;
-    const targetOrder = target.sortOrder ?? targetIdx;
+    const currentOrder = Number(current.sortOrder ?? idx);
+    const targetOrder = Number(target.sortOrder ?? targetIdx);
 
     await updateDoc(doc(db, 'resources', current.id), { sortOrder: targetOrder });
     await updateDoc(doc(db, 'resources', target.id), { sortOrder: currentOrder });
@@ -264,7 +264,7 @@ export default function AdminPage() {
 
   const handleSaveReward = () => {
     const data = {
-      week: rewardWeek,
+      week: Number(rewardWeek),
       title: rewardTitle,
       description: rewardDesc,
       fileUrl: rewardFile,
@@ -345,7 +345,7 @@ export default function AdminPage() {
     try {
       for (const task of tasksToSave) {
         await addDoc(collection(db, 'tasks'), {
-          day: taskDay,
+          day: Number(taskDay),
           title: task.title,
           description: task.description,
           createdAt: serverTimestamp()
@@ -386,8 +386,8 @@ export default function AdminPage() {
     setProdFile(p.fileUrl || "");
     setProdType(p.type);
     setProdPlacement(p.placement);
-    setProdLevel(p.requiredLevel || 1);
-    setProdPrice(p.price);
+    setProdLevel(Number(p.requiredLevel || 1));
+    setProdPrice(Number(p.price));
   };
 
   const startEditWebin = (w: any) => {

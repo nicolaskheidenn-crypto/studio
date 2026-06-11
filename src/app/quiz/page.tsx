@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,9 +65,13 @@ export default function QuizPage() {
   const [cheatTriggered, setCheatTriggered] = useState(false);
   const [userAnswer, setUserAnswer] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const cheatTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    return () => {
+      if (cheatTimerRef.current) clearTimeout(cheatTimerRef.current);
+    };
   }, []);
 
   const shuffle = useCallback((array: any[]) => {
@@ -81,7 +85,8 @@ export default function QuizPage() {
   const handleCheat = useCallback(() => {
     if (activeQuiz && !isFinished && !cheatTriggered) {
       setCheatTriggered(true);
-      const timer = setTimeout(() => {
+      cheatTimerRef.current = setTimeout(() => {
+        if (!activeQuiz) return;
         setShuffledQuestions(shuffle(activeQuiz.questions));
         setCurrentIdx(0);
         setScore(0);
@@ -93,15 +98,27 @@ export default function QuizPage() {
           variant: "destructive",
         });
       }, 3000);
-      return () => clearTimeout(timer);
     }
   }, [activeQuiz, isFinished, cheatTriggered, shuffle]);
 
   useEffect(() => {
     if (!isMounted) return;
     const onBlur = () => handleCheat();
+    const onFocus = () => {
+      if (cheatTimerRef.current) {
+        clearTimeout(cheatTimerRef.current);
+        cheatTimerRef.current = null;
+        setCheatTriggered(false);
+      }
+    };
+
     window.addEventListener("blur", onBlur);
-    return () => window.removeEventListener("blur", onBlur);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
+      if (cheatTimerRef.current) clearTimeout(cheatTimerRef.current);
+    };
   }, [handleCheat, isMounted]);
 
   const startQuiz = (quiz: any) => {
