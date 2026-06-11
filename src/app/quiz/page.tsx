@@ -81,7 +81,7 @@ export default function QuizPage() {
   const handleCheat = useCallback(() => {
     if (activeQuiz && !isFinished && !cheatTriggered) {
       setCheatTriggered(true);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setShuffledQuestions(shuffle(activeQuiz.questions));
         setCurrentIdx(0);
         setScore(0);
@@ -93,14 +93,16 @@ export default function QuizPage() {
           variant: "destructive",
         });
       }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [activeQuiz, isFinished, cheatTriggered, shuffle]);
 
   useEffect(() => {
+    if (!isMounted) return;
     const onBlur = () => handleCheat();
     window.addEventListener("blur", onBlur);
     return () => window.removeEventListener("blur", onBlur);
-  }, [handleCheat]);
+  }, [handleCheat, isMounted]);
 
   const startQuiz = (quiz: any) => {
     setActiveQuiz(quiz);
@@ -155,10 +157,10 @@ export default function QuizPage() {
       <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
         <Navigation />
         
-        <div className="absolute top-[15%] left-[5%] opacity-5 -rotate-12 pointer-events-none">
+        <div className="absolute top-[15%] left-[5%] opacity-5 -rotate-12 pointer-events-none will-change-transform">
           <Coffee className="w-48 h-48 text-primary" />
         </div>
-        <div className="absolute bottom-[10%] right-[5%] opacity-5 rotate-12 pointer-events-none">
+        <div className="absolute bottom-[10%] right-[5%] opacity-5 rotate-12 pointer-events-none will-change-transform">
           <ShieldAlert className="w-32 h-32 text-primary" />
         </div>
 
@@ -319,7 +321,7 @@ export default function QuizPage() {
       <Navigation />
       
       {!isFinished && !cheatTriggered && (
-        <div className="fixed top-24 right-8 z-[60] flex items-center gap-3 bg-red-600/10 border-2 border-red-600/30 px-8 py-4 rounded-full animate-pulse shadow-[0_0_30px_rgba(220,38,38,0.3)]">
+        <div className="fixed top-24 right-8 z-[60] flex items-center gap-3 bg-red-600/10 border-2 border-red-600/30 px-8 py-4 rounded-full animate-pulse shadow-[0_0_30px_rgba(220,38,38,0.3)] pointer-events-none">
           <ShieldAlert className="h-6 w-6 text-red-600" />
           <span className="text-[11px] font-black text-red-600 uppercase tracking-[0.2em]">Anti-Cheat Sensor Active</span>
         </div>
@@ -371,7 +373,7 @@ export default function QuizPage() {
           </div>
 
           <Card className="rounded-[4rem] border-primary/10 border-[10px] md:border-[15px] shadow-[0_50px_100px_rgba(0,0,0,0.6)] p-10 md:p-16 bg-mocha-cream relative overflow-hidden animate-in zoom-in-95 duration-700">
-            <div className="absolute top-0 right-0 p-10 opacity-5">
+            <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
               <Sparkles className="h-32 w-32 text-[#1f1610]" />
             </div>
             

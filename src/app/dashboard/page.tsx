@@ -321,20 +321,20 @@ export default function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - REFINED SCALE */}
-      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1] animate-pulse duration-[8000ms]">
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - GPU OPTIMIZED */}
+      <div className="absolute top-[10%] right-[5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1] animate-pulse duration-[8000ms] will-change-transform">
         <Coffee className="w-[200px] h-[200px] text-primary" />
       </div>
-      <div className="absolute bottom-[20%] left-[-2%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1] animate-pulse duration-[10000ms]">
+      <div className="absolute bottom-[20%] left-[-2%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1] animate-pulse duration-[10000ms] will-change-transform">
         <Zap className="w-[220px] h-[220px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[-5%] opacity-[0.02] pointer-events-none scale-[1]">
+      <div className="absolute top-[40%] right-[-5%] opacity-[0.02] pointer-events-none scale-[1] will-change-transform">
         <ShieldCheck className="w-[250px] h-[250px] text-primary" />
       </div>
-      <div className="absolute bottom-[5%] right-[15%] opacity-[0.02] pointer-events-none rotate-45 scale-[1.2]">
+      <div className="absolute bottom-[5%] right-[15%] opacity-[0.02] pointer-events-none rotate-45 scale-[1.2] will-change-transform">
         <Award className="w-[180px] h-[180px] text-primary" />
       </div>
-      <div className="absolute top-[-5%] left-[5%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[1.1]">
+      <div className="absolute top-[-5%] left-[5%] opacity-[0.02] pointer-events-none rotate-[-45deg] scale-[1.1] will-change-transform">
         <Shield className="w-[180px] h-[180px] text-primary" />
       </div>
 
@@ -398,7 +398,7 @@ export default function DashboardPage() {
           <ShadcnContent value="hub" className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
               <Card className="rounded-[4rem] border-[8px] border-primary/5 shadow-2xl p-12 bg-card/40 space-y-10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
+                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                   <Zap className="h-32 w-32 text-primary" />
                 </div>
                 <div className="flex gap-8 items-start">

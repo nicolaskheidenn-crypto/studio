@@ -115,15 +115,15 @@ export default function GoalCapsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - REDUCED SIZE */}
-      <div className="absolute top-[20%] left-[-10%] opacity-5 pointer-events-none scale-100 rotate-12">
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - GPU OPTIMIZED */}
+      <div className="absolute top-[20%] left-[-10%] opacity-5 pointer-events-none scale-100 rotate-12 will-change-transform">
         <Hourglass className="h-[300px] w-[300px] text-primary" />
       </div>
 
       <main className="flex-1 container mx-auto px-4 py-16 max-w-[1400px] relative z-10">
         <div className="space-y-16">
           
-          <div className="text-center space-y-6 animate-in fade-in slide-in-from-top-10 duration-1000">
+          <div className="text-center space-y-6 animate-in fade-in slide-in-from-top-10 duration-700">
             <h1 className="text-7xl md:text-9xl font-headline font-black text-foreground uppercase tracking-tighter italic leading-none">
               GOAL<span className="text-primary">CAPS</span>
             </h1>
@@ -161,7 +161,7 @@ export default function GoalCapsPage() {
                </Card>
 
                <Card className="rounded-[3rem] border-4 border-primary/10 bg-card/40 p-10 shadow-2xl text-center space-y-6">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto border-2 border-primary/20">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto border-2 border-primary/20 shadow-inner">
                     <KeyRound className="h-8 w-8 text-primary" />
                   </div>
                   <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest leading-relaxed">
@@ -241,7 +241,7 @@ export default function GoalCapsPage() {
                 ) : (
                   [...capsules].reverse().map((cap) => {
                     const unlockDateObj = new Date(cap.unlockDate);
-                    const isLocked = unlockDateObj > currentDate;
+                    const isLocked = unlockDateObj > (currentDate || new Date());
 
                     return (
                       <Card 

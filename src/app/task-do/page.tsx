@@ -21,7 +21,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const NODE_GAP = 550; 
 const MAP_HEIGHT = 450; 
-const VERTICAL_SCATTER = [0, 80, -60, 100, -80, 120, -100, 50, -60];
+const VERTICAL_SCATTER_BASE = [0, 80, -60, 100, -80, 120, -100, 50, -60];
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Strategist',
@@ -86,6 +86,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
+    // Generate shining dots only on client to avoid hydration mismatch
     const dots = Array.from({ length: 800 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -155,7 +156,7 @@ export default function TaskDoPage() {
     return ALL_DAYS.map((d, i) => ({
       day: d,
       x: i * NODE_GAP + 600,
-      y: (MAP_HEIGHT / 2) + VERTICAL_SCATTER[i % VERTICAL_SCATTER.length]
+      y: (MAP_HEIGHT / 2) + VERTICAL_SCATTER_BASE[i % VERTICAL_SCATTER_BASE.length]
     }));
   }, [ALL_DAYS]);
 
@@ -192,14 +193,14 @@ export default function TaskDoPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - REFINED SCALING */}
-      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none scale-[1.5] rotate-12">
+      {/* ATMOSPHERIC BACKGROUND DESIGNS - GPU OPTIMIZED */}
+      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none scale-[1.5] rotate-12 will-change-transform">
         <Target className="w-[300px] h-[300px] text-primary" />
       </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none scale-[1.5] -rotate-45">
+      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none scale-[1.5] -rotate-45 will-change-transform">
         <Zap className="w-[300px] h-[300px] text-primary" />
       </div>
-      <div className="absolute top-[50%] right-[10%] opacity-[0.02] pointer-events-none scale-[1.2]">
+      <div className="absolute top-[50%] right-[10%] opacity-[0.02] pointer-events-none scale-[1.2] will-change-transform">
         <Coffee className="w-[200px] h-[200px] text-primary" />
       </div>
 
@@ -216,7 +217,7 @@ export default function TaskDoPage() {
           <Card className="rounded-[3.8rem] border-[8px] border-primary/5 bg-[#0a140a] relative overflow-hidden h-[450px]">
             
             <div 
-              className="absolute inset-0 bg-cover bg-center" 
+              className="absolute inset-0 bg-cover bg-center pointer-events-none" 
               style={{ 
                 backgroundImage: `url('${mapBg}')`,
                 width: totalMapWidth,
@@ -224,7 +225,7 @@ export default function TaskDoPage() {
               }} 
             />
             <div 
-              className="absolute inset-0 bg-gradient-to-r from-[#0d120d] via-transparent to-[#0d120d]" 
+              className="absolute inset-0 bg-gradient-to-r from-[#0d120d] via-transparent to-[#0d120d] pointer-events-none" 
               style={{ width: totalMapWidth }}
             />
 
@@ -258,7 +259,7 @@ export default function TaskDoPage() {
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ minWidth: totalMapWidth }}>
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none will-change-transform" style={{ minWidth: totalMapWidth }}>
                     <defs>
                       <filter id="glitter-glow-v2">
                         <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
@@ -446,7 +447,7 @@ export default function TaskDoPage() {
 
               {showAward && (
                 <div className="p-16 rounded-[4.5rem] bg-primary text-[#1f1610] text-center animate-in zoom-in duration-700 shadow-[0_50px_100px_rgba(255,215,0,0.6)] relative border-[15px] border-white/20 overflow-hidden mt-12">
-                  <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12"><Sparkles className="h-56 w-56" /></div>
+                  <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12 pointer-events-none"><Sparkles className="h-56 w-56" /></div>
                   <Trophy className="h-20 w-20 mx-auto mb-6 animate-bounce drop-shadow-2xl" />
                   <h2 className="text-6xl font-headline font-black mb-4 uppercase tracking-tighter italic leading-none">Hub Conquered!</h2>
                   <p className="text-2xl font-black uppercase tracking-[0.3em] opacity-80 mb-12 italic leading-relaxed">
