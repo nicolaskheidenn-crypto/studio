@@ -16,7 +16,16 @@ import { cn } from "@/lib/utils";
 import { useUser, useFirestore } from "@/firebase";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { getAuth, updateProfile, updatePassword, verifyBeforeUpdateEmail, signOut, deleteUser } from "firebase/auth";
+import { 
+  getAuth, 
+  updateProfile, 
+  signOut, 
+  deleteUser,
+  EmailAuthProvider,
+  linkWithCredential,
+  reauthenticateWithCredential,
+  unlink
+} from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { doc, setDoc } from 'firebase/firestore';
@@ -66,13 +75,15 @@ export default function SettingsPage() {
   const { updateProfile: updateStoreProfile, resetUserStats } = useUserStore();
 
   const [displayName, setDisplayName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
   const [isInitialized, setIsInitialized] = useState(false);
   
-  const [newPass, setNewPass] = useState("");
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [isUpdatingPass, setIsUpdatingPass] = useState(false);
-  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
+  // Email Binding State
+  const [newEmailBind, setNewEmailBind] = useState("");
+  const [newPassBind, setNewPassBind] = useState("");
+  const [currentPassAuth, setCurrentPassAuth] = useState("");
+  const [isBinding, setIsBinding] = useState(false);
+  
+  const [showPass, setShowPass] = useState({ new: false, current: false });
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -112,49 +123,52 @@ export default function SettingsPage() {
     }
   };
 
-  const handleUpdateEmail = async () => {
-    if (!newEmail || !auth.currentUser) {
-      toast({ title: "Protocol Error", description: "Valid email required.", variant: "destructive" });
+  const handleRebindEmail = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !newEmailBind || !newPassBind || !currentPassAuth) {
+      toast({ title: "Protocol Breach", description: "All verification fields are required.", variant: "destructive" });
       return;
     }
-    setIsUpdatingEmail(true);
+
+    setIsBinding(true);
     try {
-      await verifyBeforeUpdateEmail(auth.currentUser, newEmail);
-      toast({ 
-        title: "Authorization Dispatched", 
-        description: "Check your new inbox for the confirmation link to complete the binding." 
-      });
-      setNewEmail("");
+      // 1. Re-authenticate to pass threshold
+      const credential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
+      await reauthenticateWithCredential(currentUser, credential);
+
+      // 2. Build new credential and Link
+      const newCredential = EmailAuthProvider.credential(newEmailBind, newPassBind);
+      await linkWithCredential(currentUser, newCredential);
+
+      // 3. Optional: Unlink the old provider if requested (conceptually)
+      // await unlink(currentUser, 'password');
+
+      toast({ title: "Identity Re-Bound", description: "Strategic email and key updated via secure link." });
+      setNewEmailBind(""); setNewPassBind(""); setCurrentPassAuth("");
     } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        toast({ title: "Security Threshold", description: "Please re-authenticate to confirm this identity shift.", variant: "destructive" });
-      } else {
-        toast({ title: "Binding Error", description: error.message, variant: "destructive" });
-      }
+      toast({ title: "Binding Failure", description: error.message, variant: "destructive" });
     } finally {
-      setIsUpdatingEmail(false);
+      setIsBinding(false);
     }
   };
 
-  const handleUpdatePassword = async () => {
-    if (!newPass || !auth.currentUser) {
-      toast({ title: "Protocol Error", description: "New key required.", variant: "destructive" });
+  const handleUnlinkIdentity = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !currentPassAuth) {
+      toast({ title: "Unlink Error", description: "Current key required for verification.", variant: "destructive" });
       return;
     }
-    setIsUpdatingPass(true);
+
+    setIsBinding(true);
     try {
-      await updatePassword(auth.currentUser, newPass);
-      setNewPass("");
-      setShowNewPass(false);
-      toast({ title: "Security Key Updated", description: "Access protocol re-established." });
+      const credential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
+      await reauthenticateWithCredential(currentUser, credential);
+      await unlink(currentUser, 'password');
+      toast({ title: "Provider Unlinked", description: "Identity block detached from root." });
     } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        toast({ title: "Security Threshold", description: "Recent login required. Please logout and back in.", variant: "destructive" });
-      } else {
-        toast({ title: "Security Alert", description: error.message, variant: "destructive" });
-      }
+      toast({ title: "Unlink Failed", description: error.message, variant: "destructive" });
     } finally {
-      setIsUpdatingPass(false);
+      setIsBinding(false);
     }
   };
 
@@ -206,9 +220,6 @@ export default function SettingsPage() {
       <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.2] animate-pulse duration-[10000ms] will-change-transform">
         <ShieldCheck className="w-[220px] h-[220px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[10%] opacity-[0.02] pointer-events-none scale-[1.1] will-change-transform">
-        <Coffee className="w-[180px] h-[180px] text-primary" />
-      </div>
 
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
         <header className="mb-12 space-y-4 text-center sm:text-left">
@@ -253,60 +264,76 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
-                 <div className="flex items-center gap-4 text-primary">
-                    <MailPlus className="h-8 w-8" />
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Strategic Email</h3>
-                 </div>
-                 <div className="space-y-4">
-                    <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Binding Target</Label>
-                    <Input 
-                      type="email" 
-                      placeholder="name@example.com" 
-                      value={newEmail} 
-                      onChange={e => setNewEmail(e.target.value)} 
-                      className="h-16 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 text-xl font-bold focus:border-primary transition-all" 
-                    />
-                    <Button 
-                      onClick={handleUpdateEmail}
-                      disabled={isUpdatingEmail}
-                      className="w-full h-16 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-xs hover:scale-105 transition-all shadow-xl tracking-widest"
-                    >
-                      {isUpdatingEmail ? <Loader2 className="h-5 w-5 animate-spin" /> : 'DISPATCH AUTHORIZATION'}
-                    </Button>
-                 </div>
-              </Card>
-
-              <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
-                 <div className="flex items-center gap-4 text-primary">
-                    <Lock className="h-8 w-8" />
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Root Security</h3>
-                 </div>
-                 <div className="space-y-4">
-                    <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">Update Access Key</Label>
-                    <div className="relative">
+            <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-12 shadow-2xl space-y-12">
+               <div className="flex items-center gap-4 text-primary">
+                  <ShieldCheck className="h-10 w-10" />
+                  <h3 className="text-4xl font-black uppercase italic tracking-tighter m-0">Binding Protocol</h3>
+               </div>
+               
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div className="space-y-4">
+                      <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">Target Strategic Email</Label>
                       <Input 
-                        type={showNewPass ? 'text' : 'password'} 
-                        placeholder="••••••••" 
-                        value={newPass} 
-                        onChange={e => setNewPass(e.target.value)} 
-                        className="h-16 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 pr-14 text-xl font-bold focus:border-primary transition-all" 
+                        placeholder="new-command@identity.com" 
+                        value={newEmailBind} 
+                        onChange={e => setNewEmailBind(e.target.value)} 
+                        className="h-16 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 text-xl font-bold" 
                       />
-                      <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-primary/30 hover:text-primary transition-colors">
-                        {showNewPass ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-                      </button>
                     </div>
-                    <Button 
-                      onClick={handleUpdatePassword}
-                      disabled={isUpdatingPass}
-                      className="w-full h-16 rounded-2xl bg-[#1f1610] border-4 border-primary/20 text-primary font-black uppercase text-xs hover:scale-105 transition-all shadow-xl tracking-widest"
-                    >
-                      {isUpdatingPass ? <Loader2 className="h-5 w-5 animate-spin" /> : 'INITIALIZE KEY SHIFT'}
-                    </Button>
-                 </div>
-              </Card>
-            </div>
+                    <div className="space-y-4">
+                      <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Security Passkey</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showPass.new ? 'text' : 'password'} 
+                          placeholder="••••••••" 
+                          value={newPassBind} 
+                          onChange={e => setNewPassBind(e.target.value)} 
+                          className="h-16 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 pr-14 text-xl font-bold" 
+                        />
+                        <button type="button" onClick={() => setShowPass(s => ({...s, new: !s.new}))} className="absolute right-5 top-1/2 -translate-y-1/2 text-primary/30">
+                          {showPass.new ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div className="space-y-4">
+                      <Label className="text-primary font-black text-[10px] uppercase tracking-[0.4em]">Current Authorization Key</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showPass.current ? 'text' : 'password'} 
+                          placeholder="Verify current passkey..." 
+                          value={currentPassAuth} 
+                          onChange={e => setCurrentPassAuth(e.target.value)} 
+                          className="h-16 bg-[#1f1610] border-4 border-red-600/30 rounded-2xl px-6 pr-14 text-xl font-bold text-white focus:border-red-600" 
+                        />
+                        <button type="button" onClick={() => setShowPass(s => ({...s, current: !s.current}))} className="absolute right-5 top-1/2 -translate-y-1/2 text-red-600/30">
+                          {showPass.current ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                      <Button 
+                        onClick={handleRebindEmail}
+                        disabled={isBinding}
+                        className="w-full h-20 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-sm hover:scale-105 transition-all shadow-xl tracking-widest"
+                      >
+                        {isBinding ? <Loader2 className="h-6 w-6 animate-spin" /> : 'RE-BIND IDENTITY'}
+                      </Button>
+                      <Button 
+                        variant="ghost"
+                        onClick={handleUnlinkIdentity}
+                        className="text-red-600 hover:bg-red-600/10 font-black uppercase text-[10px] tracking-widest"
+                      >
+                        UNLINK CURRENT PROVIDER
+                      </Button>
+                    </div>
+                  </div>
+               </div>
+            </Card>
           </TabsContent>
 
           <TabsContent value="vault" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -353,10 +380,7 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="flex flex-col items-center gap-4">
-                              <p 
-                                className="text-[9px] font-black uppercase tracking-[0.3em]"
-                                style={{ color: isUnlocked ? '#ffffff' : '#1f161060', opacity: isUnlocked ? 0.4 : 1 }}
-                              >
+                              <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: isUnlocked ? '#ffffff' : '#1f161060', opacity: isUnlocked ? 0.4 : 1 }}>
                                 {item.req}
                               </p>
                               {isUnlocked && (
@@ -373,7 +397,7 @@ export default function SettingsPage() {
 
                   <div className="h-1 bg-[#1f1610]/5 rounded-full" />
 
-                  {/* Privacy Protocol Section - UPDATED TO BLUE/WHITE BLOCKS */}
+                  {/* Privacy Protocol Section */}
                   <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-8 shadow-2xl overflow-hidden relative group">
                      <div className="flex items-center gap-6 relative z-10">
                         <div className="w-16 h-16 rounded-2xl bg-blue-700 flex items-center justify-center shadow-xl border-4 border-white/20">
@@ -389,35 +413,6 @@ export default function SettingsPage() {
                            Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
                         </p>
                      </div>
-                     
-                     {/* Decorative background accent */}
-                     <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 opacity-[0.05] pointer-events-none scale-[1.5]">
-                        <ShieldCheck className="w-80 h-80 text-blue-500" />
-                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-[#1f1610]">
-                    <div className="space-y-6">
-                      <h3 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-3">
-                        <ShieldCheck className="h-8 w-8 text-primary" /> Encryption Protocol
-                      </h3>
-                      <p className="font-medium text-lg leading-relaxed">Visions utilize a multi-layer encoding process. Raw data stored in the global registry is unreadable without an active, authenticated session key.</p>
-                      <ul className="space-y-4 font-black text-sm uppercase tracking-widest">
-                        <li className="flex gap-4"><CheckCircle2 className="h-6 w-6 text-primary shrink-0" /> Zero-Visibility Private Dispatches</li>
-                        <li className="flex gap-4"><CheckCircle2 className="h-6 w-6 text-primary shrink-0" /> Host Isolation Architecture</li>
-                        <li className="flex gap-4"><CheckCircle2 className="h-6 w-6 text-primary shrink-0" /> Local-Only Decryption Keys</li>
-                      </ul>
-                    </div>
-
-                    <div className="space-y-6">
-                      <h3 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-3">
-                        <Target className="h-8 w-8 text-primary" /> Data Retention
-                      </h3>
-                      <p className="font-medium text-lg leading-relaxed">NICO DIGITAL retains minimal identifiers required for growth scaling. Membership data is active only while your command remains open.</p>
-                      <div className="p-8 border-4 border-[#1f1610]/10 rounded-[2.5rem] bg-[#1f1610]/5 italic font-black text-xs uppercase tracking-[0.4em] text-center">
-                        "Your data. Your empire. Your sovereignty."
-                      </div>
-                    </div>
                   </div>
                 </div>
               </ScrollArea>
@@ -428,7 +423,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:border-primary/30 transition-all shadow-2xl">
                   <div className="space-y-6">
-                    <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-primary/20 shadow-inner group-hover:scale-110 transition-transform">
+                    <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-primary/20 shadow-inner">
                       <LogOut className="h-10 w-10 text-primary" />
                     </div>
                     <div className="space-y-2">
@@ -439,7 +434,7 @@ export default function SettingsPage() {
                   <Button 
                     onClick={handleLogout}
                     disabled={isLoggingOut}
-                    className="w-full h-20 rounded-2xl bg-white/5 border-4 border-white/10 text-white font-black uppercase text-xs hover:bg-white hover:text-black transition-all shadow-xl"
+                    className="w-full h-20 rounded-2xl bg-white/5 border-4 border-white/10 text-white font-black uppercase text-xs hover:bg-white hover:text-black transition-all"
                   >
                     {isLoggingOut ? <Loader2 className="h-5 w-5 animate-spin" /> : 'AUTHORIZE LOGOUT'}
                   </Button>
@@ -447,7 +442,7 @@ export default function SettingsPage() {
 
                <Card className="rounded-[3.5rem] border-[8px] border-red-600/20 bg-red-600/5 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:border-red-600/10 transition-all shadow-2xl">
                   <div className="space-y-6">
-                    <div className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-red-600/20 shadow-inner group-hover:scale-110 transition-transform">
+                    <div className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-red-600/20 shadow-inner">
                       <AlertTriangle className="h-10 w-10 text-red-600" />
                     </div>
                     <div className="space-y-2">
@@ -458,7 +453,7 @@ export default function SettingsPage() {
                   <Button 
                     onClick={handleDeleteAccount}
                     disabled={isDeleting}
-                    className="w-full h-20 rounded-2xl bg-red-600/20 border-4 border-red-600/40 text-red-600 font-black uppercase text-xs hover:bg-red-600 hover:text-white transition-all shadow-xl"
+                    className="w-full h-20 rounded-2xl bg-red-600/20 border-4 border-red-600/40 text-red-600 font-black uppercase text-xs hover:bg-red-600 hover:text-white transition-all"
                   >
                     {isDeleting ? <Loader2 className="h-5 w-5 animate-spin" /> : 'PURGE ALL DATA'}
                   </Button>
@@ -467,7 +462,7 @@ export default function SettingsPage() {
 
             <div className="p-8 bg-[#1f1610] rounded-[2.5rem] border-[6px] border-red-600/60 shadow-[0_0_30px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center">
                <div className="absolute inset-0 bg-red-600/5 pointer-events-none animate-pulse" />
-               <p className="text-3xl font-black text-red-600 uppercase tracking-[0.5em] italic relative z-10 leading-none drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+               <p className="text-3xl font-black text-red-600 uppercase tracking-[0.5em] italic relative z-10 leading-none">
                  2.0.5-SOVEREIGN
                </p>
             </div>
