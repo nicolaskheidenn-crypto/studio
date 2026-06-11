@@ -199,6 +199,7 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
+      {/* Atmospheric Designs */}
       <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.2] animate-pulse duration-[8000ms] will-change-transform">
         <User className="w-[200px] h-[200px] text-primary" />
       </div>
@@ -310,54 +311,62 @@ export default function SettingsPage() {
 
           <TabsContent value="vault" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
-              <ScrollArea className="h-[650px] pr-10">
-                <div className="space-y-12 text-[#1f1610]">
-                  <div className="space-y-8">
-                    <div className="flex items-center gap-4 text-[#1f1610]">
+              <ScrollArea className="h-[650px] pr-4">
+                <div className="space-y-12">
+                  <div className="space-y-10">
+                    <div className="flex items-center gap-4 text-[#1f1610] mb-8">
                        <Trophy className="h-10 w-10 text-primary" />
                        <h3 className="text-4xl font-black uppercase italic tracking-tighter m-0">Achievement Vault</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-2">
                       {ACHIEVEMENTS.map((item) => {
                         const isUnlocked = item.check(profile);
                         return (
                           <div key={item.id} className={cn(
-                            "p-10 rounded-[3.5rem] border-4 flex flex-col items-center text-center gap-6 transition-all shadow-xl min-h-[340px] justify-between relative",
+                            "p-10 rounded-[3.5rem] border-4 flex flex-col items-center text-center gap-8 transition-all shadow-2xl min-h-[380px] justify-between relative overflow-hidden",
                             isUnlocked 
-                              ? "bg-[#1f1610] text-primary border-primary shadow-[0_30px_60px_rgba(255,215,0,0.15)] scale-[1.02]" 
-                              : "bg-[#1f1610]/5 text-[#1f1610]/30 border-[#1f1610]/10 opacity-60"
+                              ? "bg-[#1f1610] border-primary shadow-[0_30px_60px_rgba(255,215,0,0.2)] scale-[1.02]" 
+                              : "bg-[#1f1610]/10 border-[#1f1610]/10 opacity-40"
                           )}>
+                            {/* Icon Container */}
                             <div className={cn(
-                              "w-24 h-24 rounded-[1.8rem] flex items-center justify-center border-2 shadow-inner transition-colors",
+                              "w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 shadow-inner transition-colors shrink-0",
                               isUnlocked ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
                             )}>
                               <item.icon className={cn("h-12 w-12", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
                             </div>
-                            <div className="space-y-3 w-full">
-                              <p className={cn(
-                                "text-[10px] font-black uppercase tracking-widest", 
-                                isUnlocked ? "text-white" : "text-[#1f1610]/40"
-                              )}>
+
+                            {/* Label Container - SPLIT INTO SLANTED BOXES AS PER IMAGE */}
+                            <div className="flex flex-col items-center gap-2 w-full">
+                              {item.label.split(' ').map((word, wordIdx) => (
+                                <div key={wordIdx} className={cn(
+                                  "px-6 py-2 skew-x-[-15deg] min-w-fit w-full flex items-center justify-center leading-none transition-all shadow-lg",
+                                  isUnlocked ? "bg-[#2b59ff]" : "bg-[#1f1610]/20"
+                                )}>
+                                  <p 
+                                    className="text-xl font-black uppercase italic tracking-tighter skew-x-[15deg] whitespace-nowrap"
+                                    style={{ color: isUnlocked ? '#1f1610' : '#1f161040', margin: 0 }}
+                                  >
+                                    {word}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Requirement / Checkmark Container */}
+                            <div className="flex flex-col items-center gap-4">
+                              <p 
+                                className="text-[9px] font-black uppercase tracking-[0.3em]"
+                                style={{ color: isUnlocked ? '#ffffff' : '#1f161060', opacity: isUnlocked ? 0.4 : 1 }}
+                              >
                                 {item.req}
                               </p>
-                              <div className="flex flex-col items-center gap-1">
-                                {item.label.split(' ').map((word, idx) => (
-                                  <div key={idx} className={cn(
-                                    "px-4 py-1.5 skew-x-[-15deg] min-w-fit w-full max-w-[200px] flex items-center justify-center leading-none transition-colors",
-                                    isUnlocked ? "bg-blue-600" : "bg-[#1f1610]/5"
-                                  )}>
-                                    <p className={cn(
-                                      "text-lg font-black uppercase italic tracking-tighter skew-x-[15deg] whitespace-nowrap",
-                                      isUnlocked ? "text-[#1f1610]" : "text-[#1f1610]/10"
-                                    )}>
-                                      {word}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="h-10 flex items-center justify-center">
-                              {isUnlocked && <CheckCircle2 className="h-6 w-6 text-primary fill-primary/10 animate-in zoom-in" />}
+                              {isUnlocked && (
+                                <div className="h-8 w-8 rounded-full border-2 border-primary flex items-center justify-center shadow-xl">
+                                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -367,35 +376,36 @@ export default function SettingsPage() {
 
                   <div className="h-1 bg-[#1f1610]/5 rounded-full" />
 
-                  <div className="p-8 bg-[#1f1610] text-primary rounded-[2.5rem] border-4 border-primary/30 space-y-4">
-                     <div className="flex items-center gap-4">
-                        <Fingerprint className="h-8 w-8" />
-                        <h3 className="text-3xl font-black uppercase italic m-0">Sovereign Privacy</h3>
+                  {/* Privacy Protocol Section */}
+                  <div className="p-10 bg-[#1f1610] text-primary rounded-[3rem] border-4 border-primary/30 space-y-6 shadow-2xl">
+                     <div className="flex items-center gap-6">
+                        <Fingerprint className="h-10 w-10" />
+                        <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter" style={{ color: 'var(--primary)' }}>Sovereign Privacy</h3>
                      </div>
-                     <p className="font-bold leading-relaxed m-0 text-base">
+                     <p className="font-bold leading-relaxed m-0 text-lg italic" style={{ color: 'var(--primary)', opacity: 0.8 }}>
                         Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
                      </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-[#1f1610]">
                     <div className="space-y-6">
                       <h3 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-3">
-                        <ShieldCheck className="h-7 w-7 text-primary" /> Encryption Protocol
+                        <ShieldCheck className="h-8 w-8 text-primary" /> Encryption Protocol
                       </h3>
-                      <p className="font-medium leading-relaxed">Visions utilize a multi-layer encoding process. Raw data stored in the global registry is unreadable without an active, authenticated session key.</p>
-                      <ul className="space-y-4 font-bold text-sm uppercase tracking-wide">
-                        <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 text-primary shrink-0" /> Zero-Visibility Private Dispatches</li>
-                        <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 text-primary shrink-0" /> Host Isolation Architecture</li>
-                        <li className="flex gap-3"><CheckCircle2 className="h-5 w-5 text-primary shrink-0" /> Local-Only Decryption Keys</li>
+                      <p className="font-medium text-lg leading-relaxed">Visions utilize a multi-layer encoding process. Raw data stored in the global registry is unreadable without an active, authenticated session key.</p>
+                      <ul className="space-y-4 font-black text-sm uppercase tracking-widest">
+                        <li className="flex gap-4"><CheckCircle2 className="h-6 w-6 text-primary shrink-0" /> Zero-Visibility Private Dispatches</li>
+                        <li className="flex gap-4"><CheckCircle2 className="h-6 w-6 text-primary shrink-0" /> Host Isolation Architecture</li>
+                        <li className="flex gap-4"><CheckCircle2 className="h-6 w-6 text-primary shrink-0" /> Local-Only Decryption Keys</li>
                       </ul>
                     </div>
 
                     <div className="space-y-6">
                       <h3 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-3">
-                        <Target className="h-7 w-7 text-primary" /> Data Retention
+                        <Target className="h-8 w-8 text-primary" /> Data Retention
                       </h3>
-                      <p className="font-medium leading-relaxed">NICO DIGITAL retains minimal identifiers required for growth scaling. Membership data is active only while your command remains open.</p>
-                      <div className="p-6 border-4 border-[#1f1610]/10 rounded-3xl bg-[#1f1610]/5 italic font-black text-xs uppercase tracking-widest">
+                      <p className="font-medium text-lg leading-relaxed">NICO DIGITAL retains minimal identifiers required for growth scaling. Membership data is active only while your command remains open.</p>
+                      <div className="p-8 border-4 border-[#1f1610]/10 rounded-[2.5rem] bg-[#1f1610]/5 italic font-black text-xs uppercase tracking-[0.4em] text-center">
                         "Your data. Your empire. Your sovereignty."
                       </div>
                     </div>
@@ -407,7 +417,7 @@ export default function SettingsPage() {
 
           <TabsContent value="control" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-               <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:border-primary/30 transition-all">
+               <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:border-primary/30 transition-all shadow-2xl">
                   <div className="space-y-6">
                     <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-primary/20 shadow-inner group-hover:scale-110 transition-transform">
                       <LogOut className="h-10 w-10 text-primary" />
@@ -426,7 +436,7 @@ export default function SettingsPage() {
                   </Button>
                </Card>
 
-               <Card className="rounded-[3.5rem] border-[8px] border-red-600/20 bg-red-600/5 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:bg-red-600/10 transition-all">
+               <Card className="rounded-[3.5rem] border-[8px] border-red-600/20 bg-red-600/5 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:bg-red-600/10 transition-all shadow-2xl">
                   <div className="space-y-6">
                     <div className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-red-600/20 shadow-inner group-hover:scale-110 transition-transform">
                       <AlertTriangle className="h-10 w-10 text-red-600" />
@@ -446,7 +456,8 @@ export default function SettingsPage() {
                </Card>
             </div>
 
-            <div className="p-8 bg-[#1f1610] rounded-[2.5rem] border-[6px] border-red-600/40 shadow-2xl relative overflow-hidden flex items-center justify-center">
+            {/* High-Visibility Version Bar */}
+            <div className="p-8 bg-[#1f1610] rounded-[2.5rem] border-[6px] border-red-600/60 shadow-[0_0_30px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center">
                <div className="absolute inset-0 bg-red-600/5 pointer-events-none animate-pulse" />
                <p className="text-3xl font-black text-red-600 uppercase tracking-[0.5em] italic relative z-10 leading-none drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">
                  2.0.5-SOVEREIGN
