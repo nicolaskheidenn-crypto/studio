@@ -19,6 +19,7 @@ import { useUser, useFirestore } from "@/firebase";
 import { doc, setDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
+import { encryptVision, decryptVision } from "@/lib/crypto";
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Strategist',
@@ -46,19 +47,6 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-/**
- * Sovereign Encryption Helpers
- * Ensures data is obfuscated in storage.
- */
-const encryptVision = (text: string) => btoa(encodeURIComponent(text));
-const decryptVision = (encoded: string) => {
-  try {
-    return decodeURIComponent(atob(encoded));
-  } catch {
-    return "Protocol Decryption Failure: Key Mismatch";
-  }
-};
-
 export default function GoalCapsPage() {
   const { user } = useUser();
   const uid = user?.uid;
@@ -76,13 +64,35 @@ export default function GoalCapsPage() {
   const [unlockDate, setUnlockDate] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
+  const [decryptedMessages, setDecryptedMessages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setIsMounted(true);
     setCurrentDate(new Date());
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle Decryption of unlocked capsules
+  useEffect(() => {
+    if (!uid || capsules.length === 0) return;
+    
+    const decryptAll = async () => {
+      const now = new Date();
+      const newDecrypted: Record<string, string> = {};
+      
+      for (const cap of capsules) {
+        const unlockDateObj = new Date(cap.unlockDate);
+        if (unlockDateObj <= now) {
+          const decrypted = await decryptVision(cap.message, uid);
+          newDecrypted[cap.id] = decrypted;
+        }
+      }
+      setDecryptedMessages(newDecrypted);
+    };
+    
+    decryptAll();
+  }, [capsules, uid]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uid) return;
     if (!message || !unlockDate) {
@@ -94,37 +104,41 @@ export default function GoalCapsPage() {
       return;
     }
     
-    // Deploy Sovereign Encryption before storage
-    const encryptedMessage = encryptVision(message);
-    const capsuleId = Math.random().toString(36).substring(2, 11);
+    try {
+      // Deploy AES-GCM Sovereign Encryption before storage
+      const encryptedMessage = await encryptVision(message, uid);
+      const capsuleId = Math.random().toString(36).substring(2, 11);
 
-    const newCap = {
-      id: capsuleId,
-      message: encryptedMessage,
-      unlockDate,
-      createdAt: new Date().toLocaleDateString(),
-    };
+      const newCap = {
+        id: capsuleId,
+        message: encryptedMessage,
+        unlockDate,
+        createdAt: new Date().toLocaleDateString(),
+      };
 
-    // Synchronize to Firestore for persistent security validation
-    const capRef = doc(db, 'users', uid, 'capsules', capsuleId);
-    setDoc(capRef, newCap)
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: capRef.path,
-          operation: 'create',
-          requestResourceData: newCap,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+      // Synchronize to Firestore for persistent security validation
+      const capRef = doc(db, 'users', uid, 'capsules', capsuleId);
+      setDoc(capRef, newCap)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: capRef.path,
+            operation: 'create',
+            requestResourceData: newCap,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
+
+      addCapsule(uid, newCap);
+      setMessage("");
+      setUnlockDate("");
+      
+      toast({
+        title: "Vision Sealed & AES-GCM Encrypted",
+        description: "Your strategic data block is now cryptographically secured.",
       });
-
-    addCapsule(uid, newCap);
-    setMessage("");
-    setUnlockDate("");
-    
-    toast({
-      title: "Vision Sealed & Encrypted",
-      description: "Sovereign encryption active. Your message is now a secured data block.",
-    });
+    } catch (err) {
+      toast({ title: "Encryption Breach", description: "Hardware crypto failure.", variant: "destructive" });
+    }
   };
 
   if (!isMounted || !currentDate) return null;
@@ -146,11 +160,11 @@ export default function GoalCapsPage() {
             </h1>
             <div className="space-y-4">
               <p className="text-primary font-black uppercase tracking-[0.5em] text-xs md:text-sm">
-                SOVEREIGN ENCRYPTION SHIELD ACTIVE.
+                AES-256 SOVEREIGN SHIELD ACTIVE.
               </p>
               <div className="flex items-center justify-center gap-4 bg-primary/10 w-fit mx-auto px-6 py-2 rounded-full border border-primary/20">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-black uppercase text-primary tracking-widest">Zero-Knowledge Vault Protocol</span>
+                <span className="text-[10px] font-black uppercase text-primary tracking-widest">Non-Custodial Vault Protocol</span>
               </div>
             </div>
             <div className="h-1.5 w-32 bg-primary mx-auto rounded-full shadow-[0_0_20px_rgba(255,215,0,0.3)]" />
@@ -172,7 +186,7 @@ export default function GoalCapsPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-black uppercase text-primary/40">Vault Status</span>
-                      <span className="text-xs font-black text-green-500 uppercase italic tracking-widest">Self-Custodied</span>
+                      <span className="text-xs font-black text-green-500 uppercase italic tracking-widest">AES-GCM Secured</span>
                     </div>
                   </div>
                </Card>
@@ -182,7 +196,7 @@ export default function GoalCapsPage() {
                     <KeyRound className="h-8 w-8 text-primary" />
                   </div>
                   <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest leading-relaxed">
-                    Visions are encrypted locally. Even the Host cannot read your temporal dispatches in the database.
+                    Visions are encrypted using your browser's hardware crypto. The Host cannot decrypt your blocks.
                   </p>
                </Card>
             </div>
@@ -195,7 +209,7 @@ export default function GoalCapsPage() {
                     <div className="h-2 w-20 bg-primary rounded-full" />
                   </div>
                   <Badge className="bg-[#1f1610] text-primary rounded-full h-8 px-4 flex items-center gap-2">
-                    <Lock className="h-3 w-3" /> PRIVATE
+                    <Lock className="h-3 w-3" /> AES-GCM
                   </Badge>
                 </div>
 
@@ -215,7 +229,7 @@ export default function GoalCapsPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <Label className="text-[#1f1610] font-black text-[10px] uppercase tracking-[0.3em]">Strategic Narrative (Encrypted)</Label>
+                    <Label className="text-[#1f1610] font-black text-[10px] uppercase tracking-[0.3em]">Strategic Narrative (Hardware Encrypted)</Label>
                     <Textarea 
                       placeholder="Your secret vision for the collective..." 
                       className="min-h-[280px] rounded-[3rem] bg-[#1f1610]/5 border-4 border-[#1f1610]/10 p-10 text-xl font-bold text-[#1f1610] placeholder:text-[#1f1610]/20 focus:border-primary transition-all shadow-inner leading-relaxed"
@@ -230,7 +244,7 @@ export default function GoalCapsPage() {
                     className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-3xl uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group tracking-tighter"
                   >
                     <Send className="h-8 w-8 mr-6 group-hover:translate-x-3 transition-transform" /> 
-                    SEAL & ENCRYPT
+                    SEAL & CRYPTOGRAPH
                   </Button>
                 </form>
               </Card>
@@ -243,7 +257,7 @@ export default function GoalCapsPage() {
                 </div>
                 <div>
                   <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter italic leading-none">TEMPORAL VAULT</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1">Encrypted Archive</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1">L7 Security Registry</p>
                 </div>
               </div>
 
@@ -286,7 +300,7 @@ export default function GoalCapsPage() {
                                 )}>
                                   {unlockDateObj.toLocaleDateString()}
                                 </p>
-                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">Encrypted: {cap.createdAt}</p>
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">Sealed: {cap.createdAt}</p>
                               </div>
                             </div>
                           </div>
@@ -298,17 +312,17 @@ export default function GoalCapsPage() {
                               : "bg-white border-[#1f1610]/10 shadow-inner"
                           )}>
                             {isLocked ? (
-                              <div className="space-y-4 w-full">
+                              <div className="space-y-4 w-full text-center">
                                 <p className="text-[10px] font-mono break-all opacity-20 select-none">
-                                  {cap.message.substring(0, 80)}...
+                                  {cap.message.substring(0, 120)}...
                                 </p>
-                                <p className="text-xs font-black uppercase tracking-widest text-primary/20 text-center">
-                                  Encrypted Block Secured
+                                <p className="text-xs font-black uppercase tracking-widest text-primary/40">
+                                  NON-CUSTODIAL ENCRYPTION ACTIVE
                                 </p>
                               </div>
                             ) : (
                               <p className="text-xl font-bold text-[#1f1610] leading-relaxed whitespace-pre-wrap italic tracking-tight">
-                                {decryptVision(cap.message)}
+                                {decryptedMessages[cap.id] || "Decrypting Hub..."}
                               </p>
                             )}
                           </div>
