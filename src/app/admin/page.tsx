@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy, updateDoc, where } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 const ADMIN_EMAIL = "nicolaskheidenn@gmail.com";
 const ADMIN_SECRET_KEY = "2878-2171-2489-2341";
@@ -169,7 +171,15 @@ export default function AdminPage() {
           const items = data[collName];
           for (const item of items) {
             const { id, ...rest } = item;
-            await setDoc(doc(db, collName, id), rest, { merge: true });
+            setDoc(doc(db, collName, id), rest, { merge: true })
+              .catch(async (error) => {
+                const permissionError = new FirestorePermissionError({
+                  path: `${collName}/${id}`,
+                  operation: 'write',
+                  requestResourceData: rest,
+                } satisfies SecurityRuleContext);
+                errorEmitter.emit('permission-error', permissionError);
+              });
           }
         }
         toast({ title: "Continuity Protocol Successful", description: "Grid state re-established from archive." });
@@ -197,10 +207,27 @@ export default function AdminPage() {
     };
     
     if (editingProduct) {
-      await updateDoc(doc(db, 'shooppyProducts', editingProduct.id), data);
+      const docRef = doc(db, 'shooppyProducts', editingProduct.id);
+      updateDoc(docRef, data)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
       setEditingProduct(null);
     } else {
-      await addDoc(collection(db, 'shooppyProducts'), data);
+      addDoc(collection(db, 'shooppyProducts'), data)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: 'shooppyProducts',
+            operation: 'create',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
     }
     
     setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
@@ -219,8 +246,29 @@ export default function AdminPage() {
     const currentOrder = Number(current.sortOrder ?? idx);
     const targetOrder = Number(target.sortOrder ?? targetIdx);
 
-    await updateDoc(doc(db, 'shooppyProducts', current.id), { sortOrder: targetOrder });
-    await updateDoc(doc(db, 'shooppyProducts', target.id), { sortOrder: currentOrder });
+    const doc1Ref = doc(db, 'shooppyProducts', current.id);
+    const doc2Ref = doc(db, 'shooppyProducts', target.id);
+
+    updateDoc(doc1Ref, { sortOrder: targetOrder })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: doc1Ref.path,
+          operation: 'update',
+          requestResourceData: { sortOrder: targetOrder },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+    updateDoc(doc2Ref, { sortOrder: currentOrder })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: doc2Ref.path,
+          operation: 'update',
+          requestResourceData: { sortOrder: currentOrder },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
     toast({ title: "Inventory Reorganized" });
   };
 
@@ -236,10 +284,27 @@ export default function AdminPage() {
     };
 
     if (editingWebin) {
-      await updateDoc(doc(db, 'resources', editingWebin.id), { title: webinTitle, content: webinContent });
+      const docRef = doc(db, 'resources', editingWebin.id);
+      updateDoc(docRef, { title: webinTitle, content: webinContent })
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: { title: webinTitle, content: webinContent },
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
       setEditingWebin(null);
     } else {
-      await addDoc(collection(db, 'resources'), data);
+      addDoc(collection(db, 'resources'), data)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: 'resources',
+            operation: 'create',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
     }
 
     setWebinTitle(""); setWebinContent("");
@@ -258,8 +323,29 @@ export default function AdminPage() {
     const currentOrder = Number(current.sortOrder ?? idx);
     const targetOrder = Number(target.sortOrder ?? targetIdx);
 
-    await updateDoc(doc(db, 'resources', current.id), { sortOrder: targetOrder });
-    await updateDoc(db, 'resources', target.id), { sortOrder: currentOrder };
+    const doc1Ref = doc(db, 'resources', current.id);
+    const doc2Ref = doc(db, 'resources', target.id);
+
+    updateDoc(doc1Ref, { sortOrder: targetOrder })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: doc1Ref.path,
+          operation: 'update',
+          requestResourceData: { sortOrder: targetOrder },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+    updateDoc(doc2Ref, { sortOrder: currentOrder })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: doc2Ref.path,
+          operation: 'update',
+          requestResourceData: { sortOrder: currentOrder },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
     toast({ title: "Portal Grid Reordered" });
   };
 
@@ -271,18 +357,35 @@ export default function AdminPage() {
       fileUrl: rewardFile,
       timestamp: serverTimestamp()
     };
-    addDoc(collection(db, 'rewards'), data);
+    addDoc(collection(db, 'rewards'), data)
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'rewards',
+          operation: 'create',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
     setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
     toast({ title: "Weekly Treasure Injected" });
   };
 
   const handleDispatchBroadcast = () => {
-    addDoc(collection(db, 'newsPosts'), {
+    const data = {
       title: newsTitle,
       content: newsContent,
       imageUrl: newsImg,
       timestamp: serverTimestamp()
-    });
+    };
+    addDoc(collection(db, 'newsPosts'), data)
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'newsPosts',
+          operation: 'create',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
     setNewsTitle(""); setNewsContent(""); setNewsImg("");
     toast({ title: "Broadcast Dispatched" });
   };
@@ -320,10 +423,27 @@ export default function AdminPage() {
     };
 
     if (editingQuizId) {
-      await updateDoc(doc(db, 'quizzes', editingQuizId), data);
+      const docRef = doc(db, 'quizzes', editingQuizId);
+      updateDoc(docRef, data)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
       setEditingQuizId(null);
     } else {
-      await addDoc(collection(db, 'quizzes'), data);
+      addDoc(collection(db, 'quizzes'), data)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: 'quizzes',
+            operation: 'create',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
     }
 
     setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
@@ -361,12 +481,21 @@ export default function AdminPage() {
 
     try {
       for (const task of tasksToSave) {
-        await addDoc(collection(db, 'tasks'), {
+        const taskData = {
           day: Number(taskDay),
           title: task.title,
           description: task.description,
           createdAt: serverTimestamp()
-        });
+        };
+        addDoc(collection(db, 'tasks'), taskData)
+          .catch(async (error) => {
+            const permissionError = new FirestorePermissionError({
+              path: 'tasks',
+              operation: 'create',
+              requestResourceData: taskData,
+            } satisfies SecurityRuleContext);
+            errorEmitter.emit('permission-error', permissionError);
+          });
       }
       setBulkDraftTasks([{ id: '1', title: "", description: "" }]);
       toast({ title: "Sovereign Routines Deployed", description: `${tasksToSave.length} protocols injected into Hub ${taskDay}.` });
@@ -377,22 +506,41 @@ export default function AdminPage() {
 
   const handleUpdateExistingTask = async () => {
     if (!editingTask) return;
-    try {
-      await updateDoc(doc(db, 'tasks', editingTask.id), {
-        day: Number(editingTask.day),
-        title: editingTask.title,
-        description: editingTask.description
+    const taskData = {
+      day: Number(editingTask.day),
+      title: editingTask.title,
+      description: editingTask.description
+    };
+    const docRef = doc(db, 'tasks', editingTask.id);
+    updateDoc(docRef, taskData)
+      .then(() => {
+        setEditingTask(null);
+        toast({ title: "Protocol Synchronized" });
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: taskData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        toast({ title: "Sync Breach", variant: "destructive" });
       });
-      setEditingTask(null);
-      toast({ title: "Protocol Synchronized" });
-    } catch (e) {
-      toast({ title: "Sync Breach", variant: "destructive" });
-    }
   };
 
   const handleDeleteDoc = (coll: string, id: string) => {
-    deleteDoc(doc(db, coll, id));
-    toast({ title: "Data Purged" });
+    const docRef = doc(db, coll, id);
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: "Data Purged" });
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   const startEditProduct = (p: any) => {
@@ -1063,7 +1211,21 @@ export default function AdminPage() {
                    <div className="space-y-4">
                       <Input placeholder="Inquiry Question..." value={faqQ} onChange={e => setFaqQ(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610] font-bold text-sm" />
                       <Textarea placeholder="Protocol Response..." value={faqA} onChange={e => setFaqA(e.target.value)} className="min-h-[120px] rounded-[2rem] bg-white text-[#1f1610] font-bold text-sm" />
-                      <Button onClick={() => addDoc(collection(db, 'faqs'), { question: faqQ, answer: faqA }).then(() => { setFaqQ(""); setFaqA(""); toast({ title: "FAQ Injected" }); })} className="w-full h-16 rounded-2xl bg-[#1f1610] text-primary font-black uppercase text-xs">Inject FAQ</Button>
+                      <Button onClick={() => {
+                        const faqData = { question: faqQ, answer: faqA };
+                        addDoc(collection(db, 'faqs'), faqData)
+                          .then(() => { 
+                            setFaqQ(""); setFaqA(""); toast({ title: "FAQ Injected" }); 
+                          })
+                          .catch(async (error) => {
+                            const permissionError = new FirestorePermissionError({
+                              path: 'faqs',
+                              operation: 'create',
+                              requestResourceData: faqData,
+                            } satisfies SecurityRuleContext);
+                            errorEmitter.emit('permission-error', permissionError);
+                          });
+                      }} className="w-full h-16 rounded-2xl bg-[#1f1610] text-primary font-black uppercase text-xs">Inject FAQ</Button>
                    </div>
                 </Card>
                 

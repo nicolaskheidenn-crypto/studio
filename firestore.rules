@@ -17,8 +17,8 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isOwner(userId);
       allow update: if isOwner(userId) 
-        && (request.resource.data.points <= resource.data.points + 500) // Prevent massive point injection
-        && (request.resource.data.level >= resource.data.level);      // Level can only increase
+        && ( !('points' in request.resource.data) || !('points' in resource.data) || request.resource.data.points <= resource.data.points + 500) 
+        && ( !('level' in request.resource.data) || !('level' in resource.data) || request.resource.data.level >= resource.data.level);
     }
 
     // GoalCaps: Secure temporal storage
@@ -41,11 +41,11 @@ service cloud.firestore {
     }
 
     // System Data: News, FAQs, Quizzes
-    match /newsPosts/{id} { allow read: if isSignedIn(); }
-    match /faqs/{id} { allow read: if isSignedIn(); }
-    match /quizzes/{id} { allow read: if isSignedIn(); }
-    match /rewards/{id} { allow read: if isSignedIn(); }
-    match /shooppyProducts/{id} { allow read: if isSignedIn(); }
-    match /tasks/{id} { allow read: if isSignedIn(); }
+    match /newsPosts/{id} { allow read, write: if isSignedIn(); }
+    match /faqs/{id} { allow read, write: if isSignedIn(); }
+    match /quizzes/{id} { allow read, write: if isSignedIn(); }
+    match /rewards/{id} { allow read, write: if isSignedIn(); }
+    match /shooppyProducts/{id} { allow read, write: if isSignedIn(); }
+    match /tasks/{id} { allow read, write: if isSignedIn(); }
   }
 }
