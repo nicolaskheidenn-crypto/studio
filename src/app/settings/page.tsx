@@ -24,7 +24,8 @@ import {
   EmailAuthProvider,
   linkWithCredential,
   reauthenticateWithCredential,
-  unlink
+  unlink,
+  reload
 } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -77,7 +78,7 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState("");
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Email Binding State
+  // Binding/Security State
   const [newEmailBind, setNewEmailBind] = useState("");
   const [newPassBind, setNewPassBind] = useState("");
   const [currentPassAuth, setCurrentPassAuth] = useState("");
@@ -123,36 +124,49 @@ export default function SettingsPage() {
     }
   };
 
-  const handleRebindEmail = async () => {
+  const handleRebindIdentity = async () => {
     const currentUser = auth.currentUser;
     if (!currentUser || !newEmailBind || !newPassBind || !currentPassAuth) {
-      toast({ title: "Protocol Breach", description: "All verification fields are required.", variant: "destructive" });
+      toast({ title: "Protocol Breach", description: "All strategic keys required.", variant: "destructive" });
       return;
     }
 
     setIsBinding(true);
     try {
-      // 1. Re-authenticate to pass threshold
-      const credential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
-      await reauthenticateWithCredential(currentUser, credential);
+      // 0. Reload user to ensure latest session state
+      await reload(currentUser);
 
-      // 2. Build new credential and Link
-      const newCredential = EmailAuthProvider.credential(newEmailBind, newPassBind);
-      await linkWithCredential(currentUser, newCredential);
+      // 1. Re-authenticate the active user first to pass the security threshold
+      const currentCredential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
+      
+      reauthenticateWithCredential(currentUser, currentCredential)
+        .then(() => {
+          // 2. Now that the user is freshly authenticated, build the NEW email credential to bind
+          const newCredential = EmailAuthProvider.credential(newEmailBind, newPassBind);
 
-      // 3. Optional: Unlink the old provider if requested (conceptually)
-      // await unlink(currentUser, 'password');
+          // 3. Complete the link/bind process safely
+          return linkWithCredential(currentUser, newCredential);
+        })
+        .then((linkResult) => {
+          toast({ title: "Identity Re-Bound", description: "Strategic email and key updated successfully." });
+          setNewEmailBind(""); setNewPassBind(""); setCurrentPassAuth("");
+        })
+        .catch((error: any) => {
+          console.error("Error during linking profile operations:", error);
+          let msg = error.message;
+          if (error.code === 'auth/invalid-credential') msg = "Current Security Key is incorrect.";
+          if (error.code === 'auth/email-already-in-use') msg = "Target email is already bound to another strategist.";
+          toast({ title: "Binding Failure", description: msg, variant: "destructive" });
+        })
+        .finally(() => setIsBinding(false));
 
-      toast({ title: "Identity Re-Bound", description: "Strategic email and key updated via secure link." });
-      setNewEmailBind(""); setNewPassBind(""); setCurrentPassAuth("");
     } catch (error: any) {
-      toast({ title: "Binding Failure", description: error.message, variant: "destructive" });
-    } finally {
+      toast({ title: "System Error", description: error.message, variant: "destructive" });
       setIsBinding(false);
     }
   };
 
-  const handleUnlinkIdentity = async () => {
+  const handleUnlinkProtocol = async () => {
     const currentUser = auth.currentUser;
     if (!currentUser || !currentPassAuth) {
       toast({ title: "Unlink Error", description: "Current key required for verification.", variant: "destructive" });
@@ -161,13 +175,24 @@ export default function SettingsPage() {
 
     setIsBinding(true);
     try {
+      await reload(currentUser);
       const credential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
-      await reauthenticateWithCredential(currentUser, credential);
-      await unlink(currentUser, 'password');
-      toast({ title: "Provider Unlinked", description: "Identity block detached from root." });
+
+      reauthenticateWithCredential(currentUser, credential)
+        .then(() => {
+          // 2. Proceed with unlinking the specific provider identifier
+          return unlink(currentUser, 'password');
+        })
+        .then((updatedUser) => {
+          toast({ title: "Provider Unlinked", description: "Identity block detached from root." });
+        })
+        .catch((error: any) => {
+          console.error("Error during unlinking profile operations:", error);
+          toast({ title: "Unlink Failed", description: error.message, variant: "destructive" });
+        })
+        .finally(() => setIsBinding(false));
     } catch (error: any) {
-      toast({ title: "Unlink Failed", description: error.message, variant: "destructive" });
-    } finally {
+      toast({ title: "System Breach", description: error.message, variant: "destructive" });
       setIsBinding(false);
     }
   };
@@ -213,14 +238,6 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* Atmospheric Designs */}
-      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.2] animate-pulse duration-[8000ms] will-change-transform">
-        <User className="w-[200px] h-[200px] text-primary" />
-      </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.2] animate-pulse duration-[10000ms] will-change-transform">
-        <ShieldCheck className="w-[220px] h-[220px] text-primary" />
-      </div>
-
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
         <header className="mb-12 space-y-4 text-center sm:text-left">
            <h1 className="text-6xl font-headline font-black text-foreground uppercase tracking-tighter italic leading-none">Settings Hub</h1>
@@ -267,7 +284,7 @@ export default function SettingsPage() {
             <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-12 shadow-2xl space-y-12">
                <div className="flex items-center gap-4 text-primary">
                   <ShieldCheck className="h-10 w-10" />
-                  <h3 className="text-4xl font-black uppercase italic tracking-tighter m-0">Binding Protocol</h3>
+                  <h3 className="text-4xl font-black uppercase italic tracking-tighter m-0">Strategic Binding</h3>
                </div>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -317,7 +334,7 @@ export default function SettingsPage() {
 
                     <div className="flex flex-col gap-4">
                       <Button 
-                        onClick={handleRebindEmail}
+                        onClick={handleRebindIdentity}
                         disabled={isBinding}
                         className="w-full h-20 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-sm hover:scale-105 transition-all shadow-xl tracking-widest"
                       >
@@ -325,7 +342,7 @@ export default function SettingsPage() {
                       </Button>
                       <Button 
                         variant="ghost"
-                        onClick={handleUnlinkIdentity}
+                        onClick={handleUnlinkProtocol}
                         className="text-red-600 hover:bg-red-600/10 font-black uppercase text-[10px] tracking-widest"
                       >
                         UNLINK CURRENT PROVIDER
@@ -400,15 +417,15 @@ export default function SettingsPage() {
                   {/* Privacy Protocol Section */}
                   <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-8 shadow-2xl overflow-hidden relative group">
                      <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-700 flex items-center justify-center shadow-xl border-4 border-white/20">
+                        <div className="w-16 h-16 rounded-2xl bg-[#002b80] flex items-center justify-center shadow-xl border-4 border-white/20">
                           <Fingerprint className="h-8 w-8 text-white" />
                         </div>
-                        <div className="bg-blue-700 px-8 py-3 rounded-xl shadow-[0_10px_20px_rgba(0,56,168,0.4)] border-2 border-white/10">
+                        <div className="bg-[#002b80] px-8 py-3 rounded-xl shadow-[0_10px_20px_rgba(0,43,128,0.4)] border-2 border-white/10">
                           <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-white">Sovereign Privacy</h3>
                         </div>
                      </div>
                      
-                     <div className="bg-blue-700/90 backdrop-blur-sm p-10 rounded-[2.5rem] shadow-inner border-4 border-white/10 relative z-10">
+                     <div className="bg-[#002b80] backdrop-blur-md p-10 rounded-[2.5rem] shadow-inner border-4 border-white/10 relative z-10">
                         <p className="font-black leading-relaxed m-0 text-xl italic text-white tracking-tight">
                            Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
                         </p>
