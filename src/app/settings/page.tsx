@@ -131,13 +131,9 @@ export default function SettingsPage() {
 
     setIsBinding(true);
     try {
-      // 0. Reload user to ensure latest session state
       await reload(currentUser);
-
-      // 1. Build the NEW email credential to bind directly
       const newCredential = EmailAuthProvider.credential(newEmailBind, newPassBind);
 
-      // 2. Complete the link/bind process safely
       linkWithCredential(currentUser, newCredential)
         .then((linkResult) => {
           toast({ title: "Identity Re-Bound", description: "Strategic email and key updated successfully." });
@@ -167,8 +163,6 @@ export default function SettingsPage() {
     setIsBinding(true);
     try {
       await reload(currentUser);
-      
-      // 1. Proceed with unlinking the specific provider identifier directly
       unlink(currentUser, 'password')
         .then((updatedUser) => {
           toast({ title: "Provider Unlinked", description: "Identity block detached from root." });
@@ -235,6 +229,7 @@ export default function SettingsPage() {
           <TabsList className="bg-[#1f1610] p-1.5 rounded-full w-fit shadow-2xl border-4 border-primary/10 flex gap-2 mx-auto sm:mx-0 overflow-x-auto scrollbar-hide">
             <TabsTrigger value="identity" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Identity</TabsTrigger>
             <TabsTrigger value="security" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Security</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Privacy</TabsTrigger>
             <TabsTrigger value="vault" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Vault</TabsTrigger>
             <TabsTrigger value="control" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Control</TabsTrigger>
           </TabsList>
@@ -322,6 +317,27 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="privacy" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
+              <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-8 shadow-2xl overflow-hidden relative group">
+                 <div className="flex items-center gap-6 relative z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-[#002b80] flex items-center justify-center shadow-xl border-4 border-white/20">
+                      <Fingerprint className="h-8 w-8 text-white" />
+                    </div>
+                    <div className="bg-[#002b80] px-8 py-3 rounded-xl shadow-[0_10px_20px_rgba(0,43,128,0.4)] border-2 border-white/10">
+                      <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-white">Sovereign Privacy</h3>
+                    </div>
+                 </div>
+                 
+                 <div className="bg-[#002b80] backdrop-blur-md p-10 rounded-[2.5rem] shadow-inner border-4 border-white/10 relative z-10">
+                    <p className="font-black leading-relaxed m-0 text-xl italic text-white tracking-tight">
+                       Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
+                    </p>
+                 </div>
+              </div>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="vault" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
               <ScrollArea className="h-[650px] pr-4">
@@ -379,26 +395,6 @@ export default function SettingsPage() {
                         );
                       })}
                     </div>
-                  </div>
-
-                  <div className="h-1 bg-[#1f1610]/5 rounded-full" />
-
-                  {/* Privacy Protocol Section */}
-                  <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-8 shadow-2xl overflow-hidden relative group">
-                     <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-16 h-16 rounded-2xl bg-[#002b80] flex items-center justify-center shadow-xl border-4 border-white/20">
-                          <Fingerprint className="h-8 w-8 text-white" />
-                        </div>
-                        <div className="bg-[#002b80] px-8 py-3 rounded-xl shadow-[0_10px_20px_rgba(0,43,128,0.4)] border-2 border-white/10">
-                          <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-white">Sovereign Privacy</h3>
-                        </div>
-                     </div>
-                     
-                     <div className="bg-[#002b80] backdrop-blur-md p-10 rounded-[2.5rem] shadow-inner border-4 border-white/10 relative z-10">
-                        <p className="font-black leading-relaxed m-0 text-xl italic text-white tracking-tight">
-                           Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
-                        </p>
-                     </div>
                   </div>
                 </div>
               </ScrollArea>
