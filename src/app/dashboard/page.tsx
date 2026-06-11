@@ -12,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, HelpCircle, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield, RefreshCw
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, CircleHelp, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield, RefreshCw
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -381,7 +381,7 @@ export default function DashboardPage() {
               <ShadcnTrigger value="shooppy" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><ShoppingBag className="h-4 w-4" /> SHOOPPY</ShadcnTrigger>
               <ShadcnTrigger value="wedio" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><Video className="h-4 w-4" /> WEDIO</ShadcnTrigger>
               <ShadcnTrigger value="resources" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><BookOpen className="h-4 w-4" /> LIBRARY</ShadcnTrigger>
-              <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><HelpCircle className="h-4 w-4" /> FAQ</ShadcnTrigger>
+              <ShadcnTrigger value="faq" className="rounded-full px-10 h-12 text-[11px] font-black uppercase tracking-widest gap-2"><CircleHelp className="h-4 w-4" /> FAQ</ShadcnTrigger>
             </ShadcnList>
 
             <Button 
@@ -870,7 +870,7 @@ export default function DashboardPage() {
              </div>
              <Card className="rounded-[4rem] border-4 border-primary/10 bg-card/40 p-12 shadow-2xl relative overflow-hidden">
                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
-                   <HelpCircle className="w-96 h-96 absolute -bottom-20 -right-20 text-primary" />
+                   <CircleHelp className="w-96 h-96 absolute -bottom-20 -right-20 text-primary" />
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-6 relative z-10">
                   {faqs.map((f: any) => (

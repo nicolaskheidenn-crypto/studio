@@ -17,9 +17,9 @@ import {
   Key, ShieldAlert, Trash2, Award, BookOpen, 
   Newspaper, ShoppingBag, MessageSquare, 
   Plus, Coins, ListChecks, Gift,
-  ChevronLeft, ChevronRight, Minus, HelpCircle, Upload, Link as LinkIcon,
-  Database, Download, RefreshCcw, ShieldCheck, AlertOctagon, Loader2,
-  Users, Zap, Activity, Edit3, Save, X, ArrowUp, ArrowDown, Video, HardDrive, CloudSync, ActivitySquare, AlertTriangle, FileCheck
+  ChevronLeft, ChevronRight, Minus, CircleHelp, Upload, Link as LinkIcon,
+  Database, Download, RefreshCcw, ShieldCheck, OctagonAlert, Loader2,
+  Users, Zap, Activity, Edit3, Save, X, ArrowUp, ArrowDown, Video, HardDrive, Cloud, TriangleAlert, FileCheck
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy, updateDoc, where } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
@@ -483,7 +483,7 @@ export default function AdminPage() {
                 { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
                 { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
                 { val: "maintenance", icon: Database, label: "Continuity", count: 0 },
-                { val: "system", icon: HelpCircle, label: "System", count: faqs.length }
+                { val: "system", icon: CircleHelp, label: "System", count: faqs.length }
               ].map((tab) => (
                 <TabsTrigger key={tab.val} value={tab.val} className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610] gap-2">
                   <tab.icon className="h-4 w-4" />
@@ -932,7 +932,7 @@ export default function AdminPage() {
                 <Card className="rounded-[3rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl space-y-8 flex flex-col justify-between">
                    <div className="space-y-6">
                       <div className="w-16 h-16 bg-[#1f1610] rounded-2xl flex items-center justify-center shadow-lg">
-                        <CloudSync className="h-8 w-8 text-primary" />
+                        <Cloud className="h-8 w-8 text-primary" />
                       </div>
                       <div className="space-y-2">
                         <CardTitle className="text-2xl font-black uppercase italic text-[#1f1610]">Cloud Sync Offsite</CardTitle>
@@ -948,7 +948,7 @@ export default function AdminPage() {
                 <Card className="rounded-[3rem] border-8 border-dashed border-[#1f1610]/20 bg-[#1f1610] p-10 shadow-2xl space-y-8 flex flex-col justify-between">
                    <div className="space-y-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center shadow-lg">
-                        <AlertOctagon className="h-8 w-8 text-primary" />
+                        <OctagonAlert className="h-8 w-8 text-primary" />
                       </div>
                       <div className="space-y-2">
                         <CardTitle className="text-2xl font-black uppercase italic text-primary">Legacy Restore</CardTitle>
@@ -968,7 +968,7 @@ export default function AdminPage() {
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                    <div className="flex items-center gap-4 text-[#1f1610]">
-                      <ActivitySquare className="h-10 w-10 text-primary" />
+                      <Activity className="h-10 w-10 text-primary" />
                       <h3 className="text-4xl font-black uppercase italic tracking-tighter">Continuity Metrics</h3>
                    </div>
                    <div className="grid grid-cols-2 gap-8">
@@ -985,7 +985,7 @@ export default function AdminPage() {
 
                 <Card className="rounded-[4rem] border-8 border-red-600/10 bg-red-600/5 p-12 shadow-2xl space-y-10">
                    <div className="flex items-center gap-4 text-red-600">
-                      <AlertTriangle className="h-10 w-10" />
+                      <TriangleAlert className="h-10 w-10" />
                       <h3 className="text-4xl font-black uppercase italic tracking-tighter">Disaster Protocol</h3>
                    </div>
                    <div className="space-y-4">

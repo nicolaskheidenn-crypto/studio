@@ -1,11 +1,10 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   CheckSquare, Hourglass, Settings, LayoutDashboard, 
-  Menu, X, User, Crown, BookOpen, HelpCircle,
+  Menu, X, User, Crown, BookOpen, CircleHelp,
   Zap, Trophy, Target, ShieldCheck, Share2, ShoppingBag, 
   Fingerprint, Lock
 } from "lucide-react";
@@ -109,7 +108,7 @@ export function Navigation() {
                   variant="ghost" 
                   className="rounded-full h-9 px-5 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 border border-primary/20 gap-2 transition-all active:scale-95 shadow-sm"
                 >
-                  <HelpCircle className="h-3.5 w-3.5" />
+                  <CircleHelp className="h-3.5 w-3.5" />
                   Tutorial
                 </Button>
               </DialogTrigger>
