@@ -319,20 +319,54 @@ export default function SettingsPage() {
 
           <TabsContent value="privacy" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
-              <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-8 shadow-2xl overflow-hidden relative group">
+              <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-10 shadow-2xl overflow-hidden relative group">
                  <div className="flex items-center gap-6 relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-[#002b80] flex items-center justify-center shadow-xl border-4 border-white/20">
-                      <Fingerprint className="h-8 w-8 text-white" />
+                    <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl border-4 border-[#1f1610]/10">
+                      <Fingerprint className="h-8 w-8 text-[#1f1610]" />
                     </div>
-                    <div className="bg-[#002b80] px-8 py-3 rounded-xl shadow-[0_10px_20px_rgba(0,43,128,0.4)] border-2 border-white/10">
-                      <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-white">Sovereign Privacy</h3>
+                    <div className="bg-primary px-10 py-3 rounded-xl shadow-[0_10px_20px_rgba(255,215,0,0.3)] border-2 border-[#1f1610]/10">
+                      <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-[#1f1610]">Sovereign Privacy</h3>
                     </div>
                  </div>
                  
-                 <div className="bg-[#002b80] backdrop-blur-md p-10 rounded-[2.5rem] shadow-inner border-4 border-white/10 relative z-10">
-                    <p className="font-black leading-relaxed m-0 text-xl italic text-white tracking-tight">
-                       Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
-                    </p>
+                 <div className="space-y-8 relative z-10">
+                   <div className="bg-primary backdrop-blur-md p-10 rounded-[2.5rem] shadow-inner border-4 border-[#1f1610]/10">
+                      <p className="font-black leading-relaxed m-0 text-xl italic text-[#1f1610] tracking-tight">
+                         Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
+                      </p>
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="bg-primary/20 backdrop-blur-md p-8 rounded-[2rem] border-2 border-primary/40 space-y-4 transition-all hover:bg-primary/30">
+                         <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg">
+                           <Shield className="h-5 w-5 text-[#1f1610]" />
+                         </div>
+                         <div className="space-y-2">
+                           <h4 className="text-xl font-black text-primary uppercase italic tracking-tighter">Zero-Log Protocol</h4>
+                           <p className="text-xs font-bold text-white/60 uppercase tracking-tight leading-relaxed">Individual session keystrokes and navigation paths are never recorded. Your focus is isolated.</p>
+                         </div>
+                      </div>
+
+                      <div className="bg-primary/20 backdrop-blur-md p-8 rounded-[2rem] border-2 border-primary/40 space-y-4 transition-all hover:bg-primary/30">
+                         <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg">
+                           <Fingerprint className="h-5 w-5 text-[#1f1610]" />
+                         </div>
+                         <div className="space-y-2">
+                           <h4 className="text-xl font-black text-primary uppercase italic tracking-tighter">Non-Custodial</h4>
+                           <p className="text-xs font-bold text-white/60 uppercase tracking-tight leading-relaxed">Strategist data is never exported or sold. Your tactical record exists for your growth only.</p>
+                         </div>
+                      </div>
+
+                      <div className="bg-primary/20 backdrop-blur-md p-8 rounded-[2rem] border-2 border-primary/40 space-y-4 transition-all hover:bg-primary/30">
+                         <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg">
+                           <Lock className="h-5 w-5 text-[#1f1610]" />
+                         </div>
+                         <div className="space-y-2">
+                           <h4 className="text-xl font-black text-primary uppercase italic tracking-tighter">AES-256 Shield</h4>
+                           <p className="text-xs font-bold text-white/60 uppercase tracking-tight leading-relaxed">Industry-standard encryption blocks applied to all temporal dispatches in your private vault.</p>
+                         </div>
+                      </div>
+                   </div>
                  </div>
               </div>
             </Card>
