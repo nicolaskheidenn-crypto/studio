@@ -9,14 +9,14 @@ import {
   Shield, Lock, Award, Trophy, Coffee, 
   Eye, EyeOff, Loader2, User, ShieldCheck, 
   Fingerprint, Target, Zap, MailPlus, LogOut, 
-  Trash2, AlertTriangle, CheckCircle2 
+  Trash2, AlertTriangle, CheckCircle2, BookOpen, Flame, Share2, LayoutDashboard
 } from "lucide-react";
 import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useUser, useFirestore } from "@/firebase";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { getAuth, updateProfile, updatePassword, verifyBeforeUpdateEmail, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { getAuth, updateProfile, updatePassword, verifyBeforeUpdateEmail, signOut, deleteUser } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { doc, setDoc } from 'firebase/firestore';
@@ -184,6 +184,17 @@ export default function SettingsPage() {
     }
   };
 
+  const ACHIEVEMENTS = [
+    { id: 'lv1', req: 'LEVEL 1', label: 'MASTER STRATEGIST', icon: User, check: (p: UserProfile) => p.level >= 1 },
+    { id: 'lv10', req: 'LEVEL 10', label: 'ELITE EXECUTIONER', icon: Zap, check: (p: UserProfile) => p.level >= 10 },
+    { id: 'lv20', req: 'LEVEL 20', label: 'GRAND STRATEGIST', icon: Target, check: (p: UserProfile) => p.level >= 20 },
+    { id: 'lv30', req: 'LEVEL 30', label: 'SOVEREIGN ZENITH', icon: ShieldCheck, check: (p: UserProfile) => p.level >= 30 },
+    { id: 'quiz10', req: '10 QUIZZES', label: 'QUIZ VETERAN', icon: BookOpen, check: (p: UserProfile) => (p.stats?.quizzesPassed || 0) >= 10 },
+    { id: 'streak30', req: '30 DAY STREAK', label: 'CONSISTENCY KING', icon: Flame, check: (p: UserProfile) => (p.streak || 0) >= 30 },
+    { id: 'share5', req: '5 INJECTIONS', label: 'KNOWLEDGE SOURCE', icon: Share2, check: (p: UserProfile) => ((p.stats?.promptsShared || 0) + (p.stats?.triksShared || 0)) >= 5 },
+    { id: 'explorer', req: 'ALL HUBS', label: 'GRID EXPLORER', icon: LayoutDashboard, check: (p: UserProfile) => (p.stats?.visitedFeatures || []).length >= 5 },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
@@ -308,31 +319,35 @@ export default function SettingsPage() {
                        <h3 className="text-4xl font-black uppercase italic tracking-tighter m-0">Achievement Vault</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {[
-                        { lv: 1, label: "Master Strategist", icon: User },
-                        { lv: 10, label: "Elite Executioner", icon: Zap },
-                        { lv: 20, label: "Grand Strategist", icon: Target },
-                        { lv: 30, label: "Sovereign Zenith", icon: ShieldCheck },
-                      ].map((tier) => (
-                        <div key={tier.lv} className={cn(
-                          "p-8 rounded-[2.5rem] border-4 flex flex-col items-center text-center gap-4 transition-all shadow-xl",
-                          profile.level >= tier.lv 
-                            ? "bg-[#1f1610] text-primary border-primary shadow-[0_20px_40px_rgba(255,215,0,0.2)]" 
-                            : "bg-[#1f1610]/5 text-[#1f1610]/30 border-[#1f1610]/10"
-                        )}>
-                          <div className={cn(
-                            "w-16 h-16 rounded-2xl flex items-center justify-center border-2",
-                            profile.level >= tier.lv ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
+                      {ACHIEVEMENTS.map((item) => {
+                        const isUnlocked = item.check(profile);
+                        return (
+                          <div key={item.id} className={cn(
+                            "p-8 rounded-[3.5rem] border-4 flex flex-col items-center text-center gap-4 transition-all shadow-xl min-h-[300px] justify-between relative",
+                            isUnlocked 
+                              ? "bg-[#1f1610] text-primary border-primary shadow-[0_30px_60px_rgba(255,215,0,0.15)] scale-[1.02]" 
+                              : "bg-[#1f1610]/5 text-[#1f1610]/30 border-[#1f1610]/10 opacity-60"
                           )}>
-                            <tier.icon className={cn("h-8 w-8", profile.level >= tier.lv ? "text-primary" : "text-[#1f1610]/20")} />
+                            <div className={cn(
+                              "w-20 h-20 rounded-[1.8rem] flex items-center justify-center border-2 shadow-inner transition-colors",
+                              isUnlocked ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
+                            )}>
+                              <item.icon className={cn("h-10 w-10", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
+                            </div>
+                            <div className="space-y-2">
+                              <p className={cn("text-[10px] font-black uppercase tracking-widest", isUnlocked ? "text-primary/60" : "text-[#1f1610]/40")}>
+                                {item.req}
+                              </p>
+                              <p className="text-xl font-black uppercase italic tracking-tight leading-[0.9] break-words px-2">
+                                {item.label}
+                              </p>
+                            </div>
+                            <div className="h-10 flex items-center justify-center">
+                              {isUnlocked && <CheckCircle2 className="h-6 w-6 text-primary fill-primary/10 animate-in zoom-in" />}
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Level {tier.lv}</p>
-                            <p className="text-lg font-black uppercase italic tracking-tight leading-none">{tier.label}</p>
-                          </div>
-                          {profile.level >= tier.lv && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
