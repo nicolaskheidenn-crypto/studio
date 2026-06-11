@@ -199,13 +199,13 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.2] animate-pulse duration-[8000ms]">
+      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.2] animate-pulse duration-[8000ms] will-change-transform">
         <User className="w-[200px] h-[200px] text-primary" />
       </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.2] animate-pulse duration-[10000ms]">
+      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none -rotate-12 scale-[1.2] animate-pulse duration-[10000ms] will-change-transform">
         <ShieldCheck className="w-[220px] h-[220px] text-primary" />
       </div>
-      <div className="absolute top-[40%] right-[10%] opacity-[0.02] pointer-events-none scale-[1.1]">
+      <div className="absolute top-[40%] right-[10%] opacity-[0.02] pointer-events-none scale-[1.1] will-change-transform">
         <Coffee className="w-[180px] h-[180px] text-primary" />
       </div>
 
@@ -256,7 +256,7 @@ export default function SettingsPage() {
               <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
                  <div className="flex items-center gap-4 text-primary">
                     <MailPlus className="h-8 w-8" />
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter">Email Binding</h3>
+                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Email Binding</h3>
                  </div>
                  <div className="space-y-4">
                     <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Strategic Email</Label>
@@ -280,7 +280,7 @@ export default function SettingsPage() {
               <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
                  <div className="flex items-center gap-4 text-primary">
                     <Lock className="h-8 w-8" />
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter">Security Key</h3>
+                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Security Key</h3>
                  </div>
                  <div className="space-y-4">
                     <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Access Key</Label>
@@ -312,7 +312,7 @@ export default function SettingsPage() {
             <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
               <ScrollArea className="h-[650px] pr-10">
                 <div className="space-y-12 text-[#1f1610]">
-                  {/* Achievement Vault Restoration */}
+                  {/* Achievement Vault Re-engineered */}
                   <div className="space-y-8">
                     <div className="flex items-center gap-4 text-[#1f1610]">
                        <Trophy className="h-10 w-10 text-primary" />
@@ -323,24 +323,39 @@ export default function SettingsPage() {
                         const isUnlocked = item.check(profile);
                         return (
                           <div key={item.id} className={cn(
-                            "p-8 rounded-[3.5rem] border-4 flex flex-col items-center text-center gap-4 transition-all shadow-xl min-h-[300px] justify-between relative",
+                            "p-10 rounded-[3.5rem] border-4 flex flex-col items-center text-center gap-6 transition-all shadow-xl min-h-[340px] justify-between relative",
                             isUnlocked 
                               ? "bg-[#1f1610] text-primary border-primary shadow-[0_30px_60px_rgba(255,215,0,0.15)] scale-[1.02]" 
                               : "bg-[#1f1610]/5 text-[#1f1610]/30 border-[#1f1610]/10 opacity-60"
                           )}>
                             <div className={cn(
-                              "w-20 h-20 rounded-[1.8rem] flex items-center justify-center border-2 shadow-inner transition-colors",
+                              "w-24 h-24 rounded-[1.8rem] flex items-center justify-center border-2 shadow-inner transition-colors",
                               isUnlocked ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
                             )}>
-                              <item.icon className={cn("h-10 w-10", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
+                              <item.icon className={cn("h-12 w-12", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
                             </div>
-                            <div className="space-y-2">
-                              <p className={cn("text-[10px] font-black uppercase tracking-widest", isUnlocked ? "text-primary/60" : "text-[#1f1610]/40")}>
+                            <div className="space-y-3 w-full">
+                              <p className={cn(
+                                "text-[10px] font-black uppercase tracking-widest", 
+                                isUnlocked ? "text-white" : "text-[#1f1610]/40"
+                              )}>
                                 {item.req}
                               </p>
-                              <p className="text-xl font-black uppercase italic tracking-tight leading-[0.9] break-words px-2">
-                                {item.label}
-                              </p>
+                              <div className="flex flex-col items-center gap-1">
+                                {item.label.split(' ').map((word, idx) => (
+                                  <div key={idx} className={cn(
+                                    "px-4 py-1.5 skew-x-[-15deg] min-w-fit w-full max-w-[200px] flex items-center justify-center leading-none",
+                                    isUnlocked ? "bg-blue-700" : "bg-[#1f1610]/5"
+                                  )}>
+                                    <p className={cn(
+                                      "text-lg font-black uppercase italic tracking-tighter text-white skew-x-[15deg] whitespace-nowrap",
+                                      !isUnlocked && "text-[#1f1610]/10"
+                                    )}>
+                                      {word}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                             <div className="h-10 flex items-center justify-center">
                               {isUnlocked && <CheckCircle2 className="h-6 w-6 text-primary fill-primary/10 animate-in zoom-in" />}
