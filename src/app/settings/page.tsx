@@ -226,11 +226,11 @@ export default function SettingsPage() {
         
         <Tabs defaultValue="identity" className="space-y-12">
           <TabsList className="bg-[#1f1610] p-1.5 rounded-full w-fit shadow-2xl border-4 border-primary/10 flex gap-2 mx-auto sm:mx-0 overflow-x-auto scrollbar-hide">
-            <TabsTrigger value="identity" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Identity</TabsTrigger>
-            <TabsTrigger value="security" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Security</TabsTrigger>
-            <TabsTrigger value="privacy" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Privacy</TabsTrigger>
-            <TabsTrigger value="vault" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Vault</TabsTrigger>
-            <TabsTrigger value="control" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Control</TabsTrigger>
+            <TabsTrigger value="identity" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/90">Identity</TabsTrigger>
+            <TabsTrigger value="security" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/90">Security</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/90">Privacy</TabsTrigger>
+            <TabsTrigger value="vault" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/90">Vault</TabsTrigger>
+            <TabsTrigger value="control" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/90">Control</TabsTrigger>
           </TabsList>
 
           <TabsContent value="identity" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -317,23 +317,23 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <Card className="rounded-[4rem] border-[12px] border-white/20 bg-primary p-12 md:p-16 shadow-[0_0_120px_rgba(255,215,0,0.3)] relative overflow-hidden">
+            <Card className="rounded-[4rem] border-[12px] border-white/20 bg-primary p-12 md:p-16 shadow-[0_0_150px_rgba(255,215,0,0.3)] relative overflow-hidden">
                <div className="absolute top-[-10%] right-[-10%] opacity-10 pointer-events-none rotate-12">
                   <ShieldCheck className="w-[500px] h-[500px] text-white" />
                </div>
                
                <div className="space-y-12 relative z-10">
                   <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-[2.5rem] bg-[#1f1610] flex items-center justify-center shadow-[0_25px_50px_rgba(0,0,0,0.4)] border-4 border-white/20">
+                    <div className="w-24 h-24 rounded-[2.5rem] bg-[#1f1610] flex items-center justify-center shadow-[0_25px_50px_rgba(0,0,0,0.5)] border-4 border-white/20">
                       <Fingerprint className="h-10 w-10 text-primary" />
                     </div>
-                    <div className="bg-[#1f1610] px-12 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] border-4 border-white/10">
+                    <div className="bg-[#1f1610] px-12 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] border-4 border-white/10">
                       <h3 className="text-5xl font-black uppercase italic m-0 tracking-tighter text-primary">Sovereign Privacy</h3>
                     </div>
                   </div>
                   
                   <div className="space-y-10">
-                    <div className="bg-[#1f1610] p-12 rounded-[4.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] border-8 border-white/5 relative overflow-hidden group">
+                    <div className="bg-[#1f1610] p-12 rounded-[4.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.6)] border-8 border-white/5 relative overflow-hidden group">
                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,215,0,0.05),transparent)] pointer-events-none" />
                        <p className="font-black leading-relaxed m-0 text-3xl italic text-primary tracking-tight relative z-10 uppercase">
                           YOUR STRATEGIC VISIONS ARE SELF-CUSTODIED. WE DEPLOY ZERO-KNOWLEDGE OBFUSCATION FOR GOALCAPS, ENSURING YOUR FUTURE GOALS ARE CRYPTOGRAPHICALLY HIDDEN EVEN FROM THE INFRASTRUCTURE HOST.
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                            icon: Lock 
                          }
                        ].map((item, i) => (
-                         <div key={i} className="bg-[#1f1610] p-10 rounded-[3.5rem] border-4 border-white/5 space-y-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)] hover:scale-[1.03] transition-all group overflow-hidden relative">
+                         <div key={i} className="bg-[#1f1610] p-10 rounded-[3.5rem] border-4 border-white/10 space-y-8 shadow-[0_30px_60px_rgba(0,0,0,0.5)] hover:scale-[1.03] transition-all group overflow-hidden relative shadow-inner">
                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.6)] border-4 border-white/20 relative z-10">
                               <item.icon className="h-8 w-8 text-[#1f1610]" />
@@ -366,7 +366,7 @@ export default function SettingsPage() {
                             <div className="space-y-4 relative z-10">
                               <h4 className="text-3xl font-black text-primary uppercase italic tracking-tighter leading-none">{item.title}</h4>
                               <div className="h-1 w-12 bg-primary/20 rounded-full" />
-                              <p className="text-[11px] font-bold text-white/90 uppercase tracking-widest leading-loose">{item.desc}</p>
+                              <p className="text-[11px] font-bold text-white uppercase tracking-widest leading-loose">{item.desc}</p>
                             </div>
                          </div>
                        ))}
@@ -394,24 +394,24 @@ export default function SettingsPage() {
                             "p-10 rounded-[3.5rem] border-4 flex flex-col items-center text-center gap-8 transition-all shadow-2xl min-h-[380px] justify-between relative overflow-hidden",
                             isUnlocked 
                               ? "bg-[#1f1610] border-primary shadow-[0_30px_60px_rgba(255,215,0,0.2)] scale-[1.02]" 
-                              : "bg-[#1f1610]/10 border-[#1f1610]/10 opacity-40"
+                              : "bg-[#1f1610]/10 border-[#1f1610]/10 opacity-60"
                           )}>
                             <div className={cn(
                               "w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 shadow-inner transition-colors shrink-0",
                               isUnlocked ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
                             )}>
-                              <item.icon className={cn("h-12 w-12", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
+                              <item.icon className={cn("h-12 w-12", isUnlocked ? "text-primary" : "text-[#1f1610]/40")} />
                             </div>
 
                             <div className="flex flex-col items-center gap-2 w-full">
                               {item.label.split(' ').map((word, wordIdx) => (
                                 <div key={wordIdx} className={cn(
                                   "px-6 py-2 skew-x-[-15deg] min-w-fit w-full flex items-center justify-center leading-none transition-all shadow-lg",
-                                  isUnlocked ? "bg-primary" : "bg-[#1f1610]/20"
+                                  isUnlocked ? "bg-primary" : "bg-[#1f1610]/30"
                                 )}>
                                   <p 
                                     className="text-xl font-black uppercase italic tracking-tighter skew-x-[15deg] whitespace-nowrap"
-                                    style={{ color: isUnlocked ? '#1f1610' : '#1f161040', margin: 0 }}
+                                    style={{ color: isUnlocked ? '#1f1610' : '#1f1610', opacity: isUnlocked ? 1 : 0.6, margin: 0 }}
                                   >
                                     {word}
                                   </p>
@@ -420,7 +420,7 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="flex flex-col items-center gap-4">
-                              <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: isUnlocked ? '#ffffff' : '#1f161080', opacity: isUnlocked ? 0.9 : 1 }}>
+                              <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: isUnlocked ? '#ffffff' : '#1f1610', opacity: 0.9 }}>
                                 {item.req}
                               </p>
                               {isUnlocked && (
