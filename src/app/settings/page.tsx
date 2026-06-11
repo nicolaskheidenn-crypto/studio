@@ -16,11 +16,13 @@ import { cn } from "@/lib/utils";
 import { useUser, useFirestore } from "@/firebase";
 import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
-import { getAuth, updateProfile, updatePassword, verifyBeforeUpdateEmail, signOut, deleteUser } from "firebase/auth";
+import { getAuth, updateProfile, updatePassword, verifyBeforeUpdateEmail, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from "next/navigation";
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Strategist',
@@ -61,7 +63,7 @@ export default function SettingsPage() {
     return { ...DEFAULT_PROFILE, ...raw };
   }, [profiles, uid]);
 
-  const { updateProfile: updateStoreProfile } = useUserStore();
+  const { updateProfile: updateStoreProfile, resetUserStats } = useUserStore();
 
   const [displayName, setDisplayName] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -89,9 +91,17 @@ export default function SettingsPage() {
       await updateProfile(auth.currentUser, { displayName });
       
       const userDocRef = doc(db, 'users', uid);
-      await setDoc(userDocRef, {
+      setDoc(userDocRef, {
         nickname: displayName
-      }, { merge: true });
+      }, { merge: true })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'update',
+          requestResourceData: { nickname: displayName },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
 
       updateStoreProfile(uid, { nickname: displayName });
       toast({ title: "Callsign Updated", description: "Your strategic identity has been synchronized." });
@@ -116,10 +126,13 @@ export default function SettingsPage() {
       });
       setNewEmail("");
     } catch (error: any) {
-      toast({ title: "Binding Error", description: error.message, variant: "destructive" });
+      if (error.code === 'auth/requires-recent-login') {
+        toast({ title: "Security Threshold", description: "Please re-authenticate to confirm this identity shift.", variant: "destructive" });
+      } else {
+        toast({ title: "Binding Error", description: error.message, variant: "destructive" });
+      }
     } finally {
-      setIsUpdatingEmail(true);
-      setTimeout(() => setIsUpdatingEmail(false), 2000);
+      setIsUpdatingEmail(false);
     }
   };
 
@@ -135,13 +148,11 @@ export default function SettingsPage() {
       setShowNewPass(false);
       toast({ title: "Security Key Updated", description: "Access protocol re-established." });
     } catch (error: any) {
-      toast({ 
-        title: "Security Alert", 
-        description: error.message.includes("recent-login") 
-          ? "Re-authentication required: Log out and back in to change your key." 
-          : error.message, 
-        variant: "destructive" 
-      });
+      if (error.code === 'auth/requires-recent-login') {
+        toast({ title: "Security Threshold", description: "Recent login required. Please logout and back in.", variant: "destructive" });
+      } else {
+        toast({ title: "Security Alert", description: error.message, variant: "destructive" });
+      }
     } finally {
       setIsUpdatingPass(false);
     }
@@ -151,6 +162,8 @@ export default function SettingsPage() {
     setIsLoggingOut(true);
     try {
       await signOut(auth);
+      // Hard purge of session state
+      if (uid) resetUserStats(uid);
       router.push("/");
       toast({ title: "Session Terminated", description: "Sovereign cache cleared." });
     } catch (e) {
@@ -163,6 +176,7 @@ export default function SettingsPage() {
     setIsDeleting(true);
     try {
       await deleteUser(auth.currentUser);
+      if (uid) resetUserStats(uid);
       router.push("/");
       toast({ title: "Identity Purged", description: "All data cleared from the registry." });
     } catch (error: any) {
@@ -380,4 +394,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

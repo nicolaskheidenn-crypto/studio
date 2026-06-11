@@ -15,7 +15,10 @@ import { useState, useEffect, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore } from "@/firebase";
+import { doc, setDoc } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Strategist',
@@ -33,6 +36,7 @@ const DEFAULT_PROFILE: UserProfile = {
   capsules: [],
   unlockedBadgeIds: [],
   purchasedProductIds: [],
+  claimedRewardWeeks: [],
   stats: {
     quizzesPassed: 0,
     promptsShared: 0,
@@ -58,6 +62,7 @@ const decryptVision = (encoded: string) => {
 export default function GoalCapsPage() {
   const { user } = useUser();
   const uid = user?.uid;
+  const db = useFirestore();
   const profiles = useUserStore(s => s.profiles);
   const profile = useMemo(() => {
     const raw = uid ? profiles[uid] || DEFAULT_PROFILE : DEFAULT_PROFILE;
@@ -91,13 +96,26 @@ export default function GoalCapsPage() {
     
     // Deploy Sovereign Encryption before storage
     const encryptedMessage = encryptVision(message);
+    const capsuleId = Math.random().toString(36).substring(2, 11);
 
     const newCap = {
-      id: Math.random().toString(36).substring(2, 11),
+      id: capsuleId,
       message: encryptedMessage,
       unlockDate,
       createdAt: new Date().toLocaleDateString(),
     };
+
+    // Synchronize to Firestore for persistent security validation
+    const capRef = doc(db, 'users', uid, 'capsules', capsuleId);
+    setDoc(capRef, newCap)
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: capRef.path,
+          operation: 'create',
+          requestResourceData: newCap,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
 
     addCapsule(uid, newCap);
     setMessage("");
@@ -115,7 +133,6 @@ export default function GoalCapsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - GPU OPTIMIZED */}
       <div className="absolute top-[20%] left-[-10%] opacity-5 pointer-events-none scale-100 rotate-12 will-change-transform">
         <Hourglass className="h-[300px] w-[300px] text-primary" />
       </div>
@@ -302,7 +319,6 @@ export default function GoalCapsPage() {
                 )}
               </div>
             </div>
-
           </div>
         </div>
       </main>
