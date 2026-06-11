@@ -162,7 +162,6 @@ export default function SettingsPage() {
     setIsLoggingOut(true);
     try {
       await signOut(auth);
-      // Hard purge of session state
       if (uid) resetUserStats(uid);
       router.push("/");
       toast({ title: "Session Terminated", description: "Sovereign cache cleared." });
@@ -189,7 +188,6 @@ export default function SettingsPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS */}
       <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none rotate-12 scale-[1.2] animate-pulse duration-[8000ms]">
         <User className="w-[200px] h-[200px] text-primary" />
       </div>
@@ -301,8 +299,45 @@ export default function SettingsPage() {
 
           <TabsContent value="vault" className="animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
-              <ScrollArea className="h-[600px] pr-10">
+              <ScrollArea className="h-[650px] pr-10">
                 <div className="space-y-12 text-[#1f1610]">
+                  {/* Achievement Vault Restoration */}
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-4 text-[#1f1610]">
+                       <Trophy className="h-10 w-10 text-primary" />
+                       <h3 className="text-4xl font-black uppercase italic tracking-tighter m-0">Achievement Vault</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {[
+                        { lv: 1, label: "Master Strategist", icon: User },
+                        { lv: 10, label: "Elite Executioner", icon: Zap },
+                        { lv: 20, label: "Grand Strategist", icon: Target },
+                        { lv: 30, label: "Sovereign Zenith", icon: ShieldCheck },
+                      ].map((tier) => (
+                        <div key={tier.lv} className={cn(
+                          "p-8 rounded-[2.5rem] border-4 flex flex-col items-center text-center gap-4 transition-all shadow-xl",
+                          profile.level >= tier.lv 
+                            ? "bg-[#1f1610] text-primary border-primary shadow-[0_20px_40px_rgba(255,215,0,0.2)]" 
+                            : "bg-[#1f1610]/5 text-[#1f1610]/30 border-[#1f1610]/10"
+                        )}>
+                          <div className={cn(
+                            "w-16 h-16 rounded-2xl flex items-center justify-center border-2",
+                            profile.level >= tier.lv ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
+                          )}>
+                            <tier.icon className={cn("h-8 w-8", profile.level >= tier.lv ? "text-primary" : "text-[#1f1610]/20")} />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Level {tier.lv}</p>
+                            <p className="text-lg font-black uppercase italic tracking-tight leading-none">{tier.label}</p>
+                          </div>
+                          {profile.level >= tier.lv && <CheckCircle2 className="h-5 w-5 text-primary" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-1 bg-[#1f1610]/5 rounded-full" />
+
                   <div className="p-8 bg-[#1f1610] text-primary rounded-[2.5rem] border-4 border-primary/30 space-y-4">
                      <div className="flex items-center gap-4">
                         <Fingerprint className="h-8 w-8" />
@@ -330,7 +365,7 @@ export default function SettingsPage() {
                       <h3 className="text-3xl font-black uppercase italic tracking-tight flex items-center gap-3">
                         <Target className="h-7 w-7 text-primary" /> Data Retention
                       </h3>
-                      <p className="font-medium leading-relaxed">NICO DIGITAL retains minimal identifies required for growth scaling. Membership data is active only while your command remains open.</p>
+                      <p className="font-medium leading-relaxed">NICO DIGITAL retains minimal identifiers required for growth scaling. Membership data is active only while your command remains open.</p>
                       <div className="p-6 border-4 border-[#1f1610]/10 rounded-3xl bg-[#1f1610]/5 italic font-black text-xs uppercase tracking-widest">
                         "Your data. Your empire. Your sovereignty."
                       </div>
