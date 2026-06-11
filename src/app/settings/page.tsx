@@ -23,7 +23,6 @@ import {
   deleteUser,
   EmailAuthProvider,
   linkWithCredential,
-  reauthenticateWithCredential,
   unlink,
   reload
 } from "firebase/auth";
@@ -81,10 +80,9 @@ export default function SettingsPage() {
   // Binding/Security State
   const [newEmailBind, setNewEmailBind] = useState("");
   const [newPassBind, setNewPassBind] = useState("");
-  const [currentPassAuth, setCurrentPassAuth] = useState("");
   const [isBinding, setIsBinding] = useState(false);
   
-  const [showPass, setShowPass] = useState({ new: false, current: false });
+  const [showPass, setShowPass] = useState({ new: false });
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -126,8 +124,8 @@ export default function SettingsPage() {
 
   const handleRebindIdentity = async () => {
     const currentUser = auth.currentUser;
-    if (!currentUser || !newEmailBind || !newPassBind || !currentPassAuth) {
-      toast({ title: "Protocol Breach", description: "All strategic keys required.", variant: "destructive" });
+    if (!currentUser || !newEmailBind || !newPassBind) {
+      toast({ title: "Protocol Breach", description: "New email and security key required.", variant: "destructive" });
       return;
     }
 
@@ -136,25 +134,18 @@ export default function SettingsPage() {
       // 0. Reload user to ensure latest session state
       await reload(currentUser);
 
-      // 1. Re-authenticate the active user first to pass the security threshold
-      const currentCredential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
-      
-      reauthenticateWithCredential(currentUser, currentCredential)
-        .then(() => {
-          // 2. Now that the user is freshly authenticated, build the NEW email credential to bind
-          const newCredential = EmailAuthProvider.credential(newEmailBind, newPassBind);
+      // 1. Build the NEW email credential to bind directly
+      const newCredential = EmailAuthProvider.credential(newEmailBind, newPassBind);
 
-          // 3. Complete the link/bind process safely
-          return linkWithCredential(currentUser, newCredential);
-        })
+      // 2. Complete the link/bind process safely
+      linkWithCredential(currentUser, newCredential)
         .then((linkResult) => {
           toast({ title: "Identity Re-Bound", description: "Strategic email and key updated successfully." });
-          setNewEmailBind(""); setNewPassBind(""); setCurrentPassAuth("");
+          setNewEmailBind(""); setNewPassBind("");
         })
         .catch((error: any) => {
           console.error("Error during linking profile operations:", error);
           let msg = error.message;
-          if (error.code === 'auth/invalid-credential') msg = "Current Security Key is incorrect.";
           if (error.code === 'auth/email-already-in-use') msg = "Target email is already bound to another strategist.";
           toast({ title: "Binding Failure", description: msg, variant: "destructive" });
         })
@@ -168,21 +159,17 @@ export default function SettingsPage() {
 
   const handleUnlinkProtocol = async () => {
     const currentUser = auth.currentUser;
-    if (!currentUser || !currentPassAuth) {
-      toast({ title: "Unlink Error", description: "Current key required for verification.", variant: "destructive" });
+    if (!currentUser) {
+      toast({ title: "Unlink Error", description: "Session state missing.", variant: "destructive" });
       return;
     }
 
     setIsBinding(true);
     try {
       await reload(currentUser);
-      const credential = EmailAuthProvider.credential(currentUser.email!, currentPassAuth);
-
-      reauthenticateWithCredential(currentUser, credential)
-        .then(() => {
-          // 2. Proceed with unlinking the specific provider identifier
-          return unlink(currentUser, 'password');
-        })
+      
+      // 1. Proceed with unlinking the specific provider identifier directly
+      unlink(currentUser, 'password')
         .then((updatedUser) => {
           toast({ title: "Provider Unlinked", description: "Identity block detached from root." });
         })
@@ -315,39 +302,21 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-8">
-                    <div className="space-y-4">
-                      <Label className="text-primary font-black text-[10px] uppercase tracking-[0.4em]">Current Authorization Key</Label>
-                      <div className="relative">
-                        <Input 
-                          type={showPass.current ? 'text' : 'password'} 
-                          placeholder="Verify current passkey..." 
-                          value={currentPassAuth} 
-                          onChange={e => setCurrentPassAuth(e.target.value)} 
-                          className="h-16 bg-[#1f1610] border-4 border-red-600/30 rounded-2xl px-6 pr-14 text-xl font-bold text-white focus:border-red-600" 
-                        />
-                        <button type="button" onClick={() => setShowPass(s => ({...s, current: !s.current}))} className="absolute right-5 top-1/2 -translate-y-1/2 text-red-600/30">
-                          {showPass.current ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                      <Button 
-                        onClick={handleRebindIdentity} 
-                        disabled={isBinding}
-                        className="w-full h-20 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-sm hover:scale-105 transition-all shadow-xl tracking-widest"
-                      >
-                        {isBinding ? <Loader2 className="h-6 w-6 animate-spin" /> : 'RE-BIND IDENTITY'}
-                      </Button>
-                      <Button 
-                        variant="ghost"
-                        onClick={handleUnlinkProtocol}
-                        className="text-red-600 hover:bg-red-600/10 font-black uppercase text-[10px] tracking-widest"
-                      >
-                        UNLINK CURRENT PROVIDER
-                      </Button>
-                    </div>
+                  <div className="flex flex-col gap-4 justify-end">
+                    <Button 
+                      onClick={handleRebindIdentity} 
+                      disabled={isBinding}
+                      className="w-full h-20 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-sm hover:scale-105 transition-all shadow-xl tracking-widest"
+                    >
+                      {isBinding ? <Loader2 className="h-6 w-6 animate-spin" /> : 'RE-BIND IDENTITY'}
+                    </Button>
+                    <Button 
+                      variant="ghost"
+                      onClick={handleUnlinkProtocol}
+                      className="text-red-600 hover:bg-red-600/10 font-black uppercase text-[10px] tracking-widest"
+                    >
+                      UNLINK CURRENT PROVIDER
+                    </Button>
                   </div>
                </div>
             </Card>
@@ -459,7 +428,7 @@ export default function SettingsPage() {
 
                <Card className="rounded-[3.5rem] border-[8px] border-red-600/20 bg-red-600/5 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:border-red-600/10 transition-all shadow-2xl">
                   <div className="space-y-6">
-                    <div className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-red-600/20 shadow-inner">
+                    <div className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-primary/20 shadow-inner">
                       <AlertTriangle className="h-10 w-10 text-red-600" />
                     </div>
                     <div className="space-y-2">
