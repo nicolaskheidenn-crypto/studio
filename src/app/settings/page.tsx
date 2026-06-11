@@ -212,7 +212,7 @@ export default function SettingsPage() {
 
       <main className="flex-1 container mx-auto px-4 py-12 max-w-6xl relative z-10">
         <header className="mb-12 space-y-4 text-center sm:text-left">
-           <h1 className="text-6xl font-headline font-black text-foreground uppercase tracking-tighter italic leading-none">Settings</h1>
+           <h1 className="text-6xl font-headline font-black text-foreground uppercase tracking-tighter italic leading-none">Settings Hub</h1>
            <div className="h-1.5 w-24 bg-primary rounded-full shadow-[0_0_15px_rgba(255,215,0,0.3)] mx-auto sm:mx-0" />
         </header>
         
@@ -246,7 +246,7 @@ export default function SettingsPage() {
                     disabled={isUpdatingProfile}
                     className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-2xl uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all tracking-tighter border-4 border-primary/10"
                   >
-                    {isUpdatingProfile ? <Loader2 className="h-10 w-10 animate-spin" /> : 'UPDATE CALLSIGN'}
+                    {isUpdatingProfile ? <Loader2 className="h-10 w-10 animate-spin" /> : 'UPDATE PROTOCOL'}
                   </Button>
                </div>
             </Card>
@@ -257,10 +257,10 @@ export default function SettingsPage() {
               <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
                  <div className="flex items-center gap-4 text-primary">
                     <MailPlus className="h-8 w-8" />
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Email Binding</h3>
+                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Strategic Email</h3>
                  </div>
                  <div className="space-y-4">
-                    <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Strategic Email</Label>
+                    <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Binding Target</Label>
                     <Input 
                       type="email" 
                       placeholder="name@example.com" 
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                       disabled={isUpdatingEmail}
                       className="w-full h-16 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-xs hover:scale-105 transition-all shadow-xl tracking-widest"
                     >
-                      {isUpdatingEmail ? <Loader2 className="h-5 w-5 animate-spin" /> : 'BIND NEW EMAIL'}
+                      {isUpdatingEmail ? <Loader2 className="h-5 w-5 animate-spin" /> : 'DISPATCH AUTHORIZATION'}
                     </Button>
                  </div>
               </Card>
@@ -281,10 +281,10 @@ export default function SettingsPage() {
               <Card className="rounded-[3.5rem] border-[8px] border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
                  <div className="flex items-center gap-4 text-primary">
                     <Lock className="h-8 w-8" />
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Security Key</h3>
+                    <h3 className="text-2xl font-black uppercase italic tracking-tighter m-0">Root Security</h3>
                  </div>
                  <div className="space-y-4">
-                    <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Access Key</Label>
+                    <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">Update Access Key</Label>
                     <div className="relative">
                       <Input 
                         type={showNewPass ? 'text' : 'password'} 
@@ -302,7 +302,7 @@ export default function SettingsPage() {
                       disabled={isUpdatingPass}
                       className="w-full h-16 rounded-2xl bg-[#1f1610] border-4 border-primary/20 text-primary font-black uppercase text-xs hover:scale-105 transition-all shadow-xl tracking-widest"
                     >
-                      {isUpdatingPass ? <Loader2 className="h-5 w-5 animate-spin" /> : 'UPDATE ACCESS KEY'}
+                      {isUpdatingPass ? <Loader2 className="h-5 w-5 animate-spin" /> : 'INITIALIZE KEY SHIFT'}
                     </Button>
                  </div>
               </Card>
@@ -329,7 +329,6 @@ export default function SettingsPage() {
                               ? "bg-[#1f1610] border-primary shadow-[0_30px_60px_rgba(255,215,0,0.2)] scale-[1.02]" 
                               : "bg-[#1f1610]/10 border-[#1f1610]/10 opacity-40"
                           )}>
-                            {/* Icon Container */}
                             <div className={cn(
                               "w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 shadow-inner transition-colors shrink-0",
                               isUnlocked ? "bg-primary/10 border-primary" : "bg-[#1f1610]/5 border-[#1f1610]/10"
@@ -337,7 +336,6 @@ export default function SettingsPage() {
                               <item.icon className={cn("h-12 w-12", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
                             </div>
 
-                            {/* Label Container - SPLIT INTO SLANTED BOXES WITH GOLD BACKGROUND */}
                             <div className="flex flex-col items-center gap-2 w-full">
                               {item.label.split(' ').map((word, wordIdx) => (
                                 <div key={wordIdx} className={cn(
@@ -354,7 +352,6 @@ export default function SettingsPage() {
                               ))}
                             </div>
 
-                            {/* Requirement / Checkmark Container */}
                             <div className="flex flex-col items-center gap-4">
                               <p 
                                 className="text-[9px] font-black uppercase tracking-[0.3em]"
@@ -376,15 +373,27 @@ export default function SettingsPage() {
 
                   <div className="h-1 bg-[#1f1610]/5 rounded-full" />
 
-                  {/* Privacy Protocol Section */}
-                  <div className="p-10 bg-[#1f1610] text-primary rounded-[3rem] border-4 border-primary/30 space-y-6 shadow-2xl">
-                     <div className="flex items-center gap-6">
-                        <Fingerprint className="h-10 w-10" />
-                        <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter" style={{ color: 'var(--primary)' }}>Sovereign Privacy</h3>
+                  {/* Privacy Protocol Section - UPDATED TO BLUE/WHITE BLOCKS */}
+                  <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-8 shadow-2xl overflow-hidden relative group">
+                     <div className="flex items-center gap-6 relative z-10">
+                        <div className="w-16 h-16 rounded-2xl bg-blue-700 flex items-center justify-center shadow-xl border-4 border-white/20">
+                          <Fingerprint className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="bg-blue-700 px-8 py-3 rounded-xl shadow-[0_10px_20px_rgba(0,56,168,0.4)] border-2 border-white/10">
+                          <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-white">Sovereign Privacy</h3>
+                        </div>
                      </div>
-                     <p className="font-bold leading-relaxed m-0 text-lg italic" style={{ color: 'var(--primary)', opacity: 0.8 }}>
-                        Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
-                     </p>
+                     
+                     <div className="bg-blue-700/90 backdrop-blur-sm p-10 rounded-[2.5rem] shadow-inner border-4 border-white/10 relative z-10">
+                        <p className="font-black leading-relaxed m-0 text-xl italic text-white tracking-tight">
+                           Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
+                        </p>
+                     </div>
+                     
+                     {/* Decorative background accent */}
+                     <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 opacity-[0.05] pointer-events-none scale-[1.5]">
+                        <ShieldCheck className="w-80 h-80 text-blue-500" />
+                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-[#1f1610]">
@@ -456,7 +465,6 @@ export default function SettingsPage() {
                </Card>
             </div>
 
-            {/* High-Visibility Version Bar */}
             <div className="p-8 bg-[#1f1610] rounded-[2.5rem] border-[6px] border-red-600/60 shadow-[0_0_30px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center">
                <div className="absolute inset-0 bg-red-600/5 pointer-events-none animate-pulse" />
                <p className="text-3xl font-black text-red-600 uppercase tracking-[0.5em] italic relative z-10 leading-none drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">
