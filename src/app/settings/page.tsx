@@ -334,7 +334,7 @@ export default function SettingsPage() {
 
                     <div className="flex flex-col gap-4">
                       <Button 
-                        onClick={handleRebindIdentity}
+                        onClick={handleRebindIdentity} 
                         disabled={isBinding}
                         className="w-full h-20 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-sm hover:scale-105 transition-all shadow-xl tracking-widest"
                       >
