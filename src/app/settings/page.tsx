@@ -9,7 +9,7 @@ import {
   Shield, Lock, Award, Trophy, Coffee, 
   Eye, EyeOff, Loader2, User, ShieldCheck, 
   Fingerprint, Target, Zap, MailPlus, LogOut, 
-  Trash2, AlertTriangle, CheckCircle2, BookOpen, Flame, Share2, LayoutDashboard
+  Trash2, AlertTriangle, CheckCircle2, BookOpen, Flame, Share2, LayoutDashboard, Sparkles
 } from "lucide-react";
 import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -318,57 +318,62 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
-              <div className="p-10 bg-[#1f1610] rounded-[3rem] border-4 border-primary/30 space-y-10 shadow-2xl overflow-hidden relative group">
-                 <div className="flex items-center gap-6 relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl border-4 border-[#1f1610]/10">
-                      <Fingerprint className="h-8 w-8 text-[#1f1610]" />
+            <Card className="rounded-[4rem] border-[12px] border-white/20 bg-primary p-12 md:p-16 shadow-[0_0_120px_rgba(255,215,0,0.4)] relative overflow-hidden">
+               <div className="absolute top-[-10%] right-[-10%] opacity-10 pointer-events-none rotate-12">
+                  <ShieldCheck className="w-[500px] h-[500px] text-white" />
+               </div>
+               
+               <div className="space-y-12 relative z-10">
+                  <div className="flex items-center gap-6">
+                    <div className="w-24 h-24 rounded-[2.5rem] bg-[#1f1610] flex items-center justify-center shadow-[0_25px_50px_rgba(0,0,0,0.4)] border-4 border-white/20">
+                      <Fingerprint className="h-10 w-10 text-primary" />
                     </div>
-                    <div className="bg-primary px-10 py-3 rounded-xl shadow-[0_10px_20px_rgba(255,215,0,0.3)] border-2 border-[#1f1610]/10">
-                      <h3 className="text-4xl font-black uppercase italic m-0 tracking-tighter text-[#1f1610]">Sovereign Privacy</h3>
+                    <div className="bg-[#1f1610] px-12 py-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] border-4 border-white/10">
+                      <h3 className="text-5xl font-black uppercase italic m-0 tracking-tighter text-primary">Sovereign Privacy</h3>
                     </div>
-                 </div>
-                 
-                 <div className="space-y-8 relative z-10">
-                   <div className="bg-primary backdrop-blur-md p-10 rounded-[2.5rem] shadow-inner border-4 border-[#1f1610]/10">
-                      <p className="font-black leading-relaxed m-0 text-xl italic text-[#1f1610] tracking-tight">
-                         Your strategic visions are self-custodied. We deploy Zero-Knowledge obfuscation for GoalCaps, ensuring your future goals are cryptographically hidden even from the Infrastructure Host.
-                      </p>
-                   </div>
+                  </div>
+                  
+                  <div className="space-y-10">
+                    <div className="bg-[#1f1610] p-12 rounded-[4.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.5)] border-8 border-white/5 relative overflow-hidden group">
+                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,215,0,0.05),transparent)] pointer-events-none" />
+                       <p className="font-black leading-relaxed m-0 text-3xl italic text-primary tracking-tight relative z-10 uppercase">
+                          YOUR STRATEGIC VISIONS ARE SELF-CUSTODIED. WE DEPLOY ZERO-KNOWLEDGE OBFUSCATION FOR GOALCAPS, ENSURING YOUR FUTURE GOALS ARE CRYPTOGRAPHICALLY HIDDEN EVEN FROM THE INFRASTRUCTURE HOST.
+                       </p>
+                    </div>
 
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      <div className="bg-primary/20 backdrop-blur-md p-8 rounded-[2rem] border-2 border-primary/40 space-y-4 transition-all hover:bg-primary/30">
-                         <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg">
-                           <Shield className="h-5 w-5 text-[#1f1610]" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                       {[
+                         { 
+                           title: "ZERO-LOG PROTOCOL", 
+                           desc: "INDIVIDUAL SESSION KEYSTROKES AND NAVIGATION PATHS ARE NEVER RECORDED. YOUR FOCUS IS ISOLATED WITHIN A SECURED ARCHITECTURE THAT PURGES ALL TEMPORARY ASSETS UPON DISCONNECT.",
+                           icon: Shield 
+                         },
+                         { 
+                           title: "NON-CUSTODIAL", 
+                           desc: "STRATEGIST DATA IS NEVER EXPORTED, PROCESSED, OR SOLD. YOUR TACTICAL RECORD EXISTS EXCLUSIVELY FOR YOUR GROWTH ONLY, PROTECTED BY DECENTRALIZED IDENTITY NODES.",
+                           icon: Fingerprint 
+                         },
+                         { 
+                           title: "AES-256 SHIELD", 
+                           desc: "INDUSTRY-STANDARD ENCRYPTION BLOCKS APPLIED TO ALL TEMPORAL DISPATCHES. YOUR PRIVATE VAULT UTILIZES MILITARY-GRADE AES-256 KEY WRAPPING FOR TOTAL DATA ANONYMITY.",
+                           icon: Lock 
+                         }
+                       ].map((item, i) => (
+                         <div key={i} className="bg-[#1f1610] p-10 rounded-[3.5rem] border-4 border-white/5 space-y-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)] hover:scale-[1.03] transition-all group overflow-hidden relative">
+                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.6)] border-4 border-white/20 relative z-10">
+                              <item.icon className="h-8 w-8 text-[#1f1610]" />
+                            </div>
+                            <div className="space-y-4 relative z-10">
+                              <h4 className="text-3xl font-black text-primary uppercase italic tracking-tighter leading-none">{item.title}</h4>
+                              <div className="h-1 w-12 bg-primary/20 rounded-full" />
+                              <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest leading-loose">{item.desc}</p>
+                            </div>
                          </div>
-                         <div className="space-y-2">
-                           <h4 className="text-xl font-black text-primary uppercase italic tracking-tighter">Zero-Log Protocol</h4>
-                           <p className="text-xs font-bold text-white/60 uppercase tracking-tight leading-relaxed">Individual session keystrokes and navigation paths are never recorded. Your focus is isolated.</p>
-                         </div>
-                      </div>
-
-                      <div className="bg-primary/20 backdrop-blur-md p-8 rounded-[2rem] border-2 border-primary/40 space-y-4 transition-all hover:bg-primary/30">
-                         <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg">
-                           <Fingerprint className="h-5 w-5 text-[#1f1610]" />
-                         </div>
-                         <div className="space-y-2">
-                           <h4 className="text-xl font-black text-primary uppercase italic tracking-tighter">Non-Custodial</h4>
-                           <p className="text-xs font-bold text-white/60 uppercase tracking-tight leading-relaxed">Strategist data is never exported or sold. Your tactical record exists for your growth only.</p>
-                         </div>
-                      </div>
-
-                      <div className="bg-primary/20 backdrop-blur-md p-8 rounded-[2rem] border-2 border-primary/40 space-y-4 transition-all hover:bg-primary/30">
-                         <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg">
-                           <Lock className="h-5 w-5 text-[#1f1610]" />
-                         </div>
-                         <div className="space-y-2">
-                           <h4 className="text-xl font-black text-primary uppercase italic tracking-tighter">AES-256 Shield</h4>
-                           <p className="text-xs font-bold text-white/60 uppercase tracking-tight leading-relaxed">Industry-standard encryption blocks applied to all temporal dispatches in your private vault.</p>
-                         </div>
-                      </div>
-                   </div>
-                 </div>
-              </div>
+                       ))}
+                    </div>
+                  </div>
+               </div>
             </Card>
           </TabsContent>
 
