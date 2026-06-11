@@ -376,7 +376,7 @@ export default function TaskDoPage() {
                  <div className="space-y-5">
                     <div className="flex justify-between items-end">
                        <span className="text-[11px] font-black text-primary uppercase tracking-[0.4em]">SYNC PROGRESS</span>
-                       <span className="text-3xl font-black text-white italic tracking-tighter">{xp}%</span>
+                       <span className="text-3xl font-black text-white italic tracking-tighter">{Math.round(xp)}%</span>
                     </div>
                     <div className="h-4 bg-white/5 rounded-full border-2 border-white/10 overflow-hidden shadow-inner">
                        <div className="h-full bg-primary shadow-[0_0_20px_rgba(255,215,0,0.8)] transition-all duration-1000" style={{ width: `${xp}%` }} />
@@ -464,37 +464,6 @@ export default function TaskDoPage() {
            </div>
         </div>
       </main>
-
-      <Dialog open={!!activeReward} onOpenChange={() => setActiveReward(null)}>
-        <DialogContent className="rounded-[5rem] border-[20px] border-primary/20 bg-mocha-cream p-16 max-w-2xl text-center shadow-[0_100px_150px_rgba(0,0,0,0.8)] overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.25),transparent)] pointer-events-none" />
-          <div className="relative z-10 space-y-12">
-            <div className="w-56 h-64 bg-[#1f1610] text-primary rounded-[4rem] flex items-center justify-center mx-auto shadow-[0_40px_80px_rgba(0,0,0,0.5)] border-[10px] border-primary/20">
-              <Gift className="h-32 w-32 animate-pulse" />
-            </div>
-            <div className="space-y-6">
-              <h2 className="text-7xl font-headline font-black text-[#1f1610] uppercase tracking-tighter italic leading-none">
-                TREASURE SECURED
-              </h2>
-              <div className="h-3 w-32 bg-primary mx-auto rounded-full" />
-              <p className="text-4xl font-black text-[#1f1610] uppercase italic tracking-tight">
-                {activeReward?.title}
-              </p>
-            </div>
-            <p className="text-lg font-bold text-[#1f1610]/60 uppercase tracking-[0.4em] max-w-sm mx-auto italic leading-relaxed">
-              {activeReward?.description}
-            </p>
-            <Button 
-              asChild
-              className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all uppercase tracking-tighter gap-8 border-4 border-primary/20"
-            >
-              <a href={activeReward?.fileUrl} target="_blank" download>
-                <Download className="h-10 w-10" /> DOWNLOAD PROTOCOL
-              </a>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <style jsx global>{`
         @keyframes glitter-flow {
