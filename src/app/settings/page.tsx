@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -99,10 +98,12 @@ export default function SettingsPage() {
     if (!uid || !auth.currentUser) return;
     setIsUpdatingProfile(true);
     try {
+      // Step 1: Update Auth Profile
       await updateProfile(auth.currentUser, { displayName });
       
+      // Step 2: Update Firestore (Source of Truth)
       const userDocRef = doc(db, 'users', uid);
-      setDoc(userDocRef, {
+      await setDoc(userDocRef, {
         nickname: displayName
       }, { merge: true })
       .catch(async (error) => {
@@ -112,8 +113,10 @@ export default function SettingsPage() {
           requestResourceData: { nickname: displayName },
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
+        throw error;
       });
 
+      // Step 3: Update Local Store only after Firestore success
       updateStoreProfile(uid, { nickname: displayName });
       toast({ title: "Callsign Updated", description: "Your strategic identity has been synchronized." });
     } catch (e) {

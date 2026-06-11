@@ -22,10 +22,12 @@ export default function EntryGate() {
     if (loading) return;
     if (typeof window !== 'undefined') {
       const hasAccess = sessionStorage.getItem('fireproof_access_granted');
+      // HARDENED PASS: Verify that both the local session token AND Firebase Auth state exist
       if (hasAccess === 'true') {
         if (user) {
           router.push('/dashboard');
         } else {
+          // Fail-safe: if access key exists but auth is dead, force re-auth
           router.push('/login');
         }
       }
@@ -128,7 +130,6 @@ export default function EntryGate() {
                 <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#1f1610]/40">Authorization Portal</span>
               </div>
               
-              {/* Redesigned "Verify Host" Header with Cinematic Glitch */}
               <div className="relative inline-block">
                 <h2 className="text-6xl md:text-7xl font-headline font-black tracking-tighter text-[#1f1610] uppercase italic leading-none relative z-10 animate-sovereign-glitch">
                   VERIFY HOST
@@ -200,7 +201,7 @@ export default function EntryGate() {
         @keyframes glitch-layer-2 {
           0% { transform: translate(0); clip-path: inset(25% 0 58% 0); }
           20% { transform: translate(3px, -2px); clip-path: inset(86% 0 11% 0); }
-          40% { transform: translate(-3px, 2px); clip-path: inset(15% 0 73% 0); }
+          40% { transform: translate(-3px, -2px); clip-path: inset(15% 0 73% 0); }
           60% { transform: translate(3px, 2px); clip-path: inset(48% 0 34% 0); }
           80% { transform: translate(-3px, -2px); clip-path: inset(62% 0 35% 0); }
           100% { transform: translate(0); clip-path: inset(25% 0 58% 0); }
