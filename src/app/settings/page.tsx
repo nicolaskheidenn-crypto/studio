@@ -312,7 +312,6 @@ export default function SettingsPage() {
             <Card className="rounded-[4rem] border-[10px] border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl">
               <ScrollArea className="h-[650px] pr-10">
                 <div className="space-y-12 text-[#1f1610]">
-                  {/* Achievement Vault Re-engineered */}
                   <div className="space-y-8">
                     <div className="flex items-center gap-4 text-[#1f1610]">
                        <Trophy className="h-10 w-10 text-primary" />
@@ -344,12 +343,12 @@ export default function SettingsPage() {
                               <div className="flex flex-col items-center gap-1">
                                 {item.label.split(' ').map((word, idx) => (
                                   <div key={idx} className={cn(
-                                    "px-4 py-1.5 skew-x-[-15deg] min-w-fit w-full max-w-[200px] flex items-center justify-center leading-none",
-                                    isUnlocked ? "bg-blue-700" : "bg-[#1f1610]/5"
+                                    "px-4 py-1.5 skew-x-[-15deg] min-w-fit w-full max-w-[200px] flex items-center justify-center leading-none transition-colors",
+                                    isUnlocked ? "bg-blue-600" : "bg-[#1f1610]/5"
                                   )}>
                                     <p className={cn(
-                                      "text-lg font-black uppercase italic tracking-tighter text-white skew-x-[15deg] whitespace-nowrap",
-                                      !isUnlocked && "text-[#1f1610]/10"
+                                      "text-lg font-black uppercase italic tracking-tighter skew-x-[15deg] whitespace-nowrap",
+                                      isUnlocked ? "text-[#1f1610]" : "text-[#1f1610]/10"
                                     )}>
                                       {word}
                                     </p>
