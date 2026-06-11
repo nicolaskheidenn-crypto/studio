@@ -337,12 +337,12 @@ export default function SettingsPage() {
                               <item.icon className={cn("h-12 w-12", isUnlocked ? "text-primary" : "text-[#1f1610]/20")} />
                             </div>
 
-                            {/* Label Container - SPLIT INTO SLANTED BOXES AS PER IMAGE */}
+                            {/* Label Container - SPLIT INTO SLANTED BOXES WITH GOLD BACKGROUND */}
                             <div className="flex flex-col items-center gap-2 w-full">
                               {item.label.split(' ').map((word, wordIdx) => (
                                 <div key={wordIdx} className={cn(
                                   "px-6 py-2 skew-x-[-15deg] min-w-fit w-full flex items-center justify-center leading-none transition-all shadow-lg",
-                                  isUnlocked ? "bg-[#2b59ff]" : "bg-[#1f1610]/20"
+                                  isUnlocked ? "bg-primary" : "bg-[#1f1610]/20"
                                 )}>
                                   <p 
                                     className="text-xl font-black uppercase italic tracking-tighter skew-x-[15deg] whitespace-nowrap"
@@ -436,7 +436,7 @@ export default function SettingsPage() {
                   </Button>
                </Card>
 
-               <Card className="rounded-[3.5rem] border-[8px] border-red-600/20 bg-red-600/5 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:bg-red-600/10 transition-all shadow-2xl">
+               <Card className="rounded-[3.5rem] border-[8px] border-red-600/20 bg-red-600/5 p-12 text-center space-y-8 flex flex-col justify-between h-full group hover:border-red-600/10 transition-all shadow-2xl">
                   <div className="space-y-6">
                     <div className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto border-2 border-red-600/20 shadow-inner group-hover:scale-110 transition-transform">
                       <AlertTriangle className="h-10 w-10 text-red-600" />
