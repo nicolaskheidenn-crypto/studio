@@ -92,6 +92,7 @@ export default function AdminPage() {
     { id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }
   ]);
   const [currentQIdx, setCurrentQIdx] = useState(0);
+  const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
 
   // Task Management States
   const [taskDay, setTaskDay] = useState(1);
@@ -258,7 +259,7 @@ export default function AdminPage() {
     const targetOrder = Number(target.sortOrder ?? targetIdx);
 
     await updateDoc(doc(db, 'resources', current.id), { sortOrder: targetOrder });
-    await updateDoc(doc(db, 'resources', target.id), { sortOrder: currentOrder });
+    await updateDoc(db, 'resources', target.id), { sortOrder: currentOrder };
     toast({ title: "Portal Grid Reordered" });
   };
 
@@ -310,16 +311,32 @@ export default function AdminPage() {
     setDraftQuestions(newDrafts);
   };
 
-  const handleSaveQuiz = () => {
-    addDoc(collection(db, 'quizzes'), {
+  const handleSaveQuiz = async () => {
+    const data = {
       title: quizTitle,
       questionCount: draftQuestions.length,
       questions: draftQuestions,
       createdAt: serverTimestamp()
-    });
+    };
+
+    if (editingQuizId) {
+      await updateDoc(doc(db, 'quizzes', editingQuizId), data);
+      setEditingQuizId(null);
+    } else {
+      await addDoc(collection(db, 'quizzes'), data);
+    }
+
     setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
     setCurrentQIdx(0);
-    toast({ title: "Quiz Protocol Deployed" });
+    toast({ title: editingQuizId ? "Quiz Synchronized" : "Quiz Protocol Deployed" });
+  };
+
+  const handleEditQuiz = (q: any) => {
+    setEditingQuizId(q.id);
+    setQuizTitle(q.title);
+    setDraftQuestions(q.questions);
+    setCurrentQIdx(0);
+    toast({ title: "Architect Mode: Sync", description: "Loading protocol data into constructor." });
   };
 
   const handleAddDraftTaskSlot = () => {
@@ -823,11 +840,18 @@ export default function AdminPage() {
           </TabsContent>
 
           {/* Quiz Tab */}
-          <TabsContent value="quizzo" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <TabsContent value="quizzo" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-8 w-8 text-primary" /> Quizzo Protocol Architect</CardTitle>
-                  <Button onClick={handleSaveQuiz} className="h-16 px-12 rounded-full bg-[#1f1610] text-primary font-black text-sm uppercase shadow-2xl">Deploy Quiz</Button>
+                  <div className="flex gap-4">
+                    {editingQuizId && (
+                      <Button onClick={() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); }} variant="ghost" className="h-16 px-10 rounded-full border-4 border-[#1f1610] font-black uppercase text-xs">Cancel Edit</Button>
+                    )}
+                    <Button onClick={handleSaveQuiz} className="h-16 px-12 rounded-full bg-[#1f1610] text-primary font-black text-sm uppercase shadow-2xl">
+                      {editingQuizId ? 'Synchronize Protocol' : 'Deploy Quiz'}
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -908,6 +932,31 @@ export default function AdminPage() {
                   </div>
                 </div>
              </Card>
+
+             <div className="space-y-10">
+                <div className="flex items-center justify-between px-8">
+                   <h3 className="text-3xl font-black uppercase text-foreground italic">Deployed Quiz Protocols</h3>
+                   <span className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Active Verification Grids</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   {globalQuizzes.map((q: any) => (
+                     <Card key={q.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg hover:border-primary/40 transition-all">
+                        <div className="flex items-center gap-6">
+                          <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic">Q</div>
+                          <div>
+                            <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{q.title}</h4>
+                            <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">{q.questionCount} Questions • Active</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => handleEditQuiz(q)}><Edit3 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('quizzes', q.id)}><Trash2 className="h-5 w-5" /></Button>
+                        </div>
+                     </Card>
+                   ))}
+                </div>
+             </div>
           </TabsContent>
 
           {/* Continuity Tab (Backup/Maintenance) */}
