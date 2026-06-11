@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -140,7 +141,6 @@ export default function SettingsPage() {
           setNewEmailBind(""); setNewPassBind("");
         })
         .catch((error: any) => {
-          console.error("Error during linking profile operations:", error);
           let msg = error.message;
           if (error.code === 'auth/email-already-in-use') msg = "Target email is already bound to another strategist.";
           toast({ title: "Binding Failure", description: msg, variant: "destructive" });
@@ -168,7 +168,6 @@ export default function SettingsPage() {
           toast({ title: "Provider Unlinked", description: "Identity block detached from root." });
         })
         .catch((error: any) => {
-          console.error("Error during unlinking profile operations:", error);
           toast({ title: "Unlink Failed", description: error.message, variant: "destructive" });
         })
         .finally(() => setIsBinding(false));
@@ -227,11 +226,11 @@ export default function SettingsPage() {
         
         <Tabs defaultValue="identity" className="space-y-12">
           <TabsList className="bg-[#1f1610] p-1.5 rounded-full w-fit shadow-2xl border-4 border-primary/10 flex gap-2 mx-auto sm:mx-0 overflow-x-auto scrollbar-hide">
-            <TabsTrigger value="identity" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Identity</TabsTrigger>
-            <TabsTrigger value="security" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Security</TabsTrigger>
-            <TabsTrigger value="privacy" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Privacy</TabsTrigger>
-            <TabsTrigger value="vault" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Vault</TabsTrigger>
-            <TabsTrigger value="control" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610]">Control</TabsTrigger>
+            <TabsTrigger value="identity" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Identity</TabsTrigger>
+            <TabsTrigger value="security" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Security</TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Privacy</TabsTrigger>
+            <TabsTrigger value="vault" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Vault</TabsTrigger>
+            <TabsTrigger value="control" className="rounded-full px-10 h-11 text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-primary data-[state=active]:text-[#1f1610] text-white/70">Control</TabsTrigger>
           </TabsList>
 
           <TabsContent value="identity" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -272,7 +271,7 @@ export default function SettingsPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-8">
                     <div className="space-y-4">
-                      <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">Target Strategic Email</Label>
+                      <Label className="text-primary/60 font-black text-[10px] uppercase tracking-[0.4em]">Target Strategic Email</Label>
                       <Input 
                         placeholder="new-command@identity.com" 
                         value={newEmailBind} 
@@ -281,7 +280,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div className="space-y-4">
-                      <Label className="text-primary/40 font-black text-[10px] uppercase tracking-[0.4em]">New Security Passkey</Label>
+                      <Label className="text-primary/60 font-black text-[10px] uppercase tracking-[0.4em]">New Security Passkey</Label>
                       <div className="relative">
                         <Input 
                           type={showPass.new ? 'text' : 'password'} 
@@ -318,7 +317,7 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <Card className="rounded-[4rem] border-[12px] border-white/20 bg-primary p-12 md:p-16 shadow-[0_0_120px_rgba(255,215,0,0.4)] relative overflow-hidden">
+            <Card className="rounded-[4rem] border-[12px] border-white/20 bg-primary p-12 md:p-16 shadow-[0_0_120px_rgba(255,215,0,0.3)] relative overflow-hidden">
                <div className="absolute top-[-10%] right-[-10%] opacity-10 pointer-events-none rotate-12">
                   <ShieldCheck className="w-[500px] h-[500px] text-white" />
                </div>
@@ -367,7 +366,7 @@ export default function SettingsPage() {
                             <div className="space-y-4 relative z-10">
                               <h4 className="text-3xl font-black text-primary uppercase italic tracking-tighter leading-none">{item.title}</h4>
                               <div className="h-1 w-12 bg-primary/20 rounded-full" />
-                              <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest leading-loose">{item.desc}</p>
+                              <p className="text-[11px] font-bold text-white/90 uppercase tracking-widest leading-loose">{item.desc}</p>
                             </div>
                          </div>
                        ))}
@@ -421,7 +420,7 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="flex flex-col items-center gap-4">
-                              <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: isUnlocked ? '#ffffff' : '#1f161060', opacity: isUnlocked ? 0.4 : 1 }}>
+                              <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: isUnlocked ? '#ffffff' : '#1f161080', opacity: isUnlocked ? 0.9 : 1 }}>
                                 {item.req}
                               </p>
                               {isUnlocked && (
