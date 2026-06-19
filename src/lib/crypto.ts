@@ -6,10 +6,37 @@
 const ENCRYPTION_KEY_PREFIX = "nd-vault-";
 
 /**
+ * Helper to convert ArrayBuffer to Base64 string safely.
+ */
+function bufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
+/**
+ * Helper to convert Base64 string back to Uint8Array safely.
+ */
+function base64ToUint8(base64: string): Uint8Array {
+  const binaryString = window.atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
  * Derives a deterministic key from the user's UID.
- * NOTE: In production, this should involve a user-provided passphrase.
  */
 async function deriveKey(uid: string): Promise<CryptoKey> {
+  if (typeof window === 'undefined' || !window.crypto?.subtle) {
+    throw new Error("Secure Context Breach: Cryptographic hardware is unavailable. Ensure you are accessing via HTTPS or Localhost.");
+  }
+
   const enc = new TextEncoder();
   const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
@@ -47,16 +74,12 @@ export async function encryptVision(text: string, uid: string): Promise<string> 
   combined.set(iv);
   combined.set(new Uint8Array(ciphertext), iv.length);
   
-  return btoa(String.fromCharCode(...combined));
+  return bufferToBase64(combined.buffer);
 }
 
 export async function decryptVision(encoded: string, uid: string): Promise<string> {
   try {
-    const combined = new Uint8Array(
-      atob(encoded)
-        .split("")
-        .map((c) => c.charCodeAt(0))
-    );
+    const combined = base64ToUint8(encoded);
     const iv = combined.slice(0, 12);
     const ciphertext = combined.slice(12);
     const key = await deriveKey(uid);
@@ -67,7 +90,8 @@ export async function decryptVision(encoded: string, uid: string): Promise<strin
     );
     
     return new TextDecoder().decode(decrypted);
-  } catch (e) {
-    return "Protocol Decryption Failure: Key Mismatch or Corrupted Block";
+  } catch (e: any) {
+    console.error("[SOVEREIGN CRYPTO] Decryption Error:", e);
+    return `Protocol Decryption Failure: ${e.message || "Key Mismatch or Corrupted Block"}`;
   }
 }

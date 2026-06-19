@@ -229,7 +229,7 @@ export const useUserStore = create<UserProgressStore>()(
         return {
           profiles: {
             ...s.profiles,
-            [user.uid]: { ...DEFAULT_PROFILE, ...existing, ...data }
+            [uid]: { ...DEFAULT_PROFILE, ...existing, ...data }
           }
         };
       }),

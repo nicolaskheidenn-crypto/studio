@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Hourglass, Lock, Unlock, Send, Calendar as CalendarIcon, 
-  ShieldCheck, History, Info, ShieldAlert, KeyRound 
+  ShieldCheck, History, Info, ShieldAlert, KeyRound, Loader2 
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -63,6 +63,7 @@ export default function GoalCapsPage() {
   const [message, setMessage] = useState("");
   const [unlockDate, setUnlockDate] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const [isSealing, setIsSealing] = useState(false);
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [decryptedMessages, setDecryptedMessages] = useState<Record<string, string>>({});
 
@@ -94,7 +95,8 @@ export default function GoalCapsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uid) return;
+    if (!uid || isSealing) return;
+    
     if (!message || !unlockDate) {
       toast({
         title: "Protocol Error",
@@ -104,6 +106,7 @@ export default function GoalCapsPage() {
       return;
     }
     
+    setIsSealing(true);
     try {
       // Deploy AES-GCM Sovereign Encryption before storage
       const encryptedMessage = await encryptVision(message, uid);
@@ -136,8 +139,15 @@ export default function GoalCapsPage() {
         title: "Vision Sealed & AES-GCM Encrypted",
         description: "Your strategic data block is now cryptographically secured.",
       });
-    } catch (err) {
-      toast({ title: "Encryption Breach", description: "Hardware crypto failure.", variant: "destructive" });
+    } catch (err: any) {
+      console.error("[SOVEREIGN PROTOCOL] Seal Failure:", err);
+      toast({ 
+        title: "Protocol Breach", 
+        description: err.message || "Hardware crypto failure. Ensure you are on a secure context (HTTPS).", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsSealing(false);
     }
   };
 
@@ -224,6 +234,7 @@ export default function GoalCapsPage() {
                         value={unlockDate}
                         onChange={(e) => setUnlockDate(e.target.value)}
                         required
+                        disabled={isSealing}
                       />
                     </div>
                   </div>
@@ -236,15 +247,23 @@ export default function GoalCapsPage() {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       required
+                      disabled={isSealing}
                     />
                   </div>
 
                   <Button 
                     type="submit" 
+                    disabled={isSealing}
                     className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-3xl uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group tracking-tighter"
                   >
-                    <Send className="h-8 w-8 mr-6 group-hover:translate-x-3 transition-transform" /> 
-                    SEAL & CRYPTOGRAPH
+                    {isSealing ? (
+                      <Loader2 className="h-10 w-10 animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="h-8 w-8 mr-6 group-hover:translate-x-3 transition-transform" /> 
+                        SEAL & CRYPTOGRAPH
+                      </>
+                    )}
                   </Button>
                 </form>
               </Card>
