@@ -12,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, CircleHelp, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield, RefreshCw
+  Trophy, Flame, Zap, Award, Plus, Newspaper, Star, Heart, MessageSquare, Send, LayoutDashboard, ShoppingBag, BookOpen, CircleHelp, Download, Coins, X, ExternalLink, RefreshCcw, User, Youtube, Video, Tag, Coffee, ShieldCheck, Shield, RefreshCw, Loader2
 } from 'lucide-react';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -370,8 +370,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary text-center">Points Vault</span>
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center justify-center gap-3 text-orange-500">
+            <div className="flex items-center justify-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
                 <span className="font-black text-3xl tracking-tighter text-foreground leading-none">{streak}</span>
               </div>
