@@ -12,40 +12,61 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
-    // User Profile Rules
+    // Helper: Is the user the Master Host?
+    function isHost() {
+      return isSignedIn() && request.auth.token.email == 'nicolaskheidenn@gmail.com';
+    }
+
+    // User Profile Rules: Users can read all (for wall/leaderboard), but write only their own.
+    // Master Host can update specific flags if needed.
     match /users/{userId} {
       allow read: if isSignedIn();
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) 
-        && ( !('points' in request.resource.data) || !('points' in resource.data) || request.resource.data.points <= resource.data.points + 500) 
-        && ( !('level' in request.resource.data) || !('level' in resource.data) || request.resource.data.level >= resource.data.level);
+      allow update: if isOwner(userId) || isHost();
     }
 
-    // GoalCaps: Secure temporal storage
+    // GoalCaps: Secure temporal storage - Owner Only
     match /users/{userId}/capsules/{capId} {
       allow read, write: if isOwner(userId);
     }
 
-    // Activity Wall: Public wins, private comments
+    // Activity Wall: Public wins, master moderated
     match /activityWall/{postId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn(); // For hearts and comments
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn(); // For hearts/insights
+      allow delete: if isOwner(resource.data.userId) || isHost();
     }
 
-    // Global Resources: Read-only for general, Write for host
-    match /resources/{resId} {
+    // Master Host Protected Collections: GLOBAL READ / HOST-ONLY WRITE
+    match /tasks/{id} { 
+      allow read: if isSignedIn(); 
+      allow write: if isHost(); 
+    }
+    match /quizzes/{id} { 
+      allow read: if isSignedIn(); 
+      allow write: if isHost(); 
+    }
+    match /rewards/{id} { 
+      allow read: if isSignedIn(); 
+      allow write: if isHost(); 
+    }
+    match /shooppyProducts/{id} { 
+      allow read: if isSignedIn(); 
+      allow write: if isHost(); 
+    }
+    match /newsPosts/{id} { 
+      allow read: if isSignedIn(); 
+      allow write: if isHost(); 
+    }
+    match /faqs/{id} { 
+      allow read: if isSignedIn(); 
+      allow write: if isHost(); 
+    }
+    match /resources/{id} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn(); // Simplified for prototype, ideally host only
+      allow create, update: if isSignedIn(); // Users can share in library
+      allow delete: if isOwner(resource.data.userId) || isHost();
     }
-
-    // System Data: News, FAQs, Quizzes
-    match /newsPosts/{id} { allow read, write: if isSignedIn(); }
-    match /faqs/{id} { allow read, write: if isSignedIn(); }
-    match /quizzes/{id} { allow read, write: if isSignedIn(); }
-    match /rewards/{id} { allow read, write: if isSignedIn(); }
-    match /shooppyProducts/{id} { allow read, write: if isSignedIn(); }
-    match /tasks/{id} { allow read, write: if isSignedIn(); }
   }
 }

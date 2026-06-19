@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -230,7 +229,7 @@ export const useUserStore = create<UserProgressStore>()(
         return {
           profiles: {
             ...s.profiles,
-            [uid]: { ...DEFAULT_PROFILE, ...existing, ...data }
+            [user.uid]: { ...DEFAULT_PROFILE, ...existing, ...data }
           }
         };
       }),

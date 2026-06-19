@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { initializeFirebase } from './index';
 import { FirebaseProvider } from './provider';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
+import { AuthSync } from './auth-sync';
 
 export function FirebaseClientProvider({ children }: { children: React.ReactNode }) {
   const { app, db, auth } = useMemo(() => initializeFirebase(), []);
@@ -11,6 +12,7 @@ export function FirebaseClientProvider({ children }: { children: React.ReactNode
   return (
     <FirebaseProvider app={app} db={db} auth={auth}>
       <FirebaseErrorListener />
+      <AuthSync />
       {children}
     </FirebaseProvider>
   );
