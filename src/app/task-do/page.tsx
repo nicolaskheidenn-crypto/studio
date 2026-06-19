@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Trophy, ArrowRight, Lock, ShieldCheck, 
-  Flame, Zap, BarChart3, Gift, Download, Sparkles, Target, Coffee
+  Flame, Zap, BarChart3, Gift, Download, Sparkles, Target, Coffee, Loader2
 } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -73,6 +73,7 @@ export default function TaskDoPage() {
   const { toggleTask, unlockNextDay, claimWeeklyReward } = useUserStore();
 
   const [showAward, setShowAward] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [activeReward, setActiveReward] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [shiningDots, setShiningDots] = useState<any[]>([]);
@@ -86,7 +87,6 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Generate shining dots only on client to avoid hydration mismatch
     const dots = Array.from({ length: 800 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -134,20 +134,31 @@ export default function TaskDoPage() {
   }, [isDayComplete, isMounted, uid]);
 
   const handleNextDay = () => {
-    if (!uid) return;
+    if (!uid || isProcessing) return;
+    setIsProcessing(true);
     unlockNextDay(uid);
     setShowAward(false);
     toast({
       title: `Hub ${currentTaskDay + 1} Protocol Initiated`,
       description: "Synchronizing latest daily objectives.",
     });
+    setTimeout(() => setIsProcessing(false), 800);
   };
 
   const handleClaimTreasure = (reward: any) => {
-    if (!uid) return;
+    if (!uid || isProcessing) return;
+    setIsProcessing(true);
     claimWeeklyReward(uid, reward.week);
     setActiveReward(reward);
     toast({ title: "Treasure Secured", description: "Protocol asset archived in vault." });
+    setTimeout(() => setIsProcessing(false), 800);
+  };
+
+  const handleTaskToggle = (taskId: string) => {
+    if (!uid || isProcessing) return;
+    setIsProcessing(true);
+    toggleTask(uid, taskId);
+    setTimeout(() => setIsProcessing(false), 400);
   };
 
   const ALL_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -193,17 +204,6 @@ export default function TaskDoPage() {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Navigation />
       
-      {/* ATMOSPHERIC BACKGROUND DESIGNS - GPU OPTIMIZED */}
-      <div className="absolute top-[10%] left-[-5%] opacity-[0.03] pointer-events-none scale-[1.5] rotate-12 will-change-transform">
-        <Target className="w-[300px] h-[300px] text-primary" />
-      </div>
-      <div className="absolute bottom-[10%] right-[-5%] opacity-[0.03] pointer-events-none scale-[1.5] -rotate-45 will-change-transform">
-        <Zap className="w-[300px] h-[300px] text-primary" />
-      </div>
-      <div className="absolute top-[50%] right-[10%] opacity-[0.02] pointer-events-none scale-[1.2] will-change-transform">
-        <Coffee className="w-[200px] h-[200px] text-primary" />
-      </div>
-
       <main className="flex-1 container mx-auto px-4 py-8 max-w-[1600px] relative z-10 space-y-10">
         
         <header className="text-center space-y-2">
@@ -215,7 +215,6 @@ export default function TaskDoPage() {
 
         <div className="relative group p-1 border-4 border-primary/10 rounded-[4rem] bg-[#0d120d] shadow-2xl overflow-hidden">
           <Card className="rounded-[3.8rem] border-[8px] border-primary/5 bg-[#0a140a] relative overflow-hidden h-[450px]">
-            
             <div 
               className="absolute inset-0 bg-cover bg-center pointer-events-none" 
               style={{ 
@@ -240,55 +239,18 @@ export default function TaskDoPage() {
                    style={{ opacity: line.opacity }}
                  />
                ))}
-               {shiningDots.map(dot => (
-                 <circle 
-                   key={dot.id}
-                   cx={dot.left}
-                   cy={`${dot.top}%`}
-                   r={dot.size / 2}
-                   fill="white"
-                   className="animate-twinkle"
-                   style={{ 
-                     opacity: 0.2,
-                     animationDelay: `${dot.delay}s`,
-                     animationDuration: `${dot.duration}s`
-                   }}
-                 />
-               ))}
             </svg>
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
                   <svg className="absolute inset-0 w-full h-full pointer-events-none will-change-transform" style={{ minWidth: totalMapWidth }}>
-                    <defs>
-                      <filter id="glitter-glow-v2">
-                        <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    
                     <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.06)" strokeWidth="8" strokeLinecap="round" />
-
                     <path 
                       d={completedTracePath} 
                       fill="none" 
                       stroke="var(--primary)" 
                       strokeWidth="5" 
                       strokeLinecap="round"
-                      filter="url(#glitter-glow-v2)"
-                      className="opacity-100"
-                    />
-                    <path 
-                      d={completedTracePath} 
-                      fill="none" 
-                      stroke="white" 
-                      strokeWidth="2.5" 
-                      strokeLinecap="round"
-                      strokeDasharray="25, 50"
-                      className="animate-[glitter-flow_0.8s_linear_infinite]"
                     />
                   </svg>
 
@@ -322,13 +284,15 @@ export default function TaskDoPage() {
                                 handleClaimTreasure(reward);
                               }
                             }}
+                            disabled={isProcessing}
                             className={cn(
                               "rounded-[2.8rem] flex items-center justify-center transition-all duration-700 border-[10px] font-black italic shadow-2xl relative group overflow-hidden",
                               isActive 
                                 ? "w-36 h-36 bg-primary border-mocha-cream text-[#1f1610] scale-110 shadow-[0_0_150px_rgba(255,215,0,0.9)]" 
                                 : isPast 
                                   ? "w-28 h-28 bg-primary/20 border-primary/40 text-primary" 
-                                  : "w-28 h-28 bg-white/5 border-white/10 text-white/10"
+                                  : "w-28 h-28 bg-white/5 border-white/10 text-white/10",
+                              isProcessing && "cursor-not-allowed opacity-80"
                             )}
                           >
                             {isWeekEnd && isPast && !isClaimed ? (
@@ -339,17 +303,7 @@ export default function TaskDoPage() {
                                  isActive ? "text-7xl font-black" : "text-5xl font-bold opacity-30"
                                )}>{d}</span>
                             )}
-                            
-                            {isActive && <div className="absolute inset-2 rounded-[2.2rem] border-[4px] border-white/40 animate-pulse" />}
                           </button>
-                          
-                          {(isActive || isPast) && (
-                            <div className="mt-8 flex flex-col items-center justify-center">
-                              <div className="bg-primary px-6 py-2 rounded-full border-4 border-[#1f1610]/10 shadow-xl flex items-center justify-center leading-none">
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#1f1610] italic">HUB</span>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     );
@@ -406,10 +360,7 @@ export default function TaskDoPage() {
 
               {dayTasks.length === 0 ? (
                 <div className="text-center py-32 bg-card/20 rounded-[4rem] border-[8px] border-dashed border-primary/10 shadow-inner flex flex-col items-center justify-center space-y-10">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                    <Lock className="h-20 w-20 text-primary/20 relative z-10" />
-                  </div>
+                  <Lock className="h-20 w-20 text-primary/20 relative z-10" />
                   <p className="text-3xl text-white/20 font-black uppercase tracking-[0.4em] italic leading-none">AWAITING PROTOCOL...</p>
                 </div>
               ) : (
@@ -423,9 +374,10 @@ export default function TaskDoPage() {
                           "relative overflow-hidden border-[4px] transition-all duration-700 cursor-pointer group rounded-[2.5rem] transform hover:scale-[1.005] active:scale-95 shadow-2xl",
                           isComplete 
                             ? "border-primary/20 bg-primary/5 opacity-50 shadow-none" 
-                            : "border-primary/10 bg-card hover:border-primary/50"
+                            : "border-primary/10 bg-card hover:border-primary/50",
+                          isProcessing && "pointer-events-none opacity-80"
                         )}
-                        onClick={() => uid && toggleTask(uid, task.id)}
+                        onClick={() => handleTaskToggle(task.id)}
                       >
                         <CardContent className="p-8 flex items-center gap-10">
                           <Checkbox 
@@ -447,37 +399,20 @@ export default function TaskDoPage() {
 
               {showAward && (
                 <div className="p-16 rounded-[4.5rem] bg-primary text-[#1f1610] text-center animate-in zoom-in duration-700 shadow-[0_50px_100px_rgba(255,215,0,0.6)] relative border-[15px] border-white/20 overflow-hidden mt-12">
-                  <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12 pointer-events-none"><Sparkles className="h-56 w-56" /></div>
                   <Trophy className="h-20 w-20 mx-auto mb-6 animate-bounce drop-shadow-2xl" />
                   <h2 className="text-6xl font-headline font-black mb-4 uppercase tracking-tighter italic leading-none">Hub Conquered!</h2>
-                  <p className="text-2xl font-black uppercase tracking-[0.3em] opacity-80 mb-12 italic leading-relaxed">
-                    Infrastructure Advanced.
-                  </p>
                   <Button 
                     className="rounded-full font-black text-3xl px-20 h-28 bg-[#1f1610] text-primary hover:bg-white hover:text-[#1f1610] transition-all active:scale-95 shadow-2xl uppercase tracking-tighter border-8 border-primary/20" 
                     onClick={handleNextDay}
+                    disabled={isProcessing}
                   >
-                    DEPLOY NEXT HUB <ArrowRight className="ml-6 h-12 w-12" />
+                    {isProcessing ? <Loader2 className="h-10 w-10 animate-spin" /> : <>DEPLOY NEXT HUB <ArrowRight className="ml-6 h-12 w-12" /></>}
                   </Button>
                 </div>
               )}
            </div>
         </div>
       </main>
-
-      <style jsx global>{`
-        @keyframes glitter-flow {
-          from { stroke-dashoffset: 75; }
-          to { stroke-dashoffset: 0; }
-        }
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.1; transform: scale(0.9); }
-          50% { opacity: 0.6; transform: scale(1.4); }
-        }
-        .animate-twinkle {
-          animation: twinkle linear infinite;
-        }
-      `}</style>
     </div>
   );
 }

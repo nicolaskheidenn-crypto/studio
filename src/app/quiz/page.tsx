@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   XCircle, Trophy, ShieldAlert, AlertTriangle, ArrowLeft, 
-  BookOpen, Award, Zap, Coffee, ShieldCheck, Info, Sparkles 
+  BookOpen, Award, Zap, Coffee, ShieldCheck, Info, Sparkles, Loader2 
 } from "lucide-react";
 import { useUserStore, UserProfile } from "@/lib/store";
 import { useUser, useFirestore, useCollection } from "@/firebase";
@@ -61,6 +61,7 @@ export default function QuizPage() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
   const [isFinished, setIsFinished] = useState(false);
+  const [isProcessingResult, setIsProcessingResult] = useState(false);
   const [score, setScore] = useState(0);
   const [cheatTriggered, setCheatTriggered] = useState(false);
   const [userAnswer, setUserAnswer] = useState("");
@@ -122,16 +123,19 @@ export default function QuizPage() {
   }, [handleCheat, isMounted]);
 
   const startQuiz = (quiz: any) => {
+    if (isProcessingResult) return;
     setActiveQuiz(quiz);
     setShuffledQuestions(shuffle(quiz.questions));
     setCurrentIdx(0);
     setScore(0);
     setIsFinished(false);
+    setIsProcessingResult(false);
     setUserAnswer("");
     toast({ title: "Mastery Protocol Initiated", description: "Stay focused. Focus loss will trigger a security reset." });
   };
 
   const handleNext = () => {
+    if (isProcessingResult) return;
     const currentQuestion = shuffledQuestions[currentIdx];
     const isCorrect = userAnswer.toLowerCase().trim() === currentQuestion.answer.toLowerCase().trim();
     
@@ -145,11 +149,15 @@ export default function QuizPage() {
       setCurrentIdx(idx => idx + 1);
       setUserAnswer("");
     } else {
-      setIsFinished(true);
+      setIsProcessingResult(true);
       const passing = getPassingScore(shuffledQuestions.length);
       if (newScore >= passing && uid) {
         incrementQuiz(uid);
       }
+      setTimeout(() => {
+        setIsFinished(true);
+        setIsProcessingResult(false);
+      }, 800);
     }
   };
 
@@ -174,13 +182,6 @@ export default function QuizPage() {
       <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
         <Navigation />
         
-        <div className="absolute top-[15%] left-[5%] opacity-5 -rotate-12 pointer-events-none will-change-transform">
-          <Coffee className="w-48 h-48 text-primary" />
-        </div>
-        <div className="absolute bottom-[10%] right-[5%] opacity-5 rotate-12 pointer-events-none will-change-transform">
-          <ShieldAlert className="w-32 h-32 text-primary" />
-        </div>
-
         <main className="flex-1 container mx-auto px-4 py-12 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 items-start">
             
@@ -290,15 +291,6 @@ export default function QuizPage() {
                     </p>
                  </div>
               </Card>
-
-              <Card className="rounded-[4rem] border-4 border-dashed border-primary/10 bg-card/20 p-14 text-center flex flex-col items-center justify-center space-y-10 group hover:border-primary/30 transition-all min-h-[350px]">
-                <div className="w-20 h-20 rounded-full border-2 border-primary/20 flex items-center justify-center shadow-inner group-hover:border-primary/40 transition-colors">
-                  <Info className="h-10 w-10 text-primary/40 group-hover:text-primary transition-colors" />
-                </div>
-                <p className="text-sm font-black text-primary/30 uppercase tracking-[0.5em] leading-loose text-center italic group-hover:text-primary/60 transition-colors scale-y-110">
-                  GLOBAL<br/>CERTIFICATION<br/>DATA<br/>IS UPDATED IN<br/>THE<br/>COLLECTIVE<br/>STRATEGIST<br/>REGISTRY.
-                </p>
-              </Card>
             </div>
 
           </div>
@@ -346,7 +338,6 @@ export default function QuizPage() {
 
       {cheatTriggered && (
         <div className="fixed inset-0 z-[200] bg-[#1f1610] flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-300">
-          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
           <div className="relative space-y-12 max-w-5xl w-full">
             <div className="relative w-fit mx-auto">
               <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse rounded-full" />
@@ -357,23 +348,12 @@ export default function QuizPage() {
               <h1 className="text-6xl md:text-9xl font-headline font-black mb-2 uppercase tracking-[0.2em] italic leading-none animate-[glitch_0.3s_infinite] text-primary">
                 SECURITY ALERT
               </h1>
-              <div className="h-2 w-48 bg-primary mx-auto rounded-full shadow-[0_0_40px_rgba(255,215,0,0.8)]" />
             </div>
 
             <p className="text-2xl md:text-4xl text-[#fdfaf6] font-black uppercase tracking-[0.5em] max-w-4xl mx-auto leading-relaxed italic">
               INTEGRITY SENSOR BREACHED. <br/>
               <span className="text-primary">RESETTING PROTOCOL IN REAL-TIME...</span>
             </p>
-
-            <div className="mt-16 w-full max-w-2xl mx-auto space-y-6">
-              <div className="flex justify-between items-end">
-                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">System Purge in Progress</span>
-                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">0.00% Progress Retained</span>
-              </div>
-              <div className="h-6 bg-white/5 rounded-full border-4 border-white/10 overflow-hidden shadow-inner">
-                 <div className="h-full bg-primary shadow-[0_0_30px_rgba(255,215,0,0.8)] animate-[progress_3s_linear] origin-left" style={{ width: '100%' }} />
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -381,7 +361,7 @@ export default function QuizPage() {
       <main className="flex-1 container mx-auto px-4 py-8 md:py-16 flex flex-col items-center relative z-10">
         <div className="max-w-5xl w-full space-y-12">
           <div className="flex items-center justify-between px-6">
-            <Button variant="ghost" className="text-primary hover:text-primary/60 rounded-full h-12 md:h-16 px-8 md:px-12 font-black uppercase text-[11px] tracking-[0.3em] border-4 border-primary/20 shadow-xl" onClick={() => setActiveQuiz(null)}>
+            <Button variant="ghost" className="text-primary hover:text-primary/60 rounded-full h-12 md:h-16 px-8 md:px-12 font-black uppercase text-[11px] tracking-[0.3em] border-4 border-primary/20 shadow-xl" onClick={() => setActiveQuiz(null)} disabled={isProcessingResult}>
               <ArrowLeft className="mr-4 h-5 w-5" /> EXIT PROTOCOL
             </Button>
             <div className="text-2xl md:text-4xl font-black bg-mocha-cream text-[#1f1610] px-10 py-4 rounded-[2rem] shadow-2xl border-8 border-primary/20 italic tracking-tighter leading-none">
@@ -402,12 +382,14 @@ export default function QuizPage() {
                   {currentQ.options.map((opt: string, i: number) => (
                     <button 
                       key={i} 
-                      onClick={() => setUserAnswer(opt)}
+                      onClick={() => !isProcessingResult && setUserAnswer(opt)}
+                      disabled={isProcessingResult}
                       className={cn(
                         "p-8 md:p-10 text-left border-[6px] md:border-[8px] rounded-[3rem] text-xl md:text-2xl font-black transition-all active:scale-95 flex items-center gap-8 uppercase tracking-tight shadow-xl leading-none",
                         userAnswer === opt 
                           ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-[0_20px_40px_rgba(0,0,0,0.3)] scale-[1.02]" 
-                          : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50"
+                          : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50",
+                        isProcessingResult && "opacity-50 cursor-not-allowed"
                       )}
                     >
                       <span className="w-14 h-14 md:w-16 md:h-16 rounded-[1.2rem] bg-primary text-[#1f1610] flex items-center justify-center text-xl md:text-2xl font-black shadow-inner leading-none">
@@ -424,12 +406,14 @@ export default function QuizPage() {
                   {['True', 'False'].map((opt) => (
                     <button 
                       key={opt}
-                      onClick={() => setUserAnswer(opt)}
+                      onClick={() => !isProcessingResult && setUserAnswer(opt)}
+                      disabled={isProcessingResult}
                       className={cn(
                         "p-16 md:p-24 text-center border-[8px] md:border-[12px] rounded-[4rem] text-4xl md:text-5xl font-black transition-all active:scale-95 uppercase italic shadow-2xl leading-none",
                         userAnswer === opt 
                           ? "bg-[#1f1610] text-primary border-[#1f1610] shadow-2xl scale-[1.03]" 
-                          : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50"
+                          : "border-[#1f1610]/5 bg-white text-[#1f1610]/70 hover:border-primary/50",
+                        isProcessingResult && "opacity-50 cursor-not-allowed"
                       )}
                     >
                       {opt}
@@ -445,7 +429,8 @@ export default function QuizPage() {
                     className="h-24 md:h-32 rounded-[2.5rem] text-4xl md:text-6xl text-center font-black bg-white border-[10px] md:border-[15px] border-[#1f1610]/5 text-[#1f1610] focus:border-primary shadow-inner placeholder:text-[#1f1610]/10 tracking-widest leading-none" 
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && userAnswer && handleNext()}
+                    onKeyDown={(e) => e.key === 'Enter' && userAnswer && !isProcessingResult && handleNext()}
+                    disabled={isProcessingResult}
                   />
                   <p className="text-center text-[#1f1610]/30 font-black uppercase tracking-[1em] text-xs">SECURITY VERIFICATION REQUIRED (ENTER)</p>
                 </div>
@@ -455,27 +440,13 @@ export default function QuizPage() {
             <Button 
               className="w-full mt-20 md:mt-24 h-20 md:h-28 rounded-full font-black text-2xl md:text-4xl bg-primary text-[#1f1610] hover:bg-[#1f1610] hover:text-primary transition-all shadow-[0_30px_60px_rgba(255,215,0,0.4)] active:scale-95 disabled:opacity-20 uppercase tracking-tighter border-[10px] border-white/20 leading-none" 
               onClick={handleNext} 
-              disabled={!userAnswer}
+              disabled={!userAnswer || isProcessingResult}
             >
-              CONFIRM SELECTION
+              {isProcessingResult ? <Loader2 className="h-10 w-10 animate-spin" /> : "CONFIRM SELECTION"}
             </Button>
           </Card>
         </div>
       </main>
-
-      <style jsx global>{`
-        @keyframes progress {
-          from { transform: scaleX(0); }
-          to { transform: scaleX(1); }
-        }
-        @keyframes glitch {
-          0% { transform: translate(2px, 2px); text-shadow: 2px 0 #fff; }
-          25% { transform: translate(-2px, -2px); text-shadow: -2px 0 #FFD700; }
-          50% { transform: translate(1px, -1px); text-shadow: 1px 0 #fff; }
-          75% { transform: translate(-1px, 1px); text-shadow: -1px 0 #FFD700; }
-          100% { transform: translate(0); text-shadow: 0; }
-        }
-      `}</style>
     </div>
   );
 }

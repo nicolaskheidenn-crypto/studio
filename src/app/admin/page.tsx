@@ -118,6 +118,7 @@ export default function AdminPage() {
   };
 
   const handleExportBackup = async (type: 'Local' | 'Cloud') => {
+    if (isBackingUp) return;
     setIsBackingUp(true);
     try {
       const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
@@ -157,12 +158,12 @@ export default function AdminPage() {
     }
   };
 
-  const handleRestoreBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRestoreBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || isRestoring) return;
     setIsRestoring(true);
     const reader = new FileReader();
-    reader.onload = async (event) => {
+    reader.onload = (event) => {
       try {
         const fullData = JSON.parse(event.target?.result as string);
         const data = fullData.payload || fullData; 
@@ -193,7 +194,7 @@ export default function AdminPage() {
     reader.readAsText(file);
   };
 
-  const handleSaveProduct = async () => {
+  const handleSaveProduct = () => {
     if (isSaving) return;
     setIsSaving(true);
     const data = {
@@ -208,29 +209,29 @@ export default function AdminPage() {
       sortOrder: editingProduct ? Number(editingProduct.sortOrder) : shooppyProducts.length
     };
     
-    try {
-      if (editingProduct) {
-        const docRef = doc(db, 'shooppyProducts', editingProduct.id);
-        await updateDoc(docRef, data);
+    const operation = editingProduct ? 
+      updateDoc(doc(db, 'shooppyProducts', editingProduct.id), data) :
+      addDoc(collection(db, 'shooppyProducts'), data);
+
+    operation
+      .then(() => {
         setEditingProduct(null);
-      } else {
-        await addDoc(collection(db, 'shooppyProducts'), data);
-      }
-      setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
-      toast({ title: editingProduct ? "Protocol Updated" : "Strategic Asset Deployed" });
-    } catch (error: any) {
-      const permissionError = new FirestorePermissionError({
-        path: 'shooppyProducts',
-        operation: 'write',
-        requestResourceData: data,
-      } satisfies SecurityRuleContext);
-      errorEmitter.emit('permission-error', permissionError);
-    } finally {
-      setIsSaving(false);
-    }
+        setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
+        toast({ title: editingProduct ? "Protocol Updated" : "Strategic Asset Deployed" });
+      })
+      .catch(async (error: any) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'shooppyProducts',
+          operation: 'write',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => setIsSaving(false));
   };
 
-  const handleMoveProduct = async (id: string, direction: 'up' | 'down') => {
+  const handleMoveProduct = (id: string, direction: 'up' | 'down') => {
+    if (isSaving) return;
     const idx = shooppyProducts.findIndex(p => p.id === id);
     if (idx === -1) return;
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
@@ -268,7 +269,7 @@ export default function AdminPage() {
     toast({ title: "Inventory Reorganized" });
   };
 
-  const handleSaveWebin = async () => {
+  const handleSaveWebin = () => {
     if (isSaving) return;
     setIsSaving(true);
     const data = {
@@ -281,29 +282,29 @@ export default function AdminPage() {
       sortOrder: editingWebin ? Number(editingWebin.sortOrder) : webins.length
     };
 
-    try {
-      if (editingWebin) {
-        const docRef = doc(db, 'resources', editingWebin.id);
-        await updateDoc(docRef, { title: webinTitle, content: webinContent });
+    const operation = editingWebin ?
+      updateDoc(doc(db, 'resources', editingWebin.id), { title: webinTitle, content: webinContent }) :
+      addDoc(collection(db, 'resources'), data);
+
+    operation
+      .then(() => {
         setEditingWebin(null);
-      } else {
-        await addDoc(collection(db, 'resources'), data);
-      }
-      setWebinTitle(""); setWebinContent("");
-      toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
-    } catch (error: any) {
-      const permissionError = new FirestorePermissionError({
-        path: 'resources',
-        operation: 'write',
-        requestResourceData: data,
-      } satisfies SecurityRuleContext);
-      errorEmitter.emit('permission-error', permissionError);
-    } finally {
-      setIsSaving(false);
-    }
+        setWebinTitle(""); setWebinContent("");
+        toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
+      })
+      .catch(async (error: any) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'resources',
+          operation: 'write',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => setIsSaving(false));
   };
 
-  const handleMoveWebin = async (id: string, direction: 'up' | 'down') => {
+  const handleMoveWebin = (id: string, direction: 'up' | 'down') => {
+    if (isSaving) return;
     const idx = webins.findIndex(w => w.id === id);
     if (idx === -1) return;
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
@@ -341,7 +342,7 @@ export default function AdminPage() {
     toast({ title: "Portal Grid Reordered" });
   };
 
-  const handleSaveReward = async () => {
+  const handleSaveReward = () => {
     if (isSaving) return;
     setIsSaving(true);
     const data = {
@@ -351,18 +352,18 @@ export default function AdminPage() {
       fileUrl: rewardFile,
       timestamp: serverTimestamp()
     };
-    try {
-      await addDoc(collection(db, 'rewards'), data);
-      setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
-      toast({ title: "Weekly Treasure Injected" });
-    } catch (e) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'rewards', operation: 'create', requestResourceData: data }));
-    } finally {
-      setIsSaving(false);
-    }
+    addDoc(collection(db, 'rewards'), data)
+      .then(() => {
+        setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
+        toast({ title: "Weekly Treasure Injected" });
+      })
+      .catch(async (e) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'rewards', operation: 'create', requestResourceData: data }));
+      })
+      .finally(() => setIsSaving(false));
   };
 
-  const handleDispatchBroadcast = async () => {
+  const handleDispatchBroadcast = () => {
     if (isSaving) return;
     setIsSaving(true);
     const data = {
@@ -371,15 +372,15 @@ export default function AdminPage() {
       imageUrl: newsImg,
       timestamp: serverTimestamp()
     };
-    try {
-      await addDoc(collection(db, 'newsPosts'), data);
-      setNewsTitle(""); setNewsContent(""); setNewsImg("");
-      toast({ title: "Broadcast Dispatched" });
-    } catch (e) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data }));
-    } finally {
-      setIsSaving(false);
-    }
+    addDoc(collection(db, 'newsPosts'), data)
+      .then(() => {
+        setNewsTitle(""); setNewsContent(""); setNewsImg("");
+        toast({ title: "Broadcast Dispatched" });
+      })
+      .catch(async (e) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data }));
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const handleAddQuestion = () => {
@@ -406,7 +407,7 @@ export default function AdminPage() {
     setDraftQuestions(newDrafts);
   };
 
-  const handleSaveQuiz = async () => {
+  const handleSaveQuiz = () => {
     if (isSaving) return;
     setIsSaving(true);
     const data = {
@@ -416,27 +417,26 @@ export default function AdminPage() {
       createdAt: serverTimestamp()
     };
 
-    try {
-      if (editingQuizId) {
-        const docRef = doc(db, 'quizzes', editingQuizId);
-        await updateDoc(docRef, data);
+    const operation = editingQuizId ?
+      updateDoc(doc(db, 'quizzes', editingQuizId), data) :
+      addDoc(collection(db, 'quizzes'), data);
+
+    operation
+      .then(() => {
         setEditingQuizId(null);
-      } else {
-        await addDoc(collection(db, 'quizzes'), data);
-      }
-      setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
-      setCurrentQIdx(0);
-      toast({ title: editingQuizId ? "Quiz Synchronized" : "Quiz Protocol Deployed" });
-    } catch (error: any) {
-      const permissionError = new FirestorePermissionError({
-        path: 'quizzes',
-        operation: 'write',
-        requestResourceData: data,
-      } satisfies SecurityRuleContext);
-      errorEmitter.emit('permission-error', permissionError);
-    } finally {
-      setIsSaving(false);
-    }
+        setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
+        setCurrentQIdx(0);
+        toast({ title: editingQuizId ? "Quiz Synchronized" : "Quiz Protocol Deployed" });
+      })
+      .catch(async (error: any) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'quizzes',
+          operation: 'write',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const handleEditQuiz = (q: any) => {
@@ -487,7 +487,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleUpdateExistingTask = async () => {
+  const handleUpdateExistingTask = () => {
     if (!editingTask || isSaving) return;
     setIsSaving(true);
     const taskData = {
@@ -496,24 +496,25 @@ export default function AdminPage() {
       description: editingTask.description
     };
     const docRef = doc(db, 'tasks', editingTask.id);
-    try {
-      await updateDoc(docRef, taskData);
-      setEditingTask(null);
-      toast({ title: "Protocol Synchronized" });
-    } catch (error: any) {
-      const permissionError = new FirestorePermissionError({
-        path: docRef.path,
-        operation: 'update',
-        requestResourceData: taskData,
-      } satisfies SecurityRuleContext);
-      errorEmitter.emit('permission-error', permissionError);
-      toast({ title: "Sync Breach", variant: "destructive" });
-    } finally {
-      setIsSaving(false);
-    }
+    updateDoc(docRef, taskData)
+      .then(() => {
+        setEditingTask(null);
+        toast({ title: "Protocol Synchronized" });
+      })
+      .catch(async (error: any) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: taskData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        toast({ title: "Sync Breach", variant: "destructive" });
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const handleDeleteDoc = (coll: string, id: string) => {
+    if (isSaving) return;
     const docRef = doc(db, coll, id);
     deleteDoc(docRef)
       .then(() => {
@@ -1265,7 +1266,7 @@ export default function AdminPage() {
                      <Input 
                         type="number" 
                         value={editingTask?.day || 1} 
-                        onChange={e => setEditingTask({ ...editingTask, day: e.target.value })} 
+                        onChange={e => setEditingTask({ ...editingTask, day: Number(e.target.value) })} 
                         className="h-16 text-center font-black text-2xl bg-white text-[#1f1610] rounded-xl flex items-center justify-center leading-none"
                         disabled={isSaving}
                      />
