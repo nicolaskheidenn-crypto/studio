@@ -22,12 +22,10 @@ export default function EntryGate() {
     if (loading) return;
     if (typeof window !== 'undefined') {
       const hasAccess = sessionStorage.getItem('fireproof_access_granted');
-      // HARDENED PASS: Verify that both the local session token AND Firebase Auth state exist
       if (hasAccess === 'true') {
         if (user) {
           router.push('/dashboard');
         } else {
-          // Fail-safe: if access key exists but auth is dead, force re-auth
           router.push('/login');
         }
       }
@@ -40,27 +38,43 @@ export default function EntryGate() {
 
   const verifyKey = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isVerifying) return; // Double-click prevention
     setIsVerifying(true);
 
-    setTimeout(() => {
-      if (key === ACCESS_KEY) {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('fireproof_access_granted', 'true');
-        }
-        toast({
-          title: 'Access Granted',
-          description: 'Welcome to NICO DIGITAL Infrastructure.',
-        });
-        router.push('/login');
-      } else {
-        toast({
-          title: 'Invalid Key',
-          description: 'Verification failed. Access denied.',
-          variant: 'destructive',
-        });
+    // LOADING LOOP PROTECTION: 10s Timeout safety net
+    const watchdog = setTimeout(() => {
+      if (isVerifying) {
+        setIsVerifying(false);
+        toast({ title: "Protocol Timeout", description: "Authorization response delayed. Please retry.", variant: "destructive" });
       }
+    }, 10000);
+
+    try {
+      setTimeout(() => {
+        if (key === ACCESS_KEY) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('fireproof_access_granted', 'true');
+          }
+          toast({
+            title: 'Access Granted',
+            description: 'Welcome to NICO DIGITAL Infrastructure.',
+          });
+          clearTimeout(watchdog);
+          router.push('/login');
+        } else {
+          toast({
+            title: 'Invalid Key',
+            description: 'Verification failed. Access denied.',
+            variant: 'destructive',
+          });
+          setIsVerifying(false);
+          clearTimeout(watchdog);
+        }
+      }, 1200);
+    } catch (err) {
       setIsVerifying(false);
-    }, 1200);
+      clearTimeout(watchdog);
+    }
   };
 
   if (step === 'ready') {

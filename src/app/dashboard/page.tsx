@@ -91,7 +91,7 @@ export default function DashboardPage() {
   const productsQuery = useMemo(() => query(collection(db, 'shooppyProducts'), orderBy('sortOrder', 'asc')), [db]);
   const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
 
-  const { data: sharedActivity = [] } = useCollection(activityQuery);
+  const { data: sharedActivity = [], loading: activityLoading } = useCollection(activityQuery);
   const { data: newsPosts = [] } = useCollection(newsQuery);
   const { data: sharedResources = [] } = useCollection(resourcesQuery);
   const { data: shooppyProducts = [] } = useCollection(productsQuery);
@@ -106,6 +106,10 @@ export default function DashboardPage() {
   const [postText, setPostText] = useState("");
   const [postImages, setPostImages] = useState<string[]>([]);
   const [isPosting, setIsPosting] = useState(false);
+  const [isAcquiring, setIsAcquiring] = useState(false);
+  const [isCommenting, setIsCommenting] = useState(false);
+  const [isSharingResource, setIsSharingResource] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedPostForInsights, setSelectedPostForInsights] = useState<any>(null);
@@ -158,8 +162,8 @@ export default function DashboardPage() {
     }, 800);
   };
 
-  const handleAcquireAsset = (product: any) => {
-    if (!uid) return;
+  const handleAcquireAsset = async (product: any) => {
+    if (!uid || isAcquiring) return;
     if (points < product.price) {
       toast({ title: "Insufficient Points", description: "Deploy more routines to earn points.", variant: "destructive" });
       return;
@@ -168,8 +172,16 @@ export default function DashboardPage() {
       toast({ title: "Mastery Level Low", description: `Level ${product.requiredLevel} required for this protocol.`, variant: "destructive" });
       return;
     }
-    buyProduct(uid, product.id, product.price);
-    toast({ title: "Sovereign Acquisition", description: "Protocol unlocked in your Root Archive." });
+
+    setIsAcquiring(true);
+    try {
+      buyProduct(uid, product.id, product.price);
+      toast({ title: "Sovereign Acquisition", description: "Protocol unlocked in your Root Archive." });
+    } catch (e) {
+      toast({ title: "Acquisition Breach", description: "Grid transaction failed. Retry.", variant: "destructive" });
+    } finally {
+      setIsAcquiring(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,8 +198,8 @@ export default function DashboardPage() {
     });
   };
 
-  const handleDispatchWin = () => {
-    if (!postText.trim() || !uid) return;
+  const handleDispatchWin = async () => {
+    if (!postText.trim() || !uid || isPosting) return;
     setIsPosting(true);
 
     const data = {
@@ -202,28 +214,35 @@ export default function DashboardPage() {
       comments: []
     };
     
-    addDoc(collection(db, 'activityWall'), data)
-      .then(() => {
-        addPoints(uid, 20);
-        setPostText("");
-        setPostImages([]);
-        toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'activityWall',
-          operation: 'create',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => {
+    const watchdog = setTimeout(() => {
+      if (isPosting) {
         setIsPosting(false);
-      });
+        toast({ title: "Dispatch Delay", description: "Network response slow. Check Win Archive shortly.", variant: "destructive" });
+      }
+    }, 10000);
+
+    try {
+      await addDoc(collection(db, 'activityWall'), data);
+      addPoints(uid, 20);
+      setPostText("");
+      setPostImages([]);
+      toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
+    } catch (error: any) {
+      const permissionError = new FirestorePermissionError({
+        path: 'activityWall',
+        operation: 'create',
+        requestResourceData: data,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      clearTimeout(watchdog);
+      setIsPosting(false);
+    }
   };
 
-  const handleAddComment = (postId: string) => {
-    if (!insightInput?.trim() || !uid) return;
+  const handleAddComment = async (postId: string) => {
+    if (!insightInput?.trim() || !uid || isCommenting) return;
+    setIsCommenting(true);
     
     const postRef = doc(db, 'activityWall', postId);
     const commentData = {
@@ -235,21 +254,22 @@ export default function DashboardPage() {
       timestamp: new Date().toISOString()
     };
 
-    updateDoc(postRef, {
-      comments: arrayUnion(commentData)
-    })
-      .then(() => {
-        setInsightInput("");
-        toast({ title: "Insight Recorded" });
-      })
-      .catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: postRef.path,
-          operation: 'update',
-          requestResourceData: { comments: commentData },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+    try {
+      await updateDoc(postRef, {
+        comments: arrayUnion(commentData)
       });
+      setInsightInput("");
+      toast({ title: "Insight Recorded" });
+    } catch (async) {
+      const permissionError = new FirestorePermissionError({
+        path: postRef.path,
+        operation: 'update',
+        requestResourceData: { comments: commentData },
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsCommenting(false);
+    }
   };
 
   const handleHeartPost = (postId: string) => {
@@ -265,12 +285,13 @@ export default function DashboardPage() {
       });
   };
 
-  const handleAddResource = () => {
-    if (!resTitle || !resContent || !uid) {
-       toast({ title: "Incomplete Protocol", description: "Title and content are required.", variant: "destructive" });
+  const handleAddResource = async () => {
+    if (!resTitle || !resContent || !uid || isSharingResource) {
+       if (!resTitle || !resContent) toast({ title: "Incomplete Protocol", description: "Title and content are required.", variant: "destructive" });
        return;
     }
     
+    setIsSharingResource(true);
     const data = {
       title: resTitle,
       description: "",
@@ -283,21 +304,22 @@ export default function DashboardPage() {
       timestamp: serverTimestamp()
     };
 
-    addDoc(collection(db, 'resources'), data)
-      .then(() => {
-        if (resType === 'AI_Prompt') incrementPrompt(uid);
-        else if (resType === 'T&Triks') incrementTrick(uid);
-        setResTitle(""); setResContent(""); setResCategory("General");
-        toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
-      })
-      .catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: 'resources',
-          operation: 'create',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    try {
+      await addDoc(collection(db, 'resources'), data);
+      if (resType === 'AI_Prompt') incrementPrompt(uid);
+      else if (resType === 'T&Triks') incrementTrick(uid);
+      setResTitle(""); setResContent(""); setResCategory("General");
+      toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
+    } catch (async) {
+      const permissionError = new FirestorePermissionError({
+        path: 'resources',
+        operation: 'create',
+        requestResourceData: data,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsSharingResource(false);
+    }
   };
 
   const filteredResources = useMemo(() => {
@@ -415,6 +437,7 @@ export default function DashboardPage() {
                       value={postText}
                       onChange={(e) => setPostText(e.target.value)}
                       className="w-full bg-background/50 border-4 border-primary/10 rounded-[3rem] p-10 text-xl font-bold min-h-[200px] text-foreground placeholder:text-foreground/20 focus:border-primary transition-all shadow-inner leading-relaxed"
+                      disabled={isPosting}
                     />
                   </div>
                 </div>
@@ -424,7 +447,7 @@ export default function DashboardPage() {
                     {postImages.map((img, i) => (
                       <div key={i} className="relative aspect-square rounded-[2rem] overflow-hidden group border-4 border-primary/20 shadow-xl">
                         <img src={img} className="w-full h-full object-cover" />
-                        <button onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-5 w-5" /></button>
+                        <button disabled={isPosting} onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-5 w-5" /></button>
                       </div>
                     ))}
                   </div>
@@ -435,6 +458,7 @@ export default function DashboardPage() {
                     variant="ghost" 
                     className="text-primary hover:text-primary/70 rounded-full font-black text-[12px] uppercase tracking-[0.2em] gap-4" 
                     onClick={() => fileInputRef.current?.click()}
+                    disabled={isPosting}
                    >
                     <Plus className="h-8 w-8" /> GALLERY (1-6)
                    </Button>
@@ -444,18 +468,19 @@ export default function DashboardPage() {
                     disabled={isPosting || !postText.trim()}
                     className="bg-primary text-background rounded-full px-20 h-20 font-black uppercase text-lg shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-20 tracking-tighter"
                    >
+                    {isPosting ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
                     {isPosting ? 'Dispatching...' : 'Dispatch Win'}
                    </Button>
                 </div>
               </Card>
 
               <div className="space-y-12">
-                {isSyncing && (
+                {isSyncing || activityLoading ? (
                   <div className="p-20 text-center space-y-6 animate-pulse">
                     <RefreshCw className="h-16 w-16 text-primary mx-auto animate-spin" />
                     <p className="text-xl font-black text-primary/40 uppercase tracking-[0.4em]">Synchronizing Sovereignty...</p>
                   </div>
-                )}
+                ) : null}
 
                 {newsPosts.map((news: any) => (
                   <Card key={news.id} className="rounded-[4rem] border-4 border-primary/20 bg-primary/5 overflow-hidden shadow-2xl">
@@ -573,8 +598,9 @@ export default function DashboardPage() {
                             size="icon" 
                             className="rounded-full hover:bg-primary/10 text-primary"
                             onClick={() => handleAcquireAsset(p)}
+                            disabled={isAcquiring}
                           >
-                            <Plus className="h-5 w-5" />
+                            {isAcquiring ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
                           </Button>
                         </div>
                       ))
@@ -723,6 +749,7 @@ export default function DashboardPage() {
                                value={resTitle} 
                                onChange={e => setResTitle(e.target.value)} 
                                className="h-14 rounded-2xl bg-background/50 border-4 border-primary/10 text-lg font-black px-6 focus:border-primary shadow-inner" 
+                               disabled={isSharingResource}
                             />
                          </div>
                          <div className="space-y-2">
@@ -731,6 +758,7 @@ export default function DashboardPage() {
                                className="w-full h-14 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 font-black uppercase text-foreground text-xs focus:border-primary" 
                                value={resCategory} 
                                onChange={e => setResCategory(e.target.value)}
+                               disabled={isSharingResource}
                             >
                                {RESOURCE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat.toUpperCase()}</option>)}
                             </select>
@@ -743,6 +771,7 @@ export default function DashboardPage() {
                             className="w-full h-14 bg-background/50 border-4 border-primary/10 rounded-2xl px-6 font-black uppercase text-foreground text-xs focus:border-primary" 
                             value={resType} 
                             onChange={e => setResType(e.target.value as any)}
+                            disabled={isSharingResource}
                          >
                             <option value="AI_Prompt">AI PROMPT LAB</option>
                             <option value="T&Triks">T&TRIKS ARCHIVE</option>
@@ -756,14 +785,17 @@ export default function DashboardPage() {
                             value={resContent} 
                             onChange={e => setResContent(e.target.value)} 
                             className="min-h-[180px] bg-background/50 border-4 border-primary/10 rounded-[2rem] p-8 text-base font-bold shadow-inner leading-relaxed" 
+                            disabled={isSharingResource}
                          />
                       </div>
 
                       <Button 
                         onClick={handleAddResource} 
                         className="w-full h-18 rounded-full bg-primary text-background font-black uppercase text-xl shadow-[0_20px_40px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all tracking-tighter"
+                        disabled={isSharingResource}
                       >
-                        SHARE KNOWLEDGE
+                        {isSharingResource ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
+                        {isSharingResource ? 'Sharing...' : 'SHARE KNOWLEDGE'}
                       </Button>
                    </div>
                 </Card>
@@ -953,12 +985,14 @@ export default function DashboardPage() {
                    value={insightInput}
                    onChange={(e) => setInsightInput(e.target.value)}
                    onKeyDown={(e) => e.key === 'Enter' && handleAddComment(selectedPostForInsights.id)}
+                   disabled={isCommenting}
                 />
                 <Button 
                    onClick={() => handleAddComment(selectedPostForInsights.id)} 
                    className="h-16 w-16 rounded-full bg-primary text-background shadow-xl hover:scale-110 transition-transform shrink-0"
+                   disabled={isCommenting}
                 >
-                   <Send className="h-6 w-6" />
+                   {isCommenting ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
                 </Button>
              </div>
              

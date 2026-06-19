@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -33,14 +32,27 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!email || !password) return;
+    if (!email || !password || isLoading) return;
     setIsLoading(true);
+
+    // LOADING LOOP PROTECTION: 15s Timeout
+    const watchdog = setTimeout(() => {
+      if (isLoading) {
+        setIsLoading(false);
+        toast({ title: "Authorization Delay", description: "Command response slow. Please check connection and retry.", variant: "destructive" });
+      }
+    }, 15000);
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      clearTimeout(watchdog);
       toast({ title: 'Access Granted', description: 'Welcome back.' });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({ title: 'Login Failed', description: error.message, variant: 'destructive' });
+      clearTimeout(watchdog);
+      let errorMsg = error.message;
+      if (error.code === 'auth/network-request-failed') errorMsg = "Grid Sync Failure: Unstable network detected.";
+      toast({ title: 'Login Failed', description: errorMsg, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }

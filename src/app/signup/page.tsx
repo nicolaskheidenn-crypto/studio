@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -38,25 +37,37 @@ export default function SignUpPage() {
 
   const initProfile = async (uid: string, displayName: string | null) => {
     const userDocRef = doc(db, 'users', uid);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        nickname: displayName || 'New Strategist',
-        bio: 'New Master Strategist',
-        points: 0,
-        level: 1,
-        xp: 0,
-        streak: 0,
-        currentTaskDay: 1,
-        createdAt: new Date().toISOString()
-      }, { merge: true });
+    try {
+      const userDoc = await getDoc(userDocRef);
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          nickname: displayName || 'New Strategist',
+          bio: 'New Master Strategist',
+          points: 0,
+          level: 1,
+          xp: 0,
+          streak: 0,
+          currentTaskDay: 1,
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+      }
+    } catch (e) {
+      console.error("Profile Init Error:", e);
+      // Fallback: we still proceed as auth is created
     }
   };
 
   const handleSignUp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!email || !password || !firstName) return;
+    if (!email || !password || !firstName || isLoading) return;
     setIsLoading(true);
+
+    const watchdog = setTimeout(() => {
+      if (isLoading) {
+        setIsLoading(false);
+        toast({ title: "Registration Delay", description: "Grid synchronization is taking longer than expected. Please check network.", variant: "destructive" });
+      }
+    }, 20000);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -68,9 +79,11 @@ export default function SignUpPage() {
 
       await initProfile(userCredential.user.uid, displayName);
 
+      clearTimeout(watchdog);
       toast({ title: 'Empire Founded', description: 'Your strategist account is active.' });
       router.push('/dashboard');
     } catch (error: any) {
+      clearTimeout(watchdog);
       toast({ title: 'Registration Failed', description: error.message, variant: 'destructive' });
     } finally {
       setIsLoading(false);

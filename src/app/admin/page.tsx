@@ -44,6 +44,7 @@ export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const restoreRef = useRef<HTMLInputElement>(null);
   
   // Collections
@@ -146,7 +147,6 @@ export default function AdminPage() {
         URL.revokeObjectURL(url);
         toast({ title: "In-System Backup Secure", description: "Strategic archive saved to local disk." });
       } else {
-        // Cloud logic simulation
         await new Promise(r => setTimeout(r, 2000));
         toast({ title: "Cloud Continuity Sync", description: "Encrypted blocks dispatched to offsite registry." });
       }
@@ -159,7 +159,7 @@ export default function AdminPage() {
 
   const handleRestoreBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || isRestoring) return;
     setIsRestoring(true);
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -194,6 +194,8 @@ export default function AdminPage() {
   };
 
   const handleSaveProduct = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const data = {
       title: prodTitle,
       description: prodDesc,
@@ -206,32 +208,26 @@ export default function AdminPage() {
       sortOrder: editingProduct ? Number(editingProduct.sortOrder) : shooppyProducts.length
     };
     
-    if (editingProduct) {
-      const docRef = doc(db, 'shooppyProducts', editingProduct.id);
-      updateDoc(docRef, data)
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: docRef.path,
-            operation: 'update',
-            requestResourceData: data,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
-      setEditingProduct(null);
-    } else {
-      addDoc(collection(db, 'shooppyProducts'), data)
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: 'shooppyProducts',
-            operation: 'create',
-            requestResourceData: data,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
+    try {
+      if (editingProduct) {
+        const docRef = doc(db, 'shooppyProducts', editingProduct.id);
+        await updateDoc(docRef, data);
+        setEditingProduct(null);
+      } else {
+        await addDoc(collection(db, 'shooppyProducts'), data);
+      }
+      setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
+      toast({ title: editingProduct ? "Protocol Updated" : "Strategic Asset Deployed" });
+    } catch (error: any) {
+      const permissionError = new FirestorePermissionError({
+        path: 'shooppyProducts',
+        operation: 'write',
+        requestResourceData: data,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsSaving(false);
     }
-    
-    setProdTitle(""); setProdDesc(""); setProdImg(""); setProdFile(""); setProdLevel(1); setProdPrice(0);
-    toast({ title: editingProduct ? "Protocol Updated" : "Strategic Asset Deployed" });
   };
 
   const handleMoveProduct = async (id: string, direction: 'up' | 'down') => {
@@ -273,6 +269,8 @@ export default function AdminPage() {
   };
 
   const handleSaveWebin = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const data = {
       title: webinTitle,
       content: webinContent,
@@ -283,32 +281,26 @@ export default function AdminPage() {
       sortOrder: editingWebin ? Number(editingWebin.sortOrder) : webins.length
     };
 
-    if (editingWebin) {
-      const docRef = doc(db, 'resources', editingWebin.id);
-      updateDoc(docRef, { title: webinTitle, content: webinContent })
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: docRef.path,
-            operation: 'update',
-            requestResourceData: { title: webinTitle, content: webinContent },
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
-      setEditingWebin(null);
-    } else {
-      addDoc(collection(db, 'resources'), data)
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: 'resources',
-            operation: 'create',
-            requestResourceData: data,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
+    try {
+      if (editingWebin) {
+        const docRef = doc(db, 'resources', editingWebin.id);
+        await updateDoc(docRef, { title: webinTitle, content: webinContent });
+        setEditingWebin(null);
+      } else {
+        await addDoc(collection(db, 'resources'), data);
+      }
+      setWebinTitle(""); setWebinContent("");
+      toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
+    } catch (error: any) {
+      const permissionError = new FirestorePermissionError({
+        path: 'resources',
+        operation: 'write',
+        requestResourceData: data,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsSaving(false);
     }
-
-    setWebinTitle(""); setWebinContent("");
-    toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
   };
 
   const handleMoveWebin = async (id: string, direction: 'up' | 'down') => {
@@ -349,7 +341,9 @@ export default function AdminPage() {
     toast({ title: "Portal Grid Reordered" });
   };
 
-  const handleSaveReward = () => {
+  const handleSaveReward = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const data = {
       week: Number(rewardWeek),
       title: rewardTitle,
@@ -357,37 +351,35 @@ export default function AdminPage() {
       fileUrl: rewardFile,
       timestamp: serverTimestamp()
     };
-    addDoc(collection(db, 'rewards'), data)
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'rewards',
-          operation: 'create',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-    setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
-    toast({ title: "Weekly Treasure Injected" });
+    try {
+      await addDoc(collection(db, 'rewards'), data);
+      setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
+      toast({ title: "Weekly Treasure Injected" });
+    } catch (e) {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'rewards', operation: 'create', requestResourceData: data }));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDispatchBroadcast = () => {
+  const handleDispatchBroadcast = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const data = {
       title: newsTitle,
       content: newsContent,
       imageUrl: newsImg,
       timestamp: serverTimestamp()
     };
-    addDoc(collection(db, 'newsPosts'), data)
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'newsPosts',
-          operation: 'create',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-    setNewsTitle(""); setNewsContent(""); setNewsImg("");
-    toast({ title: "Broadcast Dispatched" });
+    try {
+      await addDoc(collection(db, 'newsPosts'), data);
+      setNewsTitle(""); setNewsContent(""); setNewsImg("");
+      toast({ title: "Broadcast Dispatched" });
+    } catch (e) {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data }));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAddQuestion = () => {
@@ -415,6 +407,8 @@ export default function AdminPage() {
   };
 
   const handleSaveQuiz = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     const data = {
       title: quizTitle,
       questionCount: draftQuestions.length,
@@ -422,33 +416,27 @@ export default function AdminPage() {
       createdAt: serverTimestamp()
     };
 
-    if (editingQuizId) {
-      const docRef = doc(db, 'quizzes', editingQuizId);
-      updateDoc(docRef, data)
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: docRef.path,
-            operation: 'update',
-            requestResourceData: data,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
-      setEditingQuizId(null);
-    } else {
-      addDoc(collection(db, 'quizzes'), data)
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: 'quizzes',
-            operation: 'create',
-            requestResourceData: data,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
+    try {
+      if (editingQuizId) {
+        const docRef = doc(db, 'quizzes', editingQuizId);
+        await updateDoc(docRef, data);
+        setEditingQuizId(null);
+      } else {
+        await addDoc(collection(db, 'quizzes'), data);
+      }
+      setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
+      setCurrentQIdx(0);
+      toast({ title: editingQuizId ? "Quiz Synchronized" : "Quiz Protocol Deployed" });
+    } catch (error: any) {
+      const permissionError = new FirestorePermissionError({
+        path: 'quizzes',
+        operation: 'write',
+        requestResourceData: data,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsSaving(false);
     }
-
-    setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
-    setCurrentQIdx(0);
-    toast({ title: editingQuizId ? "Quiz Synchronized" : "Quiz Protocol Deployed" });
   };
 
   const handleEditQuiz = (q: any) => {
@@ -474,11 +462,12 @@ export default function AdminPage() {
 
   const handleSaveBulkTasks = async () => {
     const tasksToSave = bulkDraftTasks.filter(t => t.title.trim() !== "");
-    if (tasksToSave.length === 0) {
-      toast({ title: "Injection Error", description: "Empty protocols cannot be deployed.", variant: "destructive" });
+    if (tasksToSave.length === 0 || isSaving) {
+      if (tasksToSave.length === 0) toast({ title: "Injection Error", description: "Empty protocols cannot be deployed.", variant: "destructive" });
       return;
     }
 
+    setIsSaving(true);
     try {
       for (const task of tasksToSave) {
         const taskData = {
@@ -487,45 +476,41 @@ export default function AdminPage() {
           description: task.description,
           createdAt: serverTimestamp()
         };
-        addDoc(collection(db, 'tasks'), taskData)
-          .catch(async (error) => {
-            const permissionError = new FirestorePermissionError({
-              path: 'tasks',
-              operation: 'create',
-              requestResourceData: taskData,
-            } satisfies SecurityRuleContext);
-            errorEmitter.emit('permission-error', permissionError);
-          });
+        await addDoc(collection(db, 'tasks'), taskData);
       }
       setBulkDraftTasks([{ id: '1', title: "", description: "" }]);
       toast({ title: "Sovereign Routines Deployed", description: `${tasksToSave.length} protocols injected into Hub ${taskDay}.` });
     } catch (e) {
       toast({ title: "Injection Failure", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleUpdateExistingTask = async () => {
-    if (!editingTask) return;
+    if (!editingTask || isSaving) return;
+    setIsSaving(true);
     const taskData = {
       day: Number(editingTask.day),
       title: editingTask.title,
       description: editingTask.description
     };
     const docRef = doc(db, 'tasks', editingTask.id);
-    updateDoc(docRef, taskData)
-      .then(() => {
-        setEditingTask(null);
-        toast({ title: "Protocol Synchronized" });
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'update',
-          requestResourceData: taskData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ title: "Sync Breach", variant: "destructive" });
-      });
+    try {
+      await updateDoc(docRef, taskData);
+      setEditingTask(null);
+      toast({ title: "Protocol Synchronized" });
+    } catch (error: any) {
+      const permissionError = new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'update',
+        requestResourceData: taskData,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+      toast({ title: "Sync Breach", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDeleteDoc = (coll: string, id: string) => {
@@ -667,7 +652,7 @@ export default function AdminPage() {
                   </CardTitle>
                   <div className="flex items-center gap-6">
                     <Label className="text-[#1f1610] text-xs">TARGET HUB DAY</Label>
-                    <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" />
+                    <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" disabled={isSaving} />
                   </div>
                 </div>
 
@@ -681,7 +666,7 @@ export default function AdminPage() {
                             size="icon" 
                             className="text-red-500 opacity-0 group-hover/slot:opacity-100 transition-opacity" 
                             onClick={() => handleRemoveDraftTaskSlot(task.id)}
-                            disabled={bulkDraftTasks.length <= 1}
+                            disabled={bulkDraftTasks.length <= 1 || isSaving}
                           >
                             <X className="h-5 w-5" />
                           </Button>
@@ -694,6 +679,7 @@ export default function AdminPage() {
                                 value={task.title} 
                                 onChange={e => handleUpdateDraftTask(task.id, 'title', e.target.value)} 
                                 className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl" 
+                                disabled={isSaving}
                              />
                           </div>
                           <div className="md:col-span-2 space-y-2">
@@ -703,6 +689,7 @@ export default function AdminPage() {
                                 value={task.description} 
                                 onChange={e => handleUpdateDraftTask(task.id, 'description', e.target.value)} 
                                 className="h-16 bg-white text-[#1f1610] font-bold text-sm rounded-xl" 
+                                disabled={isSaving}
                              />
                           </div>
                        </div>
@@ -714,13 +701,16 @@ export default function AdminPage() {
                       onClick={handleAddDraftTaskSlot} 
                       variant="outline" 
                       className="flex-1 h-20 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black text-lg uppercase tracking-widest gap-4 hover:bg-[#1f1610] hover:text-primary transition-all"
+                      disabled={isSaving}
                     >
                       <Plus className="h-6 w-6" /> ADD PROTOCOL SLOT
                     </Button>
                     <Button 
                       onClick={handleSaveBulkTasks} 
                       className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-lg uppercase shadow-2xl tracking-tighter hover:scale-105 active:scale-95 transition-transform"
+                      disabled={isSaving}
                     >
+                      {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
                       INJECT {bulkDraftTasks.length} PROTOCOLS
                     </Button>
                   </div>
@@ -756,6 +746,7 @@ export default function AdminPage() {
                                       size="icon" 
                                       className="rounded-full hover:bg-[#1f1610] hover:text-primary text-[#1f1610]/40"
                                       onClick={() => setEditingTask(t)}
+                                      disabled={isSaving}
                                    >
                                       <Edit3 className="h-5 w-5" />
                                    </Button>
@@ -764,6 +755,7 @@ export default function AdminPage() {
                                       size="icon" 
                                       className="rounded-full hover:bg-red-500 hover:text-white text-red-500/40"
                                       onClick={() => handleDeleteDoc('tasks', t.id)}
+                                      disabled={isSaving}
                                    >
                                       <Trash2 className="h-5 w-5" />
                                    </Button>
@@ -786,11 +778,11 @@ export default function AdminPage() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Asset Name</Label>
-                        <Input placeholder="Strategy E-book" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" />
+                        <Input placeholder="Strategy E-book" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Category</Label>
-                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={prodType} onChange={e => setProdType(e.target.value as any)}>
+                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={prodType} onChange={e => setProdType(e.target.value as any)} disabled={isSaving}>
                           <option value="eBook">E-Book</option>
                           <option value="Template">Template</option>
                           <option value="Bundle">Bundle</option>
@@ -799,12 +791,12 @@ export default function AdminPage() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Detailed Narrative</Label>
-                      <Textarea placeholder="Asset value..." value={prodDesc} onChange={e => setProdDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" />
+                      <Textarea placeholder="Asset value..." value={prodDesc} onChange={e => setProdDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" disabled={isSaving} />
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Target Hub</Label>
-                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={prodPlacement} onChange={e => setProdPlacement(e.target.value as any)}>
+                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={prodPlacement} onChange={e => setProdPlacement(e.target.value as any)} disabled={isSaving}>
                           <option value="Hub">Root Hub (Free/Points)</option>
                           <option value="Marketplace">Shooppy (Paid External)</option>
                         </select>
@@ -818,6 +810,7 @@ export default function AdminPage() {
                             value={prodFile}
                             onChange={e => setProdFile(e.target.value)}
                             className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" 
+                            disabled={isSaving}
                           />
                         </div>
                       </div>
@@ -825,16 +818,17 @@ export default function AdminPage() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Level Req.</Label>
-                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" />
+                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" disabled={isSaving} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Points Price</Label>
-                        <Input type="number" min={0} value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" />
+                        <Input type="number" min={0} value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" disabled={isSaving} />
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      {editingProduct && <Button variant="ghost" onClick={() => { setEditingProduct(null); setProdTitle(""); setProdDesc(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]">Cancel</Button>}
-                      <Button onClick={handleSaveProduct} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">
+                      {editingProduct && <Button variant="ghost" onClick={() => { setEditingProduct(null); setProdTitle(""); setProdDesc(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]" disabled={isSaving}>Cancel</Button>}
+                      <Button onClick={handleSaveProduct} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all" disabled={isSaving}>
+                        {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
                         {editingProduct ? 'Sync Protocol' : 'Deploy Asset'}
                       </Button>
                     </div>
@@ -859,11 +853,11 @@ export default function AdminPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="flex flex-col gap-1 mr-4">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'up')} disabled={idx === 0}><ArrowUp className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'down')} disabled={idx === shooppyProducts.length - 1}><ArrowDown className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'up')} disabled={idx === 0 || isSaving}><ArrowUp className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'down')} disabled={idx === shooppyProducts.length - 1 || isSaving}><ArrowDown className="h-4 w-4" /></Button>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditProduct(p)}><Edit3 className="h-5 w-5" /></Button>
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('shooppyProducts', p.id)}><Trash2 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditProduct(p)} disabled={isSaving}><Edit3 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('shooppyProducts', p.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
                         </div>
                       </div>
                     ))}
@@ -881,15 +875,16 @@ export default function AdminPage() {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Portal Title</Label>
-                      <Input placeholder="Strategy Masterclass" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" />
+                      <Input placeholder="Strategy Masterclass" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Video / Portal URL</Label>
-                      <Input placeholder="https://..." value={webinContent} onChange={e => setWebinContent(e.target.value)} className="h-16 font-bold text-sm rounded-2xl bg-white text-[#1f1610]" />
+                      <Input placeholder="https://..." value={webinContent} onChange={e => setWebinContent(e.target.value)} className="h-16 font-bold text-sm rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
                     </div>
                     <div className="flex gap-4">
-                       {editingWebin && <Button variant="ghost" onClick={() => { setEditingWebin(null); setWebinTitle(""); setWebinContent(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]">Cancel</Button>}
-                       <Button onClick={handleSaveWebin} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl">
+                       {editingWebin && <Button variant="ghost" onClick={() => { setEditingWebin(null); setWebinTitle(""); setWebinContent(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]" disabled={isSaving}>Cancel</Button>}
+                       <Button onClick={handleSaveWebin} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl" disabled={isSaving}>
+                         {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
                          {editingWebin ? 'Sync Portal' : 'Inject Portal'}
                        </Button>
                     </div>
@@ -914,11 +909,11 @@ export default function AdminPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="flex flex-col gap-1 mr-4">
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'up')} disabled={idx === 0}><ArrowUp className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'down')} disabled={idx === webins.length - 1}><ArrowDown className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'up')} disabled={idx === 0 || isSaving}><ArrowUp className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'down')} disabled={idx === webins.length - 1 || isSaving}><ArrowDown className="h-4 w-4" /></Button>
                             </div>
-                            <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditWebin(w)}><Edit3 className="h-5 w-5" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('resources', w.id)}><Trash2 className="h-5 w-5" /></Button>
+                            <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditWebin(w)} disabled={isSaving}><Edit3 className="h-5 w-5" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('resources', w.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
                           </div>
                         </div>
                       ))}
@@ -936,7 +931,7 @@ export default function AdminPage() {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Target Milestone Week</Label>
-                      <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-sm text-[#1f1610]" value={rewardWeek} onChange={e => setRewardWeek(Number(e.target.value))}>
+                      <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-sm text-[#1f1610]" value={rewardWeek} onChange={e => setRewardWeek(Number(e.target.value))} disabled={isSaving}>
                         <option value={1}>Week 1 (Day 7)</option>
                         <option value={2}>Week 2 (Day 14)</option>
                         <option value={3}>Week 3 (Day 21)</option>
@@ -945,20 +940,23 @@ export default function AdminPage() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Treasure Title</Label>
-                      <Input placeholder="Exclusive Strategy Kit" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" />
+                      <Input placeholder="Exclusive Strategy Kit" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Treasure Description</Label>
-                      <Textarea placeholder="What's inside the chest..." value={rewardDesc} onChange={e => setRewardWeekDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" />
+                      <Textarea placeholder="What's inside the chest..." value={rewardDesc} onChange={e => setRewardWeekDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" disabled={isSaving} />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Treasure Link/File URL</Label>
                       <div className="relative">
                         <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
-                        <Input placeholder="https://..." value={rewardFile} onChange={e => setRewardWeekFile(e.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" />
+                        <Input placeholder="https://..." value={rewardFile} onChange={e => setRewardWeekFile(e.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" disabled={isSaving} />
                       </div>
                     </div>
-                    <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all">Inject Treasure Reward</Button>
+                    <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all" disabled={isSaving}>
+                      {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
+                      Inject Treasure Reward
+                    </Button>
                   </div>
                </Card>
 
@@ -978,7 +976,7 @@ export default function AdminPage() {
                               <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">Milestone Treasure</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('rewards', r.id)}><Trash2 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('rewards', r.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
                         </div>
                       ))}
                     </div>
@@ -994,9 +992,10 @@ export default function AdminPage() {
                   <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-8 w-8 text-primary" /> Quizzo Protocol Architect</CardTitle>
                   <div className="flex gap-4">
                     {editingQuizId && (
-                      <Button onClick={() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); }} variant="ghost" className="h-16 px-10 rounded-full border-4 border-[#1f1610] font-black uppercase text-xs">Cancel Edit</Button>
+                      <Button onClick={() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); }} variant="ghost" className="h-16 px-10 rounded-full border-4 border-[#1f1610] font-black uppercase text-xs" disabled={isSaving}>Cancel Edit</Button>
                     )}
-                    <Button onClick={handleSaveQuiz} className="h-16 px-12 rounded-full bg-[#1f1610] text-primary font-black text-sm uppercase shadow-2xl">
+                    <Button onClick={handleSaveQuiz} className="h-16 px-12 rounded-full bg-[#1f1610] text-primary font-black text-sm uppercase shadow-2xl" disabled={isSaving}>
+                      {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
                       {editingQuizId ? 'Synchronize Protocol' : 'Deploy Quiz'}
                     </Button>
                   </div>
@@ -1006,7 +1005,7 @@ export default function AdminPage() {
                   <div className="lg:col-span-2 space-y-8">
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Protocol Title</Label>
-                      <Input placeholder="Verification Level 01" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 font-black text-xl rounded-2xl bg-white text-[#1f1610]" />
+                      <Input placeholder="Verification Level 01" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 font-black text-xl rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
                     </div>
                     
                     <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-4 border-[#1f1610]/10 space-y-8">
@@ -1019,17 +1018,17 @@ export default function AdminPage() {
                           const newDrafts = draftQuestions.filter((_, i) => i !== currentQIdx);
                           setDraftQuestions(newDrafts);
                           setCurrentQIdx(Math.max(0, currentQIdx - 1));
-                        }} disabled={draftQuestions.length <= 1}><Trash2 className="h-5 w-5" /></Button>
+                        }} disabled={draftQuestions.length <= 1 || isSaving}><Trash2 className="h-5 w-5" /></Button>
                       </div>
 
                       <div className="space-y-6">
                         <div className="grid grid-cols-3 gap-6">
-                          <select className="h-16 bg-white text-[#1f1610] border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs" value={draftQuestions[currentQIdx].type} onChange={e => updateCurrentQ('type', e.target.value as any)}>
+                          <select className="h-16 bg-white text-[#1f1610] border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs" value={draftQuestions[currentQIdx].type} onChange={e => updateCurrentQ('type', e.target.value as any)} disabled={isSaving}>
                             <option value="multiple">Multiple Choice</option>
                             <option value="boolean">True/False</option>
                             <option value="id">ID Code</option>
                           </select>
-                          <Input placeholder="Question text..." value={draftQuestions[currentQIdx].question} onChange={e => updateCurrentQ('question', e.target.value)} className="col-span-2 h-16 bg-white text-[#1f1610] font-bold" />
+                          <Input placeholder="Question text..." value={draftQuestions[currentQIdx].question} onChange={e => updateCurrentQ('question', e.target.value)} className="col-span-2 h-16 bg-white text-[#1f1610] font-bold" disabled={isSaving} />
                         </div>
 
                         {draftQuestions[currentQIdx].type === 'multiple' && (
@@ -1041,7 +1040,7 @@ export default function AdminPage() {
                                   const newOpts = [...(draftQuestions[currentQIdx].options || [])];
                                   newOpts[i] = e.target.value;
                                   updateCurrentQ('options', newOpts);
-                                }} className="h-12 bg-white text-[#1f1610] text-xs" />
+                                }} className="h-12 bg-white text-[#1f1610] text-xs" disabled={isSaving} />
                               </div>
                             ))}
                           </div>
@@ -1050,9 +1049,9 @@ export default function AdminPage() {
                         <div className="space-y-2">
                           <Label className="text-[#1f1610] text-[10px]">CORRECT STRATEGIC RESPONSE</Label>
                           {draftQuestions[currentQIdx].type === 'id' ? (
-                            <Input placeholder="Answer code..." value={draftQuestions[currentQIdx].answer} onChange={e => updateCurrentQ('answer', e.target.value)} className="h-14 bg-white text-[#1f1610] text-sm" />
+                            <Input placeholder="Answer code..." value={draftQuestions[currentQIdx].answer} onChange={e => updateCurrentQ('answer', e.target.value)} className="h-14 bg-white text-[#1f1610] text-sm" disabled={isSaving} />
                           ) : (
-                            <select className="w-full h-14 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={draftQuestions[currentQIdx].answer} onChange={e => updateCurrentQ('answer', e.target.value)}>
+                            <select className="w-full h-14 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={draftQuestions[currentQIdx].answer} onChange={e => updateCurrentQ('answer', e.target.value)} disabled={isSaving}>
                               <option value="">Select Correct Answer</option>
                               {(draftQuestions[currentQIdx].type === 'multiple' ? draftQuestions[currentQIdx].options : ["True", "False"])?.map((opt, i) => (
                                 opt && <option key={i} value={opt}>{opt}</option>
@@ -1069,14 +1068,14 @@ export default function AdminPage() {
                     <ScrollArea className="h-[400px] pr-4">
                       <div className="space-y-3">
                         {draftQuestions.map((q, i) => (
-                          <button key={q.id} onClick={() => setCurrentQIdx(i)} className={cn("w-full p-4 rounded-2xl border-4 text-left transition-all flex justify-between items-center", currentQIdx === i ? "bg-[#1f1610] border-primary text-primary" : "bg-white border-[#1f1610]/5 text-[#1f1610] opacity-60 hover:opacity-100")}>
+                          <button key={q.id} onClick={() => setCurrentQIdx(i)} disabled={isSaving} className={cn("w-full p-4 rounded-2xl border-4 text-left transition-all flex justify-between items-center", currentQIdx === i ? "bg-[#1f1610] border-primary text-primary" : "bg-white border-[#1f1610]/5 text-[#1f1610] opacity-60 hover:opacity-100")}>
                             <span className="font-black italic text-sm">Q{i+1}: {q.question || "Untitled"}</span>
                             <ChevronRight className="h-4 w-4" />
                           </button>
                         ))}
                       </div>
                     </ScrollArea>
-                    <Button onClick={handleAddQuestion} className="w-full h-16 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-[10px] tracking-widest gap-2"><Plus className="h-4 w-4" /> Add Protocol Slot</Button>
+                    <Button onClick={handleAddQuestion} className="w-full h-16 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-[10px] tracking-widest gap-2" disabled={isSaving}><Plus className="h-4 w-4" /> Add Protocol Slot</Button>
                   </div>
                 </div>
              </Card>
@@ -1098,8 +1097,8 @@ export default function AdminPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => handleEditQuiz(q)}><Edit3 className="h-5 w-5" /></Button>
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('quizzes', q.id)}><Trash2 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => handleEditQuiz(q)} disabled={isSaving}><Edit3 className="h-5 w-5" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('quizzes', q.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
                         </div>
                      </Card>
                    ))}
@@ -1209,23 +1208,26 @@ export default function AdminPage() {
                 <Card className="rounded-[4rem] lg:col-span-1 border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl space-y-8">
                    <CardTitle className="text-2xl font-black uppercase italic text-[#1f1610]">Inquiry Injector</CardTitle>
                    <div className="space-y-4">
-                      <Input placeholder="Inquiry Question..." value={faqQ} onChange={e => setFaqQ(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610] font-bold text-sm" />
-                      <Textarea placeholder="Protocol Response..." value={faqA} onChange={e => setFaqA(e.target.value)} className="min-h-[120px] rounded-[2rem] bg-white text-[#1f1610] font-bold text-sm" />
-                      <Button onClick={() => {
+                      <Input placeholder="Inquiry Question..." value={faqQ} onChange={e => setFaqQ(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610] font-bold text-sm" disabled={isSaving} />
+                      <Textarea placeholder="Protocol Response..." value={faqA} onChange={e => setFaqA(e.target.value)} className="min-h-[120px] rounded-[2rem] bg-white text-[#1f1610] font-bold text-sm" disabled={isSaving} />
+                      <Button onClick={async () => {
+                        if (isSaving) return;
+                        setIsSaving(true);
                         const faqData = { question: faqQ, answer: faqA };
-                        addDoc(collection(db, 'faqs'), faqData)
-                          .then(() => { 
-                            setFaqQ(""); setFaqA(""); toast({ title: "FAQ Injected" }); 
-                          })
-                          .catch(async (error) => {
-                            const permissionError = new FirestorePermissionError({
-                              path: 'faqs',
-                              operation: 'create',
-                              requestResourceData: faqData,
-                            } satisfies SecurityRuleContext);
-                            errorEmitter.emit('permission-error', permissionError);
-                          });
-                      }} className="w-full h-16 rounded-2xl bg-[#1f1610] text-primary font-black uppercase text-xs">Inject FAQ</Button>
+                        try {
+                          await addDoc(collection(db, 'faqs'), faqData);
+                          setFaqQ(""); setFaqA(""); toast({ title: "FAQ Injected" }); 
+                        } catch (error: any) {
+                          const permissionError = new FirestorePermissionError({
+                            path: 'faqs',
+                            operation: 'create',
+                            requestResourceData: faqData,
+                          } satisfies SecurityRuleContext);
+                          errorEmitter.emit('permission-error', permissionError);
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }} className="w-full h-16 rounded-2xl bg-[#1f1610] text-primary font-black uppercase text-xs" disabled={isSaving}>Inject FAQ</Button>
                    </div>
                 </Card>
                 
@@ -1239,7 +1241,7 @@ export default function AdminPage() {
                                <p className="font-black text-[#1f1610] uppercase text-xs italic line-clamp-1">{f.question}</p>
                                <p className="text-[9px] font-bold text-[#1f1610]/40 mt-1 truncate">{f.answer}</p>
                              </div>
-                             <Button variant="ghost" size="icon" className="text-red-500 rounded-full shrink-0" onClick={() => handleDeleteDoc('faqs', f.id)}><Trash2 className="h-4 w-4" /></Button>
+                             <Button variant="ghost" size="icon" className="text-red-500 rounded-full shrink-0" onClick={() => handleDeleteDoc('faqs', f.id)} disabled={isSaving}><Trash2 className="h-4 w-4" /></Button>
                           </div>
                        ))}
                      </div>
@@ -1251,7 +1253,7 @@ export default function AdminPage() {
       </main>
 
       {/* Task Edit Dialog */}
-      <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
+      <Dialog open={!!editingTask} onOpenChange={() => !isSaving && setEditingTask(null)}>
          <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-mocha-cream p-12 max-w-xl shadow-2xl">
             <DialogHeader>
                <DialogTitle className="text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter text-center">Edit Protocol</DialogTitle>
@@ -1265,6 +1267,7 @@ export default function AdminPage() {
                         value={editingTask?.day || 1} 
                         onChange={e => setEditingTask({ ...editingTask, day: e.target.value })} 
                         className="h-16 text-center font-black text-2xl bg-white text-[#1f1610] rounded-xl flex items-center justify-center leading-none"
+                        disabled={isSaving}
                      />
                   </div>
                   <div className="col-span-3 space-y-2">
@@ -1273,6 +1276,7 @@ export default function AdminPage() {
                         value={editingTask?.title || ""} 
                         onChange={e => setEditingTask({ ...editingTask, title: e.target.value })} 
                         className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl flex items-center px-6 leading-none"
+                        disabled={isSaving}
                      />
                   </div>
                </div>
@@ -1282,12 +1286,16 @@ export default function AdminPage() {
                      value={editingTask?.description || ""} 
                      onChange={e => setEditingTask({ ...editingTask, description: e.target.value })} 
                      className="min-h-[120px] bg-white text-[#1f1610] font-bold rounded-2xl p-6 leading-relaxed"
+                     disabled={isSaving}
                   />
                </div>
             </div>
             <DialogFooter className="mt-10 gap-4">
-               <Button variant="ghost" className="rounded-full h-14 font-black uppercase text-xs" onClick={() => setEditingTask(null)}>Cancel</Button>
-               <Button className="rounded-full h-14 px-10 bg-[#1f1610] text-primary font-black uppercase text-sm" onClick={handleUpdateExistingTask}>Synchronize Changes</Button>
+               <Button variant="ghost" className="rounded-full h-14 font-black uppercase text-xs" onClick={() => setEditingTask(null)} disabled={isSaving}>Cancel</Button>
+               <Button className="rounded-full h-14 px-10 bg-[#1f1610] text-primary font-black uppercase text-sm" onClick={handleUpdateExistingTask} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-3" /> : null}
+                  Synchronize Changes
+               </Button>
             </DialogFooter>
          </DialogContent>
       </Dialog>
