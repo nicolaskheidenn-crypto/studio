@@ -260,7 +260,7 @@ export default function DashboardPage() {
       });
       setInsightInput("");
       toast({ title: "Insight Recorded" });
-    } catch (async) {
+    } catch (error: any) {
       const permissionError = new FirestorePermissionError({
         path: postRef.path,
         operation: 'update',
@@ -275,7 +275,7 @@ export default function DashboardPage() {
   const handleHeartPost = (postId: string) => {
     const postRef = doc(db, 'activityWall', postId);
     updateDoc(postRef, { hearts: increment(1) })
-      .catch(async () => {
+      .catch(async (error: any) => {
         const permissionError = new FirestorePermissionError({
           path: postRef.path,
           operation: 'update',
@@ -310,7 +310,7 @@ export default function DashboardPage() {
       else if (resType === 'T&Triks') incrementTrick(uid);
       setResTitle(""); setResContent(""); setResCategory("General");
       toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
-    } catch (async) {
+    } catch (error: any) {
       const permissionError = new FirestorePermissionError({
         path: 'resources',
         operation: 'create',
@@ -370,7 +370,8 @@ export default function DashboardPage() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-primary text-center">Points Vault</span>
             </div>
-            <div className="flex items-center justify-center gap-3 text-orange-500">
+            <div className="flex flex-col">
+              <div className="flex items-center justify-center gap-3 text-orange-500">
                 <Flame className="h-7 w-7 fill-orange-500" />
                 <span className="font-black text-3xl tracking-tighter text-foreground leading-none">{streak}</span>
               </div>
@@ -445,7 +446,7 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-3 gap-6 pl-32">
                     {postImages.map((img, i) => (
                       <div key={i} className="relative aspect-square rounded-[2rem] overflow-hidden group border-4 border-primary/20 shadow-xl">
-                        <img src={img} className="w-full h-full object-cover" />
+                        <img src={img} className="w-full h-full object-cover" alt="Post" />
                         <button disabled={isPosting} onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-5 w-5" /></button>
                       </div>
                     ))}
