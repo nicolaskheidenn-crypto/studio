@@ -186,16 +186,16 @@ export default function GoalCapsPage() {
                <Card className="rounded-[3rem] border-4 border-primary/10 bg-card/40 p-10 shadow-2xl space-y-8">
                   <div className="space-y-2">
                     <h3 className="text-2xl font-black uppercase text-foreground italic flex items-center gap-3"><History className="h-6 w-6 text-primary" /> Privacy Stats</h3>
-                    <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Sovereign Record</p>
+                    <p className="text-[10px] font-black uppercase text-primary/70 tracking-widest">Sovereign Record</p>
                   </div>
                   
                   <div className="space-y-6 pt-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase text-primary/40">Encrypted Blocks</span>
+                      <span className="text-[10px] font-black uppercase text-primary/70">Encrypted Blocks</span>
                       <span className="text-2xl font-black text-foreground">{capsules.length}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase text-primary/40">Vault Status</span>
+                      <span className="text-[10px] font-black uppercase text-primary/70">Vault Status</span>
                       <span className="text-xs font-black text-green-500 uppercase italic tracking-widest">AES-GCM Secured</span>
                     </div>
                   </div>
@@ -205,7 +205,7 @@ export default function GoalCapsPage() {
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto border-2 border-primary/20 shadow-inner">
                     <KeyRound className="h-8 w-8 text-primary" />
                   </div>
-                  <p className="text-[10px] font-black uppercase text-primary/40 tracking-widest leading-relaxed">
+                  <p className="text-[10px] font-black uppercase text-primary/70 tracking-widest leading-relaxed">
                     Visions are encrypted using your browser's hardware crypto. The Host cannot decrypt your blocks.
                   </p>
                </Card>
@@ -254,7 +254,7 @@ export default function GoalCapsPage() {
                   <Button 
                     type="submit" 
                     disabled={isSealing}
-                    className="w-full h-24 rounded-full bg-[#1f1610] text-primary font-black text-3xl uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all group tracking-tighter"
+                    className="w-full h-24 rounded-full bg-primary text-[#1f1610] font-black text-3xl uppercase shadow-2xl hover:bg-[#1f1610] hover:text-primary transition-all group tracking-tighter border-4 border-primary/20"
                   >
                     {isSealing ? (
                       <Loader2 className="h-10 w-10 animate-spin" />
@@ -276,7 +276,7 @@ export default function GoalCapsPage() {
                 </div>
                 <div>
                   <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter italic leading-none">TEMPORAL VAULT</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 mt-1">L7 Security Registry</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 mt-1">L7 Security Registry</p>
                 </div>
               </div>
 
@@ -284,7 +284,7 @@ export default function GoalCapsPage() {
                 {capsules.length === 0 ? (
                   <div className="p-16 border-4 border-dashed border-primary/10 rounded-[3.5rem] text-center bg-card/20 flex flex-col items-center justify-center space-y-6">
                     <Info className="h-12 w-12 text-primary/10" />
-                    <p className="text-primary/20 text-xl font-black uppercase tracking-widest italic text-center">
+                    <p className="text-primary/30 text-xl font-black uppercase tracking-widest italic text-center">
                       Vault Encrypted.<br/>No private data.
                     </p>
                   </div>
@@ -319,7 +319,7 @@ export default function GoalCapsPage() {
                                 )}>
                                   {unlockDateObj.toLocaleDateString()}
                                 </p>
-                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">Sealed: {cap.createdAt}</p>
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/70">Sealed: {cap.createdAt}</p>
                               </div>
                             </div>
                           </div>
@@ -332,10 +332,10 @@ export default function GoalCapsPage() {
                           )}>
                             {isLocked ? (
                               <div className="space-y-4 w-full text-center">
-                                <p className="text-[10px] font-mono break-all opacity-20 select-none">
+                                <p className="text-[10px] font-mono break-all opacity-20 select-none text-white">
                                   {cap.message.substring(0, 120)}...
                                 </p>
-                                <p className="text-xs font-black uppercase tracking-widest text-primary/40">
+                                <p className="text-xs font-black uppercase tracking-widest text-primary/70">
                                   NON-CUSTODIAL ENCRYPTION ACTIVE
                                 </p>
                               </div>
