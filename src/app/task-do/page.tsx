@@ -11,7 +11,7 @@ import {
   Trophy, ArrowRight, Lock, ShieldCheck, 
   Flame, Zap, BarChart3, Gift, Download, Sparkles, Target, Coffee, Loader2
 } from "lucide-react";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, memo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useUserStore, UserProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,61 @@ const DEFAULT_PROFILE: UserProfile = {
     totalDaysInApp: 0
   }
 };
+
+// Optimized Plexus Layer to prevent DOM bloat
+const NeuralPlexus = memo(({ dots, width }: { dots: any[], width: number }) => {
+  const plexusPath = useMemo(() => {
+    if (dots.length === 0) return "";
+    let path = "";
+    const maxDist = 350; // Balanced distance for performance
+    
+    for (let i = 0; i < dots.length; i++) {
+      const d1 = dots[i];
+      // Only check a limited number of nearby neighbors (spatial optimization)
+      const lookAhead = 25; 
+      for (let j = i + 1; j < Math.min(i + lookAhead, dots.length); j++) {
+        const d2 = dots[j];
+        const dx = d1.left - d2.left;
+        const dy = (d1.top / 100 * MAP_HEIGHT) - (d2.top / 100 * MAP_HEIGHT);
+        const distSq = dx * dx + dy * dy;
+        
+        if (distSq < maxDist * maxDist) {
+          path += `M ${d1.left} ${d1.top}% L ${d2.left} ${d2.top}% `;
+        }
+      }
+    }
+    return path;
+  }, [dots]);
+
+  return (
+    <svg 
+      className="absolute inset-0 pointer-events-none will-change-transform opacity-30" 
+      style={{ width, height: '100%' }}
+    >
+      <path 
+        d={plexusPath} 
+        fill="none" 
+        stroke="var(--primary)" 
+        strokeWidth="0.8" 
+        strokeOpacity="0.4"
+        className="animate-pulse"
+      />
+      {/* Render dots as rects/circles sparingly or within the path if needed */}
+      {dots.filter((_, idx) => idx % 4 === 0).map(dot => (
+        <circle 
+          key={dot.id} 
+          cx={dot.left} 
+          cy={`${dot.top}%`} 
+          r={dot.size} 
+          fill="var(--primary)" 
+          className="animate-pulse"
+          style={{ opacity: 0.2 }}
+        />
+      ))}
+    </svg>
+  );
+});
+NeuralPlexus.displayName = "NeuralPlexus";
 
 export default function TaskDoPage() {
   const { user } = useUser();
@@ -87,41 +142,15 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Increased dot density for plexus (1,200 nodes)
-    const dots = Array.from({ length: 1200 }).map((_, i) => ({
+    // Optimized density for fluid performance (800 nodes is sweet spot for visual/speed)
+    const dots = Array.from({ length: 800 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
       left: Math.random() * totalMapWidth, 
-      delay: Math.random() * 10,
-      size: Math.random() * 2 + 1,
-      duration: 8 + Math.random() * 12,
+      size: Math.random() * 1.5 + 0.5,
     })).sort((a, b) => a.left - b.left);
     setShiningDots(dots);
   }, [totalMapWidth]);
-
-  const plexusLines = useMemo(() => {
-    if (shiningDots.length === 0) return [];
-    const lines = [];
-    const maxDist = 450; 
-    for (let i = 0; i < shiningDots.length; i++) {
-      for (let j = i + 1; j < Math.min(i + 40, shiningDots.length); j++) {
-        const d1 = shiningDots[i];
-        const d2 = shiningDots[j];
-        const dist = Math.sqrt(Math.pow(d1.left - d2.left, 2) + Math.pow((d1.top / 100 * MAP_HEIGHT) - (d2.top / 100 * MAP_HEIGHT), 2));
-        if (dist < maxDist) {
-          lines.push({ 
-            id: `${i}-${j}`, 
-            x1: d1.left, 
-            y1: `${d1.top}%`, 
-            x2: d2.left, 
-            y2: `${d2.top}%`, 
-            opacity: (1 - (dist / maxDist)) * 0.6 
-          });
-        }
-      }
-    }
-    return lines;
-  }, [shiningDots]);
 
   const dayTasks = useMemo(() => globalTasks.filter(t => t.day === currentTaskDay), [globalTasks, currentTaskDay]);
   const isDayComplete = useMemo(() => dayTasks.length > 0 && dayTasks.every(t => (completedTaskIds || []).includes(t.id)), [dayTasks, completedTaskIds]);
@@ -228,21 +257,11 @@ export default function TaskDoPage() {
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
-                  {/* Plexus Layer Inside Scroll Container */}
-                  <svg className="absolute inset-0 pointer-events-none will-change-transform" style={{ width: totalMapWidth, height: '100%' }}>
-                     {plexusLines.map(line => (
-                       <line 
-                         key={line.id} 
-                         x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} 
-                         stroke="var(--primary)" 
-                         strokeWidth="1.5" 
-                         className="animate-pulse"
-                         style={{ opacity: line.opacity }}
-                       />
-                     ))}
-                  </svg>
+                  
+                  {/* Optimized Multiplexed Neural Layer */}
+                  <NeuralPlexus dots={shiningDots} width={totalMapWidth} />
 
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none will-change-transform" style={{ minWidth: totalMapWidth }}>
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none will-change-transform z-10" style={{ minWidth: totalMapWidth }}>
                     <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.06)" strokeWidth="8" strokeLinecap="round" />
                     <path 
                       d={completedTracePath} 
