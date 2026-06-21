@@ -262,14 +262,29 @@ export const useUserStore = create<UserProgressStore>()(
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const isCompleting = !current.completedTaskIds.includes(id);
-        if (isCompleting) {
-          get().addXP(uid, 20);
-          get().addPoints(uid, 50);
-        }
+        
+        let { points, xp, level, completedTaskIds } = current;
         const newIds = isCompleting 
-          ? [...current.completedTaskIds, id] 
-          : current.completedTaskIds.filter(tid => tid !== id);
-        get().updateProfile(uid, { completedTaskIds: newIds });
+          ? [...completedTaskIds, id] 
+          : completedTaskIds.filter(tid => tid !== id);
+
+        if (isCompleting) {
+          const multiplier = 1 + (level / 10);
+          points += Math.floor(50 * multiplier);
+          xp += 20 * multiplier;
+          while (xp >= 100 && level < 30) {
+            xp -= 100;
+            level += 1;
+          }
+          if (level >= 30) xp = 0;
+        }
+        
+        get().updateProfile(uid, { 
+          points: Math.floor(points), 
+          xp, 
+          level, 
+          completedTaskIds: newIds 
+        });
       },
 
       claimDaily: (uid) => {
@@ -287,13 +302,27 @@ export const useUserStore = create<UserProgressStore>()(
           else if (diffDays > 1) newStreak = 1;
           else if (diffDays === 0) return;
         }
+        
         const createdDate = new Date(current.createdAt);
         const diffInDays = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-        get().addPoints(uid, 100);
-        get().addXP(uid, 50);
+        
+        const multiplier = 1 + (current.level / 10);
+        let { points, xp, level } = current;
+        
+        points += Math.floor(100 * multiplier);
+        xp += 50 * multiplier;
+        while (xp >= 100 && level < 30) {
+          xp -= 100;
+          level += 1;
+        }
+        if (level >= 30) xp = 0;
+
         get().updateProfile(uid, { 
           lastLogin: now.toISOString(), 
-          streak: newStreak, 
+          streak: newStreak,
+          points: Math.floor(points),
+          xp,
+          level,
           stats: { ...(current.stats || DEFAULT_PROFILE.stats), totalDaysInApp: diffInDays }
         });
       },
@@ -308,19 +337,49 @@ export const useUserStore = create<UserProgressStore>()(
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const claimed = current.claimedRewardWeeks || [];
+        
         if (!claimed.includes(week)) {
-          get().updateProfile(uid, { claimedRewardWeeks: [...claimed, week] });
-          get().addXP(uid, 100);
-          get().addPoints(uid, 200);
+          const multiplier = 1 + (current.level / 10);
+          let { points, xp, level } = current;
+          
+          points += Math.floor(200 * multiplier);
+          xp += 100 * multiplier;
+          while (xp >= 100 && level < 30) {
+            xp -= 100;
+            level += 1;
+          }
+          if (level >= 30) xp = 0;
+
+          get().updateProfile(uid, { 
+            claimedRewardWeeks: [...claimed, week],
+            points: Math.floor(points),
+            xp,
+            level
+          });
         }
       },
 
       addCapsule: (uid, cap) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
-        get().updateProfile(uid, { capsules: [...(current.capsules || []), cap] });
-        get().addPoints(uid, 50);
-        get().addXP(uid, 30);
+        
+        const multiplier = 1 + (current.level / 10);
+        let { points, xp, level } = current;
+        
+        points += Math.floor(50 * multiplier);
+        xp += 30 * multiplier;
+        while (xp >= 100 && level < 30) {
+          xp -= 100;
+          level += 1;
+        }
+        if (level >= 30) xp = 0;
+
+        get().updateProfile(uid, { 
+          capsules: [...(current.capsules || []), cap],
+          points: Math.floor(points),
+          xp,
+          level
+        });
       },
 
       resetUserStats: (uid) => set((s) => ({
@@ -343,24 +402,36 @@ export const useUserStore = create<UserProgressStore>()(
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
-        get().addPoints(uid, 10);
-        get().updateProfile(uid, { stats: { ...stats, promptsShared: (stats.promptsShared || 0) + 1 } });
+        const multiplier = 1 + (current.level / 10);
+        
+        get().updateProfile(uid, { 
+          points: Math.floor(current.points + (10 * multiplier)),
+          stats: { ...stats, promptsShared: (stats.promptsShared || 0) + 1 } 
+        });
       },
 
       incrementTrick: (uid) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
-        get().addPoints(uid, 10);
-        get().updateProfile(uid, { stats: { ...stats, triksShared: (stats.triksShared || 0) + 1 } });
+        const multiplier = 1 + (current.level / 10);
+        
+        get().updateProfile(uid, { 
+          points: Math.floor(current.points + (10 * multiplier)),
+          stats: { ...stats, triksShared: (stats.triksShared || 0) + 1 } 
+        });
       },
 
       incrementQuiz: (uid) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const stats = { ...DEFAULT_PROFILE.stats, ...(current.stats || {}) };
-        get().addPoints(uid, 10);
-        get().updateProfile(uid, { stats: { ...stats, quizzesPassed: (stats.quizzesPassed || 0) + 1 } });
+        const multiplier = 1 + (current.level / 10);
+        
+        get().updateProfile(uid, { 
+          points: Math.floor(current.points + (10 * multiplier)),
+          stats: { ...stats, quizzesPassed: (stats.quizzesPassed || 0) + 1 } 
+        });
       },
 
       unlockBadge: (uid, badgeId) => {

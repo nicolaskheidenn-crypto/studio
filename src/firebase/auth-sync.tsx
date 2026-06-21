@@ -24,10 +24,10 @@ export function AuthSync() {
       if (user) {
         // 1. Establish Real-Time Hydration from Firestore
         const userRef = doc(db, 'users', user.uid);
-        const unsubscribeSnapshot = onSnapshot(userRef, (docSnap) => {
-          if (docSnap.exists()) {
+        // Include metadata changes to detect pending writes (prevents ping-pong/bounce back)
+        const unsubscribeSnapshot = onSnapshot(userRef, { includeMetadataChanges: true }, (docSnap) => {
+          if (docSnap.exists() && !docSnap.metadata.hasPendingWrites) {
             const remoteData = docSnap.data();
-            // Update local store with remote data (Sovereign Hydration)
             updateProfile(user.uid, remoteData as any);
           }
         });
@@ -47,7 +47,7 @@ export function AuthSync() {
     const localProfile = profiles[user.uid];
     if (!localProfile) return;
 
-    // Debounce to prevent rapid-fire writes to Firestore
+    // Accelerated sync for higher fidelity (500ms debounce)
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     
     syncTimeoutRef.current = setTimeout(() => {
@@ -58,7 +58,7 @@ export function AuthSync() {
       }, { merge: true }).catch((err) => {
         console.warn("[SOVEREIGN SYNC] Cloud mirroring delayed due to connection state.");
       });
-    }, 2000); // 2-second debounce for stability
+    }, 500); 
 
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);

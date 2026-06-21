@@ -49,16 +49,15 @@ const DEFAULT_PROFILE: UserProfile = {
   }
 };
 
-// Optimized Plexus Layer to prevent DOM bloat
+// Optimized Plexus Layer with Single-Path Multiplexing
 const NeuralPlexus = memo(({ dots, width }: { dots: any[], width: number }) => {
   const plexusPath = useMemo(() => {
     if (dots.length === 0) return "";
     let path = "";
-    const maxDist = 350; // Balanced distance for performance
+    const maxDist = 350; 
     
     for (let i = 0; i < dots.length; i++) {
       const d1 = dots[i];
-      // Only check a limited number of nearby neighbors (spatial optimization)
       const lookAhead = 25; 
       for (let j = i + 1; j < Math.min(i + lookAhead, dots.length); j++) {
         const d2 = dots[j];
@@ -67,7 +66,7 @@ const NeuralPlexus = memo(({ dots, width }: { dots: any[], width: number }) => {
         const distSq = dx * dx + dy * dy;
         
         if (distSq < maxDist * maxDist) {
-          path += `M ${d1.left} ${d1.top}% L ${d2.left} ${d2.top}% `;
+          path += `M ${d1.left} ${d1.top / 100 * MAP_HEIGHT} L ${d2.left} ${d2.top / 100 * MAP_HEIGHT} `;
         }
       }
     }
@@ -77,28 +76,16 @@ const NeuralPlexus = memo(({ dots, width }: { dots: any[], width: number }) => {
   return (
     <svg 
       className="absolute inset-0 pointer-events-none will-change-transform opacity-30" 
-      style={{ width, height: '100%' }}
+      style={{ width, height: '100%', pointerEvents: 'none' }}
     >
       <path 
         d={plexusPath} 
         fill="none" 
         stroke="var(--primary)" 
-        strokeWidth="0.8" 
-        strokeOpacity="0.4"
+        strokeWidth="1.2" 
+        strokeOpacity="0.6"
         className="animate-pulse"
       />
-      {/* Render dots as rects/circles sparingly or within the path if needed */}
-      {dots.filter((_, idx) => idx % 4 === 0).map(dot => (
-        <circle 
-          key={dot.id} 
-          cx={dot.left} 
-          cy={`${dot.top}%`} 
-          r={dot.size} 
-          fill="var(--primary)" 
-          className="animate-pulse"
-          style={{ opacity: 0.2 }}
-        />
-      ))}
     </svg>
   );
 });
@@ -142,7 +129,6 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Optimized density for fluid performance (800 nodes is sweet spot for visual/speed)
     const dots = Array.from({ length: 800 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -152,7 +138,13 @@ export default function TaskDoPage() {
     setShiningDots(dots);
   }, [totalMapWidth]);
 
-  const dayTasks = useMemo(() => globalTasks.filter(t => t.day === currentTaskDay), [globalTasks, currentTaskDay]);
+  // STABLE SORTED TASKS: Ensures TEST 1, TEST 2 etc stay in place to prevent wrong-toggling
+  const dayTasks = useMemo(() => {
+    return globalTasks
+      .filter(t => t.day === currentTaskDay)
+      .sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  }, [globalTasks, currentTaskDay]);
+
   const isDayComplete = useMemo(() => dayTasks.length > 0 && dayTasks.every(t => (completedTaskIds || []).includes(t.id)), [dayTasks, completedTaskIds]);
 
   useEffect(() => {
@@ -185,7 +177,7 @@ export default function TaskDoPage() {
     if (!uid || isProcessing) return;
     setIsProcessing(true);
     toggleTask(uid, taskId);
-    setTimeout(() => setIsProcessing(false), 400);
+    setTimeout(() => setIsProcessing(false), 500);
   };
 
   const ALL_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -258,7 +250,6 @@ export default function TaskDoPage() {
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
                   
-                  {/* Optimized Multiplexed Neural Layer */}
                   <NeuralPlexus dots={shiningDots} width={totalMapWidth} />
 
                   <svg className="absolute inset-0 w-full h-full pointer-events-none will-change-transform z-10" style={{ minWidth: totalMapWidth }}>
