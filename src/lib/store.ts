@@ -174,6 +174,7 @@ export interface UserProfile {
   stats: UserStats;
 }
 
+// STABILIZED DEFAULT PROFILE: Prevents Hydration Mismatch
 const DEFAULT_PROFILE: UserProfile = {
   nickname: 'Strategist',
   bio: '',

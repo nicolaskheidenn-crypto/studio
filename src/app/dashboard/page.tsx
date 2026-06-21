@@ -185,12 +185,11 @@ export default function DashboardPage() {
 
   const handleDispatchWin = () => {
     if (!postText.trim() || !uid || isPosting) return;
-    setIsPosting(true);
-
+    
     const data = {
       userId: uid,
-      nickname: nickname,
-      avatarUrl: avatarUrl,
+      nickname: nickname || 'Strategist',
+      avatarUrl: avatarUrl || '',
       description: postText,
       images: [],
       isPrivate: false,
@@ -199,22 +198,18 @@ export default function DashboardPage() {
       comments: []
     };
     
+    // NON-BLOCKING OPTIMISTIC DISPATCH
+    setPostText("");
+    addPoints(uid, 20);
+    toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
+
     addDoc(collection(db, 'activityWall'), data)
-      .then(() => {
-        addPoints(uid, 20);
-        setPostText("");
-        toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
-      })
       .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: 'activityWall',
           operation: 'create',
           requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => {
-        setIsPosting(false);
+        }));
       });
   };
 
@@ -226,8 +221,8 @@ export default function DashboardPage() {
     const commentData = {
       id: Math.random().toString(36).substr(2, 9),
       userId: uid,
-      nickname: nickname,
-      avatarUrl: avatarUrl,
+      nickname: nickname || 'Strategist',
+      avatarUrl: avatarUrl || '',
       text: insightInput,
       timestamp: new Date().toISOString()
     };
@@ -240,12 +235,11 @@ export default function DashboardPage() {
         toast({ title: "Insight Recorded" });
       })
       .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: postRef.path,
           operation: 'update',
           requestResourceData: { comments: commentData },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+        }));
       })
       .finally(() => {
         setIsCommenting(false);
@@ -259,12 +253,11 @@ export default function DashboardPage() {
     const postRef = doc(db, 'activityWall', postId);
     updateDoc(postRef, { hearts: increment(1) })
       .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: postRef.path,
           operation: 'update',
           requestResourceData: { hearts: 'increment' },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+        }));
       })
       .finally(() => {
         setTimeout(() => {
@@ -279,7 +272,6 @@ export default function DashboardPage() {
        return;
     }
     
-    setIsSharingResource(true);
     const data = {
       title: resTitle,
       description: "",
@@ -292,23 +284,21 @@ export default function DashboardPage() {
       timestamp: serverTimestamp()
     };
 
+    // NON-BLOCKING OPTIMISTIC SHARING: Resolves "Nonstop Loading"
+    setResTitle(""); 
+    setResContent(""); 
+    setResCategory("General");
+    if (resType === 'AI_Prompt') incrementPrompt(uid);
+    else if (resType === 'T&Triks') incrementTrick(uid);
+    toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
+
     addDoc(collection(db, 'resources'), data)
-      .then(() => {
-        if (resType === 'AI_Prompt') incrementPrompt(uid);
-        else if (resType === 'T&Triks') incrementTrick(uid);
-        setResTitle(""); setResContent(""); setResCategory("General");
-        toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
-      })
       .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: 'resources',
           operation: 'create',
           requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => {
-        setIsSharingResource(false);
+        }));
       });
   };
 
@@ -798,7 +788,7 @@ export default function DashboardPage() {
                                          </Badge>
                                          <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">Shared: {r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : 'Live Sync'}</span>
                                       </div>
-                                      <h4 className="text-3xl font-black text-foreground uppercase italic tracking-tight break-words leading-tight">{r.title}</h4>
+                                      <h4 className="text-3xl md:text-4xl font-black text-foreground uppercase italic tracking-tight break-words leading-tight">{r.title}</h4>
                                       <div className="flex items-center gap-3">
                                          <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1 rounded-full flex items-center gap-2 overflow-hidden">
                                            {r.avatarUrl ? (
