@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -9,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useUser, useFirestore, useCollection } from "@/firebase";
 import { useState, useMemo, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -55,26 +55,34 @@ export default function AdminPage() {
   const [webinSourceType, setWebinSourceType] = useState<'Link' | 'File'>('Link');
   const [rewardSourceType, setRewardSourceType] = useState<'Link' | 'File'>('Link');
 
-  // Collections
-  const productsQuery = useMemo(() => query(collection(db, 'shooppyProducts'), orderBy('sortOrder', 'asc')), [db]);
-  const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
-  const faqsQuery = useMemo(() => collection(db, 'faqs'), [db]);
-  const activityQuery = useMemo(() => query(collection(db, 'activityWall'), orderBy('timestamp', 'desc')), [db]);
-  const webinQuery = useMemo(() => query(collection(db, 'resources'), where('type', '==', 'WeBin'), orderBy('sortOrder', 'asc')), [db]);
-  const tasksQuery = useMemo(() => query(collection(db, 'tasks'), orderBy('day', 'asc')), [db]);
-  const quizzesQuery = useMemo(() => query(collection(db, 'quizzes'), orderBy('createdAt', 'desc')), [db]);
-  const usersQuery = useMemo(() => collection(db, 'users'), [db]);
-  const rewardsQuery = useMemo(() => query(collection(db, 'rewards'), orderBy('week', 'asc')), [db]);
+  // Simplified Queries for Prototyping Robustness
+  const productsRef = useMemo(() => collection(db, 'shooppyProducts'), [db]);
+  const newsRef = useMemo(() => collection(db, 'newsPosts'), [db]);
+  const faqsRef = useMemo(() => collection(db, 'faqs'), [db]);
+  const activityRef = useMemo(() => collection(db, 'activityWall'), [db]);
+  const webinRef = useMemo(() => query(collection(db, 'resources'), where('type', '==', 'WeBin')), [db]);
+  const tasksRef = useMemo(() => collection(db, 'tasks'), [db]);
+  const quizzesRef = useMemo(() => collection(db, 'quizzes'), [db]);
+  const usersRef = useMemo(() => collection(db, 'users'), [db]);
+  const rewardsRef = useMemo(() => collection(db, 'rewards'), [db]);
 
-  const { data: shooppyProducts = [] } = useCollection(productsQuery);
-  const { data: newsPosts = [] } = useCollection(newsQuery);
-  const { data: faqs = [] } = useCollection(faqsQuery);
-  const { data: activityWallData = [] } = useCollection(activityQuery);
-  const { data: webins = [] } = useCollection(webinQuery);
-  const { data: globalTasks = [] } = useCollection(tasksQuery);
-  const { data: globalQuizzes = [] } = useCollection(quizzesQuery);
-  const { data: totalUsers = [] } = useCollection(usersQuery);
-  const { data: globalRewards = [] } = useCollection(rewardsQuery);
+  const { data: allProducts = [] } = useCollection(productsRef);
+  const { data: allNews = [] } = useCollection(newsRef);
+  const { data: allActivity = [] } = useCollection(activityRef);
+  const { data: allWebins = [] } = useCollection(webinRef);
+  const { data: allTasks = [] } = useCollection(tasksRef);
+  const { data: allQuizzes = [] } = useCollection(quizzesRef);
+  const { data: totalUsers = [] } = useCollection(usersRef);
+  const { data: allRewards = [] } = useCollection(rewardsRef);
+
+  // Client-Side Sorting
+  const shooppyProducts = useMemo(() => [...allProducts].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allProducts]);
+  const newsPosts = useMemo(() => [...allNews].sort((a: any, b: any) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)), [allNews]);
+  const activityWallData = useMemo(() => [...allActivity].sort((a: any, b: any) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)), [allActivity]);
+  const webins = useMemo(() => [...allWebins].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allWebins]);
+  const globalTasks = useMemo(() => [...allTasks].sort((a: any, b: any) => (a.day || 0) - (b.day || 0)), [allTasks]);
+  const globalQuizzes = useMemo(() => [...allQuizzes].sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [allQuizzes]);
+  const globalRewards = useMemo(() => [...allRewards].sort((a: any, b: any) => (a.week || 0) - (b.week || 0)), [allRewards]);
 
   // Form States
   const [prodTitle, setProdTitle] = useState("");
@@ -107,7 +115,6 @@ export default function AdminPage() {
 
   const [taskDay, setTaskDay] = useState(1);
   const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: '1', title: "", description: "" }]);
-  const [editingTask, setEditingTask] = useState<any>(null);
 
   const [rewardWeek, setRewardWeek] = useState(1);
   const [rewardTitle, setRewardWeekTitle] = useState("");
@@ -157,73 +164,6 @@ export default function AdminPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleExportBackup = async (type: 'Local' | 'Cloud') => {
-    if (isBackingUp) return;
-    setIsBackingUp(true);
-    try {
-      const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
-      const backupData: any = {
-        metadata: { timestamp: new Date().toISOString(), type: type, host: user?.email, version: "2.0.5-Sovereign" },
-        payload: {}
-      };
-
-      for (const collName of collections) {
-        const collRef = collection(db, collName);
-        const snapshot = await getDocs(collRef);
-        backupData.payload[collName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      }
-
-      if (type === 'Local') {
-        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `SOVEREIGN_ARCHIVE_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast({ title: "In-System Backup Secure", description: "Strategic archive saved to local disk." });
-      } else {
-        await new Promise(r => setTimeout(r, 2000));
-        toast({ title: "Cloud Continuity Sync", description: "Encrypted blocks dispatched to offsite registry." });
-      }
-    } catch (e) {
-      toast({ title: "Backup Failure", variant: "destructive" });
-    } finally {
-      setIsBackingUp(false);
-    }
-  };
-
-  const handleRestoreBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || isRestoring) return;
-    setIsRestoring(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const fullData = JSON.parse(event.target?.result as string);
-        const data = fullData.payload || fullData; 
-        
-        for (const collName in data) {
-          const items = data[collName];
-          for (const item of items) {
-            const { id, ...rest } = item;
-            setDoc(doc(db, collName, id), rest, { merge: true })
-              .catch(async (error) => {
-                errorEmitter.emit('permission-error', new FirestorePermissionError({ path: `${collName}/${id}`, operation: 'write', requestResourceData: rest }));
-              });
-          }
-        }
-        toast({ title: "Continuity Protocol Successful", description: "Grid state re-established from archive." });
-      } catch (err) {
-        toast({ title: "Restoration Breach", variant: "destructive" });
-      } finally {
-        setIsRestoring(false);
-        if (restoreRef.current) restoreRef.current.value = "";
-      }
-    };
-    reader.readAsText(file);
-  };
-
   const handleSaveProduct = () => {
     if (isSaving || !prodTitle) return;
     setIsSaving(true);
@@ -256,7 +196,10 @@ export default function AdminPage() {
   };
 
   const handleSaveWebin = () => {
-    if (isSaving || !webinTitle) return;
+    if (isSaving || !webinTitle || !webinContent) {
+      if (!webinTitle || !webinContent) toast({ title: "Incomplete Protocol", variant: "destructive" });
+      return;
+    }
     setIsSaving(true);
     const data = {
       title: webinTitle,
@@ -280,6 +223,27 @@ export default function AdminPage() {
       })
       .catch(async (error: any) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'resources', operation: 'write', requestResourceData: data }));
+      })
+      .finally(() => setIsSaving(false));
+  };
+
+  const handleSaveNews = () => {
+    if (isSaving || !newsTitle) return;
+    setIsSaving(true);
+    const data = {
+      title: newsTitle,
+      content: newsContent,
+      imageUrl: newsImg,
+      timestamp: serverTimestamp()
+    };
+    
+    addDoc(collection(db, 'newsPosts'), data)
+      .then(() => {
+        setNewsTitle(""); setNewsContent(""); setNewsImg("");
+        toast({ title: "Broadcast Dispatched" });
+      })
+      .catch(async (error: any) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data }));
       })
       .finally(() => setIsSaving(false));
   };
@@ -359,6 +323,63 @@ export default function AdminPage() {
     deleteDoc(doc(db, coll, id)).then(() => toast({ title: "Data Purged" })).catch(e => {});
   };
 
+  const handleExportBackup = async (type: 'Local' | 'Cloud') => {
+    if (isBackingUp) return;
+    setIsBackingUp(true);
+    try {
+      const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
+      const backupData: any = {
+        metadata: { timestamp: new Date().toISOString(), type: type, host: user?.email, version: "2.0.5-Sovereign" },
+        payload: {}
+      };
+      for (const collName of collections) {
+        const collRef = collection(db, collName);
+        const snapshot = await getDocs(collRef);
+        backupData.payload[collName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+      if (type === 'Local') {
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `SOVEREIGN_ARCHIVE_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast({ title: "Backup Secure" });
+      } else {
+        await new Promise(r => setTimeout(r, 1500));
+        toast({ title: "Cloud Sync Complete" });
+      }
+    } catch (e) { toast({ title: "Backup Failure", variant: "destructive" }); }
+    finally { setIsBackingUp(false); }
+  };
+
+  const handleRestoreBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || isRestoring) return;
+    setIsRestoring(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const fullData = JSON.parse(event.target?.result as string);
+        const data = fullData.payload || fullData; 
+        for (const collName in data) {
+          const items = data[collName];
+          for (const item of items) {
+            const { id, ...rest } = item;
+            setDoc(doc(db, collName, id), rest, { merge: true })
+              .catch(async (error) => {
+                errorEmitter.emit('permission-error', new FirestorePermissionError({ path: `${collName}/${id}`, operation: 'write', requestResourceData: rest }));
+              });
+          }
+        }
+        toast({ title: "Grid state re-established" });
+      } catch (err) { toast({ title: "Restoration Breach", variant: "destructive" }); }
+      finally { setIsRestoring(false); if (restoreRef.current) restoreRef.current.value = ""; }
+    };
+    reader.readAsText(file);
+  };
+
   if (user?.email !== ADMIN_EMAIL) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#1f1610] p-6 text-center">
@@ -435,6 +456,7 @@ export default function AdminPage() {
             <TabsTrigger value="wedio" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Wedio</TabsTrigger>
             <TabsTrigger value="rewards" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Rewards</TabsTrigger>
             <TabsTrigger value="quizzo" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Quizzo</TabsTrigger>
+            <TabsTrigger value="dispatch" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610] gap-2"><Newspaper className="h-3.5 w-3.5" /> Dispatch</TabsTrigger>
             <TabsTrigger value="maintenance" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Continuity</TabsTrigger>
           </TabsList>
 
@@ -771,7 +793,7 @@ export default function AdminPage() {
                             placeholder="Question text..." 
                             className="md:col-span-2 h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-bold text-[#1f1610]"
                             value={draftQuestions[currentQIdx].question}
-                            onChange={e => handleUpdateQuestion(currentQIdx, { question: e.target.value })}
+                            onChange={handleUpdateQuestion(currentQIdx, { question: e.target.value })}
                           />
                        </div>
 
@@ -873,6 +895,46 @@ export default function AdminPage() {
              </ScrollArea>
           </TabsContent>
 
+          <TabsContent value="dispatch" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+              <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
+                <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Broadcast Dispatcher</CardTitle>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-[#1f1610]">Broadcast Title</Label>
+                    <Input placeholder="Important Update" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[#1f1610]">Cover Image URL</Label>
+                    <Input placeholder="https://..." value={newsImg} onChange={e => setNewsImg(e.target.value)} className="h-16 bg-white text-[#1f1610]" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[#1f1610]">Broadcast Content</Label>
+                    <Textarea placeholder="Share details with the collective..." value={newsContent} onChange={e => setNewsContent(e.target.value)} className="min-h-[200px] bg-white text-[#1f1610] font-bold" />
+                  </div>
+                  <Button onClick={handleSaveNews} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>DISPATCH BROADCAST</Button>
+                </div>
+              </Card>
+
+              <div className="space-y-8">
+                <h3 className="text-2xl font-black uppercase italic text-primary">Live Activity Moderation</h3>
+                <ScrollArea className="h-[600px]">
+                  <div className="space-y-4">
+                    {activityWallData.map(post => (
+                      <div key={post.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
+                        <div>
+                          <h4 className="font-black text-[#1f1610] uppercase italic">@{post.nickname}</h4>
+                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest line-clamp-1">{post.description}</p>
+                        </div>
+                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('activityWall', post.id)}><Trash2 /></Button>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="maintenance" className="space-y-12">
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <Card className="rounded-[3rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl text-center space-y-8">
@@ -898,3 +960,4 @@ export default function AdminPage() {
     </div>
   );
 }
+
