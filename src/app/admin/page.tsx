@@ -49,11 +49,13 @@ export default function AdminPage() {
   const assetFileInputRef = useRef<HTMLInputElement>(null);
   const webinFileInputRef = useRef<HTMLInputElement>(null);
   const rewardFileInputRef = useRef<HTMLInputElement>(null);
+  const newsFileInputRef = useRef<HTMLInputElement>(null);
   
   // Source Type Toggles
   const [assetSourceType, setAssetSourceType] = useState<'Link' | 'File'>('Link');
   const [webinSourceType, setWebinSourceType] = useState<'Link' | 'File'>('Link');
   const [rewardSourceType, setRewardSourceType] = useState<'Link' | 'File'>('Link');
+  const [newsSourceType, setNewsSourceType] = useState<'Link' | 'File'>('Link');
 
   // Simplified Queries for Prototyping Robustness
   const productsRef = useMemo(() => collection(db, 'shooppyProducts'), [db]);
@@ -160,6 +162,17 @@ export default function AdminPage() {
     reader.onloadend = () => {
       setRewardWeekFile(reader.result as string);
       toast({ title: "Treasure Asset Loaded", description: `${file.name} ready for deployment.` });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleNewsFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewsImg(reader.result as string);
+      toast({ title: "Broadcast Asset Loaded", description: `${file.name} ready for dispatch.` });
     };
     reader.readAsDataURL(file);
   };
@@ -905,10 +918,41 @@ export default function AdminPage() {
                     <Label className="text-[#1f1610]">Broadcast Title</Label>
                     <Input placeholder="Important Update" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[#1f1610]">Cover Image URL</Label>
-                    <Input placeholder="https://..." value={newsImg} onChange={e => setNewsImg(e.target.value)} className="h-16 bg-white text-[#1f1610]" />
+
+                  <div className="flex flex-col gap-4">
+                    <Label className="text-[#1f1610]">Cover Image Source</Label>
+                    <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
+                      <Button 
+                        variant={newsSourceType === 'Link' ? 'default' : 'ghost'} 
+                        onClick={() => setNewsSourceType('Link')} 
+                        className={cn("flex-1 rounded-xl h-12 font-black", newsSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                      >LINK</Button>
+                      <Button 
+                        variant={newsSourceType === 'File' ? 'default' : 'ghost'} 
+                        onClick={() => setNewsSourceType('File')} 
+                        className={cn("flex-1 rounded-xl h-12 font-black", newsSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                      >UPLOAD</Button>
+                    </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[#1f1610]">{newsSourceType === 'File' ? 'Upload Cover Image' : 'Cover Image URL'}</Label>
+                    <div className="relative">
+                      <button type="button" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" onClick={() => newsFileInputRef.current?.click()}>
+                        {newsSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                      </button>
+                      <input type="file" ref={newsFileInputRef} className="hidden" accept="image/*" onChange={handleNewsFileChange} />
+                      <Input 
+                        placeholder={newsSourceType === 'File' ? "Click icon to upload image..." : "https://..."} 
+                        value={newsImg.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : newsImg}
+                        onChange={e => setNewsImg(e.target.value)}
+                        className="h-16 pl-12 bg-white text-[#1f1610]" 
+                        readOnly={newsSourceType === 'File'}
+                        onClick={() => newsSourceType === 'File' && newsFileInputRef.current?.click()}
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label className="text-[#1f1610]">Broadcast Content</Label>
                     <Textarea placeholder="Share details with the collective..." value={newsContent} onChange={e => setNewsContent(e.target.value)} className="min-h-[200px] bg-white text-[#1f1610] font-bold" />
