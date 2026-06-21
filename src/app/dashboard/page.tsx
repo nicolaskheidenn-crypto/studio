@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from '@/components/Navigation';
@@ -312,7 +313,7 @@ export default function DashboardPage() {
 
     addDoc(collection(db, 'resources'), data)
       .then(() => {
-        if (resType === 'AI_Prompt') incrementPrompt(uid);
+        if (resType === 'AI_Prompt' incrementPrompt(uid);
         else if (resType === 'T&Triks') incrementTrick(uid);
         setResTitle(""); setResContent(""); setResCategory("General");
         toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
@@ -644,14 +645,15 @@ export default function DashboardPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                   {marketplaceAssets.map((p: any) => {
                     return (
-                      <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all">
-                        <div className="h-80 relative overflow-hidden bg-background/50">
-                           {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.title} />}
-                           <Badge className="absolute top-8 left-8 bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
+                      <Card key={p.id} className="rounded-[4rem] border-4 border-primary/10 bg-card shadow-2xl overflow-hidden group hover:border-primary transition-all flex flex-col h-full">
+                        <div className="p-8 pb-0">
+                           <Badge className="bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
                         </div>
-                        <div className="p-12 space-y-8">
-                           <h4 className="text-4xl font-black text-foreground uppercase tracking-tight italic">{p.title}</h4>
-                           <p className="text-base font-bold text-foreground/70 leading-relaxed line-clamp-3">{p.description}</p>
+                        <div className="flex-1 flex items-center justify-center p-12 min-h-[350px]">
+                           <h4 className="text-6xl font-black text-foreground uppercase tracking-tighter italic text-center leading-none">{p.title}</h4>
+                        </div>
+                        <div className="p-12 pt-0 space-y-8">
+                           {p.description && <p className="text-sm font-bold text-foreground/40 uppercase tracking-widest text-center line-clamp-2">{p.description}</p>}
                            <Button onClick={() => window.open(p.fileUrl, '_blank')} className="w-full h-18 rounded-[2rem] bg-primary text-background font-black uppercase text-sm shadow-2xl hover:bg-white hover:text-primary transition-all gap-4">
                               <ExternalLink className="h-5 w-5" /> Visit Official Shop
                            </Button>
@@ -900,7 +902,10 @@ export default function DashboardPage() {
                   {faqs.map((f: any) => (
                     <AccordionItem key={f.id} value={f.id} className="border-none bg-background/50 rounded-[3rem] px-12 transition-all data-[state=open]:shadow-2xl overflow-hidden">
                       <AccordionTrigger className="text-lg font-black text-foreground uppercase tracking-widest hover:no-underline py-10 [&>svg]:h-6 [&>svg]:w-6 [&>svg]:text-primary">
-                        {f.question}
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-[10px] text-primary/40 leading-none">{f.title || 'GENERAL'}</span>
+                          <span>{f.question}</span>
+                        </div>
                       </AccordionTrigger>
                       <AccordionContent className="text-lg text-foreground/80 leading-relaxed font-bold pb-12 pt-4 border-t-2 border-primary/10">
                         {f.answer}

@@ -18,7 +18,7 @@ import {
   Newspaper, ShoppingBag, 
   Plus, ListChecks, Gift,
   ChevronRight, CircleHelp,
-  Users, Zap, Edit3, X, Video, HardDrive, Cloud, OctagonAlert, Loader2
+  Users, Zap, Edit3, X, Video, HardDrive, Cloud, OctagonAlert, Loader2, HelpCircle
 } from "lucide-react";
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
@@ -54,6 +54,7 @@ export default function AdminPage() {
   const quizzesRef = useMemo(() => collection(db, 'quizzes'), [db]);
   const usersRef = useMemo(() => collection(db, 'users'), [db]);
   const rewardsRef = useMemo(() => collection(db, 'rewards'), [db]);
+  const faqsRef = useMemo(() => collection(db, 'faqs'), [db]);
 
   const { data: allProducts = [] } = useCollection(productsRef);
   const { data: allNews = [] } = useCollection(newsRef);
@@ -63,6 +64,7 @@ export default function AdminPage() {
   const { data: allQuizzes = [] } = useCollection(quizzesRef);
   const { data: totalUsers = [] } = useCollection(usersRef);
   const { data: allRewards = [] } = useCollection(rewardsRef);
+  const { data: allFaqs = [] } = useCollection(faqsRef);
 
   // Grouping Tasks for Organization
   const groupedTasks = useMemo(() => {
@@ -119,6 +121,11 @@ export default function AdminPage() {
   const [rewardPoints, setRewardPoints] = useState(500);
   const [rewardXP, setRewardXP] = useState(250);
 
+  const [faqTitle, setFaqTitle] = useState("");
+  const [faqQuestion, setFaqQuestion] = useState("");
+  const [faqAnswer, setFaqAnswer] = useState("");
+  const [editingFaq, setEditingFaq] = useState<any>(null);
+
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminKey === ADMIN_SECRET_KEY) {
@@ -135,7 +142,7 @@ export default function AdminPage() {
     const data = {
       title: prodTitle,
       description: prodDesc,
-      imageUrl: prodImg,
+      imageUrl: "", // Removed image support as per request
       fileUrl: prodFile, 
       type: prodType,
       placement: prodPlacement,
@@ -247,6 +254,32 @@ export default function AdminPage() {
       .finally(() => setIsSaving(false));
   };
 
+  const handleSaveFaq = () => {
+    if (isSaving || !faqQuestion || !faqAnswer) return;
+    setIsSaving(true);
+    const data = {
+      title: faqTitle,
+      question: faqQuestion,
+      answer: faqAnswer,
+      timestamp: serverTimestamp()
+    };
+    
+    const operation = editingFaq ?
+      updateDoc(doc(db, 'faqs', editingFaq.id), data) :
+      addDoc(collection(db, 'faqs'), data);
+
+    operation
+      .then(() => {
+        setEditingFaq(null);
+        setFaqTitle(""); setFaqQuestion(""); setFaqAnswer("");
+        toast({ title: editingFaq ? "Inquiry Updated" : "Inquiry Deployed" });
+      })
+      .catch(async (error: any) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'faqs', operation: 'write', requestResourceData: data }));
+      })
+      .finally(() => setIsSaving(false));
+  };
+
   const handleAddQuestionSlot = () => {
     setDraftQuestions([...draftQuestions, { 
       id: Math.random().toString(36).substr(2, 9), 
@@ -314,7 +347,7 @@ export default function AdminPage() {
     if (isBackingUp) return;
     setIsBackingUp(true);
     try {
-      const collections = ['shooppyProducts', 'newsPosts', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
+      const collections = ['shooppyProducts', 'newsPosts', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards', 'faqs'];
       const backupData: any = {
         metadata: { timestamp: new Date().toISOString(), type: type, host: user?.email, version: "2.0.5-Sovereign" },
         payload: {}
@@ -443,6 +476,7 @@ export default function AdminPage() {
             <TabsTrigger value="wedio" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Wedio</TabsTrigger>
             <TabsTrigger value="rewards" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Rewards</TabsTrigger>
             <TabsTrigger value="quizzo" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Quizzo</TabsTrigger>
+            <TabsTrigger value="faq" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610] gap-2"><HelpCircle className="h-3.5 w-3.5" /> Inquiry</TabsTrigger>
             <TabsTrigger value="dispatch" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610] gap-2"><Newspaper className="h-3.5 w-3.5" /> Dispatch</TabsTrigger>
             <TabsTrigger value="maintenance" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Continuity</TabsTrigger>
           </TabsList>
@@ -585,20 +619,14 @@ export default function AdminPage() {
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[#1f1610]">Cover Image URL</Label>
-                        <Input placeholder="https://..." value={prodImg} onChange={e => setProdImg(e.target.value)} className="h-16 bg-white text-[#1f1610] font-black" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
                         <Label className="text-[#1f1610]">Points Price</Label>
                         <Input type="number" value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-[#1f1610]">Level Req.</Label>
-                        <Input type="number" value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
-                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">Level Req.</Label>
+                      <Input type="number" value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
                     </div>
                     
                     <Button onClick={handleSaveProduct} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>DEPLOY ASSET</Button>
@@ -613,7 +641,19 @@ export default function AdminPage() {
                           <h4 className="font-black text-[#1f1610] uppercase italic">{p.title}</h4>
                           <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest">{p.price} PTS • LV {p.requiredLevel}</p>
                        </div>
-                       <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('shooppyProducts', p.id)}><Trash2 /></Button>
+                       <div className="flex gap-2">
+                          <Button variant="ghost" size="icon" className="text-[#1f1610]/40" onClick={() => {
+                            setEditingProduct(p);
+                            setProdTitle(p.title);
+                            setProdDesc(p.description);
+                            setProdFile(p.fileUrl || "");
+                            setProdType(p.type);
+                            setProdPlacement(p.placement);
+                            setProdLevel(p.requiredLevel || 1);
+                            setProdPrice(p.price || 0);
+                          }}><Edit3 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('shooppyProducts', p.id)}><Trash2 /></Button>
+                       </div>
                     </div>
                   ))}
                 </div>
@@ -875,6 +915,75 @@ export default function AdminPage() {
                   ))}
                 </div>
              </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="faq" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
+                   <div className="flex items-center gap-4">
+                      <HelpCircle className="h-10 w-10 text-[#1f1610]" />
+                      <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Inquiry Injector</CardTitle>
+                   </div>
+                   
+                   <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-[#1f1610]">Inquiry Title</Label>
+                        <Input placeholder="General Protocol" value={faqTitle} onChange={e => setFaqTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#1f1610]">The Question</Label>
+                        <Input placeholder="How to initialize the grid?" value={faqQuestion} onChange={e => setFaqQuestion(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#1f1610]">Strategic Answer</Label>
+                        <Textarea placeholder="Execute the morning brew routine..." value={faqAnswer} onChange={e => setFaqAnswer(e.target.value)} className="min-h-[150px] bg-white text-[#1f1610] font-bold" />
+                      </div>
+                      <div className="flex gap-4">
+                        <Button onClick={handleSaveFaq} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>
+                          {editingFaq ? 'UPDATE INQUIRY' : 'INJECT INQUIRY'}
+                        </Button>
+                        {editingFaq && (
+                          <Button variant="outline" className="h-20 px-8 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black" onClick={() => {
+                            setEditingFaq(null);
+                            setFaqTitle(""); setFaqQuestion(""); setFaqAnswer("");
+                          }}>CANCEL</Button>
+                        )}
+                      </div>
+                   </div>
+                </Card>
+
+                <div className="space-y-8">
+                   <h3 className="text-2xl font-black uppercase italic text-primary">Deployed Inquiries</h3>
+                   <ScrollArea className="h-[600px] pr-4">
+                      <div className="space-y-4">
+                        {allFaqs.map((f: any) => (
+                          <div key={f.id} className="p-8 bg-mocha-cream rounded-[2.5rem] shadow-xl border-4 border-primary/5 group hover:border-primary/20 transition-all">
+                             <div className="flex justify-between items-start">
+                                <div className="space-y-2">
+                                   <Badge className="bg-primary/10 text-[#1f1610] border-none font-black text-[8px] uppercase tracking-widest px-3 py-0.5 rounded-full">{f.title || 'UNTAGGED'}</Badge>
+                                   <h4 className="text-xl font-black text-[#1f1610] uppercase italic tracking-tight">{f.question}</h4>
+                                   <p className="text-xs text-[#1f1610]/60 font-bold line-clamp-2">{f.answer}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                   <Button variant="ghost" size="icon" className="h-10 w-10 text-[#1f1610]/20 hover:text-primary" onClick={() => {
+                                      setEditingFaq(f);
+                                      setFaqTitle(f.title || "");
+                                      setFaqQuestion(f.question || "");
+                                      setFaqAnswer(f.answer || "");
+                                   }}>
+                                      <Edit3 className="h-4 w-4" />
+                                   </Button>
+                                   <Button variant="ghost" size="icon" className="h-10 w-10 text-red-500" onClick={() => handleDeleteDoc('faqs', f.id)}>
+                                      <Trash2 className="h-4 w-4" />
+                                   </Button>
+                                </div>
+                             </div>
+                          </div>
+                        ))}
+                      </div>
+                   </ScrollArea>
+                </div>
+             </div>
           </TabsContent>
 
           <TabsContent value="dispatch" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
