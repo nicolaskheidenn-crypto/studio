@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [isRestoring, setIsRestoring] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const restoreRef = useRef<HTMLInputElement>(null);
+  const assetFileInputRef = useRef<HTMLInputElement>(null);
   
   // Collections
   const productsQuery = useMemo(() => query(collection(db, 'shooppyProducts'), orderBy('sortOrder', 'asc')), [db]);
@@ -115,6 +116,17 @@ export default function AdminPage() {
     } else {
       toast({ title: "Invalid Protocol Key", variant: "destructive" });
     }
+  };
+
+  const handleAssetFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProdFile(reader.result as string);
+      toast({ title: "Protocol File Loaded", description: `${file.name} ready for injection.` });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleExportBackup = async (type: 'Local' | 'Cloud') => {
@@ -805,13 +817,33 @@ export default function AdminPage() {
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">{prodPlacement === 'Hub' ? 'Protocol File' : 'Shop URL'}</Label>
                         <div className="relative">
-                          {prodPlacement === 'Hub' ? <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" /> : <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />}
+                          {prodPlacement === 'Hub' ? (
+                            <button 
+                              type="button" 
+                              className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30 hover:opacity-100 transition-opacity z-10"
+                              onClick={() => assetFileInputRef.current?.click()}
+                            >
+                              <Upload className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
+                          )}
+                          
+                          <input 
+                            type="file" 
+                            ref={assetFileInputRef} 
+                            className="hidden" 
+                            onChange={handleAssetFileChange}
+                          />
+
                           <Input 
                             placeholder={prodPlacement === 'Hub' ? "Upload asset..." : "https://..."} 
-                            value={prodFile}
+                            value={prodFile.startsWith('data:') ? 'PROTOCOL_FILE_LOADED' : prodFile}
                             onChange={e => setProdFile(e.target.value)}
                             className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" 
                             disabled={isSaving}
+                            readOnly={prodPlacement === 'Hub'}
+                            onClick={() => prodPlacement === 'Hub' && assetFileInputRef.current?.click()}
                           />
                         </div>
                       </div>
@@ -827,7 +859,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      {editingProduct && <Button variant="ghost" onClick={() => { setEditingProduct(null); setProdTitle(""); setProdDesc(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]" disabled={isSaving}>Cancel</Button>}
+                      {editingProduct && <Button variant="ghost" onClick={() => { setEditingProduct(null); setProdTitle(""); setProdDesc(""); setProdFile(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]" disabled={isSaving}>Cancel</Button>}
                       <Button onClick={handleSaveProduct} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all" disabled={isSaving}>
                         {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
                         {editingProduct ? 'Sync Protocol' : 'Deploy Asset'}

@@ -20,7 +20,7 @@ service cloud.firestore {
     // User Profile Rules: Users can read all (for wall/leaderboard), but write only their own.
     // Master Host can update specific flags if needed.
     match /users/{userId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow create: if isOwner(userId);
       allow update: if isOwner(userId) || isHost();
     }
@@ -32,7 +32,7 @@ service cloud.firestore {
 
     // Activity Wall: Public wins, master moderated
     match /activityWall/{postId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isSignedIn(); // For hearts/insights
       allow delete: if isOwner(resource.data.userId) || isHost();
@@ -40,31 +40,31 @@ service cloud.firestore {
 
     // Master Host Protected Collections: GLOBAL READ / HOST-ONLY WRITE
     match /tasks/{id} { 
-      allow read: if isSignedIn(); 
+      allow read: if true; 
       allow write: if isHost(); 
     }
     match /quizzes/{id} { 
-      allow read: if isSignedIn(); 
+      allow read: if true; 
       allow write: if isHost(); 
     }
     match /rewards/{id} { 
-      allow read: if isSignedIn(); 
+      allow read: if true; 
       allow write: if isHost(); 
     }
     match /shooppyProducts/{id} { 
-      allow read: if isSignedIn(); 
+      allow read: if true; 
       allow write: if isHost(); 
     }
     match /newsPosts/{id} { 
-      allow read: if isSignedIn(); 
+      allow read: if true; 
       allow write: if isHost(); 
     }
     match /faqs/{id} { 
-      allow read: if isSignedIn(); 
+      allow read: if true; 
       allow write: if isHost(); 
     }
     match /resources/{id} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow create, update: if isSignedIn(); // Users can share in library
       allow delete: if isOwner(resource.data.userId) || isHost();
     }

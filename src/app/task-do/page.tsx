@@ -87,6 +87,7 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
+    // Increased dot density for plexus (1200 nodes)
     const dots = Array.from({ length: 800 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
@@ -94,16 +95,17 @@ export default function TaskDoPage() {
       delay: Math.random() * 10,
       size: Math.random() * 2 + 1,
       duration: 8 + Math.random() * 12,
-    }));
+    })).sort((a, b) => a.left - b.left); // Spatial sorting for connectivity optimization
     setShiningDots(dots);
   }, [totalMapWidth]);
 
   const plexusLines = useMemo(() => {
     if (shiningDots.length === 0) return [];
     const lines = [];
-    const maxDist = 400; 
+    const maxDist = 450; 
     for (let i = 0; i < shiningDots.length; i++) {
-      for (let j = i + 1; j < Math.min(i + 30, shiningDots.length); j++) {
+      // Neighbor scan optimized by spatial sorting
+      for (let j = i + 1; j < Math.min(i + 40, shiningDots.length); j++) {
         const d1 = shiningDots[i];
         const d2 = shiningDots[j];
         const dist = Math.sqrt(Math.pow(d1.left - d2.left, 2) + Math.pow((d1.top / 100 * MAP_HEIGHT) - (d2.top / 100 * MAP_HEIGHT), 2));
@@ -114,7 +116,7 @@ export default function TaskDoPage() {
             y1: `${d1.top}%`, 
             x2: d2.left, 
             y2: `${d2.top}%`, 
-            opacity: (1 - (dist / maxDist)) * 0.3 
+            opacity: (1 - (dist / maxDist)) * 0.6 
           });
         }
       }
@@ -227,22 +229,23 @@ export default function TaskDoPage() {
               className="absolute inset-0 bg-gradient-to-r from-[#0d120d] via-transparent to-[#0d120d] pointer-events-none" 
               style={{ width: totalMapWidth }}
             />
-
-            <svg className="absolute inset-0 pointer-events-none" style={{ width: totalMapWidth, height: '100%' }}>
-               {plexusLines.map(line => (
-                 <line 
-                   key={line.id} 
-                   x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} 
-                   stroke="var(--primary)" 
-                   strokeWidth="0.8" 
-                   className="animate-pulse"
-                   style={{ opacity: line.opacity }}
-                 />
-               ))}
-            </svg>
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
+                  {/* Plexus Layer Moved Inside Scroll Container for Sync */}
+                  <svg className="absolute inset-0 pointer-events-none will-change-transform" style={{ width: totalMapWidth, height: '100%' }}>
+                     {plexusLines.map(line => (
+                       <line 
+                         key={line.id} 
+                         x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} 
+                         stroke="var(--primary)" 
+                         strokeWidth="1.2" 
+                         className="animate-pulse"
+                         style={{ opacity: line.opacity }}
+                       />
+                     ))}
+                  </svg>
+
                   <svg className="absolute inset-0 w-full h-full pointer-events-none will-change-transform" style={{ minWidth: totalMapWidth }}>
                     <path d={tracePath} fill="none" stroke="rgba(255,215,0,0.06)" strokeWidth="8" strokeLinecap="round" />
                     <path 
