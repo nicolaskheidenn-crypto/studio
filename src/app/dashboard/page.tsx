@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from '@/components/Navigation';
@@ -313,7 +312,7 @@ export default function DashboardPage() {
 
     addDoc(collection(db, 'resources'), data)
       .then(() => {
-        if (resType === 'AI_Prompt' incrementPrompt(uid);
+        if (resType === 'AI_Prompt') incrementPrompt(uid);
         else if (resType === 'T&Triks') incrementTrick(uid);
         setResTitle(""); setResContent(""); setResCategory("General");
         toast({ title: "Strategic Resource Shared", description: "Global knowledge synchronization complete." });
