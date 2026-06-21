@@ -76,12 +76,22 @@ export default function AdminPage() {
   const { data: totalUsers = [] } = useCollection(usersRef);
   const { data: allRewards = [] } = useCollection(rewardsRef);
 
+  // Grouping Tasks for Organization
+  const groupedTasks = useMemo(() => {
+    const groups: Record<number, any[]> = {};
+    allTasks.forEach((task: any) => {
+      const d = task.day || 1;
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(task);
+    });
+    return Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b));
+  }, [allTasks]);
+
   // Sorting
   const shooppyProducts = useMemo(() => [...allProducts].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allProducts]);
   const newsPosts = useMemo(() => [...allNews].sort((a: any, b: any) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)), [allNews]);
   const activityWallData = useMemo(() => [...allActivity].sort((a: any, b: any) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)), [allActivity]);
   const webins = useMemo(() => allResources.filter((r: any) => r.type === 'WeBin').sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allResources]);
-  const globalTasks = useMemo(() => [...allTasks].sort((a: any, b: any) => (a.day || 0) - (b.day || 0)), [allTasks]);
   const globalQuizzes = useMemo(() => [...allQuizzes].sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [allQuizzes]);
   const globalRewards = useMemo(() => [...allRewards].sort((a: any, b: any) => (a.week || 0) - (b.week || 0)), [allRewards]);
 
@@ -230,10 +240,9 @@ export default function AdminPage() {
 
     operation
       .then(() => {
-        const wasEditing = !!editingWebin;
         setEditingWebin(null);
         setWebinTitle(""); setWebinContent("");
-        toast({ title: wasEditing ? "Portal Synchronized" : "Wedio Portal Deployed" });
+        toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
       })
       .catch(async (error: any) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'resources', operation: 'write', requestResourceData: data }));
@@ -530,34 +539,61 @@ export default function AdminPage() {
 
                 <div className="space-y-8">
                    <h3 className="text-2xl font-black uppercase italic text-primary">Deployed Routines</h3>
-                   <ScrollArea className="h-[600px]">
-                      <div className="space-y-4">
-                        {globalTasks.map(task => (
-                          <div key={task.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 space-y-4">
-                             {editingTask?.id === task.id ? (
-                               <div className="space-y-4">
-                                  <Input value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="bg-white text-[#1f1610] font-black" />
-                                  <Textarea value={editingTask.description} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="bg-white text-[#1f1610]" />
-                                  <div className="flex gap-4">
-                                    <Button size="sm" className="bg-[#1f1610] text-primary" onClick={() => handleUpdateTask(editingTask)}>SAVE</Button>
-                                    <Button size="sm" variant="ghost" onClick={() => setEditingTask(null)}>CANCEL</Button>
-                                  </div>
-                               </div>
-                             ) : (
-                               <div className="flex justify-between items-start">
-                                  <div className="space-y-1">
-                                     <div className="flex items-center gap-3">
-                                        <Badge className="bg-[#1f1610] text-primary">DAY {task.day}</Badge>
-                                        <h4 className="font-black text-[#1f1610] uppercase italic">{task.title}</h4>
+                   <ScrollArea className="h-[750px] pr-4">
+                      <div className="space-y-12">
+                        {groupedTasks.map(([day, tasks]) => (
+                          <div key={day} className="space-y-6">
+                            <div className="flex items-center gap-4">
+                               <Badge className="bg-primary text-[#1f1610] font-black uppercase px-6 h-8 rounded-full text-[10px] tracking-widest shadow-lg">HUB DAY {day}</Badge>
+                               <div className="h-0.5 flex-1 bg-primary/10" />
+                            </div>
+                            
+                            <div className="space-y-4">
+                              {tasks.map((task: any) => (
+                                <div key={task.id} className="p-8 bg-mocha-cream rounded-[2.5rem] shadow-xl border-4 border-primary/5 group hover:border-primary/20 transition-all">
+                                   {editingTask?.id === task.id ? (
+                                     <div className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                           <div className="space-y-2">
+                                              <Label className="text-[9px]">TITLE</Label>
+                                              <Input value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="h-14 bg-white text-[#1f1610] font-black" />
+                                           </div>
+                                           <div className="space-y-2">
+                                              <Label className="text-[9px]">DAY</Label>
+                                              <Input type="number" value={editingTask.day} onChange={e => setEditingTask({...editingTask, day: e.target.value})} className="h-14 bg-white text-[#1f1610] font-black" />
+                                           </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                           <Label className="text-[9px]">INSTRUCTIONS</Label>
+                                           <Textarea value={editingTask.description} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="bg-white text-[#1f1610] min-h-[100px]" />
+                                        </div>
+                                        <div className="flex gap-4">
+                                          <Button size="lg" className="flex-1 bg-[#1f1610] text-primary font-black rounded-full" onClick={() => handleUpdateTask(editingTask)}>SAVE CHANGES</Button>
+                                          <Button size="lg" variant="ghost" className="rounded-full" onClick={() => setEditingTask(null)}>CANCEL</Button>
+                                        </div>
                                      </div>
-                                     <p className="text-xs text-[#1f1610]/60 font-bold leading-relaxed">{task.description}</p>
-                                  </div>
-                                  <div className="flex gap-2">
-                                     <Button variant="ghost" size="icon" className="text-[#1f1610]/40 hover:text-primary" onClick={() => setEditingTask(task)}><Edit3 className="h-4 w-4" /></Button>
-                                     <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('tasks', task.id)}><Trash2 className="h-4 w-4" /></Button>
-                                  </div>
-                               </div>
-                             )}
+                                   ) : (
+                                     <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-6">
+                                           <div className="w-12 h-6 bg-[#1f1610] rounded-full shrink-0" />
+                                           <div className="space-y-1">
+                                              <h4 className="text-xl font-black text-[#1f1610] uppercase italic tracking-tight">{task.title}</h4>
+                                              <p className="text-xs text-[#1f1610]/60 font-bold leading-relaxed">{task.description}</p>
+                                           </div>
+                                        </div>
+                                        <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                           <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full text-[#1f1610]/20 hover:text-primary hover:bg-primary/5" onClick={() => setEditingTask(task)}>
+                                              <Edit3 className="h-5 w-5" />
+                                           </Button>
+                                           <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full text-red-500 hover:bg-red-500/5" onClick={() => handleDeleteDoc('tasks', task.id)}>
+                                              <Trash2 className="h-5 w-5" />
+                                           </Button>
+                                        </div>
+                                     </div>
+                                   )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
