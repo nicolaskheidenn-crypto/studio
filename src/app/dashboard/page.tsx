@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from '@/components/Navigation';
@@ -34,7 +35,7 @@ const DEFAULT_PROFILE: UserProfile = {
   streak: 0,
   currentTaskDay: 1,
   lastLogin: null,
-  createdAt: new Date().toISOString(),
+  createdAt: '2024-01-01T00:00:00.000Z',
   completedTaskIds: [],
   capsules: [],
   unlockedBadgeIds: [],
@@ -286,8 +287,8 @@ export default function DashboardPage() {
       category: resCategory,
       content: resContent,
       userId: uid,
-      nickname: nickname,
-      avatarUrl: avatarUrl,
+      nickname: nickname || 'Strategist',
+      avatarUrl: avatarUrl || '',
       timestamp: serverTimestamp()
     };
 
@@ -797,7 +798,7 @@ export default function DashboardPage() {
                                          </Badge>
                                          <span className="text-[9px] text-foreground/20 font-black uppercase tracking-widest">Shared: {r.timestamp?.toDate ? r.timestamp.toDate().toLocaleDateString() : 'Live Sync'}</span>
                                       </div>
-                                      <h4 className="text-3xl font-black text-foreground uppercase italic tracking-tight">{r.title}</h4>
+                                      <h4 className="text-3xl font-black text-foreground uppercase italic tracking-tight break-words leading-tight">{r.title}</h4>
                                       <div className="flex items-center gap-3">
                                          <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1 rounded-full flex items-center gap-2 overflow-hidden">
                                            {r.avatarUrl ? (
@@ -934,7 +935,7 @@ export default function DashboardPage() {
                                {comment.avatarUrl ? (
                                  <img src={comment.avatarUrl} className="w-full h-full object-cover" alt="" />
                                ) : (
-                                 <User className="h-5 w-5 text-primary" />
+                                 <User className="h-3 w-3" />
                                )}
                             </div>
                           </div>

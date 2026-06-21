@@ -185,7 +185,7 @@ const DEFAULT_PROFILE: UserProfile = {
   streak: 0,
   currentTaskDay: 1,
   lastLogin: null,
-  createdAt: new Date().toISOString(),
+  createdAt: '2024-01-01T00:00:00.000Z',
   completedTaskIds: [],
   capsules: [],
   unlockedBadgeIds: [],
