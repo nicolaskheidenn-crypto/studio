@@ -305,50 +305,6 @@ export default function AdminPage() {
       .finally(() => setIsSaving(false));
   };
 
-  const handleMoveProduct = (id: string, direction: 'up' | 'down') => {
-    if (isSaving) return;
-    const idx = shooppyProducts.findIndex(p => p.id === id);
-    if (idx === -1) return;
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= shooppyProducts.length) return;
-
-    const current = shooppyProducts[idx];
-    const target = shooppyProducts[targetIdx];
-    const doc1Ref = doc(db, 'shooppyProducts', current.id);
-    const doc2Ref = doc(db, 'shooppyProducts', target.id);
-
-    updateDoc(doc1Ref, { sortOrder: target.sortOrder ?? targetIdx }).catch(e => {});
-    updateDoc(doc2Ref, { sortOrder: current.sortOrder ?? idx }).catch(e => {});
-    toast({ title: "Inventory Reorganized" });
-  };
-
-  const handleMoveWebin = (id: string, direction: 'up' | 'down') => {
-    if (isSaving) return;
-    const idx = webins.findIndex(w => w.id === id);
-    if (idx === -1) return;
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= webins.length) return;
-
-    const current = webins[idx];
-    const target = webins[targetIdx];
-    const doc1Ref = doc(db, 'resources', current.id);
-    const doc2Ref = doc(db, 'resources', target.id);
-
-    updateDoc(doc1Ref, { sortOrder: target.sortOrder ?? targetIdx }).catch(e => {});
-    updateDoc(doc2Ref, { sortOrder: current.sortOrder ?? idx }).catch(e => {});
-    toast({ title: "Portal Grid Reordered" });
-  };
-
-  const handleDispatchBroadcast = () => {
-    if (isSaving || !newsTitle) return;
-    setIsSaving(true);
-    const data = { title: newsTitle, content: newsContent, imageUrl: newsImg, timestamp: serverTimestamp() };
-    addDoc(collection(db, 'newsPosts'), data)
-      .then(() => { setNewsTitle(""); setNewsContent(""); setNewsImg(""); toast({ title: "Broadcast Dispatched" }); })
-      .catch(async (e) => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data })))
-      .finally(() => setIsSaving(false));
-  };
-
   const handleSaveQuiz = () => {
     if (isSaving || !quizTitle) return;
     setIsSaving(true);
@@ -358,6 +314,30 @@ export default function AdminPage() {
       .then(() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); setCurrentQIdx(0); toast({ title: "Quiz Synchronized" }); })
       .catch(async (error: any) => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'quizzes', operation: 'write', requestResourceData: data })))
       .finally(() => setIsSaving(false));
+  };
+
+  const handleAddQuestionSlot = () => {
+    setDraftQuestions([...draftQuestions, { 
+      id: Math.random().toString(36).substr(2, 9), 
+      type: 'multiple', 
+      question: "", 
+      answer: "", 
+      options: ["", "", "", ""] 
+    }]);
+    setCurrentQIdx(draftQuestions.length);
+  };
+
+  const handleDeleteQuestion = (id: string) => {
+    if (draftQuestions.length === 1) return;
+    const newQs = draftQuestions.filter(q => q.id !== id);
+    setDraftQuestions(newQs);
+    setCurrentQIdx(Math.max(0, currentQIdx - 1));
+  };
+
+  const handleUpdateQuestion = (index: number, data: Partial<QuizQuestion>) => {
+    const newQs = [...draftQuestions];
+    newQs[index] = { ...newQs[index], ...data };
+    setDraftQuestions(newQs);
   };
 
   const handleSaveBulkTasks = async () => {
@@ -408,13 +388,6 @@ export default function AdminPage() {
     );
   }
 
-  const tasksByDay = globalTasks.reduce((acc: any, task: any) => {
-    const day = task.day;
-    if (!acc[day]) acc[day] = [];
-    acc[day].push(task);
-    return acc;
-  }, {});
-
   return (
     <div className="min-h-screen flex flex-col bg-[#1f1610]">
       <Navigation />
@@ -463,7 +436,6 @@ export default function AdminPage() {
             <TabsTrigger value="rewards" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Rewards</TabsTrigger>
             <TabsTrigger value="quizzo" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Quizzo</TabsTrigger>
             <TabsTrigger value="maintenance" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Continuity</TabsTrigger>
-            <TabsTrigger value="system" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tasks" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -737,6 +709,168 @@ export default function AdminPage() {
                  </div>
                </ScrollArea>
              </div>
+          </TabsContent>
+
+          <TabsContent value="quizzo" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
+             <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl space-y-12">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <BookOpen className="h-10 w-10 text-[#1f1610]" />
+                    <h2 className="text-4xl font-black uppercase italic text-[#1f1610] tracking-tighter">QUIZZO PROTOCOL ARCHITECT</h2>
+                  </div>
+                  <Button 
+                    onClick={handleSaveQuiz} 
+                    disabled={isSaving}
+                    className="rounded-full h-16 px-12 bg-[#1f1610] text-primary font-black text-lg uppercase shadow-2xl"
+                  >
+                    {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : 'DEPLOY QUIZ'}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+                  <div className="lg:col-span-2 space-y-12">
+                    <div className="space-y-4">
+                      <Label className="text-[#1f1610] text-[10px] font-black uppercase tracking-[0.3em]">PROTOCOL TITLE</Label>
+                      <Input 
+                        placeholder="Verification Level 01" 
+                        value={quizTitle} 
+                        onChange={e => setQuizTitle(e.target.value)} 
+                        className="h-20 bg-[#1f1610]/5 border-4 border-[#1f1610]/10 rounded-[1.5rem] px-8 text-2xl font-black text-[#1f1610]" 
+                      />
+                    </div>
+
+                    {/* Question Constructor Card */}
+                    <div className="bg-[#1f1610]/5 p-12 rounded-[3.5rem] border-4 border-[#1f1610]/5 space-y-10 relative">
+                       <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-[#1f1610] rounded-xl flex items-center justify-center text-primary font-black">{currentQIdx + 1}</div>
+                            <span className="text-[#1f1610] font-black uppercase text-xs tracking-widest">CONSTRUCTING QUESTION</span>
+                         </div>
+                         <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-red-500 hover:bg-red-500/10" 
+                            onClick={() => handleDeleteQuestion(draftQuestions[currentQIdx].id)}
+                            disabled={draftQuestions.length === 1}
+                         >
+                           <Trash2 className="h-6 w-6" />
+                         </Button>
+                       </div>
+
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          <select 
+                            className="h-16 bg-[#1f1610] border-none rounded-2xl px-6 text-primary font-black uppercase text-[10px] tracking-widest"
+                            value={draftQuestions[currentQIdx].type}
+                            onChange={e => handleUpdateQuestion(currentQIdx, { type: e.target.value as any })}
+                          >
+                            <option value="multiple">MULTIPLE CHOICE</option>
+                            <option value="boolean">TRUE / FALSE</option>
+                            <option value="id">PROTOCOL ID</option>
+                          </select>
+                          <Input 
+                            placeholder="Question text..." 
+                            className="md:col-span-2 h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-bold text-[#1f1610]"
+                            value={draftQuestions[currentQIdx].question}
+                            onChange={e => handleUpdateQuestion(currentQIdx, { question: e.target.value })}
+                          />
+                       </div>
+
+                       {draftQuestions[currentQIdx].type === 'multiple' && (
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {draftQuestions[currentQIdx].options?.map((opt, optIdx) => (
+                              <div key={optIdx} className="relative">
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-[#1f1610]/20 text-xs">{optIdx + 1}</span>
+                                <Input 
+                                  placeholder={`Option ${optIdx + 1}`} 
+                                  className="h-16 pl-12 bg-white border-4 border-[#1f1610]/10 rounded-2xl font-bold text-[#1f1610]"
+                                  value={opt}
+                                  onChange={e => {
+                                    const newOpts = [...(draftQuestions[currentQIdx].options || [])];
+                                    newOpts[optIdx] = e.target.value;
+                                    handleUpdateQuestion(currentQIdx, { options: newOpts });
+                                  }}
+                                />
+                              </div>
+                            ))}
+                         </div>
+                       )}
+
+                       <div className="space-y-4">
+                          <Label className="text-[#1f1610] text-[10px]">CORRECT STRATEGIC RESPONSE</Label>
+                          <select 
+                            className="w-full h-16 bg-[#1f1610] border-none rounded-2xl px-8 text-primary font-black uppercase text-sm tracking-widest"
+                            value={draftQuestions[currentQIdx].answer}
+                            onChange={e => handleUpdateQuestion(currentQIdx, { answer: e.target.value })}
+                          >
+                            <option value="">SELECT CORRECT ANSWER</option>
+                            {draftQuestions[currentQIdx].type === 'multiple' ? (
+                              draftQuestions[currentQIdx].options?.map((opt, idx) => opt && <option key={idx} value={opt}>{opt}</option>)
+                            ) : draftQuestions[currentQIdx].type === 'boolean' ? (
+                              <>
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                              </>
+                            ) : (
+                              <option value={draftQuestions[currentQIdx].answer}>{draftQuestions[currentQIdx].answer || 'Custom ID (Manual entry)'}</option>
+                            )}
+                          </select>
+                          {draftQuestions[currentQIdx].type === 'id' && (
+                            <Input 
+                              placeholder="Enter correct ID string..." 
+                              className="h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black text-[#1f1610]"
+                              value={draftQuestions[currentQIdx].answer}
+                              onChange={e => handleUpdateQuestion(currentQIdx, { answer: e.target.value })}
+                            />
+                          )}
+                       </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-12">
+                    <div className="space-y-4">
+                       <Label className="text-[#1f1610] text-[10px]">PROTOCOL LAYOUT ({draftQuestions.length})</Label>
+                       <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 scrollbar-hide">
+                         {draftQuestions.map((q, idx) => (
+                           <button 
+                             key={q.id} 
+                             onClick={() => setCurrentQIdx(idx)}
+                             className={cn(
+                               "w-full p-6 rounded-2xl border-4 transition-all flex items-center justify-between group",
+                               idx === currentQIdx ? "bg-[#1f1610] border-primary text-primary shadow-xl" : "bg-white border-[#1f1610]/10 text-[#1f1610]/40"
+                             )}
+                           >
+                             <span className="font-black text-xs uppercase tracking-tighter truncate max-w-[150px]">
+                               {q.question || `UNTITLED SLOT ${idx + 1}`}
+                             </span>
+                             <ChevronRight className={cn("h-4 w-4", idx === currentQIdx ? "text-primary" : "text-[#1f1610]/10")} />
+                           </button>
+                         ))}
+                       </div>
+                    </div>
+
+                    <Button 
+                      onClick={handleAddQuestionSlot} 
+                      className="w-full h-20 rounded-[1.5rem] bg-primary text-[#1f1610] font-black uppercase text-xs tracking-widest shadow-xl hover:scale-105 transition-all"
+                    >
+                      + ADD PROTOCOL SLOT
+                    </Button>
+                  </div>
+                </div>
+             </Card>
+
+             <ScrollArea className="h-[400px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {globalQuizzes.map(q => (
+                    <Card key={q.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex justify-between items-center group">
+                       <div className="space-y-1">
+                          <h4 className="font-black text-[#1f1610] uppercase italic tracking-tight">{q.title}</h4>
+                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest">{q.questionCount} PROTOCOLS</p>
+                       </div>
+                       <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('quizzes', q.id)}><Trash2 /></Button>
+                    </Card>
+                  ))}
+                </div>
+             </ScrollArea>
           </TabsContent>
 
           <TabsContent value="maintenance" className="space-y-12">
