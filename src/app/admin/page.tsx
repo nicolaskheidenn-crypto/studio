@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -57,12 +56,12 @@ export default function AdminPage() {
   const [rewardSourceType, setRewardSourceType] = useState<'Link' | 'File'>('Link');
   const [newsSourceType, setNewsSourceType] = useState<'Link' | 'File'>('Link');
 
-  // Simplified Queries for Prototyping Robustness
+  // Queries
   const productsRef = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const newsRef = useMemo(() => collection(db, 'newsPosts'), [db]);
   const faqsRef = useMemo(() => collection(db, 'faqs'), [db]);
   const activityRef = useMemo(() => collection(db, 'activityWall'), [db]);
-  const webinRef = useMemo(() => query(collection(db, 'resources'), where('type', '==', 'WeBin')), [db]);
+  const resourcesRef = useMemo(() => collection(db, 'resources'), [db]);
   const tasksRef = useMemo(() => collection(db, 'tasks'), [db]);
   const quizzesRef = useMemo(() => collection(db, 'quizzes'), [db]);
   const usersRef = useMemo(() => collection(db, 'users'), [db]);
@@ -71,17 +70,17 @@ export default function AdminPage() {
   const { data: allProducts = [] } = useCollection(productsRef);
   const { data: allNews = [] } = useCollection(newsRef);
   const { data: allActivity = [] } = useCollection(activityRef);
-  const { data: allWebins = [] } = useCollection(webinRef);
+  const { data: allResources = [] } = useCollection(resourcesRef);
   const { data: allTasks = [] } = useCollection(tasksRef);
   const { data: allQuizzes = [] } = useCollection(quizzesRef);
   const { data: totalUsers = [] } = useCollection(usersRef);
   const { data: allRewards = [] } = useCollection(rewardsRef);
 
-  // Client-Side Sorting
+  // Sorting
   const shooppyProducts = useMemo(() => [...allProducts].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allProducts]);
   const newsPosts = useMemo(() => [...allNews].sort((a: any, b: any) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)), [allNews]);
   const activityWallData = useMemo(() => [...allActivity].sort((a: any, b: any) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)), [allActivity]);
-  const webins = useMemo(() => [...allWebins].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allWebins]);
+  const webins = useMemo(() => allResources.filter((r: any) => r.type === 'WeBin').sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0)), [allResources]);
   const globalTasks = useMemo(() => [...allTasks].sort((a: any, b: any) => (a.day || 0) - (b.day || 0)), [allTasks]);
   const globalQuizzes = useMemo(() => [...allQuizzes].sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)), [allQuizzes]);
   const globalRewards = useMemo(() => [...allRewards].sort((a: any, b: any) => (a.week || 0) - (b.week || 0)), [allRewards]);
@@ -117,6 +116,7 @@ export default function AdminPage() {
 
   const [taskDay, setTaskDay] = useState(1);
   const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: '1', title: "", description: "" }]);
+  const [editingTask, setEditingTask] = useState<any>(null);
 
   const [rewardWeek, setRewardWeek] = useState(1);
   const [rewardTitle, setRewardWeekTitle] = useState("");
@@ -324,12 +324,32 @@ export default function AdminPage() {
     setIsSaving(true);
     try {
       for (const task of tasksToSave) {
-        await addDoc(collection(db, 'tasks'), { day: Number(taskDay), title: task.title, description: task.description, createdAt: serverTimestamp() });
+        await addDoc(collection(db, 'tasks'), { 
+          day: Number(taskDay), 
+          title: task.title, 
+          description: task.description, 
+          createdAt: serverTimestamp() 
+        });
       }
       setBulkDraftTasks([{ id: '1', title: "", description: "" }]);
       toast({ title: "Sovereign Routines Deployed" });
     } catch (e) { toast({ title: "Injection Failure", variant: "destructive" }); }
     finally { setIsSaving(false); }
+  };
+
+  const handleUpdateTask = (task: any) => {
+    if (isSaving || !task.title) return;
+    setIsSaving(true);
+    updateDoc(doc(db, 'tasks', task.id), {
+      title: task.title,
+      description: task.description,
+      day: Number(task.day)
+    })
+    .then(() => {
+      setEditingTask(null);
+      toast({ title: "Protocol Synchronized" });
+    })
+    .finally(() => setIsSaving(false));
   };
 
   const handleDeleteDoc = (coll: string, id: string) => {
@@ -475,37 +495,75 @@ export default function AdminPage() {
           </TabsList>
 
           <TabsContent value="tasks" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
-             <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl space-y-12">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-4xl font-black uppercase italic text-[#1f1610]">Routine Injector</CardTitle>
-                  <div className="flex items-center gap-6">
-                    <Label className="text-[#1f1610] text-xs">HUB DAY</Label>
-                    <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" />
-                  </div>
-                </div>
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl space-y-12">
+                   <div className="flex items-center justify-between">
+                     <CardTitle className="text-4xl font-black uppercase italic text-[#1f1610]">Routine Injector</CardTitle>
+                     <div className="flex items-center gap-6">
+                       <Label className="text-[#1f1610] text-xs">HUB DAY</Label>
+                       <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" />
+                     </div>
+                   </div>
 
-                <div className="space-y-8">
-                  {bulkDraftTasks.map((task, idx) => (
-                    <div key={task.id} className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                       <div className="md:col-span-1 space-y-2">
-                          <Label className="text-[#1f1610] text-[9px]">HEADLINE</Label>
-                          <Input placeholder="Routine name..." value={task.title} onChange={e => setBulkDraftTasks(prev => prev.map(t => t.id === task.id ? {...t, title: e.target.value} : t))} className="h-16 bg-white text-[#1f1610] font-black" />
-                       </div>
-                       <div className="md:col-span-2 space-y-2">
-                          <Label className="text-[#1f1610] text-[9px]">INSTRUCTIONS</Label>
-                          <div className="flex gap-4">
-                            <Input placeholder="Step details..." value={task.description} onChange={e => setBulkDraftTasks(prev => prev.map(t => t.id === task.id ? {...t, description: e.target.value} : t))} className="h-16 bg-white text-[#1f1610] font-bold" />
-                            <Button variant="ghost" size="icon" className="h-16 w-16 text-red-500" onClick={() => setBulkDraftTasks(prev => prev.filter(t => t.id !== task.id))} disabled={bulkDraftTasks.length === 1}><X /></Button>
+                   <div className="space-y-8">
+                     {bulkDraftTasks.map((task, idx) => (
+                       <div key={task.id} className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                          <div className="md:col-span-1 space-y-2">
+                             <Label className="text-[#1f1610] text-[9px]">HEADLINE</Label>
+                             <Input placeholder="Routine name..." value={task.title} onChange={e => setBulkDraftTasks(prev => prev.map(t => t.id === task.id ? {...t, title: e.target.value} : t))} className="h-16 bg-white text-[#1f1610] font-black" />
+                          </div>
+                          <div className="md:col-span-2 space-y-2">
+                             <Label className="text-[#1f1610] text-[9px]">INSTRUCTIONS</Label>
+                             <div className="flex gap-4">
+                               <Input placeholder="Step details..." value={task.description} onChange={e => setBulkDraftTasks(prev => prev.map(t => t.id === task.id ? {...t, description: e.target.value} : t))} className="h-16 bg-white text-[#1f1610] font-bold" />
+                               <Button variant="ghost" size="icon" className="h-16 w-16 text-red-500" onClick={() => setBulkDraftTasks(prev => prev.filter(t => t.id !== task.id))} disabled={bulkDraftTasks.length === 1}><X /></Button>
+                             </div>
                           </div>
                        </div>
-                    </div>
-                  ))}
-                  <div className="flex gap-6">
-                    <Button onClick={() => setBulkDraftTasks([...bulkDraftTasks, { id: Math.random().toString(36), title: "", description: "" }])} variant="outline" className="flex-1 h-20 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black">ADD SLOT</Button>
-                    <Button onClick={handleSaveBulkTasks} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black" disabled={isSaving}>INJECT PROTOCOLS</Button>
-                  </div>
+                     ))}
+                     <div className="flex gap-6">
+                       <Button onClick={() => setBulkDraftTasks([...bulkDraftTasks, { id: Math.random().toString(36), title: "", description: "" }])} variant="outline" className="flex-1 h-20 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black">ADD SLOT</Button>
+                       <Button onClick={handleSaveBulkTasks} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black" disabled={isSaving}>INJECT PROTOCOLS</Button>
+                     </div>
+                   </div>
+                </Card>
+
+                <div className="space-y-8">
+                   <h3 className="text-2xl font-black uppercase italic text-primary">Deployed Routines</h3>
+                   <ScrollArea className="h-[600px]">
+                      <div className="space-y-4">
+                        {globalTasks.map(task => (
+                          <div key={task.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 space-y-4">
+                             {editingTask?.id === task.id ? (
+                               <div className="space-y-4">
+                                  <Input value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="bg-white text-[#1f1610] font-black" />
+                                  <Textarea value={editingTask.description} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="bg-white text-[#1f1610]" />
+                                  <div className="flex gap-4">
+                                    <Button size="sm" className="bg-[#1f1610] text-primary" onClick={() => handleUpdateTask(editingTask)}>SAVE</Button>
+                                    <Button size="sm" variant="ghost" onClick={() => setEditingTask(null)}>CANCEL</Button>
+                                  </div>
+                               </div>
+                             ) : (
+                               <div className="flex justify-between items-start">
+                                  <div className="space-y-1">
+                                     <div className="flex items-center gap-3">
+                                        <Badge className="bg-[#1f1610] text-primary">DAY {task.day}</Badge>
+                                        <h4 className="font-black text-[#1f1610] uppercase italic">{task.title}</h4>
+                                     </div>
+                                     <p className="text-xs text-[#1f1610]/60 font-bold leading-relaxed">{task.description}</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                     <Button variant="ghost" size="icon" className="text-[#1f1610]/40 hover:text-primary" onClick={() => setEditingTask(task)}><Edit3 className="h-4 w-4" /></Button>
+                                     <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('tasks', task.id)}><Trash2 className="h-4 w-4" /></Button>
+                                  </div>
+                               </div>
+                             )}
+                          </div>
+                        ))}
+                      </div>
+                   </ScrollArea>
                 </div>
-             </Card>
+             </div>
           </TabsContent>
 
           <TabsContent value="assets" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -912,7 +970,10 @@ export default function AdminPage() {
           <TabsContent value="dispatch" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Broadcast Dispatcher</CardTitle>
+                <div className="flex items-center gap-6">
+                   <Newspaper className="h-10 w-10 text-[#1f1610]" />
+                   <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Broadcast Dispatcher</CardTitle>
+                </div>
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="text-[#1f1610]">Broadcast Title</Label>
@@ -961,21 +1022,43 @@ export default function AdminPage() {
                 </div>
               </Card>
 
-              <div className="space-y-8">
-                <h3 className="text-2xl font-black uppercase italic text-primary">Live Activity Moderation</h3>
-                <ScrollArea className="h-[600px]">
-                  <div className="space-y-4">
-                    {activityWallData.map(post => (
-                      <div key={post.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
-                        <div>
-                          <h4 className="font-black text-[#1f1610] uppercase italic">@{post.nickname}</h4>
-                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest line-clamp-1">{post.description}</p>
-                        </div>
-                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('activityWall', post.id)}><Trash2 /></Button>
+              <div className="space-y-12">
+                 <div className="space-y-4">
+                    <h3 className="text-2xl font-black uppercase italic text-primary">Deployed Broadcasts</h3>
+                    <ScrollArea className="h-[400px]">
+                      <div className="space-y-4">
+                        {newsPosts.map(post => (
+                          <div key={post.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center group">
+                            <div className="flex gap-4 items-center">
+                               {post.imageUrl && <img src={post.imageUrl} className="h-12 w-12 rounded-xl object-cover border-2 border-[#1f1610]/10" alt="" />}
+                               <div>
+                                  <h4 className="font-black text-[#1f1610] uppercase italic leading-none">{post.title}</h4>
+                                  <p className="text-[9px] font-black text-[#1f1610]/40 uppercase tracking-widest mt-1">DISPATCHED: {post.timestamp?.toDate ? post.timestamp.toDate().toLocaleDateString() : 'RECENT'}</p>
+                               </div>
+                            </div>
+                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('newsPosts', post.id)}><Trash2 /></Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+                    </ScrollArea>
+                 </div>
+
+                 <div className="space-y-4">
+                    <h3 className="text-2xl font-black uppercase italic text-primary">Live Activity Moderation</h3>
+                    <ScrollArea className="h-[400px]">
+                      <div className="space-y-4">
+                        {activityWallData.map(post => (
+                          <div key={post.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
+                            <div>
+                              <h4 className="font-black text-[#1f1610] uppercase italic">@{post.nickname}</h4>
+                              <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest line-clamp-1">{post.description}</p>
+                            </div>
+                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('activityWall', post.id)}><Trash2 /></Button>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                 </div>
               </div>
             </div>
           </TabsContent>
