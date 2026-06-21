@@ -345,27 +345,27 @@ export default function QuizPage() {
         </div>
       )}
 
-      {/* UNPASSABLE ANTI-CHEAT MODAL */}
+      {/* UNPASSABLE ANTI-CHEAT MODAL - Optimized for Laptop/Zoom */}
       {cheatTriggered && (
         <div className="fixed inset-0 z-[200] bg-[#1f1610] flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1),transparent)]" />
           
-          <div className="relative space-y-12 max-w-5xl w-full">
+          <div className="relative space-y-8 max-w-4xl w-full">
             <div className="relative w-fit mx-auto">
               <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse rounded-full" />
-              <AlertTriangle className="h-32 w-32 md:h-40 md:w-40 text-primary animate-bounce relative z-10" />
+              <AlertTriangle className="h-24 w-24 md:h-32 md:w-32 text-primary animate-bounce relative z-10" />
             </div>
             
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-8xl font-headline font-black mb-2 uppercase tracking-[0.1em] italic leading-none text-primary">
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-6xl font-headline font-black mb-2 uppercase tracking-[0.1em] italic leading-none text-primary">
                 SECURITY ALERT
               </h1>
-              <p className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">
+              <p className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">
                 Cheating Detected! You left the quiz screen.
               </p>
             </div>
 
-            <p className="text-lg md:text-xl text-[#fdfaf6]/60 font-black uppercase tracking-[0.4em] max-w-3xl mx-auto leading-relaxed italic">
+            <p className="text-sm md:text-base text-[#fdfaf6]/60 font-black uppercase tracking-[0.4em] max-w-2xl mx-auto leading-relaxed italic">
               Integrity breach recorded. The protocol has been suspended. <br/>
               <span className="text-primary">Manual re-initialization required.</span>
             </p>
@@ -373,9 +373,9 @@ export default function QuizPage() {
             <Button 
               onClick={handleHardRestart} 
               disabled={isProcessingResult}
-              className="mt-12 rounded-full h-24 px-20 bg-primary text-[#1f1610] font-black text-3xl uppercase shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-110 active:scale-95 transition-all border-8 border-white/20"
+              className="mt-10 rounded-full h-20 px-16 bg-primary text-[#1f1610] font-black text-xl uppercase shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-110 active:scale-95 transition-all border-4 md:border-8 border-white/20"
             >
-              {isProcessingResult ? <Loader2 className="h-10 w-10 animate-spin" /> : "Restart Quiz"}
+              {isProcessingResult ? <Loader2 className="h-8 w-8 animate-spin" /> : "Restart Quiz"}
             </Button>
           </div>
         </div>
