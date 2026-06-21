@@ -98,20 +98,16 @@ export default function DashboardPage() {
   const { data: faqs = [] } = useCollection(faqsQuery);
   
   const [showDaily, setShowDaily] = useState(false);
-  const [showRewardModal, setShowRewardModal] = useState(false);
   const [activeTab, setActiveTab] = useState('hub');
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
   const [postText, setPostText] = useState("");
-  const [postImages, setPostImages] = useState<string[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [isAcquiring, setIsAcquiring] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
   const [isSharingResource, setIsSharingResource] = useState(false);
   const [isHearting, setIsHearting] = useState<Record<string, boolean>>({});
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedPostForInsights, setSelectedPostForInsights] = useState<any>(null);
   const [insightInput, setInsightInput] = useState("");
@@ -186,20 +182,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    
-    const limitedFiles = files.slice(0, 6);
-    limitedFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPostImages(prev => [...prev, reader.result as string].slice(0, 6));
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleDispatchWin = () => {
     if (!postText.trim() || !uid || isPosting) return;
     setIsPosting(true);
@@ -209,7 +191,7 @@ export default function DashboardPage() {
       nickname: nickname,
       avatarUrl: avatarUrl,
       description: postText,
-      images: postImages,
+      images: [],
       isPrivate: false,
       timestamp: serverTimestamp(),
       hearts: 0,
@@ -220,7 +202,6 @@ export default function DashboardPage() {
       .then(() => {
         addPoints(uid, 20);
         setPostText("");
-        setPostImages([]);
         toast({ title: "Sovereign Win Dispatched", description: "Gains boosted by growth multiplier." });
       })
       .catch(async (error: any) => {
@@ -433,27 +414,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {postImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-6 pl-32">
-                    {postImages.map((img, i) => (
-                      <div key={i} className="relative aspect-square rounded-[2rem] overflow-hidden group border-4 border-primary/20 shadow-xl">
-                        <img src={img} className="w-full h-full object-cover" alt="Post" />
-                        <button disabled={isPosting} onClick={() => setPostImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-4 right-4 bg-black/80 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-5 w-5" /></button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center pl-32 mt-4">
-                   <Button 
-                    variant="ghost" 
-                    className="text-primary hover:text-primary/70 rounded-full font-black text-[12px] uppercase tracking-[0.2em] gap-4" 
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isPosting}
-                   >
-                    <Plus className="h-8 w-8" /> GALLERY (1-6)
-                   </Button>
-                   <input type="file" min={1} max={6} ref={fileInputRef} hidden multiple accept="image/*" onChange={handleFileChange} />
+                <div className="flex justify-end items-center mt-4">
                    <Button 
                     onClick={handleDispatchWin} 
                     disabled={isPosting || !postText.trim()}
@@ -510,19 +471,6 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="p-12 pt-0 space-y-10">
                        <p className="text-3xl font-black text-foreground leading-tight tracking-tight uppercase italic whitespace-pre-wrap">{post.description}</p>
-                       
-                       {post.images?.length > 0 && (
-                         <div className={cn("grid gap-6", post.images.length === 1 ? "grid-cols-1" : post.images.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
-                           {post.images.map((img: string, i: number) => (
-                             <img 
-                               key={i} 
-                               src={img} 
-                               className="w-full h-[450px] object-cover rounded-[3.5rem] shadow-2xl border-4 border-primary/20 hover:scale-[1.02] transition-transform duration-700" 
-                               alt="Activity" 
-                             />
-                           ))}
-                         </div>
-                       )}
                        
                        <div className="flex items-center gap-10 pt-10 border-t-4 border-primary/5">
                           <Button 
@@ -767,7 +715,7 @@ export default function DashboardPage() {
                             disabled={isSharingResource}
                          >
                             <option value="AI_Prompt">AI PROMPT LAB</option>
-                            <option value="T&TRIKS ARCHIVE">T&TRIKS ARCHIVE</option>
+                            <option value="T&Triks">T&TRIKS ARCHIVE</option>
                          </select>
                       </div>
 
