@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, 
@@ -44,6 +43,7 @@ export default function AdminPage() {
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   
   // Queries
   const productsRef = useMemo(() => collection(db, 'shooppyProducts'), [db]);
@@ -105,14 +105,12 @@ export default function AdminPage() {
   const [newsImg, setNewsImg] = useState("");
 
   const [quizTitle, setQuizTitle] = useState("");
-  const [draftQuestions, setDraftQuestions] = useState<QuizQuestion[]>([
-    { id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }
-  ]);
+  const [draftQuestions, setDraftQuestions] = useState<QuizQuestion[]>([]);
   const [currentQIdx, setCurrentQIdx] = useState(0);
   const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
 
   const [taskDay, setTaskDay] = useState(1);
-  const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: '1', title: "", description: "" }]);
+  const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: 'init-1', title: "", description: "" }]);
   const [editingTask, setEditingTask] = useState<any>(null);
 
   const [rewardWeek, setRewardWeek] = useState(7);
@@ -125,6 +123,15 @@ export default function AdminPage() {
   const [faqQuestion, setFaqQuestion] = useState("");
   const [faqAnswer, setFaqAnswer] = useState("");
   const [editingFaq, setEditingFaq] = useState<any>(null);
+
+  // Initialize hydration-safe IDs
+  useEffect(() => {
+    setIsHydrated(true);
+    setDraftQuestions([
+      { id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }
+    ]);
+    setBulkDraftTasks([{ id: Math.random().toString(36), title: "", description: "" }]);
+  }, []);
 
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +149,7 @@ export default function AdminPage() {
     const data = {
       title: prodTitle,
       description: prodDesc,
-      imageUrl: "", // Removed image support as per request
+      imageUrl: "", 
       fileUrl: prodFile, 
       type: prodType,
       placement: prodPlacement,
@@ -249,7 +256,13 @@ export default function AdminPage() {
     const data = { title: quizTitle, questionCount: draftQuestions.length, questions: draftQuestions, createdAt: serverTimestamp() };
     const operation = editingQuizId ? updateDoc(doc(db, 'quizzes', editingQuizId), data) : addDoc(collection(db, 'quizzes'), data);
     operation
-      .then(() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); setCurrentQIdx(0); toast({ title: "Quiz Synchronized" }); })
+      .then(() => { 
+        setEditingQuizId(null); 
+        setQuizTitle(""); 
+        setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); 
+        setCurrentQIdx(0); 
+        toast({ title: "Quiz Synchronized" }); 
+      })
       .catch(async (error: any) => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'quizzes', operation: 'write', requestResourceData: data })))
       .finally(() => setIsSaving(false));
   };
@@ -317,7 +330,7 @@ export default function AdminPage() {
           createdAt: serverTimestamp() 
         });
       }
-      setBulkDraftTasks([{ id: '1', title: "", description: "" }]);
+      setBulkDraftTasks([{ id: Math.random().toString(36), title: "", description: "" }]);
       toast({ title: "Sovereign Routines Deployed" });
     } catch (e) { toast({ title: "Injection Failure", variant: "destructive" }); }
     finally { setIsSaving(false); }
@@ -399,6 +412,8 @@ export default function AdminPage() {
     };
     reader.readAsText(file);
   };
+
+  if (!isHydrated) return null;
 
   if (user?.email !== ADMIN_EMAIL) {
     return (
@@ -784,90 +799,92 @@ export default function AdminPage() {
                     </div>
 
                     {/* Question Constructor Card */}
-                    <div className="bg-[#1f1610]/5 p-12 rounded-[3.5rem] border-4 border-[#1f1610]/5 space-y-10 relative">
-                       <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-[#1f1610] rounded-xl flex items-center justify-center text-primary font-black">{currentQIdx + 1}</div>
-                            <span className="text-[#1f1610] font-black uppercase text-xs tracking-widest">CONSTRUCTING QUESTION</span>
-                         </div>
-                         <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-red-500 hover:bg-red-500/10" 
-                            onClick={() => handleDeleteQuestion(draftQuestions[currentQIdx].id)}
-                            disabled={draftQuestions.length === 1}
-                         >
-                           <Trash2 className="h-6 w-6" />
-                         </Button>
-                       </div>
-
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          <select 
-                            className="h-16 bg-[#1f1610] border-none rounded-2xl px-6 text-primary font-black uppercase text-[10px] tracking-widest"
-                            value={draftQuestions[currentQIdx].type}
-                            onChange={e => handleUpdateQuestion(currentQIdx, { type: e.target.value as any })}
+                    {draftQuestions.length > 0 && (
+                      <div className="bg-[#1f1610]/5 p-12 rounded-[3.5rem] border-4 border-[#1f1610]/5 space-y-10 relative">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-[#1f1610] rounded-xl flex items-center justify-center text-primary font-black">{currentQIdx + 1}</div>
+                              <span className="text-[#1f1610] font-black uppercase text-xs tracking-widest">CONSTRUCTING QUESTION</span>
+                          </div>
+                          <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-red-500 hover:bg-red-500/10" 
+                              onClick={() => handleDeleteQuestion(draftQuestions[currentQIdx].id)}
+                              disabled={draftQuestions.length === 1}
                           >
-                            <option value="multiple">MULTIPLE CHOICE</option>
-                            <option value="boolean">TRUE / FALSE</option>
-                            <option value="id">PROTOCOL ID</option>
-                          </select>
-                          <Input 
-                            placeholder="Question text..." 
-                            className="md:col-span-2 h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-bold text-[#1f1610]"
-                            value={draftQuestions[currentQIdx].question}
-                            onChange={e => handleUpdateQuestion(currentQIdx, { question: e.target.value })}
-                          />
-                       </div>
+                            <Trash2 className="h-6 w-6" />
+                          </Button>
+                        </div>
 
-                       {draftQuestions[currentQIdx].type === 'multiple' && (
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {draftQuestions[currentQIdx].options?.map((opt, optIdx) => (
-                              <div key={optIdx} className="relative">
-                                <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-[#1f1610]/20 text-xs">{optIdx + 1}</span>
-                                <Input 
-                                  placeholder={`Option ${optIdx + 1}`} 
-                                  className="h-16 pl-12 bg-white border-4 border-[#1f1610]/10 rounded-2xl font-bold text-[#1f1610]"
-                                  value={opt}
-                                  onChange={e => {
-                                    const newOpts = [...(draftQuestions[currentQIdx].options || [])];
-                                    newOpts[optIdx] = e.target.value;
-                                    handleUpdateQuestion(currentQIdx, { options: newOpts });
-                                  }}
-                                />
-                              </div>
-                            ))}
-                         </div>
-                       )}
-
-                       <div className="space-y-4">
-                          <Label className="text-[#1f1610] text-[10px]">CORRECT STRATEGIC RESPONSE</Label>
-                          <select 
-                            className="w-full h-16 bg-[#1f1610] border-none rounded-2xl px-8 text-primary font-black uppercase text-sm tracking-widest"
-                            value={draftQuestions[currentQIdx].answer}
-                            onChange={e => handleUpdateQuestion(currentQIdx, { answer: e.target.value })}
-                          >
-                            <option value="">SELECT CORRECT ANSWER</option>
-                            {draftQuestions[currentQIdx].type === 'multiple' ? (
-                              draftQuestions[currentQIdx].options?.map((opt, idx) => opt && <option key={idx} value={opt}>{opt}</option>)
-                            ) : draftQuestions[currentQIdx].type === 'boolean' ? (
-                              <>
-                                <option value="True">True</option>
-                                <option value="False">False</option>
-                              </>
-                            ) : (
-                              <option value={draftQuestions[currentQIdx].answer}>{draftQuestions[currentQIdx].answer || 'Custom ID (Manual entry)'}</option>
-                            )}
-                          </select>
-                          {draftQuestions[currentQIdx].type === 'id' && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <select 
+                              className="h-16 bg-[#1f1610] border-none rounded-2xl px-6 text-primary font-black uppercase text-[10px] tracking-widest"
+                              value={draftQuestions[currentQIdx]?.type || 'multiple'}
+                              onChange={e => handleUpdateQuestion(currentQIdx, { type: e.target.value as any })}
+                            >
+                              <option value="multiple">MULTIPLE CHOICE</option>
+                              <option value="boolean">TRUE / FALSE</option>
+                              <option value="id">PROTOCOL ID</option>
+                            </select>
                             <Input 
-                              placeholder="Enter correct ID string..." 
-                              className="h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black text-[#1f1610]"
-                              value={draftQuestions[currentQIdx].answer}
-                              onChange={e => handleUpdateQuestion(currentQIdx, { answer: e.target.value })}
+                              placeholder="Question text..." 
+                              className="md:col-span-2 h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-bold text-[#1f1610]"
+                              value={draftQuestions[currentQIdx]?.question || ""}
+                              onChange={e => handleUpdateQuestion(currentQIdx, { question: e.target.value })}
                             />
-                          )}
-                       </div>
-                    </div>
+                        </div>
+
+                        {draftQuestions[currentQIdx]?.type === 'multiple' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {draftQuestions[currentQIdx].options?.map((opt, optIdx) => (
+                                <div key={optIdx} className="relative">
+                                  <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-[#1f1610]/20 text-xs">{optIdx + 1}</span>
+                                  <Input 
+                                    placeholder={`Option ${optIdx + 1}`} 
+                                    className="h-16 pl-12 bg-white border-4 border-[#1f1610]/10 rounded-2xl font-bold text-[#1f1610]"
+                                    value={opt}
+                                    onChange={e => {
+                                      const newOpts = [...(draftQuestions[currentQIdx].options || [])];
+                                      newOpts[optIdx] = e.target.value;
+                                      handleUpdateQuestion(currentQIdx, { options: newOpts });
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <Label className="text-[#1f1610] text-[10px]">CORRECT STRATEGIC RESPONSE</Label>
+                            <select 
+                              className="w-full h-16 bg-[#1f1610] border-none rounded-2xl px-8 text-primary font-black uppercase text-sm tracking-widest"
+                              value={draftQuestions[currentQIdx]?.answer || ""}
+                              onChange={e => handleUpdateQuestion(currentQIdx, { answer: e.target.value })}
+                            >
+                              <option value="">SELECT CORRECT ANSWER</option>
+                              {draftQuestions[currentQIdx]?.type === 'multiple' ? (
+                                draftQuestions[currentQIdx].options?.map((opt, idx) => opt && <option key={idx} value={opt}>{opt}</option>)
+                              ) : draftQuestions[currentQIdx]?.type === 'boolean' ? (
+                                <>
+                                  <option value="True">True</option>
+                                  <option value="False">False</option>
+                                </>
+                              ) : (
+                                <option value={draftQuestions[currentQIdx]?.answer}>{draftQuestions[currentQIdx]?.answer || 'Custom ID (Manual entry)'}</option>
+                              )}
+                            </select>
+                            {draftQuestions[currentQIdx]?.type === 'id' && (
+                              <Input 
+                                placeholder="Enter correct ID string..." 
+                                className="h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black text-[#1f1610]"
+                                value={draftQuestions[currentQIdx]?.answer || ""}
+                                onChange={e => handleUpdateQuestion(currentQIdx, { answer: e.target.value })}
+                              />
+                            )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-12">

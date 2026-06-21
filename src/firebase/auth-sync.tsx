@@ -7,28 +7,37 @@ import { useAuth, useFirestore } from '@/firebase';
 import { useUserStore } from '@/lib/store';
 
 /**
- * @fileOverview AuthSync Bridge
+ * @fileOverview AuthSync Bridge (Hardened)
  * 
- * This component handles the real-time bridge between Firebase Auth, 
- * Firestore, and the local Zustand state. It ensures data survives 
- * refreshes and auto-saves all progress.
+ * Handles real-time synchronization between Firebase and local state.
+ * Optimized to prevent infinite write loops and quota exhaustion.
  */
 export function AuthSync() {
   const auth = useAuth();
   const db = useFirestore();
   const { updateProfile, profiles } = useUserStore();
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSyncedDataRef = useRef<string>("");
 
+  // 1. Establish Real-Time Hydration from Firestore
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // 1. Establish Real-Time Hydration from Firestore
         const userRef = doc(db, 'users', user.uid);
-        // Include metadata changes to detect pending writes (prevents ping-pong/bounce back)
+        
         const unsubscribeSnapshot = onSnapshot(userRef, { includeMetadataChanges: true }, (docSnap) => {
           if (docSnap.exists() && !docSnap.metadata.hasPendingWrites) {
             const remoteData = docSnap.data();
-            updateProfile(user.uid, remoteData as any);
+            
+            // Clean volatile server fields for stable comparison
+            const { lastSync, ...comparableData } = remoteData as any;
+            const dataStr = JSON.stringify(comparableData);
+            
+            // Only update local store if remote data actually changed
+            if (dataStr !== lastSyncedDataRef.current) {
+              lastSyncedDataRef.current = dataStr;
+              updateProfile(user.uid, remoteData as any);
+            }
           }
         });
 
@@ -39,26 +48,37 @@ export function AuthSync() {
     return () => unsubscribeAuth();
   }, [auth, db, updateProfile]);
 
-  // 2. Silent Auto-Save Logic (Local Store -> Cloud Registry)
+  // 2. Optimized Auto-Save (Local -> Cloud)
   useEffect(() => {
     const user = auth.currentUser;
-    if (!user) return;
+    const uid = user?.uid;
+    if (!uid || !profiles[uid]) return;
 
-    const localProfile = profiles[user.uid];
-    if (!localProfile) return;
+    const localProfile = profiles[uid];
+    
+    // Ignore internal system fields and metadata for comparison
+    const { lastLogin, lastSync, ...cleanLocal } = localProfile as any;
+    const localStr = JSON.stringify(cleanLocal);
 
-    // Accelerated sync for higher fidelity (500ms debounce)
+    // BREAK THE LOOP: If local state matches what we last synced, do nothing
+    if (localStr === lastSyncedDataRef.current) return;
+
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     
+    // Increased debounce to 2s to preserve quota during heavy usage
     syncTimeoutRef.current = setTimeout(() => {
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', uid);
+      
+      // Update our sync reference immediately to block echos
+      lastSyncedDataRef.current = localStr;
+      
       setDoc(userRef, {
         ...localProfile,
         lastSync: serverTimestamp()
-      }, { merge: true }).catch((err) => {
-        console.warn("[SOVEREIGN SYNC] Cloud mirroring delayed due to connection state.");
+      }, { merge: true }).catch(() => {
+        // Silent catch to prevent UI interruption on network dips
       });
-    }, 500); 
+    }, 2000); 
 
     return () => {
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
