@@ -59,7 +59,6 @@ export default function AdminPage() {
   // Queries
   const productsRef = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const newsRef = useMemo(() => collection(db, 'newsPosts'), [db]);
-  const faqsRef = useMemo(() => collection(db, 'faqs'), [db]);
   const activityRef = useMemo(() => collection(db, 'activityWall'), [db]);
   const resourcesRef = useMemo(() => collection(db, 'resources'), [db]);
   const tasksRef = useMemo(() => collection(db, 'tasks'), [db]);
