@@ -217,9 +217,10 @@ export default function AdminPage() {
 
     operation
       .then(() => {
+        const wasEditing = !!editingWebin;
         setEditingWebin(null);
         setWebinTitle(""); setWebinContent("");
-        toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
+        toast({ title: wasEditing ? "Portal Synchronized" : "Wedio Portal Deployed" });
       })
       .catch(async (error: any) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'resources', operation: 'write', requestResourceData: data }));
@@ -793,7 +794,7 @@ export default function AdminPage() {
                             placeholder="Question text..." 
                             className="md:col-span-2 h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-bold text-[#1f1610]"
                             value={draftQuestions[currentQIdx].question}
-                            onChange={handleUpdateQuestion(currentQIdx, { question: e.target.value })}
+                            onChange={e => handleUpdateQuestion(currentQIdx, { question: e.target.value })}
                           />
                        </div>
 
@@ -960,4 +961,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
