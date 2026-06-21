@@ -66,13 +66,9 @@ export default function QuizPage() {
   const [cheatTriggered, setCheatTriggered] = useState(false);
   const [userAnswer, setUserAnswer] = useState("");
   const [isMounted, setIsMounted] = useState(false);
-  const cheatTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
-    return () => {
-      if (cheatTimerRef.current) clearTimeout(cheatTimerRef.current);
-    };
   }, []);
 
   const shuffle = useCallback((array: any[]) => {
@@ -83,44 +79,57 @@ export default function QuizPage() {
     if (uid) trackVisit(uid, 'faq');
   }, [uid, trackVisit]);
 
+  // ANTI-CHEAT DETECTION LOGIC
   const handleCheat = useCallback(() => {
-    if (activeQuiz && !isFinished && !cheatTriggered) {
+    if (activeQuiz && !isFinished && !cheatTriggered && !isProcessingResult) {
       setCheatTriggered(true);
-      cheatTimerRef.current = setTimeout(() => {
-        if (!activeQuiz) return;
-        setShuffledQuestions(shuffle(activeQuiz.questions));
-        setCurrentIdx(0);
-        setScore(0);
-        setUserAnswer("");
-        setCheatTriggered(false);
-        toast({
-          title: "SECURITY ALERT",
-          description: "Cheating detected. Progress zeroed and questions shuffled.",
-          variant: "destructive",
-        });
-      }, 3000);
+      toast({
+        title: "SECURITY ALERT",
+        description: "Strategic focus breach detected.",
+        variant: "destructive",
+      });
     }
-  }, [activeQuiz, isFinished, cheatTriggered, shuffle]);
+  }, [activeQuiz, isFinished, cheatTriggered, isProcessingResult]);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !activeQuiz || isFinished) return;
+
     const onBlur = () => handleCheat();
-    const onFocus = () => {
-      if (cheatTimerRef.current) {
-        clearTimeout(cheatTimerRef.current);
-        cheatTimerRef.current = null;
-        setCheatTriggered(false);
-      }
+    const handleVisibilityChange = () => {
+      if (document.hidden) handleCheat();
     };
 
     window.addEventListener("blur", onBlur);
-    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       window.removeEventListener("blur", onBlur);
-      window.removeEventListener("focus", onFocus);
-      if (cheatTimerRef.current) clearTimeout(cheatTimerRef.current);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [handleCheat, isMounted]);
+  }, [handleCheat, isMounted, activeQuiz, isFinished]);
+
+  // HARD RESTART SEQUENCE
+  const handleHardRestart = () => {
+    if (isProcessingResult) return;
+    setIsProcessingResult(true);
+
+    // Reset session variables
+    setScore(0);
+    setCurrentIdx(0);
+    setUserAnswer("");
+    setIsFinished(false);
+    
+    // Re-shuffle to maintain integrity
+    if (activeQuiz) {
+      setShuffledQuestions(shuffle(activeQuiz.questions));
+    }
+
+    setTimeout(() => {
+      setCheatTriggered(false);
+      setIsProcessingResult(false);
+      toast({ title: "Protocol Re-initialized" });
+    }, 600);
+  };
 
   const startQuiz = (quiz: any) => {
     if (isProcessingResult) return;
@@ -131,7 +140,7 @@ export default function QuizPage() {
     setIsFinished(false);
     setIsProcessingResult(false);
     setUserAnswer("");
-    toast({ title: "Mastery Protocol Initiated", description: "Stay focused. Focus loss will trigger a security reset." });
+    toast({ title: "Mastery Protocol Initiated", description: "Maintain focus to ensure certification." });
   };
 
   const handleNext = () => {
@@ -336,24 +345,38 @@ export default function QuizPage() {
         </div>
       )}
 
+      {/* UNPASSABLE ANTI-CHEAT MODAL */}
       {cheatTriggered && (
         <div className="fixed inset-0 z-[200] bg-[#1f1610] flex flex-col items-center justify-center text-[#fdfaf6] p-6 text-center animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1),transparent)]" />
+          
           <div className="relative space-y-12 max-w-5xl w-full">
             <div className="relative w-fit mx-auto">
               <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse rounded-full" />
-              <AlertTriangle className="h-32 w-32 md:h-40 md:w-40 text-primary animate-[bounce_0.5s_infinite] relative z-10" />
+              <AlertTriangle className="h-32 w-32 md:h-40 md:w-40 text-primary animate-bounce relative z-10" />
             </div>
             
             <div className="space-y-6">
-              <h1 className="text-6xl md:text-9xl font-headline font-black mb-2 uppercase tracking-[0.2em] italic leading-none animate-[glitch_0.3s_infinite] text-primary">
+              <h1 className="text-5xl md:text-8xl font-headline font-black mb-2 uppercase tracking-[0.1em] italic leading-none text-primary">
                 SECURITY ALERT
               </h1>
+              <p className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white">
+                Cheating Detected! You left the quiz screen.
+              </p>
             </div>
 
-            <p className="text-2xl md:text-4xl text-[#fdfaf6] font-black uppercase tracking-[0.5em] max-w-4xl mx-auto leading-relaxed italic">
-              INTEGRITY SENSOR BREACHED. <br/>
-              <span className="text-primary">RESETTING PROTOCOL IN REAL-TIME...</span>
+            <p className="text-lg md:text-xl text-[#fdfaf6]/60 font-black uppercase tracking-[0.4em] max-w-3xl mx-auto leading-relaxed italic">
+              Integrity breach recorded. The protocol has been suspended. <br/>
+              <span className="text-primary">Manual re-initialization required.</span>
             </p>
+
+            <Button 
+              onClick={handleHardRestart} 
+              disabled={isProcessingResult}
+              className="mt-12 rounded-full h-24 px-20 bg-primary text-[#1f1610] font-black text-3xl uppercase shadow-[0_30px_60px_rgba(255,215,0,0.3)] hover:scale-110 active:scale-95 transition-all border-8 border-white/20"
+            >
+              {isProcessingResult ? <Loader2 className="h-10 w-10 animate-spin" /> : "Restart Quiz"}
+            </Button>
           </div>
         </div>
       )}
