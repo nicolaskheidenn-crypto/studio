@@ -87,15 +87,15 @@ export default function TaskDoPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Increased dot density for plexus (1200 nodes)
-    const dots = Array.from({ length: 800 }).map((_, i) => ({
+    // Increased dot density for plexus (1,200 nodes)
+    const dots = Array.from({ length: 1200 }).map((_, i) => ({
       id: i,
       top: Math.random() * 100,
       left: Math.random() * totalMapWidth, 
       delay: Math.random() * 10,
       size: Math.random() * 2 + 1,
       duration: 8 + Math.random() * 12,
-    })).sort((a, b) => a.left - b.left); // Spatial sorting for connectivity optimization
+    })).sort((a, b) => a.left - b.left);
     setShiningDots(dots);
   }, [totalMapWidth]);
 
@@ -104,7 +104,6 @@ export default function TaskDoPage() {
     const lines = [];
     const maxDist = 450; 
     for (let i = 0; i < shiningDots.length; i++) {
-      // Neighbor scan optimized by spatial sorting
       for (let j = i + 1; j < Math.min(i + 40, shiningDots.length); j++) {
         const d1 = shiningDots[i];
         const d2 = shiningDots[j];
@@ -140,10 +139,7 @@ export default function TaskDoPage() {
     setIsProcessing(true);
     unlockNextDay(uid);
     setShowAward(false);
-    toast({
-      title: `Hub ${currentTaskDay + 1} Protocol Initiated`,
-      description: "Synchronizing latest daily objectives.",
-    });
+    toast({ title: `Hub ${currentTaskDay + 1} Protocol Initiated` });
     setTimeout(() => setIsProcessing(false), 800);
   };
 
@@ -152,7 +148,7 @@ export default function TaskDoPage() {
     setIsProcessing(true);
     claimWeeklyReward(uid, reward.week);
     setActiveReward(reward);
-    toast({ title: "Treasure Secured", description: "Protocol asset archived in vault." });
+    toast({ title: "Treasure Secured" });
     setTimeout(() => setIsProcessing(false), 800);
   };
 
@@ -232,14 +228,14 @@ export default function TaskDoPage() {
             
             <ScrollArea className="w-full h-full">
               <div className="min-w-max h-full relative px-[600px]" ref={scrollRef}>
-                  {/* Plexus Layer Moved Inside Scroll Container for Sync */}
+                  {/* Plexus Layer Inside Scroll Container */}
                   <svg className="absolute inset-0 pointer-events-none will-change-transform" style={{ width: totalMapWidth, height: '100%' }}>
                      {plexusLines.map(line => (
                        <line 
                          key={line.id} 
                          x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} 
                          stroke="var(--primary)" 
-                         strokeWidth="1.2" 
+                         strokeWidth="1.5" 
                          className="animate-pulse"
                          style={{ opacity: line.opacity }}
                        />
@@ -283,9 +279,7 @@ export default function TaskDoPage() {
 
                           <button
                             onClick={() => {
-                              if (isWeekEnd && isPast && reward && !isClaimed) {
-                                handleClaimTreasure(reward);
-                              }
+                              if (isWeekEnd && isPast && reward && !isClaimed) handleClaimTreasure(reward);
                             }}
                             disabled={isProcessing}
                             className={cn(
@@ -383,14 +377,9 @@ export default function TaskDoPage() {
                         onClick={() => handleTaskToggle(task.id)}
                       >
                         <CardContent className="p-8 flex items-center gap-10">
-                          <Checkbox 
-                            checked={isComplete} 
-                            className="h-10 w-10 rounded-xl border-[6px] border-primary data-[state=checked]:bg-primary shadow-2xl transition-all" 
-                          />
+                          <Checkbox checked={isComplete} className="h-10 w-10 rounded-xl border-[6px] border-primary data-[state=checked]:bg-primary shadow-2xl transition-all" />
                           <div className="flex-1 space-y-2">
-                            <p className={cn("text-3xl font-black text-white uppercase tracking-tight leading-none italic", isComplete && "line-through opacity-30")}>
-                              {task.title}
-                            </p>
+                            <p className={cn("text-3xl font-black text-white uppercase tracking-tight leading-none italic", isComplete && "line-through opacity-30")}>{task.title}</p>
                             <p className="text-[12px] text-primary/60 font-black uppercase tracking-[0.3em] italic">{task.description}</p>
                           </div>
                         </CardContent>
@@ -404,11 +393,7 @@ export default function TaskDoPage() {
                 <div className="p-16 rounded-[4.5rem] bg-primary text-[#1f1610] text-center animate-in zoom-in duration-700 shadow-[0_50px_100px_rgba(255,215,0,0.6)] relative border-[15px] border-white/20 overflow-hidden mt-12">
                   <Trophy className="h-20 w-20 mx-auto mb-6 animate-bounce drop-shadow-2xl" />
                   <h2 className="text-6xl font-headline font-black mb-4 uppercase tracking-tighter italic leading-none">Hub Conquered!</h2>
-                  <Button 
-                    className="rounded-full font-black text-3xl px-20 h-28 bg-[#1f1610] text-primary hover:bg-white hover:text-[#1f1610] transition-all active:scale-95 shadow-2xl uppercase tracking-tighter border-8 border-primary/20" 
-                    onClick={handleNextDay}
-                    disabled={isProcessing}
-                  >
+                  <Button className="rounded-full font-black text-3xl px-20 h-28 bg-[#1f1610] text-primary hover:bg-white hover:text-[#1f1610] transition-all active:scale-95 shadow-2xl uppercase tracking-tighter border-8 border-primary/20" onClick={handleNextDay} disabled={isProcessing}>
                     {isProcessing ? <Loader2 className="h-10 w-10 animate-spin" /> : <>DEPLOY NEXT HUB <ArrowRight className="ml-6 h-12 w-12" /></>}
                   </Button>
                 </div>

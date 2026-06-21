@@ -47,7 +47,14 @@ export default function AdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const restoreRef = useRef<HTMLInputElement>(null);
   const assetFileInputRef = useRef<HTMLInputElement>(null);
+  const webinFileInputRef = useRef<HTMLInputElement>(null);
+  const rewardFileInputRef = useRef<HTMLInputElement>(null);
   
+  // Source Type Toggles
+  const [assetSourceType, setAssetSourceType] = useState<'Link' | 'File'>('Link');
+  const [webinSourceType, setWebinSourceType] = useState<'Link' | 'File'>('Link');
+  const [rewardSourceType, setRewardSourceType] = useState<'Link' | 'File'>('Link');
+
   // Collections
   const productsQuery = useMemo(() => query(collection(db, 'shooppyProducts'), orderBy('sortOrder', 'asc')), [db]);
   const newsQuery = useMemo(() => query(collection(db, 'newsPosts'), orderBy('timestamp', 'desc')), [db]);
@@ -98,7 +105,6 @@ export default function AdminPage() {
   const [currentQIdx, setCurrentQIdx] = useState(0);
   const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
 
-  // Task Management States
   const [taskDay, setTaskDay] = useState(1);
   const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: '1', title: "", description: "" }]);
   const [editingTask, setEditingTask] = useState<any>(null);
@@ -129,18 +135,35 @@ export default function AdminPage() {
     reader.readAsDataURL(file);
   };
 
+  const handleWebinFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setWebinContent(reader.result as string);
+      toast({ title: "Wedio Asset Loaded", description: `${file.name} ready for sync.` });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRewardFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setRewardWeekFile(reader.result as string);
+      toast({ title: "Treasure Asset Loaded", description: `${file.name} ready for deployment.` });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleExportBackup = async (type: 'Local' | 'Cloud') => {
     if (isBackingUp) return;
     setIsBackingUp(true);
     try {
       const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
       const backupData: any = {
-        metadata: {
-          timestamp: new Date().toISOString(),
-          type: type,
-          host: user?.email,
-          version: "2.0.5-Sovereign"
-        },
+        metadata: { timestamp: new Date().toISOString(), type: type, host: user?.email, version: "2.0.5-Sovereign" },
         payload: {}
       };
 
@@ -186,12 +209,7 @@ export default function AdminPage() {
             const { id, ...rest } = item;
             setDoc(doc(db, collName, id), rest, { merge: true })
               .catch(async (error) => {
-                const permissionError = new FirestorePermissionError({
-                  path: `${collName}/${id}`,
-                  operation: 'write',
-                  requestResourceData: rest,
-                } satisfies SecurityRuleContext);
-                errorEmitter.emit('permission-error', permissionError);
+                errorEmitter.emit('permission-error', new FirestorePermissionError({ path: `${collName}/${id}`, operation: 'write', requestResourceData: rest }));
               });
           }
         }
@@ -207,7 +225,7 @@ export default function AdminPage() {
   };
 
   const handleSaveProduct = () => {
-    if (isSaving) return;
+    if (isSaving || !prodTitle) return;
     setIsSaving(true);
     const data = {
       title: prodTitle,
@@ -232,57 +250,13 @@ export default function AdminPage() {
         toast({ title: editingProduct ? "Protocol Updated" : "Strategic Asset Deployed" });
       })
       .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'shooppyProducts',
-          operation: 'write',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'shooppyProducts', operation: 'write', requestResourceData: data }));
       })
       .finally(() => setIsSaving(false));
   };
 
-  const handleMoveProduct = (id: string, direction: 'up' | 'down') => {
-    if (isSaving) return;
-    const idx = shooppyProducts.findIndex(p => p.id === id);
-    if (idx === -1) return;
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= shooppyProducts.length) return;
-
-    const current = shooppyProducts[idx];
-    const target = shooppyProducts[targetIdx];
-
-    const currentOrder = Number(current.sortOrder ?? idx);
-    const targetOrder = Number(target.sortOrder ?? targetIdx);
-
-    const doc1Ref = doc(db, 'shooppyProducts', current.id);
-    const doc2Ref = doc(db, 'shooppyProducts', target.id);
-
-    updateDoc(doc1Ref, { sortOrder: targetOrder })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: doc1Ref.path,
-          operation: 'update',
-          requestResourceData: { sortOrder: targetOrder },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-    updateDoc(doc2Ref, { sortOrder: currentOrder })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: doc2Ref.path,
-          operation: 'update',
-          requestResourceData: { sortOrder: currentOrder },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-    toast({ title: "Inventory Reorganized" });
-  };
-
   const handleSaveWebin = () => {
-    if (isSaving) return;
+    if (isSaving || !webinTitle) return;
     setIsSaving(true);
     const data = {
       title: webinTitle,
@@ -305,57 +279,13 @@ export default function AdminPage() {
         toast({ title: editingWebin ? "Portal Synchronized" : "Wedio Portal Deployed" });
       })
       .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'resources',
-          operation: 'write',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'resources', operation: 'write', requestResourceData: data }));
       })
       .finally(() => setIsSaving(false));
   };
 
-  const handleMoveWebin = (id: string, direction: 'up' | 'down') => {
-    if (isSaving) return;
-    const idx = webins.findIndex(w => w.id === id);
-    if (idx === -1) return;
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= webins.length) return;
-
-    const current = webins[idx];
-    const target = webins[targetIdx];
-
-    const currentOrder = Number(current.sortOrder ?? idx);
-    const targetOrder = Number(target.sortOrder ?? targetIdx);
-
-    const doc1Ref = doc(db, 'resources', current.id);
-    const doc2Ref = doc(db, 'resources', target.id);
-
-    updateDoc(doc1Ref, { sortOrder: targetOrder })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: doc1Ref.path,
-          operation: 'update',
-          requestResourceData: { sortOrder: targetOrder },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-    updateDoc(doc2Ref, { sortOrder: currentOrder })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: doc2Ref.path,
-          operation: 'update',
-          requestResourceData: { sortOrder: currentOrder },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-    toast({ title: "Portal Grid Reordered" });
-  };
-
   const handleSaveReward = () => {
-    if (isSaving) return;
+    if (isSaving || !rewardTitle) return;
     setIsSaving(true);
     const data = {
       week: Number(rewardWeek),
@@ -375,188 +305,78 @@ export default function AdminPage() {
       .finally(() => setIsSaving(false));
   };
 
-  const handleDispatchBroadcast = () => {
+  const handleMoveProduct = (id: string, direction: 'up' | 'down') => {
     if (isSaving) return;
+    const idx = shooppyProducts.findIndex(p => p.id === id);
+    if (idx === -1) return;
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= shooppyProducts.length) return;
+
+    const current = shooppyProducts[idx];
+    const target = shooppyProducts[targetIdx];
+    const doc1Ref = doc(db, 'shooppyProducts', current.id);
+    const doc2Ref = doc(db, 'shooppyProducts', target.id);
+
+    updateDoc(doc1Ref, { sortOrder: target.sortOrder ?? targetIdx }).catch(e => {});
+    updateDoc(doc2Ref, { sortOrder: current.sortOrder ?? idx }).catch(e => {});
+    toast({ title: "Inventory Reorganized" });
+  };
+
+  const handleMoveWebin = (id: string, direction: 'up' | 'down') => {
+    if (isSaving) return;
+    const idx = webins.findIndex(w => w.id === id);
+    if (idx === -1) return;
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= webins.length) return;
+
+    const current = webins[idx];
+    const target = webins[targetIdx];
+    const doc1Ref = doc(db, 'resources', current.id);
+    const doc2Ref = doc(db, 'resources', target.id);
+
+    updateDoc(doc1Ref, { sortOrder: target.sortOrder ?? targetIdx }).catch(e => {});
+    updateDoc(doc2Ref, { sortOrder: current.sortOrder ?? idx }).catch(e => {});
+    toast({ title: "Portal Grid Reordered" });
+  };
+
+  const handleDispatchBroadcast = () => {
+    if (isSaving || !newsTitle) return;
     setIsSaving(true);
-    const data = {
-      title: newsTitle,
-      content: newsContent,
-      imageUrl: newsImg,
-      timestamp: serverTimestamp()
-    };
+    const data = { title: newsTitle, content: newsContent, imageUrl: newsImg, timestamp: serverTimestamp() };
     addDoc(collection(db, 'newsPosts'), data)
-      .then(() => {
-        setNewsTitle(""); setNewsContent(""); setNewsImg("");
-        toast({ title: "Broadcast Dispatched" });
-      })
-      .catch(async (e) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data }));
-      })
+      .then(() => { setNewsTitle(""); setNewsContent(""); setNewsImg(""); toast({ title: "Broadcast Dispatched" }); })
+      .catch(async (e) => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'newsPosts', operation: 'create', requestResourceData: data })))
       .finally(() => setIsSaving(false));
-  };
-
-  const handleAddQuestion = () => {
-    const newQ: QuizQuestion = {
-      id: Math.random().toString(36).substr(2, 9),
-      type: 'multiple',
-      question: "",
-      answer: "",
-      options: ["", "", "", ""]
-    };
-    setDraftQuestions([...draftQuestions, newQ]);
-    setCurrentQIdx(draftQuestions.length);
-  };
-
-  const updateCurrentQ = (field: keyof QuizQuestion, value: any) => {
-    const newDrafts = [...draftQuestions];
-    newDrafts[currentQIdx] = { ...newDrafts[currentQIdx], [field]: value };
-    if (field === 'type') {
-      if (value === 'boolean') newDrafts[currentQIdx].options = ["True", "False"];
-      else if (value === 'multiple') newDrafts[currentQIdx].options = ["", "", "", ""];
-      else newDrafts[currentQIdx].options = undefined;
-      newDrafts[currentQIdx].answer = "";
-    }
-    setDraftQuestions(newDrafts);
   };
 
   const handleSaveQuiz = () => {
-    if (isSaving) return;
+    if (isSaving || !quizTitle) return;
     setIsSaving(true);
-    const data = {
-      title: quizTitle,
-      questionCount: draftQuestions.length,
-      questions: draftQuestions,
-      createdAt: serverTimestamp()
-    };
-
-    const operation = editingQuizId ?
-      updateDoc(doc(db, 'quizzes', editingQuizId), data) :
-      addDoc(collection(db, 'quizzes'), data);
-
+    const data = { title: quizTitle, questionCount: draftQuestions.length, questions: draftQuestions, createdAt: serverTimestamp() };
+    const operation = editingQuizId ? updateDoc(doc(db, 'quizzes', editingQuizId), data) : addDoc(collection(db, 'quizzes'), data);
     operation
-      .then(() => {
-        setEditingQuizId(null);
-        setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]);
-        setCurrentQIdx(0);
-        toast({ title: editingQuizId ? "Quiz Synchronized" : "Quiz Protocol Deployed" });
-      })
-      .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'quizzes',
-          operation: 'write',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      })
+      .then(() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); setCurrentQIdx(0); toast({ title: "Quiz Synchronized" }); })
+      .catch(async (error: any) => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'quizzes', operation: 'write', requestResourceData: data })))
       .finally(() => setIsSaving(false));
-  };
-
-  const handleEditQuiz = (q: any) => {
-    setEditingQuizId(q.id);
-    setQuizTitle(q.title);
-    setDraftQuestions(q.questions);
-    setCurrentQIdx(0);
-    toast({ title: "Architect Mode: Sync", description: "Loading protocol data into constructor." });
-  };
-
-  const handleAddDraftTaskSlot = () => {
-    setBulkDraftTasks([...bulkDraftTasks, { id: Math.random().toString(36).substr(2, 9), title: "", description: "" }]);
-  };
-
-  const handleRemoveDraftTaskSlot = (id: string) => {
-    if (bulkDraftTasks.length <= 1) return;
-    setBulkDraftTasks(bulkDraftTasks.filter(t => t.id !== id));
-  };
-
-  const handleUpdateDraftTask = (id: string, field: 'title' | 'description', value: string) => {
-    setBulkDraftTasks(bulkDraftTasks.map(t => t.id === id ? { ...t, [field]: value } : t));
   };
 
   const handleSaveBulkTasks = async () => {
     const tasksToSave = bulkDraftTasks.filter(t => t.title.trim() !== "");
-    if (tasksToSave.length === 0 || isSaving) {
-      if (tasksToSave.length === 0) toast({ title: "Injection Error", description: "Empty protocols cannot be deployed.", variant: "destructive" });
-      return;
-    }
-
+    if (tasksToSave.length === 0 || isSaving) return;
     setIsSaving(true);
     try {
       for (const task of tasksToSave) {
-        const taskData = {
-          day: Number(taskDay),
-          title: task.title,
-          description: task.description,
-          createdAt: serverTimestamp()
-        };
-        await addDoc(collection(db, 'tasks'), taskData);
+        await addDoc(collection(db, 'tasks'), { day: Number(taskDay), title: task.title, description: task.description, createdAt: serverTimestamp() });
       }
       setBulkDraftTasks([{ id: '1', title: "", description: "" }]);
-      toast({ title: "Sovereign Routines Deployed", description: `${tasksToSave.length} protocols injected into Hub ${taskDay}.` });
-    } catch (e) {
-      toast({ title: "Injection Failure", variant: "destructive" });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleUpdateExistingTask = () => {
-    if (!editingTask || isSaving) return;
-    setIsSaving(true);
-    const taskData = {
-      day: Number(editingTask.day),
-      title: editingTask.title,
-      description: editingTask.description
-    };
-    const docRef = doc(db, 'tasks', editingTask.id);
-    updateDoc(docRef, taskData)
-      .then(() => {
-        setEditingTask(null);
-        toast({ title: "Protocol Synchronized" });
-      })
-      .catch(async (error: any) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'update',
-          requestResourceData: taskData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ title: "Sync Breach", variant: "destructive" });
-      })
-      .finally(() => setIsSaving(false));
+      toast({ title: "Sovereign Routines Deployed" });
+    } catch (e) { toast({ title: "Injection Failure", variant: "destructive" }); }
+    finally { setIsSaving(false); }
   };
 
   const handleDeleteDoc = (coll: string, id: string) => {
     if (isSaving) return;
-    const docRef = doc(db, coll, id);
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: "Data Purged" });
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'delete',
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
-  };
-
-  const startEditProduct = (p: any) => {
-    setEditingProduct(p);
-    setProdTitle(p.title);
-    setProdDesc(p.description);
-    setProdImg(p.imageUrl);
-    setProdFile(p.fileUrl || "");
-    setProdType(p.type);
-    setProdPlacement(p.placement);
-    setProdLevel(Number(p.requiredLevel || 1));
-    setProdPrice(Number(p.price));
-  };
-
-  const startEditWebin = (w: any) => {
-    setEditingWebin(w);
-    setWebinTitle(w.title);
-    setWebinContent(w.content);
+    deleteDoc(doc(db, coll, id)).then(() => toast({ title: "Data Purged" })).catch(e => {});
   };
 
   if (user?.email !== ADMIN_EMAIL) {
@@ -636,702 +456,311 @@ export default function AdminPage() {
 
       <main className="flex-1 container mx-auto px-4 py-16 max-w-6xl">
         <Tabs defaultValue="tasks" className="space-y-12">
-          <div className="flex items-center justify-between overflow-x-auto pb-4 scrollbar-hide">
-            <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-primary/20 flex-shrink-0">
-              {[
-                { val: "tasks", icon: ListChecks, label: "Routines", count: globalTasks.length },
-                { val: "assets", icon: ShoppingBag, label: "Shooppy", count: shooppyProducts.length },
-                { val: "wedio", icon: Video, label: "Wedio", count: webins.length },
-                { val: "rewards", icon: Gift, label: "Rewards", count: globalRewards.length },
-                { val: "quizzo", icon: BookOpen, label: "Quizzo", count: globalQuizzes.length },
-                { val: "broadcast", icon: Newspaper, label: "Dispatch", count: newsPosts.length },
-                { val: "maintenance", icon: Database, label: "Continuity", count: 0 },
-                { val: "system", icon: CircleHelp, label: "System", count: faqs.length }
-              ].map((tab) => (
-                <TabsTrigger key={tab.val} value={tab.val} className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610] gap-2">
-                  <tab.icon className="h-4 w-4" />
-                  {tab.label}
-                  {tab.count > 0 && <Badge className="bg-[#1f1610] text-primary border-none text-[8px] h-4 w-4 flex items-center justify-center p-0">{tab.count}</Badge>}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+          <TabsList className="bg-mocha-cream p-2 rounded-full w-fit shadow-2xl border-4 border-primary/20 overflow-x-auto scrollbar-hide">
+            <TabsTrigger value="tasks" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Routines</TabsTrigger>
+            <TabsTrigger value="assets" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Shooppy</TabsTrigger>
+            <TabsTrigger value="wedio" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Wedio</TabsTrigger>
+            <TabsTrigger value="rewards" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Rewards</TabsTrigger>
+            <TabsTrigger value="quizzo" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Quizzo</TabsTrigger>
+            <TabsTrigger value="maintenance" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">Continuity</TabsTrigger>
+            <TabsTrigger value="system" className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest text-[#1f1610]">System</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="tasks" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 md:p-16 shadow-2xl space-y-12">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-4xl font-black uppercase flex items-center gap-6 italic text-[#1f1610]">
-                    <ListChecks className="h-10 w-10 text-primary" /> DAILY ROUTINE INJECTOR
-                  </CardTitle>
+                  <CardTitle className="text-4xl font-black uppercase italic text-[#1f1610]">Routine Injector</CardTitle>
                   <div className="flex items-center gap-6">
-                    <Label className="text-[#1f1610] text-xs">TARGET HUB DAY</Label>
-                    <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" disabled={isSaving} />
+                    <Label className="text-[#1f1610] text-xs">HUB DAY</Label>
+                    <Input type="number" min={1} max={30} value={taskDay} onChange={e => setTaskDay(Number(e.target.value))} className="w-24 h-16 font-black text-center text-3xl bg-white text-[#1f1610] rounded-2xl" />
                   </div>
                 </div>
 
                 <div className="space-y-8">
                   {bulkDraftTasks.map((task, idx) => (
-                    <div key={task.id} className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 space-y-6 relative group/slot animate-in zoom-in-95">
-                       <div className="flex items-center justify-between mb-4">
-                          <Badge className="bg-[#1f1610] text-primary h-8 px-6 font-black uppercase text-[9px] rounded-full">Protocol Slot 0{idx + 1}</Badge>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-red-500 opacity-0 group-hover/slot:opacity-100 transition-opacity" 
-                            onClick={() => handleRemoveDraftTaskSlot(task.id)}
-                            disabled={bulkDraftTasks.length <= 1 || isSaving}
-                          >
-                            <X className="h-5 w-5" />
-                          </Button>
+                    <div key={task.id} className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                       <div className="md:col-span-1 space-y-2">
+                          <Label className="text-[#1f1610] text-[9px]">HEADLINE</Label>
+                          <Input placeholder="Routine name..." value={task.title} onChange={e => setBulkDraftTasks(prev => prev.map(t => t.id === task.id ? {...t, title: e.target.value} : t))} className="h-16 bg-white text-[#1f1610] font-black" />
                        </div>
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          <div className="md:col-span-1 space-y-2">
-                             <Label className="text-[#1f1610] text-[9px]">ROUTINE HEADLINE</Label>
-                             <Input 
-                                placeholder="Morning protocol..." 
-                                value={task.title} 
-                                onChange={e => handleUpdateDraftTask(task.id, 'title', e.target.value)} 
-                                className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl" 
-                                disabled={isSaving}
-                             />
-                          </div>
-                          <div className="md:col-span-2 space-y-2">
-                             <Label className="text-[#1f1610] text-[9px]">OPERATIONAL INSTRUCTIONS</Label>
-                             <Input 
-                                placeholder="Step-by-step..." 
-                                value={task.description} 
-                                onChange={e => handleUpdateDraftTask(task.id, 'description', e.target.value)} 
-                                className="h-16 bg-white text-[#1f1610] font-bold text-sm rounded-xl" 
-                                disabled={isSaving}
-                             />
+                       <div className="md:col-span-2 space-y-2">
+                          <Label className="text-[#1f1610] text-[9px]">INSTRUCTIONS</Label>
+                          <div className="flex gap-4">
+                            <Input placeholder="Step details..." value={task.description} onChange={e => setBulkDraftTasks(prev => prev.map(t => t.id === task.id ? {...t, description: e.target.value} : t))} className="h-16 bg-white text-[#1f1610] font-bold" />
+                            <Button variant="ghost" size="icon" className="h-16 w-16 text-red-500" onClick={() => setBulkDraftTasks(prev => prev.filter(t => t.id !== task.id))} disabled={bulkDraftTasks.length === 1}><X /></Button>
                           </div>
                        </div>
                     </div>
                   ))}
-
                   <div className="flex gap-6">
-                    <Button 
-                      onClick={handleAddDraftTaskSlot} 
-                      variant="outline" 
-                      className="flex-1 h-20 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black text-lg uppercase tracking-widest gap-4 hover:bg-[#1f1610] hover:text-primary transition-all"
-                      disabled={isSaving}
-                    >
-                      <Plus className="h-6 w-6" /> ADD PROTOCOL SLOT
-                    </Button>
-                    <Button 
-                      onClick={handleSaveBulkTasks} 
-                      className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-lg uppercase shadow-2xl tracking-tighter hover:scale-105 active:scale-95 transition-transform"
-                      disabled={isSaving}
-                    >
-                      {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
-                      INJECT {bulkDraftTasks.length} PROTOCOLS
-                    </Button>
+                    <Button onClick={() => setBulkDraftTasks([...bulkDraftTasks, { id: Math.random().toString(36), title: "", description: "" }])} variant="outline" className="flex-1 h-20 rounded-full border-4 border-[#1f1610] text-[#1f1610] font-black">ADD SLOT</Button>
+                    <Button onClick={handleSaveBulkTasks} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black" disabled={isSaving}>INJECT PROTOCOLS</Button>
                   </div>
                 </div>
              </Card>
-
-             <div className="space-y-10">
-                <div className="flex items-center justify-between px-8">
-                   <h3 className="text-3xl font-black uppercase text-foreground italic">Master Infrastructure List</h3>
-                   <span className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Active Grid Protocols</span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-12">
-                   {Object.entries(tasksByDay).sort(([a], [b]) => Number(a) - Number(b)).map(([day, dayTasks]: [string, any]) => (
-                     <div key={day} className="space-y-6">
-                        <div className="flex items-center gap-4">
-                           <div className="w-16 h-16 bg-primary text-[#1f1610] rounded-[1.2rem] flex items-center justify-center font-black text-2xl italic shadow-xl">D{day}</div>
-                           <div className="h-1 flex-1 bg-primary/10 rounded-full" />
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                           {dayTasks.map((t: any) => (
-                             <Card key={t.id} className="p-8 bg-mocha-cream rounded-[2.5rem] border-4 border-primary/10 flex flex-col justify-between group shadow-lg hover:border-primary/40 transition-all">
-                                <div className="space-y-4">
-                                   <div className="flex justify-between items-start">
-                                      <h4 className="font-black text-[#1f1610] uppercase italic text-xl leading-tight line-clamp-2">{t.title}</h4>
-                                   </div>
-                                   <p className="text-xs font-bold text-[#1f1610]/60 line-clamp-3 uppercase tracking-tight">{t.description}</p>
-                                </div>
-                                <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t-2 border-[#1f1610]/5">
-                                   <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      className="rounded-full hover:bg-[#1f1610] hover:text-primary text-[#1f1610]/40"
-                                      onClick={() => setEditingTask(t)}
-                                      disabled={isSaving}
-                                   >
-                                      <Edit3 className="h-5 w-5" />
-                                   </Button>
-                                   <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      className="rounded-full hover:bg-red-500 hover:text-white text-red-500/40"
-                                      onClick={() => handleDeleteDoc('tasks', t.id)}
-                                      disabled={isSaving}
-                                   >
-                                      <Trash2 className="h-5 w-5" />
-                                   </Button>
-                                </div>
-                             </Card>
-                           ))}
-                        </div>
-                     </div>
-                   ))}
-                </div>
-             </div>
           </TabsContent>
 
-          {/* Shooppy Tab */}
           <TabsContent value="assets" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Plus className="h-8 w-8 text-primary" /> {editingProduct ? 'Edit Asset' : 'Asset Injector'}</CardTitle>
+                  <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">{editingProduct ? 'Edit Asset' : 'Asset Injector'}</CardTitle>
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Asset Name</Label>
-                        <Input placeholder="Strategy E-book" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
+                        <Input placeholder="Strategy E-book" value={prodTitle} onChange={e => setProdTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Category</Label>
-                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={prodType} onChange={e => setProdType(e.target.value as any)} disabled={isSaving}>
+                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-[#1f1610]" value={prodType} onChange={e => setProdType(e.target.value as any)}>
                           <option value="eBook">E-Book</option>
                           <option value="Template">Template</option>
                           <option value="Bundle">Bundle</option>
                         </select>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Detailed Narrative</Label>
-                      <Textarea placeholder="Asset value..." value={prodDesc} onChange={e => setProdDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" disabled={isSaving} />
+                    
+                    <div className="flex flex-col gap-4">
+                       <Label className="text-[#1f1610]">Source Type</Label>
+                       <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
+                          <Button 
+                            variant={assetSourceType === 'Link' ? 'default' : 'ghost'} 
+                            onClick={() => setAssetSourceType('Link')} 
+                            className={cn("flex-1 rounded-xl h-12 font-black", assetSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                          >LINK</Button>
+                          <Button 
+                            variant={assetSourceType === 'File' ? 'default' : 'ghost'} 
+                            onClick={() => setAssetSourceType('File')} 
+                            className={cn("flex-1 rounded-xl h-12 font-black", assetSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                          >UPLOAD</Button>
+                       </div>
                     </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-[#1f1610]">{assetSourceType === 'File' ? 'Upload Asset' : 'Shop/Resource URL'}</Label>
+                      <div className="relative">
+                        <button 
+                          type="button" 
+                          className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 hover:opacity-100 transition-opacity z-10"
+                          onClick={() => assetFileInputRef.current?.click()}
+                        >
+                          {assetSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                        </button>
+                        <input type="file" ref={assetFileInputRef} className="hidden" onChange={handleAssetFileChange} />
+                        <Input 
+                          placeholder={assetSourceType === 'File' ? "Click icon to upload..." : "https://..."} 
+                          value={prodFile.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : prodFile}
+                          onChange={e => setProdFile(e.target.value)}
+                          className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" 
+                          readOnly={assetSourceType === 'File'}
+                          onClick={() => assetSourceType === 'File' && assetFileInputRef.current?.click()}
+                        />
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Target Hub</Label>
-                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={prodPlacement} onChange={e => setProdPlacement(e.target.value as any)} disabled={isSaving}>
+                        <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-[#1f1610]" value={prodPlacement} onChange={e => setProdPlacement(e.target.value as any)}>
                           <option value="Hub">Root Hub (Free/Points)</option>
-                          <option value="Marketplace">Shooppy (Paid External)</option>
+                          <option value="Marketplace">Shooppy (External)</option>
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[#1f1610]">{prodPlacement === 'Hub' ? 'Protocol File' : 'Shop URL'}</Label>
-                        <div className="relative">
-                          {prodPlacement === 'Hub' ? (
-                            <button 
-                              type="button" 
-                              className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30 hover:opacity-100 transition-opacity z-10"
-                              onClick={() => assetFileInputRef.current?.click()}
-                            >
-                              <Upload className="h-4 w-4" />
-                            </button>
-                          ) : (
-                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
-                          )}
-                          
-                          <input 
-                            type="file" 
-                            ref={assetFileInputRef} 
-                            className="hidden" 
-                            onChange={handleAssetFileChange}
-                          />
-
-                          <Input 
-                            placeholder={prodPlacement === 'Hub' ? "Upload asset..." : "https://..."} 
-                            value={prodFile.startsWith('data:') ? 'PROTOCOL_FILE_LOADED' : prodFile}
-                            onChange={e => setProdFile(e.target.value)}
-                            className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" 
-                            disabled={isSaving}
-                            readOnly={prodPlacement === 'Hub'}
-                            onClick={() => prodPlacement === 'Hub' && assetFileInputRef.current?.click()}
-                          />
-                        </div>
+                        <Label className="text-[#1f1610]">Cover Image URL</Label>
+                        <Input placeholder="https://..." value={prodImg} onChange={e => setProdImg(e.target.value)} className="h-16 bg-white text-[#1f1610]" />
                       </div>
                     </div>
+
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label className="text-[#1f1610]">Level Req.</Label>
-                        <Input type="number" min={1} value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" disabled={isSaving} />
+                        <Label className="text-[#1f1610]">Points Price</Label>
+                        <Input type="number" value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[#1f1610]">Points Price</Label>
-                        <Input type="number" min={0} value={prodPrice} onChange={e => setProdPrice(Number(e.target.value))} className="h-16 font-black text-2xl text-center bg-white text-[#1f1610]" disabled={isSaving} />
+                        <Label className="text-[#1f1610]">Level Req.</Label>
+                        <Input type="number" value={prodLevel} onChange={e => setProdLevel(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
                       </div>
                     </div>
-                    <div className="flex gap-4">
-                      {editingProduct && <Button variant="ghost" onClick={() => { setEditingProduct(null); setProdTitle(""); setProdDesc(""); setProdFile(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]" disabled={isSaving}>Cancel</Button>}
-                      <Button onClick={handleSaveProduct} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all" disabled={isSaving}>
-                        {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
-                        {editingProduct ? 'Sync Protocol' : 'Deploy Asset'}
-                      </Button>
-                    </div>
+                    
+                    <Button onClick={handleSaveProduct} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>DEPLOY ASSET</Button>
                   </div>
               </Card>
 
-              <div className="space-y-8">
-                <div className="flex items-center justify-between px-6">
-                   <h3 className="text-2xl font-black uppercase text-foreground italic">Current Inventory</h3>
-                   <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Active Protocols</span>
+              <ScrollArea className="h-[600px]">
+                <div className="space-y-4">
+                  {shooppyProducts.map(p => (
+                    <div key={p.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
+                       <div>
+                          <h4 className="font-black text-[#1f1610] uppercase italic">{p.title}</h4>
+                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest">{p.price} PTS • LV {p.requiredLevel}</p>
+                       </div>
+                       <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('shooppyProducts', p.id)}><Trash2 /></Button>
+                    </div>
+                  ))}
                 </div>
-                <ScrollArea className="h-[650px] pr-6">
-                  <div className="space-y-6">
-                    {shooppyProducts.map((p: any, idx: number) => (
-                      <div key={p.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
-                        <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic shrink-0">{p.type.slice(0,1)}</div>
-                          <div>
-                            <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{p.title}</h4>
-                            <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">{p.placement} • LV {p.requiredLevel} • {p.price} PTS</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex flex-col gap-1 mr-4">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'up')} disabled={idx === 0 || isSaving}><ArrowUp className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveProduct(p.id, 'down')} disabled={idx === shooppyProducts.length - 1 || isSaving}><ArrowDown className="h-4 w-4" /></Button>
-                          </div>
-                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditProduct(p)} disabled={isSaving}><Edit3 className="h-5 w-5" /></Button>
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('shooppyProducts', p.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              </ScrollArea>
             </div>
           </TabsContent>
 
-          {/* Wedio Tab */}
           <TabsContent value="wedio" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Video className="h-8 w-8 text-primary" /> {editingWebin ? 'Edit Portal' : 'Wedio Injector'}</CardTitle>
+                  <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Wedio Injector</CardTitle>
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Portal Title</Label>
-                      <Input placeholder="Strategy Masterclass" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
+                      <Input placeholder="Strategy Masterclass" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                     </div>
+                    
+                    <div className="flex flex-col gap-4">
+                       <Label className="text-[#1f1610]">Portal Source</Label>
+                       <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
+                          <Button 
+                            variant={webinSourceType === 'Link' ? 'default' : 'ghost'} 
+                            onClick={() => setWebinSourceType('Link')} 
+                            className={cn("flex-1 rounded-xl h-12 font-black", webinSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                          >LINK</Button>
+                          <Button 
+                            variant={webinSourceType === 'File' ? 'default' : 'ghost'} 
+                            onClick={() => setWebinSourceType('File')} 
+                            className={cn("flex-1 rounded-xl h-12 font-black", webinSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                          >UPLOAD</Button>
+                       </div>
+                    </div>
+
                     <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Video / Portal URL</Label>
-                      <Input placeholder="https://..." value={webinContent} onChange={e => setWebinContent(e.target.value)} className="h-16 font-bold text-sm rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
+                      <Label className="text-[#1f1610]">{webinSourceType === 'File' ? 'Upload Video' : 'Portal / YouTube URL'}</Label>
+                      <div className="relative">
+                        <button type="button" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" onClick={() => webinFileInputRef.current?.click()}>
+                          {webinSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                        </button>
+                        <input type="file" ref={webinFileInputRef} className="hidden" accept="video/*" onChange={handleWebinFileChange} />
+                        <Input 
+                          placeholder={webinSourceType === 'File' ? "Click icon to upload video..." : "https://..."} 
+                          value={webinContent.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : webinContent}
+                          onChange={e => setWebinContent(e.target.value)}
+                          className="h-16 pl-12 bg-white text-[#1f1610]" 
+                          readOnly={webinSourceType === 'File'}
+                          onClick={() => webinSourceType === 'File' && webinFileInputRef.current?.click()}
+                        />
+                      </div>
                     </div>
-                    <div className="flex gap-4">
-                       {editingWebin && <Button variant="ghost" onClick={() => { setEditingWebin(null); setWebinTitle(""); setWebinContent(""); }} className="flex-1 h-20 rounded-full border-4 border-[#1f1610]" disabled={isSaving}>Cancel</Button>}
-                       <Button onClick={handleSaveWebin} className="flex-1 h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl" disabled={isSaving}>
-                         {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
-                         {editingWebin ? 'Sync Portal' : 'Inject Portal'}
-                       </Button>
-                    </div>
+
+                    <Button onClick={handleSaveWebin} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>INJECT PORTAL</Button>
                   </div>
                </Card>
 
-               <div className="space-y-8">
-                  <div className="flex items-center justify-between px-6">
-                    <h3 className="text-2xl font-black uppercase text-foreground italic">Wedio Portals</h3>
-                    <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Active Links</span>
-                  </div>
-                  <ScrollArea className="h-[650px] pr-6">
-                    <div className="space-y-6">
-                      {webins.map((w: any, idx: number) => (
-                        <div key={w.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
-                          <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic shrink-0">W</div>
-                            <div>
-                              <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{w.title}</h4>
-                              <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest truncate max-w-[200px]">{w.content}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex flex-col gap-1 mr-4">
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'up')} disabled={idx === 0 || isSaving}><ArrowUp className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => handleMoveWebin(w.id, 'down')} disabled={idx === webins.length - 1 || isSaving}><ArrowDown className="h-4 w-4" /></Button>
-                            </div>
-                            <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => startEditWebin(w)} disabled={isSaving}><Edit3 className="h-5 w-5" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('resources', w.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
-                          </div>
+               <ScrollArea className="h-[600px]">
+                 <div className="space-y-4">
+                   {webins.map(w => (
+                     <div key={w.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
+                        <div>
+                          <h4 className="font-black text-[#1f1610] uppercase italic">{w.title}</h4>
+                          <p className="text-[9px] font-black text-[#1f1610]/40 uppercase tracking-widest truncate max-w-[200px]">{w.content}</p>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-               </div>
+                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('resources', w.id)}><Trash2 /></Button>
+                     </div>
+                   ))}
+                 </div>
+               </ScrollArea>
              </div>
           </TabsContent>
 
-          {/* Reward Tab */}
           <TabsContent value="rewards" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><Gift className="h-8 w-8 text-primary" /> Treasure Injector</CardTitle>
+                  <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Treasure Injector</CardTitle>
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Target Milestone Week</Label>
-                      <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-sm text-[#1f1610]" value={rewardWeek} onChange={e => setRewardWeek(Number(e.target.value))} disabled={isSaving}>
-                        <option value={1}>Week 1 (Day 7)</option>
-                        <option value={2}>Week 2 (Day 14)</option>
-                        <option value={3}>Week 3 (Day 21)</option>
-                        <option value={4}>Week 4 (Day 28)</option>
+                      <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-[#1f1610]" value={rewardWeek} onChange={e => setRewardWeek(Number(e.target.value))}>
+                        <option value={1}>Week 1</option>
+                        <option value={2}>Week 2</option>
+                        <option value={3}>Week 3</option>
+                        <option value={4}>Week 4</option>
                       </select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Treasure Title</Label>
-                      <Input placeholder="Exclusive Strategy Kit" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black text-lg rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
+                      <Input placeholder="Strategy Kit" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Treasure Description</Label>
-                      <Textarea placeholder="What's inside the chest..." value={rewardDesc} onChange={e => setRewardWeekDesc(e.target.value)} className="min-h-[120px] rounded-[2rem] p-6 bg-white text-[#1f1610]" disabled={isSaving} />
+
+                    <div className="flex flex-col gap-4">
+                       <Label className="text-[#1f1610]">Treasure Source</Label>
+                       <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
+                          <Button 
+                            variant={rewardSourceType === 'Link' ? 'default' : 'ghost'} 
+                            onClick={() => setRewardSourceType('Link')} 
+                            className={cn("flex-1 rounded-xl h-12 font-black", rewardSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                          >LINK</Button>
+                          <Button 
+                            variant={rewardSourceType === 'File' ? 'default' : 'ghost'} 
+                            onClick={() => setRewardSourceType('File')} 
+                            className={cn("flex-1 rounded-xl h-12 font-black", rewardSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
+                          >UPLOAD</Button>
+                       </div>
                     </div>
+
                     <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Treasure Link/File URL</Label>
+                      <Label className="text-[#1f1610]">{rewardSourceType === 'File' ? 'Upload Asset' : 'Treasure Link'}</Label>
                       <div className="relative">
-                        <Upload className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
-                        <Input placeholder="https://..." value={rewardFile} onChange={e => setRewardWeekFile(e.target.value)} className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" disabled={isSaving} />
+                        <button type="button" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" onClick={() => rewardFileInputRef.current?.click()}>
+                          {rewardSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+                        </button>
+                        <input type="file" ref={rewardFileInputRef} className="hidden" onChange={handleRewardFileChange} />
+                        <Input 
+                          placeholder={rewardSourceType === 'File' ? "Click icon to upload asset..." : "https://..."} 
+                          value={rewardFile.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : rewardFile}
+                          onChange={e => setRewardWeekFile(e.target.value)}
+                          className="h-16 pl-12 bg-white text-[#1f1610]" 
+                          readOnly={rewardSourceType === 'File'}
+                          onClick={() => rewardSourceType === 'File' && rewardFileInputRef.current?.click()}
+                        />
                       </div>
                     </div>
-                    <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black text-xl uppercase shadow-2xl hover:scale-[1.02] transition-all" disabled={isSaving}>
-                      {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
-                      Inject Treasure Reward
-                    </Button>
+                    <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>INJECT TREASURE</Button>
                   </div>
                </Card>
 
-               <div className="space-y-8">
-                  <div className="flex items-center justify-between px-6">
-                    <h3 className="text-2xl font-black uppercase text-foreground italic">Deployed Treasures</h3>
-                    <span className="text-[10px] font-black uppercase text-primary/40 tracking-widest">Roadmap Milestones</span>
-                  </div>
-                  <ScrollArea className="h-[650px] pr-6">
-                    <div className="space-y-6">
-                      {globalRewards.map((r: any) => (
-                        <div key={r.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg">
-                          <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic shrink-0">W{r.week}</div>
-                            <div>
-                              <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{r.title}</h4>
-                              <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">Milestone Treasure</p>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('rewards', r.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
+               <ScrollArea className="h-[600px]">
+                 <div className="space-y-4">
+                   {globalRewards.map(r => (
+                     <div key={r.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
+                        <div>
+                          <h4 className="font-black text-[#1f1610] uppercase italic">{r.title}</h4>
+                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest">W{r.week} Milestone</p>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-               </div>
-             </div>
-          </TabsContent>
-
-          {/* Quiz Tab */}
-          <TabsContent value="quizzo" className="space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-700">
-             <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-3xl font-black uppercase flex items-center gap-5 italic text-[#1f1610]"><BookOpen className="h-8 w-8 text-primary" /> Quizzo Protocol Architect</CardTitle>
-                  <div className="flex gap-4">
-                    {editingQuizId && (
-                      <Button onClick={() => { setEditingQuizId(null); setQuizTitle(""); setDraftQuestions([{ id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }]); }} variant="ghost" className="h-16 px-10 rounded-full border-4 border-[#1f1610] font-black uppercase text-xs" disabled={isSaving}>Cancel Edit</Button>
-                    )}
-                    <Button onClick={handleSaveQuiz} className="h-16 px-12 rounded-full bg-[#1f1610] text-primary font-black text-sm uppercase shadow-2xl" disabled={isSaving}>
-                      {isSaving ? <Loader2 className="h-6 w-6 animate-spin mr-3" /> : null}
-                      {editingQuizId ? 'Synchronize Protocol' : 'Deploy Quiz'}
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                  <div className="lg:col-span-2 space-y-8">
-                    <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Protocol Title</Label>
-                      <Input placeholder="Verification Level 01" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} className="h-16 font-black text-xl rounded-2xl bg-white text-[#1f1610]" disabled={isSaving} />
-                    </div>
-                    
-                    <div className="p-10 bg-[#1f1610]/5 rounded-[3rem] border-4 border-[#1f1610]/10 space-y-8">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="w-12 h-12 bg-[#1f1610] text-primary rounded-xl flex items-center justify-center font-black text-2xl italic leading-none">{currentQIdx + 1}</span>
-                          <span className="text-[10px] font-black uppercase text-[#1f1610] tracking-widest">Constructing Question</span>
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" className="text-red-500 rounded-full h-10 w-10" onClick={() => {
-                          const newDrafts = draftQuestions.filter((_, i) => i !== currentQIdx);
-                          setDraftQuestions(newDrafts);
-                          setCurrentQIdx(Math.max(0, currentQIdx - 1));
-                        }} disabled={draftQuestions.length <= 1 || isSaving}><Trash2 className="h-5 w-5" /></Button>
-                      </div>
-
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-3 gap-6">
-                          <select className="h-16 bg-white text-[#1f1610] border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs" value={draftQuestions[currentQIdx].type} onChange={e => updateCurrentQ('type', e.target.value as any)} disabled={isSaving}>
-                            <option value="multiple">Multiple Choice</option>
-                            <option value="boolean">True/False</option>
-                            <option value="id">ID Code</option>
-                          </select>
-                          <Input placeholder="Question text..." value={draftQuestions[currentQIdx].question} onChange={e => updateCurrentQ('question', e.target.value)} className="col-span-2 h-16 bg-white text-[#1f1610] font-bold" disabled={isSaving} />
-                        </div>
-
-                        {draftQuestions[currentQIdx].type === 'multiple' && (
-                          <div className="grid grid-cols-2 gap-4">
-                            {draftQuestions[currentQIdx].options?.map((opt, i) => (
-                              <div key={i} className="flex gap-2 items-center">
-                                <span className="text-[10px] font-black opacity-20">{i+1}</span>
-                                <Input placeholder={`Option ${i+1}`} value={opt} onChange={e => {
-                                  const newOpts = [...(draftQuestions[currentQIdx].options || [])];
-                                  newOpts[i] = e.target.value;
-                                  updateCurrentQ('options', newOpts);
-                                }} className="h-12 bg-white text-[#1f1610] text-xs" disabled={isSaving} />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="space-y-2">
-                          <Label className="text-[#1f1610] text-[10px]">CORRECT STRATEGIC RESPONSE</Label>
-                          {draftQuestions[currentQIdx].type === 'id' ? (
-                            <Input placeholder="Answer code..." value={draftQuestions[currentQIdx].answer} onChange={e => updateCurrentQ('answer', e.target.value)} className="h-14 bg-white text-[#1f1610] text-sm" disabled={isSaving} />
-                          ) : (
-                            <select className="w-full h-14 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-xs text-[#1f1610]" value={draftQuestions[currentQIdx].answer} onChange={e => updateCurrentQ('answer', e.target.value)} disabled={isSaving}>
-                              <option value="">Select Correct Answer</option>
-                              {(draftQuestions[currentQIdx].type === 'multiple' ? draftQuestions[currentQIdx].options : ["True", "False"])?.map((opt, i) => (
-                                opt && <option key={i} value={opt}>{opt}</option>
-                              ))}
-                            </select>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <Label className="text-[#1f1610] font-black uppercase tracking-widest text-[10px]">Protocol Layout ({draftQuestions.length})</Label>
-                    <ScrollArea className="h-[400px] pr-4">
-                      <div className="space-y-3">
-                        {draftQuestions.map((q, i) => (
-                          <button key={q.id} onClick={() => setCurrentQIdx(i)} disabled={isSaving} className={cn("w-full p-4 rounded-2xl border-4 text-left transition-all flex justify-between items-center", currentQIdx === i ? "bg-[#1f1610] border-primary text-primary" : "bg-white border-[#1f1610]/5 text-[#1f1610] opacity-60 hover:opacity-100")}>
-                            <span className="font-black italic text-sm">Q{i+1}: {q.question || "Untitled"}</span>
-                            <ChevronRight className="h-4 w-4" />
-                          </button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                    <Button onClick={handleAddQuestion} className="w-full h-16 rounded-2xl bg-primary text-[#1f1610] font-black uppercase text-[10px] tracking-widest gap-2" disabled={isSaving}><Plus className="h-4 w-4" /> Add Protocol Slot</Button>
-                  </div>
-                </div>
-             </Card>
-
-             <div className="space-y-10">
-                <div className="flex items-center justify-between px-8">
-                   <h3 className="text-3xl font-black uppercase text-foreground italic">Deployed Quiz Protocols</h3>
-                   <span className="text-[10px] font-black uppercase text-primary/40 tracking-[0.4em]">Active Verification Grids</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   {globalQuizzes.map((q: any) => (
-                     <Card key={q.id} className="p-8 bg-mocha-cream rounded-[3rem] border-4 border-primary/10 flex items-center justify-between group shadow-lg hover:border-primary/40 transition-all">
-                        <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 bg-[#1f1610] text-primary rounded-2xl flex items-center justify-center font-black text-xs italic">Q</div>
-                          <div>
-                            <h4 className="font-black text-[#1f1610] uppercase italic text-lg line-clamp-1">{q.title}</h4>
-                            <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">{q.questionCount} Questions • Active</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10 rounded-full" onClick={() => handleEditQuiz(q)} disabled={isSaving}><Edit3 className="h-5 w-5" /></Button>
-                          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-500/10 rounded-full" onClick={() => handleDeleteDoc('quizzes', q.id)} disabled={isSaving}><Trash2 className="h-5 w-5" /></Button>
-                        </div>
-                     </Card>
-                   ))}
-                </div>
-             </div>
-          </TabsContent>
-
-          {/* Continuity Tab (Backup/Maintenance) */}
-          <TabsContent value="maintenance" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                <Card className="rounded-[3rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl space-y-8 flex flex-col justify-between">
-                   <div className="space-y-6">
-                      <div className="w-16 h-16 bg-[#1f1610] rounded-2xl flex items-center justify-center shadow-lg">
-                        <HardDrive className="h-8 w-8 text-primary" />
-                      </div>
-                      <div className="space-y-2">
-                        <CardTitle className="text-2xl font-black uppercase italic text-[#1f1610]">In-System Archive</CardTitle>
-                        <p className="text-[10px] font-bold text-[#1f1610]/60 uppercase tracking-widest leading-relaxed italic">Download encrypted grid data to local strategist disk for fast restoration.</p>
-                      </div>
-                   </div>
-                   <Button onClick={() => handleExportBackup('Local')} disabled={isBackingUp} className="w-full h-16 rounded-full bg-[#1f1610] text-primary font-black uppercase text-xs shadow-xl gap-3">
-                     {isBackingUp ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}
-                     GENERATE ARCHIVE
-                   </Button>
-                </Card>
-
-                <Card className="rounded-[3rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl space-y-8 flex flex-col justify-between">
-                   <div className="space-y-6">
-                      <div className="w-16 h-16 bg-[#1f1610] rounded-2xl flex items-center justify-center shadow-lg">
-                        <Cloud className="h-8 w-8 text-primary" />
-                      </div>
-                      <div className="space-y-2">
-                        <CardTitle className="text-2xl font-black uppercase italic text-[#1f1610]">Cloud Sync Offsite</CardTitle>
-                        <p className="text-[10px] font-bold text-[#1f1610]/60 uppercase tracking-widest leading-relaxed italic">Dispatch encrypted blocks to offsite cloud registry for geo-redundant durability.</p>
-                      </div>
-                   </div>
-                   <Button onClick={() => handleExportBackup('Cloud')} disabled={isBackingUp} className="w-full h-16 rounded-full bg-[#1f1610] text-primary font-black uppercase text-xs shadow-xl gap-3">
-                     {isBackingUp ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCcw className="h-5 w-5" />}
-                     DISPATCH TO CLOUD
-                   </Button>
-                </Card>
-
-                <Card className="rounded-[3rem] border-8 border-dashed border-[#1f1610]/20 bg-[#1f1610] p-10 shadow-2xl space-y-8 flex flex-col justify-between">
-                   <div className="space-y-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center shadow-lg">
-                        <OctagonAlert className="h-8 w-8 text-primary" />
-                      </div>
-                      <div className="space-y-2">
-                        <CardTitle className="text-2xl font-black uppercase italic text-primary">Legacy Restore</CardTitle>
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-relaxed italic">DANGER: Injecting archive will overwrite current state. Zero data-loss protocol recommended.</p>
-                      </div>
-                   </div>
-                   <div className="space-y-4">
-                      <input type="file" accept=".json" ref={restoreRef} onChange={handleRestoreBackup} className="hidden" />
-                      <Button onClick={() => restoreRef.current?.click()} disabled={isRestoring} className="w-full h-16 rounded-full bg-primary text-[#1f1610] font-black uppercase text-xs shadow-xl gap-3">
-                        {isRestoring ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
-                        INJECT ARCHIVE
-                      </Button>
-                   </div>
-                </Card>
-             </div>
-
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <Card className="rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-12 shadow-2xl space-y-10">
-                   <div className="flex items-center gap-4 text-[#1f1610]">
-                      <Activity className="h-10 w-10 text-primary" />
-                      <h3 className="text-4xl font-black uppercase italic tracking-tighter">Continuity Metrics</h3>
-                   </div>
-                   <div className="grid grid-cols-2 gap-8">
-                      <div className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 text-center space-y-2">
-                        <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">Archived Records</p>
-                        <p className="text-5xl font-black text-[#1f1610] italic tracking-tighter">24k+</p>
-                      </div>
-                      <div className="p-8 bg-[#1f1610]/5 rounded-[2.5rem] border-2 border-[#1f1610]/10 text-center space-y-2">
-                        <p className="text-[10px] font-black uppercase text-[#1f1610]/40 tracking-widest">RTO (EST.)</p>
-                        <p className="text-5xl font-black text-[#1f1610] italic tracking-tighter">~12s</p>
-                      </div>
-                   </div>
-                </Card>
-
-                <Card className="rounded-[4rem] border-8 border-red-600/10 bg-red-600/5 p-12 shadow-2xl space-y-10">
-                   <div className="flex items-center gap-4 text-red-600">
-                      <TriangleAlert className="h-10 w-10" />
-                      <h3 className="text-4xl font-black uppercase italic tracking-tighter">Disaster Protocol</h3>
-                   </div>
-                   <div className="space-y-4">
-                      {[
-                        "Initiate Lockdown: Suspend all Hub injections.",
-                        "Flush Memory: Clear active session cache.",
-                        "Verify Integrity: Run checksum on target archive.",
-                        "Inject Archive: Re-establish state via Continuity Hub.",
-                        "Verify State: Authenticate core strategist profiles."
-                      ].map((step, i) => (
-                        <div key={i} className="flex items-center gap-6 p-4 bg-white/40 rounded-2xl border-2 border-red-600/10">
-                           <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-black text-lg italic shrink-0 leading-none">0{i+1}</div>
-                           <p className="text-xs font-black uppercase text-red-600/80 tracking-widest">{step}</p>
-                        </div>
-                      ))}
-                   </div>
-                </Card>
-             </div>
-          </TabsContent>
-
-          {/* FAQ Tab */}
-          <TabsContent value="system" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                <Card className="rounded-[4rem] lg:col-span-1 border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl space-y-8">
-                   <CardTitle className="text-2xl font-black uppercase italic text-[#1f1610]">Inquiry Injector</CardTitle>
-                   <div className="space-y-4">
-                      <Input placeholder="Inquiry Question..." value={faqQ} onChange={e => setFaqQ(e.target.value)} className="h-16 rounded-2xl bg-white text-[#1f1610] font-bold text-sm" disabled={isSaving} />
-                      <Textarea placeholder="Protocol Response..." value={faqA} onChange={e => setFaqA(e.target.value)} className="min-h-[120px] rounded-[2rem] bg-white text-[#1f1610] font-bold text-sm" disabled={isSaving} />
-                      <Button onClick={async () => {
-                        if (isSaving) return;
-                        setIsSaving(true);
-                        const faqData = { question: faqQ, answer: faqA };
-                        try {
-                          await addDoc(collection(db, 'faqs'), faqData);
-                          setFaqQ(""); setFaqA(""); toast({ title: "FAQ Injected" }); 
-                        } catch (error: any) {
-                          const permissionError = new FirestorePermissionError({
-                            path: 'faqs',
-                            operation: 'create',
-                            requestResourceData: faqData,
-                          } satisfies SecurityRuleContext);
-                          errorEmitter.emit('permission-error', permissionError);
-                        } finally {
-                          setIsSaving(false);
-                        }
-                      }} className="w-full h-16 rounded-2xl bg-[#1f1610] text-primary font-black uppercase text-xs" disabled={isSaving}>Inject FAQ</Button>
-                   </div>
-                </Card>
-                
-                <Card className="lg:col-span-2 rounded-[4rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl flex flex-col h-[600px]">
-                   <CardTitle className="text-2xl font-black uppercase text-[#1f1610] mb-8">Active System FAQs</CardTitle>
-                   <ScrollArea className="flex-1 pr-4">
-                     <div className="space-y-4">
-                       {faqs.map((f: any) => (
-                          <div key={f.id} className="p-6 bg-white/50 rounded-[2rem] border-2 border-[#1f1610]/5 flex justify-between items-center group">
-                             <div className="flex-1 mr-4">
-                               <p className="font-black text-[#1f1610] uppercase text-xs italic line-clamp-1">{f.question}</p>
-                               <p className="text-[9px] font-bold text-[#1f1610]/40 mt-1 truncate">{f.answer}</p>
-                             </div>
-                             <Button variant="ghost" size="icon" className="text-red-500 rounded-full shrink-0" onClick={() => handleDeleteDoc('faqs', f.id)} disabled={isSaving}><Trash2 className="h-4 w-4" /></Button>
-                          </div>
-                       ))}
+                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('rewards', r.id)}><Trash2 /></Button>
                      </div>
-                   </ScrollArea>
+                   ))}
+                 </div>
+               </ScrollArea>
+             </div>
+          </TabsContent>
+
+          <TabsContent value="maintenance" className="space-y-12">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <Card className="rounded-[3rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl text-center space-y-8">
+                   <div className="w-16 h-16 bg-[#1f1610] rounded-2xl flex items-center justify-center mx-auto"><HardDrive className="h-8 w-8 text-primary" /></div>
+                   <h3 className="text-2xl font-black uppercase italic text-[#1f1610]">In-System Archive</h3>
+                   <Button onClick={() => handleExportBackup('Local')} disabled={isBackingUp} className="w-full h-16 rounded-full bg-[#1f1610] text-primary font-black uppercase text-xs">GENERATE ARCHIVE</Button>
+                </Card>
+                <Card className="rounded-[3rem] border-8 border-primary/10 bg-mocha-cream p-10 shadow-2xl text-center space-y-8">
+                   <div className="w-16 h-16 bg-[#1f1610] rounded-2xl flex items-center justify-center mx-auto"><Cloud className="h-8 w-8 text-primary" /></div>
+                   <h3 className="text-2xl font-black uppercase italic text-[#1f1610]">Cloud Sync</h3>
+                   <Button onClick={() => handleExportBackup('Cloud')} disabled={isBackingUp} className="w-full h-16 rounded-full bg-[#1f1610] text-primary font-black uppercase text-xs">DISPATCH TO CLOUD</Button>
+                </Card>
+                <Card className="rounded-[3rem] border-8 border-dashed border-[#1f1610]/20 bg-[#1f1610] p-10 shadow-2xl text-center space-y-8">
+                   <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto"><OctagonAlert className="h-8 w-8 text-primary" /></div>
+                   <h3 className="text-2xl font-black uppercase italic text-primary">Inject Archive</h3>
+                   <input type="file" accept=".json" ref={restoreRef} onChange={handleRestoreBackup} className="hidden" />
+                   <Button onClick={() => restoreRef.current?.click()} disabled={isRestoring} className="w-full h-16 rounded-full bg-primary text-[#1f1610] font-black uppercase text-xs">INJECT ARCHIVE</Button>
                 </Card>
              </div>
           </TabsContent>
         </Tabs>
       </main>
-
-      {/* Task Edit Dialog */}
-      <Dialog open={!!editingTask} onOpenChange={() => !isSaving && setEditingTask(null)}>
-         <DialogContent className="rounded-[3rem] border-8 border-primary/20 bg-mocha-cream p-12 max-w-xl shadow-2xl">
-            <DialogHeader>
-               <DialogTitle className="text-3xl font-black text-[#1f1610] uppercase italic tracking-tighter text-center">Edit Protocol</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-8 mt-6">
-               <div className="grid grid-cols-4 gap-6">
-                  <div className="space-y-2">
-                     <Label className="text-[#1f1610] text-[9px]">HUB DAY</Label>
-                     <Input 
-                        type="number" 
-                        value={editingTask?.day || 1} 
-                        onChange={e => setEditingTask({ ...editingTask, day: Number(e.target.value) })} 
-                        className="h-16 text-center font-black text-2xl bg-white text-[#1f1610] rounded-xl flex items-center justify-center leading-none"
-                        disabled={isSaving}
-                     />
-                  </div>
-                  <div className="col-span-3 space-y-2">
-                     <Label className="text-[#1f1610] text-[9px]">HEADLINE</Label>
-                     <Input 
-                        value={editingTask?.title || ""} 
-                        onChange={e => setEditingTask({ ...editingTask, title: e.target.value })} 
-                        className="h-16 bg-white text-[#1f1610] font-black text-lg rounded-xl flex items-center px-6 leading-none"
-                        disabled={isSaving}
-                     />
-                  </div>
-               </div>
-               <div className="space-y-2">
-                  <Label className="text-[#1f1610] text-[9px]">INSTRUCTIONS</Label>
-                  <Textarea 
-                     value={editingTask?.description || ""} 
-                     onChange={e => setEditingTask({ ...editingTask, description: e.target.value })} 
-                     className="min-h-[120px] bg-white text-[#1f1610] font-bold rounded-2xl p-6 leading-relaxed"
-                     disabled={isSaving}
-                  />
-               </div>
-            </div>
-            <DialogFooter className="mt-10 gap-4">
-               <Button variant="ghost" className="rounded-full h-14 font-black uppercase text-xs" onClick={() => setEditingTask(null)} disabled={isSaving}>Cancel</Button>
-               <Button className="rounded-full h-14 px-10 bg-[#1f1610] text-primary font-black uppercase text-sm" onClick={handleUpdateExistingTask} disabled={isSaving}>
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-3" /> : null}
-                  Synchronize Changes
-               </Button>
-            </DialogFooter>
-         </DialogContent>
-      </Dialog>
     </div>
   );
 }

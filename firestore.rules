@@ -17,8 +17,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.email == 'nicolaskheidenn@gmail.com';
     }
 
-    // User Profile Rules: Users can read all (for wall/leaderboard), but write only their own.
-    // Master Host can update specific flags if needed.
+    // User Profile Rules: PUBLIC READ, but write only their own.
     match /users/{userId} {
       allow read: if true;
       allow create: if isOwner(userId);
@@ -38,7 +37,7 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data.userId) || isHost();
     }
 
-    // Master Host Protected Collections: GLOBAL READ / HOST-ONLY WRITE
+    // Master Host Protected Collections: GLOBAL PUBLIC READ / HOST-ONLY WRITE
     match /tasks/{id} { 
       allow read: if true; 
       allow write: if isHost(); 
