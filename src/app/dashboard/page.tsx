@@ -648,8 +648,8 @@ export default function DashboardPage() {
                         <div className="p-8 pb-0">
                            <Badge className="bg-primary text-background font-black uppercase text-[11px] tracking-widest rounded-full h-10 px-6 shadow-xl border-4 border-primary/20">{p.type}</Badge>
                         </div>
-                        <div className="flex-1 flex items-center justify-center p-12 min-h-[350px]">
-                           <h4 className="text-6xl font-black text-foreground uppercase tracking-tighter italic text-center leading-none">{p.title}</h4>
+                        <div className="flex-1 flex items-center justify-center p-8 md:p-12 min-h-[350px]">
+                           <h4 className="text-4xl md:text-5xl font-black text-foreground uppercase tracking-tighter italic text-center leading-tight break-words">{p.title}</h4>
                         </div>
                         <div className="p-12 pt-0 space-y-8">
                            {p.description && <p className="text-sm font-bold text-foreground/40 uppercase tracking-widest text-center line-clamp-2">{p.description}</p>}
@@ -767,7 +767,7 @@ export default function DashboardPage() {
                             disabled={isSharingResource}
                          >
                             <option value="AI_Prompt">AI PROMPT LAB</option>
-                            <option value="T&Triks">T&TRIKS ARCHIVE</option>
+                            <option value="T&TRIKS ARCHIVE">T&TRIKS ARCHIVE</option>
                          </select>
                       </div>
 
