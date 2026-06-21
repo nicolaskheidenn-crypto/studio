@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -6,10 +7,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
-  Trophy, ArrowRight, Lock, ShieldCheck, 
-  Flame, Zap, BarChart3, Gift, Download, Sparkles, Target, Coffee, Loader2
+  Trophy, ArrowRight, Lock, 
+  Flame, Zap, BarChart3, Gift, Target, Loader2
 } from "lucide-react";
 import { useState, useEffect, useMemo, useRef, memo } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -116,7 +116,6 @@ export default function TaskDoPage() {
 
   const [showAward, setShowAward] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeReward, setActiveReward] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [shiningDots, setShiningDots] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -167,9 +166,11 @@ export default function TaskDoPage() {
   const handleClaimTreasure = (reward: any) => {
     if (!uid || isProcessing) return;
     setIsProcessing(true);
-    claimWeeklyReward(uid, reward.week);
-    setActiveReward(reward);
-    toast({ title: "Treasure Secured" });
+    claimWeeklyReward(uid, reward.week, reward.pointsReward || 500, reward.xpReward || 250);
+    toast({ 
+      title: "Treasure Secured", 
+      description: `Gained ${reward.pointsReward} Points and ${reward.xpReward} XP Milestone Bonus.`
+    });
     setTimeout(() => setIsProcessing(false), 800);
   };
 
@@ -302,7 +303,7 @@ export default function TaskDoPage() {
                               isProcessing && "cursor-not-allowed opacity-80"
                             )}
                           >
-                            {isWeekEnd && isPast && !isClaimed ? (
+                            {isWeekEnd && isPast && !isClaimed && reward ? (
                                <Gift className="h-14 w-14 animate-bounce text-white" />
                             ) : (
                                <span className={cn(

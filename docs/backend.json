@@ -39,10 +39,11 @@
         "week": { "type": "number" },
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "fileUrl": { "type": "string" },
+        "pointsReward": { "type": "number" },
+        "xpReward": { "type": "number" },
         "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": ["week", "title", "fileUrl"]
+      "required": ["week", "title", "pointsReward", "xpReward"]
     },
     "Resource": {
       "title": "Strategic Resource",
@@ -86,6 +87,7 @@
         "title": { "type": "string" },
         "description": { "type": "string" },
         "imageUrl": { "type": "string" },
+        "fileUrl": { "type": "string" },
         "price": { "type": "number" },
         "type": { "type": "string", "enum": ["Bundle", "Template", "eBook"] },
         "placement": { "type": "string", "enum": ["Hub", "Marketplace"] }

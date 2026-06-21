@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navigation } from "@/components/Navigation";
@@ -10,17 +11,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { 
   Key, ShieldAlert, Trash2, Award, BookOpen, 
-  Newspaper, ShoppingBag, MessageSquare, 
-  Plus, Coins, ListChecks, Gift,
-  ChevronLeft, ChevronRight, Minus, CircleHelp, Upload, Link as LinkIcon,
-  Database, Download, RefreshCcw, ShieldCheck, OctagonAlert, Loader2,
-  Users, Zap, Activity, Edit3, Save, X, ArrowUp, ArrowDown, Video, HardDrive, Cloud, TriangleAlert, FileCheck
+  Newspaper, ShoppingBag, 
+  Plus, ListChecks, Gift,
+  ChevronRight, CircleHelp,
+  Users, Zap, Edit3, X, Video, HardDrive, Cloud, OctagonAlert, Loader2
 } from "lucide-react";
-import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, query, orderBy, updateDoc, where } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
@@ -44,18 +44,7 @@ export default function AdminPage() {
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const restoreRef = useRef<HTMLInputElement>(null);
-  const assetFileInputRef = useRef<HTMLInputElement>(null);
-  const webinFileInputRef = useRef<HTMLInputElement>(null);
-  const rewardFileInputRef = useRef<HTMLInputElement>(null);
-  const newsFileInputRef = useRef<HTMLInputElement>(null);
   
-  // Source Type Toggles
-  const [assetSourceType, setAssetSourceType] = useState<'Link' | 'File'>('Link');
-  const [webinSourceType, setWebinSourceType] = useState<'Link' | 'File'>('Link');
-  const [rewardSourceType, setRewardSourceType] = useState<'Link' | 'File'>('Link');
-  const [newsSourceType, setNewsSourceType] = useState<'Link' | 'File'>('Link');
-
   // Queries
   const productsRef = useMemo(() => collection(db, 'shooppyProducts'), [db]);
   const newsRef = useMemo(() => collection(db, 'newsPosts'), [db]);
@@ -113,9 +102,6 @@ export default function AdminPage() {
   const [newsContent, setNewsContent] = useState("");
   const [newsImg, setNewsImg] = useState("");
 
-  const [faqQ, setFaqQ] = useState("");
-  const [faqA, setFaqA] = useState("");
-
   const [quizTitle, setQuizTitle] = useState("");
   const [draftQuestions, setDraftQuestions] = useState<QuizQuestion[]>([
     { id: Math.random().toString(36).substr(2, 9), type: 'multiple', question: "", answer: "", options: ["", "", "", ""] }
@@ -127,10 +113,11 @@ export default function AdminPage() {
   const [bulkDraftTasks, setBulkDraftTasks] = useState([{ id: '1', title: "", description: "" }]);
   const [editingTask, setEditingTask] = useState<any>(null);
 
-  const [rewardWeek, setRewardWeek] = useState(1);
+  const [rewardWeek, setRewardWeek] = useState(7);
   const [rewardTitle, setRewardWeekTitle] = useState("");
   const [rewardDesc, setRewardWeekDesc] = useState("");
-  const [rewardFile, setRewardWeekFile] = useState("");
+  const [rewardPoints, setRewardPoints] = useState(500);
+  const [rewardXP, setRewardXP] = useState(250);
 
   const handleAuthorize = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,50 +127,6 @@ export default function AdminPage() {
     } else {
       toast({ title: "Invalid Protocol Key", variant: "destructive" });
     }
-  };
-
-  const handleAssetFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProdFile(reader.result as string);
-      toast({ title: "Protocol File Loaded", description: `${file.name} ready for injection.` });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleWebinFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setWebinContent(reader.result as string);
-      toast({ title: "Wedio Asset Loaded", description: `${file.name} ready for sync.` });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRewardFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setRewardWeekFile(reader.result as string);
-      toast({ title: "Treasure Asset Loaded", description: `${file.name} ready for deployment.` });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleNewsFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewsImg(reader.result as string);
-      toast({ title: "Broadcast Asset Loaded", description: `${file.name} ready for dispatch.` });
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleSaveProduct = () => {
@@ -273,17 +216,19 @@ export default function AdminPage() {
   const handleSaveReward = () => {
     if (isSaving || !rewardTitle) return;
     setIsSaving(true);
+    const weekNum = Math.floor(rewardWeek / 7);
     const data = {
-      week: Number(rewardWeek),
+      week: weekNum,
       title: rewardTitle,
       description: rewardDesc,
-      fileUrl: rewardFile,
+      pointsReward: Number(rewardPoints),
+      xpReward: Number(rewardXP),
       timestamp: serverTimestamp()
     };
     addDoc(collection(db, 'rewards'), data)
       .then(() => {
-        setRewardWeekTitle(""); setRewardWeekDesc(""); setRewardWeekFile("");
-        toast({ title: "Weekly Treasure Injected" });
+        setRewardWeekTitle(""); setRewardWeekDesc("");
+        toast({ title: "Milestone Reward Injected" });
       })
       .catch(async (e) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'rewards', operation: 'create', requestResourceData: data }));
@@ -369,7 +314,7 @@ export default function AdminPage() {
     if (isBackingUp) return;
     setIsBackingUp(true);
     try {
-      const collections = ['shooppyProducts', 'newsPosts', 'faqs', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
+      const collections = ['shooppyProducts', 'newsPosts', 'activityWall', 'resources', 'tasks', 'quizzes', 'users', 'rewards'];
       const backupData: any = {
         metadata: { timestamp: new Date().toISOString(), type: type, host: user?.email, version: "2.0.5-Sovereign" },
         payload: {}
@@ -417,7 +362,7 @@ export default function AdminPage() {
         }
         toast({ title: "Grid state re-established" });
       } catch (err) { toast({ title: "Restoration Breach", variant: "destructive" }); }
-      finally { setIsRestoring(false); if (restoreRef.current) restoreRef.current.value = ""; }
+      finally { setIsRestoring(false); }
     };
     reader.readAsText(file);
   };
@@ -620,43 +565,15 @@ export default function AdminPage() {
                         </select>
                       </div>
                     </div>
-                    
-                    <div className="flex flex-col gap-4">
-                       <Label className="text-[#1f1610]">Source Type</Label>
-                       <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
-                          <Button 
-                            variant={assetSourceType === 'Link' ? 'default' : 'ghost'} 
-                            onClick={() => setAssetSourceType('Link')} 
-                            className={cn("flex-1 rounded-xl h-12 font-black", assetSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                          >LINK</Button>
-                          <Button 
-                            variant={assetSourceType === 'File' ? 'default' : 'ghost'} 
-                            onClick={() => setAssetSourceType('File')} 
-                            className={cn("flex-1 rounded-xl h-12 font-black", assetSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                          >UPLOAD</Button>
-                       </div>
-                    </div>
 
                     <div className="space-y-2">
-                      <Label className="text-[#1f1610]">{assetSourceType === 'File' ? 'Upload Asset' : 'Shop/Resource URL'}</Label>
-                      <div className="relative">
-                        <button 
-                          type="button" 
-                          className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 hover:opacity-100 transition-opacity z-10"
-                          onClick={() => assetFileInputRef.current?.click()}
-                        >
-                          {assetSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
-                        </button>
-                        <input type="file" ref={assetFileInputRef} className="hidden" onChange={handleAssetFileChange} />
-                        <Input 
-                          placeholder={assetSourceType === 'File' ? "Click icon to upload..." : "https://..."} 
-                          value={prodFile.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : prodFile}
-                          onChange={e => setProdFile(e.target.value)}
-                          className="h-16 pl-12 text-xs font-black bg-white text-[#1f1610]" 
-                          readOnly={assetSourceType === 'File'}
-                          onClick={() => assetSourceType === 'File' && assetFileInputRef.current?.click()}
-                        />
-                      </div>
+                      <Label className="text-[#1f1610]">Asset Hub Link (Drive/Dropbox/Shop)</Label>
+                      <Input 
+                        placeholder="https://..." 
+                        value={prodFile}
+                        onChange={e => setProdFile(e.target.value)}
+                        className="h-16 bg-white text-[#1f1610] font-black" 
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
@@ -669,7 +586,7 @@ export default function AdminPage() {
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[#1f1610]">Cover Image URL</Label>
-                        <Input placeholder="https://..." value={prodImg} onChange={e => setProdImg(e.target.value)} className="h-16 bg-white text-[#1f1610]" />
+                        <Input placeholder="https://..." value={prodImg} onChange={e => setProdImg(e.target.value)} className="h-16 bg-white text-[#1f1610] font-black" />
                       </div>
                     </div>
 
@@ -713,39 +630,15 @@ export default function AdminPage() {
                       <Label className="text-[#1f1610]">Portal Title</Label>
                       <Input placeholder="Strategy Masterclass" value={webinTitle} onChange={e => setWebinTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                     </div>
-                    
-                    <div className="flex flex-col gap-4">
-                       <Label className="text-[#1f1610]">Portal Source</Label>
-                       <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
-                          <Button 
-                            variant={webinSourceType === 'Link' ? 'default' : 'ghost'} 
-                            onClick={() => setWebinSourceType('Link')} 
-                            className={cn("flex-1 rounded-xl h-12 font-black", webinSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                          >LINK</Button>
-                          <Button 
-                            variant={webinSourceType === 'File' ? 'default' : 'ghost'} 
-                            onClick={() => setWebinSourceType('File')} 
-                            className={cn("flex-1 rounded-xl h-12 font-black", webinSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                          >UPLOAD</Button>
-                       </div>
-                    </div>
 
                     <div className="space-y-2">
-                      <Label className="text-[#1f1610]">{webinSourceType === 'File' ? 'Upload Video' : 'Portal / YouTube URL'}</Label>
-                      <div className="relative">
-                        <button type="button" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" onClick={() => webinFileInputRef.current?.click()}>
-                          {webinSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
-                        </button>
-                        <input type="file" ref={webinFileInputRef} className="hidden" accept="video/*" onChange={handleWebinFileChange} />
-                        <Input 
-                          placeholder={webinSourceType === 'File' ? "Click icon to upload video..." : "https://..."} 
-                          value={webinContent.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : webinContent}
-                          onChange={e => setWebinContent(e.target.value)}
-                          className="h-16 pl-12 bg-white text-[#1f1610]" 
-                          readOnly={webinSourceType === 'File'}
-                          onClick={() => webinSourceType === 'File' && webinFileInputRef.current?.click()}
-                        />
-                      </div>
+                      <Label className="text-[#1f1610]">Portal / YouTube URL</Label>
+                      <Input 
+                        placeholder="https://..." 
+                        value={webinContent}
+                        onChange={e => setWebinContent(e.target.value)}
+                        className="h-16 bg-white text-[#1f1610] font-black" 
+                      />
                     </div>
 
                     <Button onClick={handleSaveWebin} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>INJECT PORTAL</Button>
@@ -774,52 +667,34 @@ export default function AdminPage() {
                   <CardTitle className="text-3xl font-black uppercase italic text-[#1f1610]">Treasure Injector</CardTitle>
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <Label className="text-[#1f1610]">Target Milestone Week</Label>
+                      <Label className="text-[#1f1610]">Target Milestone Day</Label>
                       <select className="w-full h-16 bg-white border-4 border-[#1f1610]/10 rounded-2xl px-6 font-black uppercase text-[#1f1610]" value={rewardWeek} onChange={e => setRewardWeek(Number(e.target.value))}>
-                        <option value={1}>Week 1</option>
-                        <option value={2}>Week 2</option>
-                        <option value={3}>Week 3</option>
-                        <option value={4}>Week 4</option>
+                        <option value={7}>Day 7 Milestone (W1)</option>
+                        <option value={14}>Day 14 Milestone (W2)</option>
+                        <option value={21}>Day 21 Milestone (W3)</option>
+                        <option value={28}>Day 28 Milestone (W4)</option>
                       </select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[#1f1610]">Treasure Title</Label>
-                      <Input placeholder="Strategy Kit" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
+                      <Input placeholder="Tactical Boost" value={rewardTitle} onChange={e => setRewardWeekTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                     </div>
-
-                    <div className="flex flex-col gap-4">
-                       <Label className="text-[#1f1610]">Treasure Source</Label>
-                       <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
-                          <Button 
-                            variant={rewardSourceType === 'Link' ? 'default' : 'ghost'} 
-                            onClick={() => setRewardSourceType('Link')} 
-                            className={cn("flex-1 rounded-xl h-12 font-black", rewardSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                          >LINK</Button>
-                          <Button 
-                            variant={rewardSourceType === 'File' ? 'default' : 'ghost'} 
-                            onClick={() => setRewardSourceType('File')} 
-                            className={cn("flex-1 rounded-xl h-12 font-black", rewardSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                          >UPLOAD</Button>
-                       </div>
-                    </div>
-
                     <div className="space-y-2">
-                      <Label className="text-[#1f1610]">{rewardSourceType === 'File' ? 'Upload Asset' : 'Treasure Link'}</Label>
-                      <div className="relative">
-                        <button type="button" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" onClick={() => rewardFileInputRef.current?.click()}>
-                          {rewardSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
-                        </button>
-                        <input type="file" ref={rewardFileInputRef} className="hidden" onChange={handleRewardFileChange} />
-                        <Input 
-                          placeholder={rewardSourceType === 'File' ? "Click icon to upload asset..." : "https://..."} 
-                          value={rewardFile.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : rewardFile}
-                          onChange={e => setRewardWeekFile(e.target.value)}
-                          className="h-16 pl-12 bg-white text-[#1f1610]" 
-                          readOnly={rewardSourceType === 'File'}
-                          onClick={() => rewardSourceType === 'File' && rewardFileInputRef.current?.click()}
-                        />
+                      <Label className="text-[#1f1610]">Reward Description</Label>
+                      <Input placeholder="Unlock major growth gains." value={rewardDesc} onChange={e => setRewardWeekDesc(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-[#1f1610]">Points Reward</Label>
+                        <Input type="number" value={rewardPoints} onChange={e => setRewardPoints(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#1f1610]">XP Reward</Label>
+                        <Input type="number" value={rewardXP} onChange={e => setRewardXP(Number(e.target.value))} className="h-16 font-black bg-white text-[#1f1610]" />
                       </div>
                     </div>
+
                     <Button onClick={handleSaveReward} className="w-full h-20 rounded-full bg-[#1f1610] text-primary font-black uppercase shadow-2xl" disabled={isSaving}>INJECT TREASURE</Button>
                   </div>
                </Card>
@@ -830,7 +705,7 @@ export default function AdminPage() {
                      <div key={r.id} className="p-6 bg-mocha-cream rounded-3xl border-4 border-primary/10 flex justify-between items-center">
                         <div>
                           <h4 className="font-black text-[#1f1610] uppercase italic">{r.title}</h4>
-                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest">W{r.week} Milestone</p>
+                          <p className="text-[10px] font-black text-[#1f1610]/40 uppercase tracking-widest">Day {r.week * 7} • {r.pointsReward} PTS • {r.xpReward} XP</p>
                         </div>
                         <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc('rewards', r.id)}><Trash2 /></Button>
                      </div>
@@ -1015,38 +890,9 @@ export default function AdminPage() {
                     <Input placeholder="Important Update" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} className="h-16 font-black bg-white text-[#1f1610]" />
                   </div>
 
-                  <div className="flex flex-col gap-4">
-                    <Label className="text-[#1f1610]">Cover Image Source</Label>
-                    <div className="flex gap-4 p-2 bg-[#1f1610]/5 rounded-2xl border-2 border-[#1f1610]/10">
-                      <Button 
-                        variant={newsSourceType === 'Link' ? 'default' : 'ghost'} 
-                        onClick={() => setNewsSourceType('Link')} 
-                        className={cn("flex-1 rounded-xl h-12 font-black", newsSourceType === 'Link' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                      >LINK</Button>
-                      <Button 
-                        variant={newsSourceType === 'File' ? 'default' : 'ghost'} 
-                        onClick={() => setNewsSourceType('File')} 
-                        className={cn("flex-1 rounded-xl h-12 font-black", newsSourceType === 'File' ? "bg-[#1f1610] text-primary" : "text-[#1f1610]")}
-                      >UPLOAD</Button>
-                    </div>
-                  </div>
-
                   <div className="space-y-2">
-                    <Label className="text-[#1f1610]">{newsSourceType === 'File' ? 'Upload Cover Image' : 'Cover Image URL'}</Label>
-                    <div className="relative">
-                      <button type="button" className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" onClick={() => newsFileInputRef.current?.click()}>
-                        {newsSourceType === 'File' ? <Upload className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
-                      </button>
-                      <input type="file" ref={newsFileInputRef} className="hidden" accept="image/*" onChange={handleNewsFileChange} />
-                      <Input 
-                        placeholder={newsSourceType === 'File' ? "Click icon to upload image..." : "https://..."} 
-                        value={newsImg.startsWith('data:') ? 'DATA_PROTOCOL_LOADED' : newsImg}
-                        onChange={e => setNewsImg(e.target.value)}
-                        className="h-16 pl-12 bg-white text-[#1f1610]" 
-                        readOnly={newsSourceType === 'File'}
-                        onClick={() => newsSourceType === 'File' && newsFileInputRef.current?.click()}
-                      />
-                    </div>
+                    <Label className="text-[#1f1610]">Cover Image URL</Label>
+                    <Input placeholder="https://..." value={newsImg} onChange={e => setNewsImg(e.target.value)} className="h-16 bg-white text-[#1f1610] font-black" />
                   </div>
 
                   <div className="space-y-2">
@@ -1113,8 +959,8 @@ export default function AdminPage() {
                 <Card className="rounded-[3rem] border-8 border-dashed border-[#1f1610]/20 bg-[#1f1610] p-10 shadow-2xl text-center space-y-8">
                    <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto"><OctagonAlert className="h-8 w-8 text-primary" /></div>
                    <h3 className="text-2xl font-black uppercase italic text-primary">Inject Archive</h3>
-                   <input type="file" accept=".json" ref={restoreRef} onChange={handleRestoreBackup} className="hidden" />
-                   <Button onClick={() => restoreRef.current?.click()} disabled={isRestoring} className="w-full h-16 rounded-full bg-primary text-[#1f1610] font-black uppercase text-xs">INJECT ARCHIVE</Button>
+                   <input type="file" accept=".json" onChange={handleRestoreBackup} className="hidden" id="restore-input" />
+                   <Button onClick={() => document.getElementById('restore-input')?.click()} disabled={isRestoring} className="w-full h-16 rounded-full bg-primary text-[#1f1610] font-black uppercase text-xs">INJECT ARCHIVE</Button>
                 </Card>
              </div>
           </TabsContent>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -99,7 +100,8 @@ export interface Reward {
   week: number;
   title: string;
   description: string;
-  fileUrl: string;
+  pointsReward: number;
+  xpReward: number;
   timestamp: string;
 }
 
@@ -209,7 +211,7 @@ interface UserProgressStore {
   addCapsule: (uid: string, cap: any) => void;
   resetUserStats: (uid: string) => void;
   unlockNextDay: (uid: string) => void;
-  claimWeeklyReward: (uid: string, week: number) => void;
+  claimWeeklyReward: (uid: string, week: number, pointsBonus: number, xpBonus: number) => void;
   updateSpecificUser: (uid: string, data: Partial<{ points: number; xp: number; level: number; streak: number; currentTaskDay: number }>) => void;
   trackVisit: (uid: string, feature: string) => void;
   incrementPrompt: (uid: string) => void;
@@ -333,7 +335,7 @@ export const useUserStore = create<UserProgressStore>()(
         get().updateProfile(uid, { currentTaskDay: Math.min(current.currentTaskDay + 1, 30) });
       },
 
-      claimWeeklyReward: (uid, week) => {
+      claimWeeklyReward: (uid, week, pointsBonus, xpBonus) => {
         const profiles = get().profiles;
         const current = { ...DEFAULT_PROFILE, ...(profiles[uid] || {}) };
         const claimed = current.claimedRewardWeeks || [];
@@ -342,8 +344,8 @@ export const useUserStore = create<UserProgressStore>()(
           const multiplier = 1 + (current.level / 10);
           let { points, xp, level } = current;
           
-          points += Math.floor(200 * multiplier);
-          xp += 100 * multiplier;
+          points += Math.floor(pointsBonus * multiplier);
+          xp += xpBonus * multiplier;
           while (xp >= 100 && level < 30) {
             xp -= 100;
             level += 1;
